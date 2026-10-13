@@ -85,6 +85,7 @@ A stack é recente e a sintaxe antiga ainda domina o que os modelos viram. Antes
   - Collections em `src/content.config.ts` com `loader: glob({ ..., generateId })`, não em `src/content/config.ts`.
   - `z` vem de `astro/zod`, não de `zod`. Para renderizar, `render(entry)` importado de `astro:content`, não `entry.render()`.
 - **Zod 4:** `z.url()`, não `z.string().url()`; `{ error: '...' }`, não `{ message: '...' }`; `z.strictObject()` em vez de `.strict()`.
+- **TypeScript:** fica em 6.x. O 7 ainda quebra `astro check` e `typescript-eslint` (peers `^5 || ^6`). Só subir quando os dois suportarem; confira os peers antes.
 - **Svelte 5:** runes (`$props()`, `$state`, `$derived`, `$effect`). Eventos como atributo (`onclick`), não `on:click`. Nada de `export let`, `createEventDispatcher` ou stores para estado local.
 - **Tailwind v4:** configuração no CSS (`@import "tailwindcss"`, `@theme`, `@plugin "@tailwindcss/typography"`), integrada pelo plugin `@tailwindcss/vite`. Não existe `tailwind.config.js` e não se usa `@astrojs/tailwind`.
 - **D3 v7:** importe módulos avulsos (`d3-scale`, `d3-shape`, `d3-array`, `d3-format`), nunca o pacote `d3`. O DOM é do Svelte: `d3-selection` não cria nem altera elementos (exceção: `d3-zoom`/`d3-drag` via action).

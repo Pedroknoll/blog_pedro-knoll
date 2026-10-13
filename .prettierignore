@@ -1,0 +1,12 @@
+.cursor
+specs
+AGENTS.md
+dist
+.astro
+node_modules
+pnpm-lock.yaml
+uv.lock
+public
+.venv
+playwright-report
+test-results
