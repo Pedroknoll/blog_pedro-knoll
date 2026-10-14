@@ -618,8 +618,11 @@ O deploy roda no GitHub Actions, e não no build nativo da Cloudflare, porque o 
 
 ```jsonc
 {
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "blog",
   "compatibility_date": "2026-10-06",
+  "workers_dev": true,
+  "preview_urls": true,
   "assets": {
     "directory": "./dist",
     "not_found_handling": "404-page"
@@ -627,6 +630,8 @@ O deploy roda no GitHub Actions, e não no build nativo da Cloudflare, porque o 
 }
 
 ```
+
+`workers_dev: true` mantém o subdomínio `workers.dev` mesmo quando uma rota for adicionada: sem `route` nem `routes` o default já é `true`, e com rota o default passa a `false`. `preview_urls: true` liga as Version URLs. Omitir esse campo não altera a configuração que o Worker já tem na Cloudflare.
 
 ### Headers e redirecionamentos
 
@@ -668,7 +673,7 @@ A T-05 valida na prática que detach e nova CSP no mesmo bloco funcionam. Se nã
 
 `SHOW_DRAFTS` não tem prefixo `PUBLIC_`: só o build a lê, e ela não deve ir para o cliente.
 
-Segredos necessários no repositório: `CLOUDFLARE_API_TOKEN` (permissão Workers Scripts:Edit) e `CLOUDFLARE_ACCOUNT_ID`. Variável: `SITE_URL`.
+Segredos necessários no repositório: `CLOUDFLARE_API_TOKEN` (Account API token com o papel Workers · Editor) e `CLOUDFLARE_ACCOUNT_ID`. Variável: `SITE_URL`.
 
 ### Cache na edge
 

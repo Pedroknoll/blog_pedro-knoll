@@ -1,0 +1,22 @@
+name: Setup
+description: Install pnpm, Node from .node-version, and uv.
+
+runs:
+  using: composite
+  steps:
+    - name: Set up pnpm and Node
+      # v3.1.1 is an annotated tag; this is the commit it points at.
+      # https://github.com/pnpm/setup/releases/tag/v3.1.1
+      uses: pnpm/setup@a0881977cd8ea73b1ed212236c99ca10dcc80cf4 # v3.1.1
+      with:
+        cache: true
+        require-lockfile: true
+        node-version-file: .node-version
+
+    - name: Set up uv
+      # Latest release is v10.3.0 (2026-10-09). The uv GitHub guide still cites v9.0.0.
+      # https://github.com/astral-sh/setup-uv/releases/tag/v10.3.0
+      # https://docs.astral.sh/uv/guides/integration/github/
+      uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+      with:
+        enable-cache: true
