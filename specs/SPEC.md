@@ -1,14 +1,16 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 09/10/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 14/10/2026
 
-**Revisão de 09/10/2026:** removidas as menções a `authors` e "autores" que contradiziam a Q2; o componente do modo inline passa a se chamar só `MarimoRuntime`; Q4b reaberta (o domínio não está confirmado); o build chama o Python via `uv run`; os dois diagramas viraram Mermaid; o roadmap (seção 12) foi movido para `specs/ROADMAP.md`.
+**Revisão de 14/10/2026:** o modo inline foi adiado por custo de manutenção (T-03). O blog fica só com notebooks marimo em iframe. O ADR-02 foi substituído; o texto anterior está em `specs/adr/ADR-02-v1-mdx-marimo.md`. Detalhes em `specs/spikes/T-03-mdx-marimo.md`.
+
+**Revisão de 09/10/2026:** removidas as menções a `authors` e "autores" que contradiziam a Q2; Q4b reaberta (o domínio não está confirmado); o build chama o Python via `uv run`; os dois diagramas viraram Mermaid; o roadmap (seção 12) foi movido para `specs/ROADMAP.md`.
 
 **Revisão 2 de 09/10/2026 (conferida nas docs oficiais):**
 
 - ADR-01 passa de Astro 6 para **Astro 7**, com Markdown e MDX pelo processador `unified()`. O ADR antigo foi para `specs/adr/`.
-- O modo inline usa o runtime em custom element do mdx-marimo, sem React.
-- Notebook inline é declarado só com `{ mode: inline }`, sem `src`.
+- O modo inline (adiado em 14/10/2026) usava o runtime em custom element do mdx-marimo, sem React.
+- O notebook inline (adiado em 14/10/2026) era declarado só com `{ mode: inline }`, sem `src`.
 - Schemas atualizados para a API do Zod 4.
 - `_headers` passa a ser gerado no build, com o limite de 100 regras.
 - Exports pesados ficam em `exports/`.
@@ -26,7 +28,7 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 ### Objetivos
 
 - Publicar posts em Markdown/MDX com a mesma ergonomia de leitura do HF Blog: listagem em cards, página de post com TOC, autor, tags e data.
-- Permitir que um post embuta células ou notebooks marimo interativos (Python no browser via WebAssembly), sem servidor Python em produção.
+- Permitir que um post embuta um notebook marimo interativo em iframe (Python no browser via WebAssembly), sem servidor Python em produção.
 - Permitir gráficos D3 interativos encapsulados em componentes Svelte, hidratados só quando visíveis.
 - Deploy automático a cada push, com preview por pull request.
 
@@ -54,7 +56,7 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 
 ## 2. Premissas e decisões em aberto
 
-A spec parte de seis premissas; as respostas de 06/10 e 09/10 já estão incorporadas e só o domínio segue em aberto, então a Fase 0 pode começar já.
+A spec parte de seis premissas; as respostas de 06/10, 09/10 e 14/10 já estão incorporadas e só o domínio segue em aberto, então a Fase 0 pode começar já.
 
 ### Premissas assumidas
 
@@ -71,7 +73,7 @@ A spec parte de seis premissas; as respostas de 06/10 e 09/10 já estão incorpo
 
 ### Decisões de 06/10/2026
 
-- [x] **Q1 — Notebooks:** os dois modos, `inline` e `iframe` (ADR-02 confirmado).
+- [x] **Q1 — Notebooks:** os dois modos, `inline` e `iframe`, foram a decisão de 06/10. Substituída em 14/10/2026: o modo inline foi adiado e o blog fica só com iframe (ver decisões de 14/10).
 - [x] **Q2 — Autores:** autor único; sem collection `authors` nem páginas de autor (seção 6).
 - [x] **Q3 — Comunidade:** fora do sprint 01; Giscus entra na Fase 4 do roadmap.
 - [x] **Q4 — Ambientes:** sem staging; só preview por PR e produção.
@@ -83,8 +85,12 @@ A spec parte de seis premissas; as respostas de 06/10 e 09/10 já estão incorpo
 ### Decisões de 09/10/2026
 
 - [x] **Q8 — Versão do Astro:** Astro 7 com o processador `unified()` (ADR-01 revisado). O Astro 6 está em `specs/adr/ADR-01-v1-astro-6.md`.
-- [x] **Q9 — Notebook inline:** declarado como `{ mode: inline }`, sem `src`. As células são as fences ````python marimo` do próprio MDX (seção 7).
+- [x] **Q9 — Notebook inline:** em 09/10, declarado como `{ mode: inline }`, sem `src`. Substituída em 14/10/2026: o modo inline foi adiado (ver decisões de 14/10).
 - [x] **Q10 — Rota de paginação:** fica `/page/2`. É a única rota fora do pt-BR, por decisão explícita.
+
+### Decisões de 14/10/2026
+
+- [x] **Q11 — Notebook inline adiado:** o modo inline fica adiado por custo de manutenção (T-03, `specs/spikes/T-03-mdx-marimo.md`). O blog segue só com notebooks marimo em iframe (`marimo export html-wasm`). Reavaliar quando o mdx-marimo chegar a 0.1, ou quando houver uma opção pública para controlar Python e projeto no build (T-32).
 
 ## 3. Requisitos funcionais
 
@@ -100,7 +106,7 @@ A v1 entrega 12 requisitos Must; o restante entra por ordem de prioridade sem bl
 | RF-05 | TOC lateral fixa (h2–h3) com seção ativa destacada                                    | Must       | Funciona sem JS (links âncora); destaque é melhoria progressiva                                                         |
 | RF-06 | Syntax highlighting com botão copiar                                                  | Must       | Shiki em build time, tema claro e escuro (`markdown.shikiConfig.themes`)                                                |
 | RF-07 | Matemática LaTeX inline e em bloco                                                    | Must       | `remark-math` + `rehype-katex` no processador `unified()`, render no build                                              |
-| RF-08 | Células ou notebooks marimo interativos no post                                       | Must       | Saída estática visível antes do Pyodide carregar (seção 7)                                                              |
+| RF-08 | Notebook marimo interativo no post, em iframe                                         | Must       | Iframe via `marimo export html-wasm`; pôster estático até "Executar"; Python só dentro do export (seção 7)             |
 | RF-09 | Visualizações Svelte + D3 usadas dentro do MDX                                        | Must       | Hidratam com `client:visible`; têm fallback estático (seção 8)                                                          |
 | RF-10 | Feed RSS e sitemap                                                                    | Must       | `/rss.xml` válido no W3C Validator; `sitemap-index.xml` gerado                                                          |
 | RF-11 | Rascunhos (`draft: true`) visíveis só em preview                                      | Must       | Build de produção exclui drafts de páginas, feed e sitemap                                                              |
@@ -129,9 +135,9 @@ Cada RNF tem um número verificável no CI; o que não dá para medir automatica
 | RNF-04 | Acessibilidade   | WCAG 2.2 AA; gráficos D3 com `role="img"`, `aria-label` e tabela de dados alternativa                                                                                   | axe-core no Playwright, zero violações serious/critical                                                                                                                                                                                    |
 | RNF-05 | SEO              | HTML semântico, um `h1` por página, URLs estáveis `/blog/[slug]`                                                                                                        | Teste de build + Lighthouse SEO ≥ 95                                                                                                                                                                                                       |
 | RNF-06 | Segurança        | Headers: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`                                                                                                         | `dist/_headers` gerado no build e conferido por teste de artefato; securityheaders.com em produção                                                                                                                                         |
-| RNF-07 | Segurança        | CSP com `wasm-unsafe-eval` e as origens do Pyodide só nas rotas com notebook; o `dist/_headers` gerado tem no máximo 100 regras (limite da Cloudflare)                  | Teste de artefato: rotas sem notebook não têm `wasm-unsafe-eval`; o build falha acima de 100 regras                                                                                                                                        |
+| RNF-07 | Segurança        | CSP com `wasm-unsafe-eval` e as origens do Pyodide só em `/notebooks/*` (o iframe), não na página do post; o `dist/_headers` gerado tem no máximo 100 regras (limite da Cloudflare) | Teste de artefato: rotas sem notebook não têm `wasm-unsafe-eval`; o build falha acima de 100 regras                                                                                                                                        |
 | RNF-08 | Build            | Build completo < 5 min com 200 posts e 20 notebooks                                                                                                                     | Medido no CI; cache de exports marimo por hash do `.py` + `uv.lock`                                                                                                                                                                        |
-| RNF-09 | Confiabilidade   | Build falha se frontmatter for inválido, link interno quebrar, notebook falhar no `marimo check` ou houver fence marimo sem `{ mode: inline }` declarado (e vice-versa) | Zod + `astro check` + verificador de links + checagem de fences                                                                                                                                                                            |
+| RNF-09 | Confiabilidade   | Build falha se frontmatter for inválido, link interno quebrar ou notebook falhar no `marimo check`                                                                                   | Zod + `astro check` + verificador de links + `marimo check`                                                                                                                                                                                |
 | RNF-10 | Custo            | US$ 0/mês até o limite do plano free (static assets não são cobrados)                                                                                                   | Revisão mensal no dashboard Cloudflare                                                                                                                                                                                                     |
 | RNF-11 | Privacidade      | Analytics sem cookies                                                                                                                                                   | Cloudflare Web Analytics                                                                                                                                                                                                                   |
 | RNF-12 | Manutenibilidade | TypeScript strict, ESLint + Prettier, Ruff para Python                                                                                                                  | Gates no CI                                                                                                                                                                                                                                |
@@ -175,9 +181,9 @@ Python só existe no build; em produção, o único código que executa é o do 
 
 | ADR    | Decisão                                                                                                                                                                                | Alternativas descartadas                                                                                          | Motivo                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ADR-01 | **Astro 7**, `output: 'static'`, content collections com loader `glob` e schemas Zod 4 (`astro/zod`). Markdown e MDX passam pelo processador `unified()` de `@astrojs/markdown-remark` | Next.js, Hugo, Docusaurus; Astro 6 (ver `specs/adr/ADR-01-v1-astro-6.md`); processador Sätteri, padrão do Astro 7 | Islands nativos, zero JS por padrão, MDX de primeira classe. O [Astro 7](https://docs.astro.build/en/guides/upgrade-to/v7/) saiu em 22/06/2026 e a doc do Astro 6 virou snapshot sem manutenção. O exemplo oficial do mdx-marimo roda em Astro 7 com `unified()`. O `unified()` mantém `remarkMarimo`, `remark-math` e `rehype-katex` sem precisar portá-los para o Sätteri. Revisado em 09/10/2026 (Q8) |
-| ADR-02 | **marimo via [mdx-marimo](https://github.com/marimo-team/mdx-marimo)** para células no meio do texto; `marimo export html-wasm` em iframe para notebooks inteiros                      | Jupyter + nbconvert estático; Thebe/Binder                                                                        | mdx-marimo renderiza a saída no build e hidrata a página como um notebook reativo no Pyodide; o export WASM é o caminho maduro e isolado ([docs](https://docs.marimo.io/guides/exporting/webassembly_html/))                                                                                                                                                                                             |
-| ADR-03 | **Svelte 5** para islands interativos; **D3 v7** só para cálculo (escalas, eixos, layouts), com o Svelte dono do DOM                                                                   | React + D3; Observable Plot puro                                                                                  | Svelte compila para bundles pequenos; D3 manipulando DOM brigaria com a reatividade. Content collections ficam no Astro, não no Svelte. O mdx-marimo não exige React no Astro (o runtime é um custom element), então não há segundo framework de UI                                                                                                                                                      |
+| ADR-01 | **Astro 7**, `output: 'static'`, content collections com loader `glob` e schemas Zod 4 (`astro/zod`). Markdown e MDX passam pelo processador `unified()` de `@astrojs/markdown-remark` | Next.js, Hugo, Docusaurus; Astro 6 (ver `specs/adr/ADR-01-v1-astro-6.md`); processador Sätteri, padrão do Astro 7 | Islands nativos, zero JS por padrão, MDX de primeira classe. O [Astro 7](https://docs.astro.build/en/guides/upgrade-to/v7/) saiu em 22/06/2026 e a doc do Astro 6 virou snapshot sem manutenção. O `unified()` mantém `remark-math`, `rehype-katex` e o tempo de leitura sem precisar portá-los para o Sätteri. Revisado em 09/10/2026 (Q8) |
+| ADR-02 | **marimo só via `marimo export html-wasm` em iframe**                                                                                                                          | Jupyter + nbconvert estático; Thebe/Binder; mdx-marimo no meio do texto (adiado, ver `specs/adr/ADR-02-v1-mdx-marimo.md` e `specs/spikes/T-03-mdx-marimo.md`) | O export WASM isola o runtime e o marimo fica travado no `uv.lock` ([docs](https://docs.marimo.io/guides/exporting/webassembly_html/)). O modo inline foi adiado em 14/10/2026 por custo de manutenção (T-03): o build do mdx-marimo ignora o `uv.lock` |
+| ADR-03 | **Svelte 5** para islands interativos; **D3 v7** só para cálculo (escalas, eixos, layouts), com o Svelte dono do DOM                                                                   | React + D3; Observable Plot puro                                                                                  | Svelte compila para bundles pequenos; D3 manipulando DOM brigaria com a reatividade. Content collections ficam no Astro, não no Svelte. Não há segundo framework de UI                                                                                                                                                      |
 | ADR-04 | **Cloudflare Workers com Static Assets** (`wrangler.jsonc` com `assets.directory: ./dist`)                                                                                             | Cloudflare Pages, Vercel, Netlify                                                                                 | [Recomendação atual](https://docs.astro.build/en/guides/deploy/cloudflare) para projetos novos; static assets não são cobrados; caminho direto para D1/KV no futuro. Confirmado em 06/10 (Q5)                                                                                                                                                                                                            |
 | ADR-05 | Sem SSR na v1                                                                                                                                                                          | `@astrojs/cloudflare` desde o início                                                                              | YAGNI. Se vierem upvotes/comentários próprios, adiciona-se o adapter `@astrojs/cloudflare` compatível com a versão do Astro em uso, e D1                                                                                                                                                                                                                                                                 |
 | ADR-06 | **Pagefind** para busca                                                                                                                                                                | Algolia, Orama                                                                                                    | Indexa o `dist/` no pós-build, roda 100% no cliente, sem custo                                                                                                                                                                                                                                                                                                                                           |
@@ -186,7 +192,7 @@ Python só existe no build; em produção, o único código que executa é o do 
 
 ### Riscos técnicos
 
-- **mdx-marimo é jovem** (repositório recente, poucos usuários). No Astro, o runtime é um custom element carregado por `<script type="module">`, sem React. Mitigação: spike na Fase 0 com o exemplo `examples/with-astro`; se falhar, usar só o export WASM em iframe.
+- **Modo inline adiado** na T-03, por custo de manutenção. O blog usa só iframe. Reavaliação na T-32 (`specs/spikes/T-03-mdx-marimo.md`).
 - **Pyodide pesa** dezenas de MB no primeiro acesso. Mitigação: saída estática pré-renderizada e botão "Ativar interatividade" quando o notebook for grande.
 - **Pacotes sem wheel WASM** não rodam no browser. Mitigação: `marimo check --select MW` no CI (regras `MW001` import incompatível, `MW002` chamada de sistema insegura, `MW003` dependência sem wheel WASM) e cache de execução (seção 7).
 - **Astro 7 é estrito com HTML.** O compilador Rust recusa tags não fechadas e não corrige aninhamento inválido; o padrão `compressHTML: 'jsx'` remove espaço entre elementos inline. Mitigação: `astro check` no CI e revisão visual do preview.
@@ -204,12 +210,12 @@ src/
 ├── site.config.ts
 └── content/posts/
     └── 2026-10-intro-a-embeddings/
-        ├── index.mdx          # células inline são fences ```python marimo aqui dentro
+        ├── index.mdx
         ├── cover.png
         ├── figs/
         ├── data/              # JSON/CSV dos gráficos
         └── notebooks/
-            └── treino.py      # só notebooks iframe têm arquivo .py
+            └── treino.py      # notebook iframe
 
 ```
 
@@ -220,23 +226,14 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod'; // Zod 4
 
-// Inline: as células são as fences do próprio MDX. Sem `src`; sempre roda no navegador.
-const inlineNotebook = z.strictObject({
-  mode: z.literal('inline'),
-  gpuUrl: z.url().optional(), // botão "Rodar com GPU" (molab, Colab, HF Space)
-});
-
 // Iframe: notebook inteiro num .py da pasta do post, exportado com html-wasm.
-const iframeNotebook = z.strictObject({
+const notebook = z.strictObject({
   mode: z.literal('iframe'),
   src: z.string(),
   // estratégia de execução, ver seção 7
   compute: z.enum(['browser', 'cache', 'precomputed', 'onnx', 'static']).default('browser'),
-  gpuUrl: z.url().optional(),
+  gpuUrl: z.url().optional(), // botão "Rodar com GPU" (molab, Colab, HF Space)
 });
-
-// `strictObject` faz `{ mode: inline, compute: cache }` ou `{ mode: inline, src }` quebrar o build.
-const notebook = z.discriminatedUnion('mode', [inlineNotebook, iframeNotebook]);
 
 const posts = defineCollection({
   loader: glob({
@@ -257,17 +254,13 @@ const posts = defineCollection({
         coverAlt: z.string().optional(),
         featured: z.boolean().default(false),
         draft: z.boolean().default(false),
-        // dirige o carregamento do Pyodide e a CSP por rota
+        // declara os iframes do post
         notebooks: z.array(notebook).default([]),
         canonical: z.url().optional(),
       })
       .refine((d) => !d.cover || d.coverAlt, {
         error: 'coverAlt é obrigatório quando há cover',
         path: ['coverAlt'],
-      })
-      .refine((d) => d.notebooks.filter((n) => n.mode === 'inline').length <= 1, {
-        error: 'declare no máximo um { mode: inline } por post: as fences da página formam um único notebook',
-        path: ['notebooks'],
       }),
 });
 
@@ -306,7 +299,6 @@ tags: [nlp, embeddings]
 cover: ./cover.png
 coverAlt: "Pontos coloridos agrupados num plano 2D"
 notebooks:
-  - { mode: inline }   # as células são as fences ```python marimo deste index.mdx
   - { mode: iframe, src: ./notebooks/treino.py, compute: cache, gpuUrl: "https://colab.research.google.com/..." }
 ---
 
@@ -318,30 +310,16 @@ notebooks:
 - O slug é o `id` gerado pelo `generateId` do loader (nome da pasta). Nenhuma página recalcula slug por conta própria.
 - Tempo de leitura é calculado por um plugin remark do projeto (200 palavras/min), excluindo blocos de código.
 - Tags são normalizadas em kebab-case; um arquivo `src/data/tags.ts` opcional dá rótulo e descrição para as páginas de tag.
-- Coerência inline: se o `index.mdx` tem fences ````python marimo`, o frontmatter precisa declarar `{ mode: inline }`; se declara, precisa ter ao menos uma fence. O build falha nos dois casos (RNF-09).
 
 ## 7. Pipeline marimo
 
-O blog suporta dois modos de notebook, escolhidos por post no campo `notebooks[].mode`: `inline` (células intercaladas com o texto) e `iframe` (notebook inteiro isolado). Os dois rodam Python no navegador via Pyodide; nenhum precisa de servidor.
+O blog embute notebooks marimo em iframe. O Python roda no navegador via Pyodide, dentro do export; a página do post não executa o kernel. Nenhum notebook precisa de servidor.
 
+O modo inline foi adiado em 14/10/2026 por custo de manutenção (T-03). Ver `specs/spikes/T-03-mdx-marimo.md`.
 
-|                           | Modo `inline`                                                                                        | Modo `iframe`                                           |
-| ------------------------- | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------- |
-| Tecnologia                | [mdx-marimo](https://github.com/marimo-team/mdx-marimo) (`remarkMarimo` + runtime em custom element) | `marimo export html-wasm --mode run`                    |
-| Declaração no frontmatter | `{ mode: inline }`, sem `src`                                                                        | `{ mode: iframe, src: ./notebooks/<nome>.py, compute }` |
-| Autoria                   | Fences ````python marimo` no próprio `index.mdx`                                                     | Arquivo `.py` em `notebooks/`                           |
-| Render inicial            | Saída gerada no build, hidrata depois                                                                | Pré-visualização com `--execute`                        |
-| Isolamento                | Um notebook reativo por página, compartilhado entre fences                                           | Um kernel por iframe                                    |
-| Estratégias `compute`     | Só `browser` (implícito)                                                                             | Todas (tabela abaixo)                                   |
-| Maturidade                | Recente; validar no spike                                                                            | Estável, documentado                                    |
-| Usar quando               | Artigo interativo, poucas células leves                                                              | Demo completa, dependências pesadas                     |
+### Processador Markdown e MDX
 
-
-### Modo inline
-
-1. O autor escreve células direto no MDX ou converte um notebook existente com `marimo export md notebook.py -o notebook.mdx --flavor mdx` e cola as fences no `index.mdx`.
-2. O frontmatter declara `notebooks: [{ mode: inline }]`.
-3. `astro.config.mjs` usa o processador `unified()` para Markdown e MDX e registra os plugins:
+`astro.config.mjs` usa o processador `unified()` para Markdown e MDX:
 
 ```js
 import { defineConfig } from 'astro/config';
@@ -352,7 +330,6 @@ import tailwindcss from '@tailwindcss/vite';
 import { unified } from '@astrojs/markdown-remark';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
-import { remarkMarimo } from '@marimo-team/mdx-marimo/remark';
 import { remarkReadingTime } from './src/lib/remark-reading-time.mjs';
 
 const remarkPlugins = [remarkMath, remarkReadingTime];
@@ -365,7 +342,7 @@ export default defineConfig({
     processor: unified({ remarkPlugins, rehypePlugins }),
   },
   integrations: [
-    mdx({ processor: unified({ remarkPlugins: [remarkMarimo, ...remarkPlugins], rehypePlugins }) }),
+    mdx({ processor: unified({ remarkPlugins, rehypePlugins }) }),
     svelte(),
     sitemap(),
   ],
@@ -375,24 +352,6 @@ export default defineConfig({
 ```
 
 As opções `markdown.remarkPlugins` e `markdown.rehypePlugins` estão depreciadas no Astro 7; os plugins vão dentro de `unified()`. A configuração do Shiki (`markdown.shikiConfig`) é da T-10, que confere na doc atual como ela interage com `unified()`.
-
-1. O `PostLayout` inclui o `MarimoRuntime.astro` (em `src/components/marimo/`) **somente** se o post declarar `{ mode: inline }` (RNF-03). O componente importa `@marimo-team/mdx-marimo/styles.css` e carrega o runtime em custom element (`@marimo-team/mdx-marimo/element/auto?url`) num `<script type="module">`, como no exemplo oficial `with-astro`. Não usa React nem diretiva `client:`*. Se o spike T-03 mostrar que o script dispara o Pyodide antes do primeiro paint, a carga passa para um import dinâmico após o paint.
-2. Uso no texto (atributos de fence vistos no mdx-marimo: `editor=true`, `output=false`):
-
-```mdx
-```python marimo editor=true
-import marimo as mo
-k = mo.ui.slider(1, 10, label="Vizinhos")
-k
-```
-
-O texto do artigo continua normalmente aqui.
-
-```python marimo
-mo.md(f"Usando **{k.value}** vizinhos.")
-```
-
-```
 
 ### Modo iframe
 
@@ -458,7 +417,7 @@ pnpm build   # = uv run scripts/build-notebooks.py && astro build && pagefind --
 
 ```
 
-`pnpm dev` não gera notebooks. Para ver um notebook iframe no servidor de dev, rode antes `uv run scripts/build-notebooks.py` (só leves, com cache) ou `pnpm build && npx wrangler dev`. O modo inline funciona direto no `pnpm dev`.
+`pnpm dev` não gera notebooks. Para ver um notebook iframe no servidor de dev, rode antes `uv run scripts/build-notebooks.py` (só leves, com cache) ou `pnpm build && npx wrangler dev`.
 
 ## 8. Visualizações interativas (Svelte + D3)
 
@@ -555,7 +514,7 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   ├── components/
 │   │   ├── ui/               # .astro: Card, TagList, Toc, AuthorBadge
 │   │   ├── viz/              # .svelte: gráficos D3 (AGENTS.md próprio, criado antes da T-19)
-│   │   └── marimo/           # MarimoRuntime.astro, MarimoFrame, RunOnGpu (AGENTS.md próprio, criado antes da T-14)
+│   │   └── marimo/           # MarimoFrame, RunOnGpu (AGENTS.md próprio, criado antes da T-14)
 │   ├── integrations/
 │   │   └── headers.ts        # gera dist/_headers no astro:build:done (CSP por rota)
 │   ├── layouts/              # BaseLayout, PostLayout
@@ -589,7 +548,7 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 - **Componentes:** `.astro` para tudo que é estático; `.svelte` só quando houver estado no cliente.
 - **Rotas:** em pt-BR (`/sobre`, `/tags/[tag]`), com `/blog/[slug]` e a exceção `/page/[n]` (Q10).
 - **Alias:** `~/` aponta para `src/`.
-- **Versões:** Node LTS fixado em `.node-version`; Python fixado em `.python-version`; marimo travado no `uv.lock`. O modo iframe usa os assets do próprio export, então já sai alinhado. No modo inline, a relação entre o pacote npm do mdx-marimo e o marimo Python é medida no spike T-03 e verificada por teste na T-15.
+- **Versões:** Node LTS fixado em `.node-version`; Python fixado em `.python-version`; marimo travado no `uv.lock`. O iframe usa os assets do próprio export, então já sai alinhado.
 - **Mudança de spec:** PR que altera comportamento atualiza `specs/SPEC.md` no mesmo commit; o template de PR tem o campo "Requisitos afetados".
 
 ### Dependências pré-aprovadas
@@ -601,7 +560,7 @@ Um agente pode instalar, sem perguntar, as dependências abaixo, na versão est�
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
 | Núcleo         | `astro`, `@astrojs/mdx`, `@astrojs/markdown-remark`, `@astrojs/svelte`, `svelte`, `@astrojs/sitemap`, `@astrojs/rss`, `@astrojs/check`, `typescript`                         | `marimo`                                                          |
 | Estilo         | `tailwindcss`, `@tailwindcss/vite`, `@tailwindcss/typography`                                                                                                                | —                                                                 |
-| Conteúdo       | `remark-math`, `rehype-katex`, `katex`, `@marimo-team/mdx-marimo`                                                                                                            | —                                                                 |
+| Conteúdo       | `remark-math`, `rehype-katex`, `katex`                                                                                                                                       | —                                                                 |
 | Gráficos       | `d3-scale`, `d3-shape`, `d3-array`, `d3-format`, `d3-zoom`, `d3-scale-chromatic`                                                                                             | —                                                                 |
 | Busca e deploy | `pagefind`, `wrangler`                                                                                                                                                       | —                                                                 |
 | Qualidade      | `eslint`, `prettier` (e os plugins oficiais para Astro e Svelte), `vitest`, `@testing-library/svelte`, `@playwright/test`, `@axe-core/playwright`, `size-limit`, `@lhci/cli` | `ruff`                                                            |
@@ -644,10 +603,9 @@ A [doc da Cloudflare](https://developers.cloudflare.com/workers/static-assets/he
 Por isso o `_headers` é **gerado no build** pela integração `src/integrations/headers.ts`, no hook `astro:build:done`, escrevendo em `dist/_headers`:
 
 1. Regra `/*` com a CSP estrita (sem `wasm-unsafe-eval`), HSTS, `X-Content-Type-Options`, `Referrer-Policy` e `frame-ancestors 'self'`. Não usar `X-Frame-Options: DENY`: os iframes de notebook são do mesmo domínio.
-2. Regra `/notebooks/*` com `! Content-Security-Policy` e a CSP de notebook (`wasm-unsafe-eval` e as origens do Pyodide medidas nos spikes). Cobre todos os iframes com uma regra só.
-3. Uma regra por post com `{ mode: inline }`, com o mesmo par detach + CSP de notebook. O padrão de URL exato (`/blog/<slug>/` ou `/blog/<slug>/*`, por causa da barra final) sai da T-05. Posts só com iframe não precisam de regra: a página-pai não executa Pyodide.
-4. Regras de cache (abaixo) e `X-Robots-Tag: noindex` para `https://:version.:subdomain.workers.dev/*` depois que o domínio próprio existir.
-5. O build falha se o arquivo passar de 100 regras (RNF-07).
+2. Regra `/notebooks/*` com `! Content-Security-Policy` e a CSP de notebook (`wasm-unsafe-eval` e as origens do Pyodide medidas nos spikes). Cobre todos os iframes com uma regra só. A página do post não executa Pyodide e não recebe essa CSP.
+3. Regras de cache (abaixo) e `X-Robots-Tag: noindex` para `https://:version.:subdomain.workers.dev/*` depois que o domínio próprio existir.
+4. O build falha se o arquivo passar de 100 regras (RNF-07).
 
 A T-05 valida na prática que detach e nova CSP no mesmo bloco funcionam. Se não funcionarem, plano B: Transform Rules da zona. `_redirects` continua versionado em `public/`.
 
@@ -687,27 +645,11 @@ Uma tarefa só fecha quando seus cenários passam no CI. Os cenários abaixo cob
 ### Cenários (Given/When/Then)
 
 ```gherkin
-Funcionalidade: Notebook marimo inline [RF-08, RNF-03]
-  Cenário: leitor abre post com notebook
-    Dado um post com notebooks: [{ mode: inline }] e fences python marimo
-    Quando a página carrega
-    Então a saída estática das células aparece antes de qualquer download do Pyodide
-    E ao mover o slider, a célula dependente atualiza em até 1 s após o kernel ficar pronto
-
+Funcionalidade: Notebook marimo em iframe [RF-08, RNF-03]
   Cenário: post sem notebook não carrega runtime
     Dado um post sem o campo notebooks
     Quando a página carrega
     Então nenhuma requisição casa com /pyodide|marimo/
-
-  Cenário: fences sem declaração
-    Dado um post com fences python marimo e sem { mode: inline } no frontmatter
-    Quando rodo pnpm build
-    Então o build falha citando o arquivo e o campo notebooks
-
-  Cenário: inline com src
-    Dado um post com notebooks: [{ mode: inline, src: ./notebooks/x.py }]
-    Quando rodo pnpm build
-    Então o build falha citando o arquivo e o campo notebooks
 
 Funcionalidade: Notebook pesado [RF-08, RNF-09]
   Cenário: export desatualizado
@@ -715,11 +657,6 @@ Funcionalidade: Notebook pesado [RF-08, RNF-09]
     E o .py mudou depois do último export local
     Quando o CI roda
     Então o build falha pedindo para rodar build-notebooks.py --heavy <slug>
-
-  Cenário: notebook pesado em modo inline
-    Dado um post com notebooks: [{ mode: inline, compute: cache }]
-    Quando rodo pnpm build
-    Então o build falha citando o arquivo e o campo notebooks
 
   Cenário: leitor interage com notebook cacheado
     Dado um notebook com compute: cache aberto no navegador
@@ -733,9 +670,10 @@ Funcionalidade: CSP por rota [RNF-06, RNF-07]
     Então a CSP não contém wasm-unsafe-eval
 
   Cenário: rota com notebook
-    Dado um post com { mode: inline } e um export em /notebooks/
-    Quando inspeciono os headers efetivos dessas rotas
-    Então há uma única CSP, com wasm-unsafe-eval
+    Dado um post com { mode: iframe } e o export em /notebooks/
+    Quando inspeciono os headers efetivos da página do post e de /notebooks/
+    Então a página do post não contém wasm-unsafe-eval
+    E /notebooks/ tem uma única CSP, com wasm-unsafe-eval
 
 Funcionalidade: Rascunhos [RF-11]
   Cenário: draft em produção
@@ -756,7 +694,7 @@ Funcionalidade: Gráfico acessível [RF-09, RNF-04]
 
 | Nível      | Ferramenta                                                                   | O que cobre                                                                                                                                      |
 | ---------- | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Unit       | Vitest                                                                       | `src/lib` (ordenação, filtros, `SHOW_DRAFTS` ligado e desligado, readingTime, SEO, checagem de fences, geração do `_headers`), helpers de escala |
+| Unit       | Vitest                                                                       | `src/lib` (ordenação, filtros, `SHOW_DRAFTS` ligado e desligado, readingTime, SEO, geração do `_headers`), helpers de escala                      |
 | Componente | Vitest + `@testing-library/svelte`                                           | Props e estados dos gráficos                                                                                                                     |
 | Notebook   | `marimo check` + export nativo                                               | Notebook executa e é compatível com WASM                                                                                                         |
 | E2E        | Playwright + axe-core                                                        | Cenários acima, navegação, busca, tema                                                                                                           |
@@ -776,7 +714,7 @@ Funcionalidade: Gráfico acessível [RF-09, RNF-04]
 
 As tarefas, dependências, gates e o status de cada uma estão em `specs/ROADMAP.md`. Cada tarefa é uma unidade de PR e cita os IDs de requisito desta spec que entrega; esta spec define o quê, o roadmap define a ordem.
 
-O lançamento leva cerca de 6 a 7 semanas para uma pessoa, em quatro fases com um gate cada. A Fase 0 existe para matar o maior risco (integração do marimo) antes de escrever features; se o spike reprovar o mdx-marimo, a Fase 2 segue só com o modo iframe.
+O lançamento leva cerca de 6 a 7 semanas para uma pessoa, em quatro fases com um gate cada. A Fase 0 existe para matar o maior risco (integração do marimo) antes de escrever features. O modo inline foi adiado na T-03 e a Fase 2 segue só com iframe.
 
 ## Fontes
 
@@ -793,8 +731,6 @@ Conferidas em 09/10/2026.
 - [Cloudflare Workers: Limits](https://developers.cloudflare.com/workers/platform/limits/): 25 MiB por arquivo, 20.000 arquivos, 100 regras de `_headers`
 - [Workers vs. Pages (compatibility matrix)](https://developers.cloudflare.com/workers/static-assets/compatibility-matrix): Cloudflare
 - [WebAssembly HTML](https://docs.marimo.io/guides/exporting/webassembly_html/): export WASM, `--execute`, `--include-cloudflare`, cache, pré-cômputo, `MW001–003`, islands
-- [Publishing with MDX](https://docs.marimo.io/guides/exporting/mdx/): `marimo export md --flavor mdx`
-- [mdx-marimo](https://github.com/marimo-team/mdx-marimo): repositório; exemplo `examples/with-astro` em Astro 7 com runtime em custom element
 - [moutils](https://github.com/marimo-team/moutils#onnx-runtime-adapter): adaptador ONNX
 - [huggingface/blog](https://github.com/huggingface/blog): referência de modelo de autoria
 
