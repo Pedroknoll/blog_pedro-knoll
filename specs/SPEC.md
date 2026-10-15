@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 14/10/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 15/10/2026
+
+**Revisão de 15/10/2026:** `compute: cache` não funciona no marimo 0.25.1 para notebooks que treinam com `torch`, ver T-04 e `specs/spikes/T-04-html-wasm.md`. Os exemplos passam a usar `precomputed`, a validar na T-33.
 
 **Revisão de 14/10/2026:** o modo inline foi adiado por custo de manutenção (T-03). O blog fica só com notebooks marimo em iframe. O ADR-02 foi substituído; o texto anterior está em `specs/adr/ADR-02-v1-mdx-marimo.md`. Detalhes em `specs/spikes/T-03-mdx-marimo.md`.
 
@@ -196,6 +198,7 @@ Python só existe no build; em produção, o único código que executa é o do 
 - **Pyodide pesa** dezenas de MB no primeiro acesso. Mitigação: saída estática pré-renderizada e botão "Ativar interatividade" quando o notebook for grande.
 - **Pacotes sem wheel WASM** não rodam no browser. Mitigação: `marimo check --select MW` no CI (regras `MW001` import incompatível, `MW002` chamada de sistema insegura, `MW003` dependência sem wheel WASM) e cache de execução (seção 7).
 - **Astro 7 é estrito com HTML.** O compilador Rust recusa tags não fechadas e não corrige aninhamento inválido; o padrão `compressHTML: 'jsx'` remove espaço entre elementos inline. Mitigação: `astro check` no CI e revisão visual do preview.
+- **Cache de células com `torch`** não funciona no marimo 0.25.1, ver T-04. Mitigação: `precomputed`, a validar na T-33, ou `onnx` e `static`.
 
 ## 6. Modelo de conteúdo
 
@@ -299,7 +302,7 @@ tags: [nlp, embeddings]
 cover: ./cover.png
 coverAlt: "Pontos coloridos agrupados num plano 2D"
 notebooks:
-  - { mode: iframe, src: ./notebooks/treino.py, compute: cache, gpuUrl: "https://colab.research.google.com/..." }
+  - { mode: iframe, src: ./notebooks/treino.py, compute: precomputed, gpuUrl: "https://colab.research.google.com/..." } # a validar na T-33
 ---
 
 ```
@@ -378,7 +381,7 @@ Notebook pesado nunca roda inteiro no navegador do leitor: o Pyodide só instala
 | `compute`          | Como funciona                                                                                                                                                                                                                 | O leitor pode                                             | Quando usar                                                 |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ----------------------------------------------------------- |
 | `browser` (padrão) | Tudo roda no Pyodide; exportado no CI                                                                                                                                                                                         | Tudo, inclusive editar código                             | numpy, pandas, scikit-learn, matplotlib                     |
-| `cache`            | `cache_cells = true` + `marimo export html-wasm --execute`; o marimo copia o cache para `public/cache/` **dentro do diretório do export**                                                                                     | Interagir com células leves que leem os valores cacheados | Treino curto, embeddings, métricas de avaliação             |
+| `cache`            | `cache_cells = true` + `marimo export html-wasm --execute`; o marimo copia o cache para `public/cache/` **dentro do diretório do export**                                                                                     | Interagir com células leves que leem os valores cacheados | Treino curto, embeddings, métricas de avaliação. Não funciona com treino em `torch` no marimo 0.25.1, ver T-04             |
 | `precomputed`      | `@mo.persistent_cache(method="lazy")` numa função indexada pelos controles; uma célula guardada por `sys.platform != "emscripten"` aquece todas as combinações antes do export (`method="pickle"` não empacota bem para WASM) | Trocar qualquer opção de slider/dropdown sem recomputar   | Poucos estados conhecidos (ex.: 3 modelos × 4 temperaturas) |
 | `onnx`             | Modelo cacheado como ONNX com `moutils.onnx.OnnxRuntime`; no navegador a inferência roda em onnxruntime-web                                                                                                                   | Rodar inferência de verdade com entradas novas            | Modelos pequenos, abaixo do limite de 25 MiB                |
 | `static`           | `marimo export html`, sem WASM                                                                                                                                                                                                | Só ler                                                    | Resultados finais que não justificam o Pyodide              |
@@ -388,7 +391,7 @@ Complemento para qualquer estratégia: um botão "Rodar com GPU" apontando para 
 
 #### Fluxo de um post pesado
 
-1. Declarar no frontmatter `notebooks: [{ mode: iframe, src: ./notebooks/treino.py, compute: cache }]`.
+1. Declarar no frontmatter `notebooks: [{ mode: iframe, src: ./notebooks/treino.py, compute: precomputed }]`.
 2. Marcar dependências nativas no bloco PEP 723 para que o export WASM as ignore:
 
 ```python
@@ -408,7 +411,7 @@ Complemento para qualquer estratégia: um botão "Rodar com GPU" apontando para 
 2. Commitar `exports/<slug>/`; arquivos acima de 25 MiB são enviados ao R2 pelo mesmo script e substituídos por referência.
 3. No CI, notebooks com `compute` diferente de `browser` não são executados. O CI confere se o `export.lock` bate com os hashes atuais (falha se o export estiver desatualizado) e o `build-notebooks.py` copia `exports/<slug>/<nome>/` para `public/notebooks/<slug>/<nome>/`, onde fica junto dos exports leves.
 
-A mecânica de cache e pré-cômputo está descrita na [documentação do marimo](https://docs.marimo.io/guides/exporting/webassembly_html/). O spike T-04 confirma como o `--execute` se comporta com `torch`: a doc diz que ele usa, quando possível, um ambiente isolado com pacotes compatíveis com WASM.
+A mecânica de cache e pré-cômputo está descrita na [documentação do marimo](https://docs.marimo.io/guides/exporting/webassembly_html/). O spike T-04 mostrou que o `--execute` instala e roda o `torch` num sandbox isolado, mas a célula que treina com `torch` não entra no cache no marimo 0.25.1. Ver `specs/spikes/T-04-html-wasm.md`.
 
 ### Ordem do build
 
@@ -653,13 +656,13 @@ Funcionalidade: Notebook marimo em iframe [RF-08, RNF-03]
 
 Funcionalidade: Notebook pesado [RF-08, RNF-09]
   Cenário: export desatualizado
-    Dado um notebook com compute: cache
+    Dado um notebook com compute: precomputed
     E o .py mudou depois do último export local
     Quando o CI roda
     Então o build falha pedindo para rodar build-notebooks.py --heavy <slug>
 
   Cenário: leitor interage com notebook cacheado
-    Dado um notebook com compute: cache aberto no navegador
+    Dado um notebook com compute: precomputed aberto no navegador
     Quando o leitor muda um controle que só depende de valores cacheados
     Então a saída atualiza sem nenhuma requisição de pacote torch
 
