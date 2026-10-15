@@ -230,6 +230,7 @@ src/
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod'; // Zod 4
+import { postIdFromEntry } from './lib/post-id';
 
 // Iframe: notebook inteiro num .py da pasta do post, exportado com html-wasm.
 const notebook = z.strictObject({
@@ -244,8 +245,8 @@ const posts = defineCollection({
   loader: glob({
     pattern: '**/index.{md,mdx}',
     base: './src/content/posts',
-    // id = nome da pasta do post; é o slug de /blog/[slug]
-    generateId: ({ entry }) => entry.split('/')[0],
+    // id = nome da pasta, validado por postIdFromEntry; é o slug de /blog/[slug]
+    generateId: ({ entry }) => postIdFromEntry(entry),
   }),
   schema: ({ image }) =>
     z
@@ -311,8 +312,8 @@ notebooks:
 
 ### Regras derivadas
 
-- `getPublishedPosts()` é o único acesso à collection nas páginas: filtra `draft` quando `SHOW_DRAFTS` não é `true` e ordena por `pubDate` desc.
-- O slug é o `id` gerado pelo `generateId` do loader (nome da pasta). Nenhuma página recalcula slug por conta própria.
+- `getPublishedPosts()` é o único acesso à collection nas páginas: filtra `draft` quando `SHOW_DRAFTS` não é `true` e ordena por `pubDate` desc, com desempate por `id` crescente.
+- O slug é o `id` gerado pelo `generateId` do loader (nome da pasta). `postIdFromEntry` exige exatamente dois segmentos (`pasta/index.md` ou `pasta/index.mdx`) e pasta `^[a-z0-9-]+$`; caso contrário o build falha citando o entry. Nenhuma página recalcula slug por conta própria.
 - Tempo de leitura é calculado por um plugin remark do projeto (200 palavras/min), excluindo blocos de código.
 - Tags são normalizadas em kebab-case; um arquivo `src/data/tags.ts` opcional dá rótulo e descrição para as páginas de tag.
 
