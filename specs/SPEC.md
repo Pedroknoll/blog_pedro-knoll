@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 15/10/2026
 
+**Revisão 2 de 15/10/2026:** detach de CSP validado em Workers Static Assets (T-05). A regra de cache de notebooks usa `/notebooks/:slug/:nome/assets/*`. A CSP de notebook leva hashes dos scripts inline, calculados no build. A v1 não tem interrupts. Gate 0 aprovado. Ver `specs/spikes/T-05-headers.md`.
+
 **Revisão de 15/10/2026:** `compute: cache` não funciona no marimo 0.25.1 para notebooks que treinam com `torch`, ver T-04 e `specs/spikes/T-04-html-wasm.md`. Os exemplos passam a usar `precomputed`, a validar na T-33.
 
 **Revisão de 14/10/2026:** o modo inline foi adiado por custo de manutenção (T-03). O blog fica só com notebooks marimo em iframe. O ADR-02 foi substituído; o texto anterior está em `specs/adr/ADR-02-v1-mdx-marimo.md`. Detalhes em `specs/spikes/T-03-mdx-marimo.md`.
@@ -360,8 +362,10 @@ As opções `markdown.remarkPlugins` e `markdown.rehypePlugins` estão depreciad
 
 1. `scripts/build-notebooks.py` percorre os posts e, para cada notebook `iframe` com `compute: browser`, roda `marimo check --select MW` e depois `marimo export html-wasm <nb>.py -o public/notebooks/<slug>/<nome>/ --mode run --no-show-code`.
 2. O resultado é cacheado pelo SHA-256 do `.py` + `uv.lock`; notebook sem mudança não é reexportado (RNF-08). `public/notebooks/` é gerado e fica no `.gitignore`.
-3. O componente `<MarimoFrame src="..." title="..." height={600} />` renderiza um iframe com `loading="lazy"` e um pôster estático até o usuário clicar em "Executar".
+3. O componente `<MarimoFrame>` aponta para `/notebooks/<slug>/<nome>/`, com barra final, e define largura e altura. Sem dimensões, o iframe sai com 300 × 150 px. Renderiza com `loading="lazy"` e um pôster estático até o usuário clicar em "Executar".
 4. Dados do notebook são lidos via `mo.notebook_location()`, para funcionar local e no WASM. Módulos `.py` locais importados pelo notebook entram no export como wheel em `public/wheels` (exige uv).
+
+A v1 não tem interrupts. O marimo em WASM usa `SharedArrayBuffer`, que exige isolamento de origem (`Cross-Origin-Opener-Policy: same-origin` e `Cross-Origin-Embedder-Policy: require-corp` ou `credentialless`). Sem isso, o leitor não consegue parar uma célula em execução. Ver `specs/spikes/T-05-headers.md`.
 
 ### Notebooks pesados (torch, GPU, dados grandes)
 
@@ -606,11 +610,11 @@ A [doc da Cloudflare](https://developers.cloudflare.com/workers/static-assets/he
 Por isso o `_headers` é **gerado no build** pela integração `src/integrations/headers.ts`, no hook `astro:build:done`, escrevendo em `dist/_headers`:
 
 1. Regra `/*` com a CSP estrita (sem `wasm-unsafe-eval`), HSTS, `X-Content-Type-Options`, `Referrer-Policy` e `frame-ancestors 'self'`. Não usar `X-Frame-Options: DENY`: os iframes de notebook são do mesmo domínio.
-2. Regra `/notebooks/*` com `! Content-Security-Policy` e a CSP de notebook (`wasm-unsafe-eval` e as origens do Pyodide medidas nos spikes). Cobre todos os iframes com uma regra só. A página do post não executa Pyodide e não recebe essa CSP.
+2. A CSP de notebook medida na T-05 vai numa regra por export, `/notebooks/<slug>/<nome>/*`, cada uma com `! Content-Security-Policy` e os hashes do próprio export. A página do post não executa Pyodide e não recebe essa CSP. Diretivas: `default-src 'none'`; `script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net` mais os hashes `sha256` dos scripts inline; `style-src 'self' 'unsafe-inline'`; `img-src 'self' data:`; `font-src 'self' data:`; `connect-src 'self' https://wasm.marimo.app https://cdn.jsdelivr.net https://files.pythonhosted.org`; `worker-src 'self'`; `frame-ancestors 'self'`; `base-uri 'none'`; `form-action 'none'`. Os hashes dependem do `index.html` de cada export. Cada linha do `_headers` tem limite de 2.000 caracteres: a linha medida tem 577 com 4 hashes, cerca de 55 por hash. A T-16 implementa essas regras, calcula os hashes no build e confere o limite de 100 regras e de 2.000 caracteres por linha. Hash em `style-src` não entra: com um hash na diretiva, o navegador ignora `'unsafe-inline'`. `'unsafe-inline'` em `style-src` não contradiz o RNF-07; `script-src` não tem `'unsafe-inline'` nem `'unsafe-eval'`.
 3. Regras de cache (abaixo) e `X-Robots-Tag: noindex` para `https://:version.:subdomain.workers.dev/*` depois que o domínio próprio existir.
 4. O build falha se o arquivo passar de 100 regras (RNF-07).
 
-A T-05 valida na prática que detach e nova CSP no mesmo bloco funcionam. Se não funcionarem, plano B: Transform Rules da zona. `_redirects` continua versionado em `public/`.
+A T-05 confirmou o detach: `! Content-Security-Policy` seguido de nova CSP no mesmo bloco entrega uma única CSP, com `wasm-unsafe-eval`, na rota do notebook; a página que embute o iframe fica só com a CSP global. Headers repetidos chegaram como linhas separadas, não unidos por vírgula; os testes da T-16 contam ocorrências. Ver `specs/spikes/T-05-headers.md`. O plano B não foi necessário. Transform Rules exigem zona, e o `workers.dev` não é uma zona da conta: só depois da T-27. Até lá, se o detach falhar, a alternativa são regras explícitas por rota (`/`, `/blog/*`, `/tags/*`, `/page/*`, `/sobre`, `/_astro/*`…). `_redirects` continua versionado em `public/`.
 
 ### Ambientes
 
@@ -638,7 +642,7 @@ Segredos necessários no repositório: `CLOUDFLARE_API_TOKEN` (Account API token
 
 ### Cache na edge
 
-- `/_astro/*` e `/notebooks/*/assets/*`: `Cache-Control: public, max-age=31536000, immutable` (nomes com hash).
+- `/_astro/*` e `/notebooks/:slug/:nome/assets/*`: `Cache-Control: public, max-age=31536000, immutable` (nomes com hash). A Cloudflare aceita um splat por URL; a forma com dois `*` não vale. Use um placeholder por segmento.
 - HTML: o padrão da Cloudflare já é `public, max-age=0, must-revalidate` com `ETag`; não precisa de regra.
 
 ## 11. Critérios de aceite e testes

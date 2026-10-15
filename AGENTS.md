@@ -14,7 +14,7 @@ Blog técnico estático no estilo do Hugging Face Blog: Astro 7 gera o HTML, Pyt
 2. Leia só as seções da SPEC ligadas aos requisitos citados. Não leia a spec inteira por hábito.
 3. **Antes de editar código**, apresente um plano curto e espere confirmação: arquivos a criar ou mudar, o que fica fora, como vai provar. O mesmo plano vai para a descrição do PR.
 4. Testes primeiro, nas tarefas que entregam comportamento (RF ou RNF). Tire o `test.fixme` dos cenários da tarefa, ou escreva os testes a partir dos critérios de aceite da SPEC §3, §4 e §11. **Rode-os e mostre que falham antes de implementar**: um teste que já passa sem o código não prova nada.
-  - Exceções: spikes (T-03, T-04) provam com o doc em `specs/spikes/`; tarefas de infraestrutura (T-01, T-02, T-05, T-13) provam com o comando ou o pipeline rodando e com a saída colada no PR. Não invente testes artificiais para elas.
+  - Exceções: spikes (T-03, T-04, T-05) provam com o doc em `specs/spikes/`; tarefas de infraestrutura (T-01, T-02, T-13) provam com o comando ou o pipeline rodando e com a saída colada no PR. Não invente testes artificiais para elas.
 5. Implemente até os testes e os gates ficarem verdes.
 6. Feche: tarefa `concluída` e linha de handoff no `ROADMAP.md`; `SPEC.md` atualizado se o comportamento mudou; tudo no mesmo PR.
 
@@ -92,7 +92,7 @@ A stack é recente e a sintaxe antiga ainda domina o que os modelos viram. Antes
 - **Cloudflare:** o site roda em **Workers com Static Assets** (`wrangler.jsonc`, `assets.directory: ./dist`). Não é Pages: nada de `wrangler pages deploy` nem `@astrojs/cloudflare` (o site é estático, sem adapter).
 - **Modo inline:** adiado na T-03; não instale `@marimo-team/mdx-marimo`.
 - **marimo:** versão travada no `uv.lock`. Dados de notebook são lidos com `mo.notebook_location()`. Cache e pré-cômputo usam `cache_cells = true`, `--execute` e `@mo.persistent_cache(method="lazy")`; `method="pickle"` não empacota bem para WASM. Célula que treina com `torch` não entra no cache com `cache_cells` no marimo 0.25.1, ver `specs/spikes/T-04-html-wasm.md`.
-- **CSP e** `_headers`**:** o arquivo é gerado no build (`src/integrations/headers.ts`); não edite `dist/_headers` nem crie `public/_headers`. Na Cloudflare, header repetido em regras que casam com a mesma URL tem os valores unidos por vírgula, ou seja, vira duas CSPs. Para trocar a CSP de uma rota, a regra precisa de `! Content-Security-Policy` antes da nova. Limite de 100 regras. `wasm-unsafe-eval` só nas rotas com notebook. Iframes de notebook são do mesmo domínio: use `frame-ancestors 'self'`, não `X-Frame-Options: DENY`.
+- **CSP e** `_headers`**:** o arquivo é gerado no build (`src/integrations/headers.ts`); não edite `dist/_headers` nem crie `public/_headers`. Na Cloudflare, header repetido em regras que casam com a mesma URL chega em linhas separadas (a doc descreve união por vírgula; para a CSP, as duas formas são duas políticas). Os testes de headers usam GET: HEAD falhou no preview da T-05. Para trocar a CSP de uma rota, a regra precisa de `! Content-Security-Policy` antes da nova. Limite de 100 regras. Só cabe um splat por regra; use `:placeholder` por segmento (ex.: `/notebooks/:slug/:nome/assets/*`). `wasm-unsafe-eval` só nas rotas com notebook. Iframes de notebook são do mesmo domínio: use `frame-ancestors 'self'`, não `X-Frame-Options: DENY`.
 
 
 
