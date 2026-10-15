@@ -25,7 +25,7 @@ Uma tarefa = um PR, num branch `t-XX-descricao-curta`. Trabalho descoberto no ca
 
 | Para                   | Comando                                                                        |
 | ---------------------- | ------------------------------------------------------------------------------ |
-| Servidor de dev        | `pnpm dev` (localhost:4321). Não gera notebooks iframe; o modo inline funciona |
+| Servidor de dev        | `pnpm dev` (localhost:4321). Não gera notebooks iframe                         |
 | Gerar notebooks leves  | `uv run scripts/build-notebooks.py` (com cache por hash)                       |
 | Rodar como em produção | `pnpm build && npx wrangler dev` (localhost:8787)                              |
 | Build completo         | `pnpm build` (notebooks → Astro → Pagefind)                                    |
@@ -48,7 +48,7 @@ src/content.config.ts   collection `posts` com schema Zod 4
 src/content/posts/<slug>/index.mdx   cada post é uma pasta: texto, capa, figs/, data/, notebooks/
 src/components/ui/      .astro estáticos
 src/components/viz/     .svelte com D3 (AGENTS.md próprio, criado antes da T-19)
-src/components/marimo/  MarimoRuntime.astro, MarimoFrame, RunOnGpu (AGENTS.md próprio, criado antes da T-14)
+src/components/marimo/  MarimoFrame, RunOnGpu (AGENTS.md próprio, criado antes da T-14)
 src/integrations/headers.ts   gera dist/_headers no build (CSP por rota)
 src/lib/                getPublishedPosts, readingTime, seo
 scripts/build-notebooks.py
@@ -69,7 +69,7 @@ tests/                  vitest (unit) e playwright (e2e)
 - **Nomes:** identificadores de código em inglês; texto visível e rotas em pt-BR (`/sobre`, `/tags/[tag]`). Exceções fixadas na SPEC: `/blog/[slug]` e `/page/[n]`.
 - **Alias:** `~/` aponta para `src/`.
 - **Dados de gráfico:** importados no MDX a partir de JSON/CSV da pasta do post; nada de `fetch` em runtime. Datas chegam como string ISO e o componente converte.
-- **Notebooks:** inline é `{ mode: inline }` sem `src`, e as células são as fences ````python marimo`do`index.mdx`; iframe é` { mode: iframe, src, compute }`. Detalhes na SPEC §6 e §7.
+- **Notebooks:** `{ mode: iframe, src, compute }`. Detalhes na SPEC §6 e §7.
 
 
 
@@ -90,8 +90,8 @@ A stack é recente e a sintaxe antiga ainda domina o que os modelos viram. Antes
 - **Tailwind v4:** configuração no CSS (`@import "tailwindcss"`, `@theme`, `@plugin "@tailwindcss/typography"`), integrada pelo plugin `@tailwindcss/vite`. Não existe `tailwind.config.js` e não se usa `@astrojs/tailwind`.
 - **D3 v7:** importe módulos avulsos (`d3-scale`, `d3-shape`, `d3-array`, `d3-format`), nunca o pacote `d3`. O DOM é do Svelte: `d3-selection` não cria nem altera elementos (exceção: `d3-zoom`/`d3-drag` via action).
 - **Cloudflare:** o site roda em **Workers com Static Assets** (`wrangler.jsonc`, `assets.directory: ./dist`). Não é Pages: nada de `wrangler pages deploy` nem `@astrojs/cloudflare` (o site é estático, sem adapter).
-- **mdx-marimo no Astro:** o runtime é um custom element, carregado por `<script type="module">` a partir de `@marimo-team/mdx-marimo/element/auto?url`, mais `@marimo-team/mdx-marimo/styles.css`. Não use React nem `@astrojs/react` para ele.
-- **marimo:** versão travada no `uv.lock`. Dados de notebook são lidos com `mo.notebook_location()`. Notebook com `compute` diferente de `browser` só existe em `mode: iframe`. Cache e pré-cômputo usam `cache_cells = true`, `--execute` e `@mo.persistent_cache(method="lazy")`; `method="pickle"` não empacota bem para WASM.
+- **Modo inline:** adiado na T-03; não instale `@marimo-team/mdx-marimo`.
+- **marimo:** versão travada no `uv.lock`. Dados de notebook são lidos com `mo.notebook_location()`. Cache e pré-cômputo usam `cache_cells = true`, `--execute` e `@mo.persistent_cache(method="lazy")`; `method="pickle"` não empacota bem para WASM.
 - **CSP e** `_headers`**:** o arquivo é gerado no build (`src/integrations/headers.ts`); não edite `dist/_headers` nem crie `public/_headers`. Na Cloudflare, header repetido em regras que casam com a mesma URL tem os valores unidos por vírgula, ou seja, vira duas CSPs. Para trocar a CSP de uma rota, a regra precisa de `! Content-Security-Policy` antes da nova. Limite de 100 regras. `wasm-unsafe-eval` só nas rotas com notebook. Iframes de notebook são do mesmo domínio: use `frame-ancestors 'self'`, não `X-Frame-Options: DENY`.
 
 
