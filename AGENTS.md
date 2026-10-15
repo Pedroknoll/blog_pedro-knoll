@@ -91,7 +91,7 @@ A stack é recente e a sintaxe antiga ainda domina o que os modelos viram. Antes
 - **D3 v7:** importe módulos avulsos (`d3-scale`, `d3-shape`, `d3-array`, `d3-format`), nunca o pacote `d3`. O DOM é do Svelte: `d3-selection` não cria nem altera elementos (exceção: `d3-zoom`/`d3-drag` via action).
 - **Cloudflare:** o site roda em **Workers com Static Assets** (`wrangler.jsonc`, `assets.directory: ./dist`). Não é Pages: nada de `wrangler pages deploy` nem `@astrojs/cloudflare` (o site é estático, sem adapter).
 - **Modo inline:** adiado na T-03; não instale `@marimo-team/mdx-marimo`.
-- **marimo:** versão travada no `uv.lock`. Dados de notebook são lidos com `mo.notebook_location()`. Cache e pré-cômputo usam `cache_cells = true`, `--execute` e `@mo.persistent_cache(method="lazy")`; `method="pickle"` não empacota bem para WASM.
+- **marimo:** versão travada no `uv.lock`. Dados de notebook são lidos com `mo.notebook_location()`. Cache e pré-cômputo usam `cache_cells = true`, `--execute` e `@mo.persistent_cache(method="lazy")`; `method="pickle"` não empacota bem para WASM. Célula que treina com `torch` não entra no cache com `cache_cells` no marimo 0.25.1, ver `specs/spikes/T-04-html-wasm.md`.
 - **CSP e** `_headers`**:** o arquivo é gerado no build (`src/integrations/headers.ts`); não edite `dist/_headers` nem crie `public/_headers`. Na Cloudflare, header repetido em regras que casam com a mesma URL tem os valores unidos por vírgula, ou seja, vira duas CSPs. Para trocar a CSP de uma rota, a regra precisa de `! Content-Security-Policy` antes da nova. Limite de 100 regras. `wasm-unsafe-eval` só nas rotas com notebook. Iframes de notebook são do mesmo domínio: use `frame-ancestors 'self'`, não `X-Frame-Options: DENY`.
 
 
