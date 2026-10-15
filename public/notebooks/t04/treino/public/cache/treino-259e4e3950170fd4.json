@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "notebook": "../../treino.py",
+  "written_at": "2026-10-15T16:54:44.930992+00:00",
+  "nodes": {
+    "0ecd270e6ba2cbc2f3f2e9467872504f87a34a690a34fac75b32a73918dd503e": {
+      "cell_cache": [
+        "C_3BeMMt3oPdzPQclfCPJ_MnokTpO4ZlXIxLJuAIjZ3lg"
+      ]
+    },
+    "25b33d1dd60351a10540450f1abb67974c0664a928fc87a8feb492da0659432e": {
+      "cell_cache": [
+        "P_UiBYcn4kAoT51ZEhvqhe30ZjNlAq0MsBohEnkTEM1NA"
+      ]
+    },
+    "54249254ee23188839659a592adc50c442693eac79d8888173a4e999ffbcec7d": {
+      "cell_cache": [
+        "P_79wmK1Fdb7La1JgEIkI_-UMSVoYpS46hVlNDpWFJ0bI"
+      ]
+    },
+    "912ca361880db32a432f6afa2539a2a6b534f81d919bd961529d311975f36b80": {
+      "cell_cache": [
+        "C_ztsrKl4fIKqL-o9EFwGsTmbmvDjYW7Ynr4XU42hLHS0"
+      ]
+    },
+    "999ff3fe1ced0307053a4f66d29c448b0dba011041c7ad769c794846ebb59bd9": {
+      "cell_cache": [
+        "C_zxFQPT2UVf7DGwsShoghxTxThTRFkkuGxC7-oUqFKDA"
+      ]
+    },
+    "e9dffe8abf85ec213a11beb37dd4ea5b51355fd22f2c2196807e63d5c4fd04b6": {
+      "cell_cache": [
+        "C_qamYWwxsdiJ9BuFj4Jze6wyvqjDro4IyVrOeAbjsmtY"
+      ]
+    }
+  }
+}
