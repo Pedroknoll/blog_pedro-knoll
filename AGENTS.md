@@ -70,6 +70,7 @@ tests/                  vitest (unit) e playwright (e2e)
 - **Alias:** `~/` aponta para `src/`.
 - **Dados de gráfico:** importados no MDX a partir de JSON/CSV da pasta do post; nada de `fetch` em runtime. Datas chegam como string ISO e o componente converte.
 - **Notebooks:** `{ mode: iframe, src, compute }`. Detalhes na SPEC §6 e §7.
+- **Cores:** só os tokens semânticos do CSS global, sem paleta literal e sem `dark:` em componentes.
 
 
 
