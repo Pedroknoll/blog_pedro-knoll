@@ -1,2 +1,18 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+:root {
+  --site-surface: #ffffff;
+  --site-ink: #111827;
+  --site-muted: #4b5563;
+  --site-line: #d1d5db;
+  --site-accent: #1e40af;
+}
+
+@theme inline {
+  --color-surface: var(--site-surface);
+  --color-ink: var(--site-ink);
+  --color-muted: var(--site-muted);
+  --color-line: var(--site-line);
+  --color-accent: var(--site-accent);
+}

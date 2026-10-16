@@ -571,7 +571,7 @@ Um agente pode instalar, sem perguntar, as dependências abaixo, na versão est�
 | Conteúdo       | `remark-math`, `rehype-katex`, `katex`                                                                                                                                       | —                                                                 |
 | Gráficos       | `d3-scale`, `d3-shape`, `d3-array`, `d3-format`, `d3-zoom`, `d3-scale-chromatic`                                                                                             | —                                                                 |
 | Busca e deploy | `pagefind`, `wrangler`                                                                                                                                                       | —                                                                 |
-| Qualidade      | `eslint`, `prettier` (e os plugins oficiais para Astro e Svelte), `vitest`, `@testing-library/svelte`, `@playwright/test`, `@axe-core/playwright`, `size-limit`, `@lhci/cli` | `ruff`                                                            |
+| Qualidade      | `eslint`, `prettier` (e os plugins oficiais para Astro e Svelte), `vitest`, `@testing-library/svelte`, `@playwright/test`, `@axe-core/playwright`, `size-limit`, `@lhci/cli`, `@types/node` | `ruff`                                                            |
 | Notebooks      | —                                                                                                                                                                            | `moutils` (só em notebooks com `compute: onnx`, no bloco PEP 723) |
 
 

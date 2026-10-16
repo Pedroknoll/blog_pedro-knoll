@@ -1,0 +1,33 @@
+---
+import "~/styles/global.css";
+import Footer from "~/components/ui/Footer.astro";
+import Header from "~/components/ui/Header.astro";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{title}</title>
+    <slot name="head" />
+  </head>
+  <body class="bg-surface text-ink">
+    <a
+      class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-10 focus:bg-ink focus:px-3 focus:py-2 focus:text-surface"
+      href="#conteudo"
+    >
+      Pular para o conteúdo
+    </a>
+    <Header />
+    <main id="conteudo">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

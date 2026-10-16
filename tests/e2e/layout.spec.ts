@@ -63,7 +63,9 @@ test.describe("layout da home [RNF-04, RNF-05]", () => {
 
   test("link do header para / com o título do site", async ({ page }) => {
     await page.goto("/");
-    const home = page.getByRole("banner").getByRole("link", { name: "Nome do blog" });
+    const home = page
+      .getByRole("banner")
+      .getByRole("link", { name: "Nome do blog" });
     await expect(home).toHaveAttribute("href", "/");
   });
 
@@ -76,21 +78,26 @@ test.describe("layout da home [RNF-04, RNF-05]", () => {
     await page.goto("/");
     const results = await new AxeBuilder({ page }).analyze();
     const blocking = results.violations.filter(
-      (violation) => violation.impact === "serious" || violation.impact === "critical",
+      (violation) =>
+        violation.impact === "serious" || violation.impact === "critical",
     );
     expect(blocking.map((violation) => violation.id)).toEqual([]);
   });
 
   test("nenhum script além de JSON-LD", async ({ page }) => {
     await page.goto("/");
-    await expect(page.locator('script:not([type="application/ld+json"])')).toHaveCount(0);
+    await expect(
+      page.locator('script:not([type="application/ld+json"])'),
+    ).toHaveCount(0);
   });
 
   test("sem rolagem horizontal a 360 px", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await page.goto("/");
     const overflows = await page.evaluate(
-      () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      () =>
+        document.documentElement.scrollWidth >
+        document.documentElement.clientWidth,
     );
     expect(overflows).toBe(false);
   });

@@ -36,7 +36,10 @@ function astroFiles(): string[] {
   for (const dir of ["src/layouts", "src/components/ui"]) {
     const absolute = join(root, dir);
     if (!existsSync(absolute)) continue;
-    for (const entry of readdirSync(absolute, { encoding: "utf8", recursive: true })) {
+    for (const entry of readdirSync(absolute, {
+      encoding: "utf8",
+      recursive: true,
+    })) {
       if (entry.endsWith(".astro")) files.push(join(absolute, entry));
     }
   }
@@ -44,16 +47,22 @@ function astroFiles(): string[] {
 }
 
 describe("detector de cor", () => {
-  it.each(["bg-white", "text-gray-900", "hover:border-red-500", "dark:bg-surface", "bg-[#fff]"])(
-    "casa %s",
+  it.each([
+    "bg-white",
+    "text-gray-900",
+    "hover:border-red-500",
+    "dark:bg-surface",
+    "bg-[#fff]",
+  ])("casa %s", (sample) => {
+    expect(forbiddenColorUses(sample).length).toBeGreaterThan(0);
+  });
+
+  it.each(["bg-surface", "text-ink", "font-black", 'href="#conteudo"'])(
+    "não casa %s",
     (sample) => {
-      expect(forbiddenColorUses(sample).length).toBeGreaterThan(0);
+      expect(forbiddenColorUses(sample)).toEqual([]);
     },
   );
-
-  it.each(["bg-surface", "text-ink", "font-black", 'href="#conteudo"'])("não casa %s", (sample) => {
-    expect(forbiddenColorUses(sample)).toEqual([]);
-  });
 });
 
 describe("arquivos de layout e ui", () => {
@@ -61,7 +70,9 @@ describe("arquivos de layout e ui", () => {
     const files = astroFiles();
     expect(files.length).toBeGreaterThan(0);
     const violations = files.flatMap((file) =>
-      forbiddenColorUses(readFileSync(file, "utf8")).map((hit) => `${file}: ${hit}`),
+      forbiddenColorUses(readFileSync(file, "utf8")).map(
+        (hit) => `${file}: ${hit}`,
+      ),
     );
     expect(violations).toEqual([]);
   });
