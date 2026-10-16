@@ -62,7 +62,7 @@ Os spikes (T-03, T-04, T-05) rodam em branch própria. O código fica nesse bran
 | T-11 | Páginas de tag                                                                                                                                                                                                                               | RF-02                  | T-06, T-08       | pendente |
 | T-12 | SEO, JSON-LD, RSS e sitemap, com URLs absolutas a partir de `SITE_URL`                                                                                                                                                                       | RF-10, RF-12           | T-06, T-09       | pendente |
 | T-13 | Lighthouse CI, verificação de JS por página, `size-limit` por island e verificador de links no pipeline, com os limites da SPEC §4. A ferramenta de links não está na lista pré-aprovada: proponha e pergunte                                | RNF-01, RNF-02, RNF-05 | T-02, T-08, T-09 | pendente |
-| T-36 | Job e2e no CI: Playwright e axe contra astro preview do build de produção; incluir e2e nos checks obrigatórios                                                                                                                               | RNF-04, RF-11          | T-02, T-07       | pendente |
+| T-36 | Job e2e no CI: Playwright e axe contra astro preview do build de produção; incluir e2e nos checks obrigatórios                                                                                                                               | RNF-04, RF-11          | T-02, T-07       | em andamento |
 
 
 T-06 e T-07 vêm primeiro; depois disso, T-08 a T-12 podem correr em paralelo.
