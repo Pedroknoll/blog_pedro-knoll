@@ -14,7 +14,7 @@ Blog técnico estático no estilo do Hugging Face Blog: Astro 7 gera o HTML, Pyt
 2. Leia só as seções da SPEC ligadas aos requisitos citados. Não leia a spec inteira por hábito.
 3. **Antes de editar código**, apresente um plano curto e espere confirmação: arquivos a criar ou mudar, o que fica fora, como vai provar. O mesmo plano vai para a descrição do PR.
 4. Testes primeiro, nas tarefas que entregam comportamento (RF ou RNF). Tire o `test.fixme` dos cenários da tarefa, ou escreva os testes a partir dos critérios de aceite da SPEC §3, §4 e §11. **Rode-os e mostre que falham antes de implementar**: um teste que já passa sem o código não prova nada.
-  - Exceções: spikes (T-03, T-04, T-05) provam com o doc em `specs/spikes/`; tarefas de infraestrutura (T-01, T-02, T-13) provam com o comando ou o pipeline rodando e com a saída colada no PR. Não invente testes artificiais para elas.
+  - Exceções: spikes (T-03, T-04, T-05) provam com o doc em `specs/spikes/`; tarefas de infraestrutura (T-01, T-02, T-13, T-36) provam com o comando ou o pipeline rodando e com a saída colada no PR. Não invente testes artificiais para elas.
 5. Implemente até os testes e os gates ficarem verdes.
 6. Feche: tarefa `concluída` e linha de handoff no `ROADMAP.md`; `SPEC.md` atualizado se o comportamento mudou; tudo no mesmo PR.
 

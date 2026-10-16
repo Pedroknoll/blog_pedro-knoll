@@ -634,8 +634,8 @@ A T-05 confirmou o detach: `! Content-Security-Policy` seguido de nova CSP no me
 3. **Testes unitários:** `vitest` em `src/lib`.
 4. **Build de produção:** `pnpm build` sem `SHOW_DRAFTS` (notebooks leves → Astro → Pagefind; notebooks pesados não executam, só têm o `export.lock` conferido e são copiados).
 5. **Verificações do artefato:** links internos, regras do `dist/_headers`, JS por página e `size-limit`, Lighthouse CI com budgets (RNF-01/02/06/07).
-6. **E2E:** Playwright + axe contra `astro preview` desse build de produção, o que inclui o cenário de rascunhos.
-7. **Deploy:** em PR, um segundo `astro build` com `SHOW_DRAFTS=true` (reaproveita os notebooks do passo 4) seguido de `wrangler versions upload`, que gera a URL de preview. Em `main`, `wrangler deploy` do build do passo 4.
+6. **E2E:** Playwright + axe, só no Chromium, contra `astro preview` do `dist/` do passo 4 (artifact), o que inclui o cenário de rascunhos.
+7. **Deploy:** em PR, um segundo `astro build` com `SHOW_DRAFTS=true` (reaproveita os notebooks do passo 4) seguido de `wrangler versions upload`, que gera a URL de preview. Em `main`, o deploy espera o E2E e faz `wrangler deploy` do build do passo 4.
 
 `SHOW_DRAFTS` não tem prefixo `PUBLIC_`: só o build a lê, e ela não deve ir para o cliente.
 
