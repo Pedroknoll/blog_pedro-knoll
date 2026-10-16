@@ -1,7 +1,25 @@
 ---
+import Listing from "~/components/ui/Listing.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
+import { splitFeatured } from "~/lib/featured";
+import { getPublishedPosts } from "~/lib/getPublishedPosts";
+import { PAGE_SIZE, paginatePosts } from "~/lib/pagination";
+
+const posts = await getPublishedPosts();
+const { featured, rest } = splitFeatured(posts);
+const [page] = paginatePosts(rest, PAGE_SIZE);
+
+if (!page) {
+  throw new Error("A listagem não tem a página 1.");
+}
 ---
 
 <BaseLayout title="Blog">
-  <h1>Blog</h1>
+  <Listing
+    heading="Blog"
+    featured={featured}
+    posts={page.items}
+    prev={page.prev}
+    next={page.next}
+  />
 </BaseLayout>

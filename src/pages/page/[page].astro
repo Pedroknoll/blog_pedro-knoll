@@ -1,0 +1,38 @@
+---
+import Listing from "~/components/ui/Listing.astro";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { splitFeatured } from "~/lib/featured";
+import { getPublishedPosts } from "~/lib/getPublishedPosts";
+import { PAGE_SIZE, paginatePosts } from "~/lib/pagination";
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  const { rest } = splitFeatured(posts);
+
+  return paginatePosts(rest, PAGE_SIZE)
+    .filter((entry) => entry.href !== "/")
+    .map((entry) => ({
+      params: { page: entry.href.slice("/page/".length, -1) },
+    }));
+}
+
+const page = Astro.params.page;
+const posts = await getPublishedPosts();
+const { rest } = splitFeatured(posts);
+const current = paginatePosts(rest, PAGE_SIZE).find(
+  (entry) => entry.href === `/page/${page}/`,
+);
+
+if (!page || !current) {
+  throw new Error(`Página inválida: /page/${page}/`);
+}
+---
+
+<BaseLayout title="Blog">
+  <Listing
+    heading={`Blog — página ${page}`}
+    posts={current.items}
+    prev={current.prev}
+    next={current.next}
+  />
+</BaseLayout>

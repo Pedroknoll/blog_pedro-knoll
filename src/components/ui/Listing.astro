@@ -1,0 +1,36 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+import Card from "~/components/ui/Card.astro";
+import Pagination from "~/components/ui/Pagination.astro";
+
+interface Props {
+  heading: string;
+  posts: CollectionEntry<"posts">[];
+  featured?: CollectionEntry<"posts"> | null;
+  prev: string | null;
+  next: string | null;
+}
+
+const { heading, posts, featured = null, prev, next } = Astro.props;
+---
+
+<div class="mx-auto w-full max-w-[52rem] px-4 py-10">
+  <h1 class="font-serif text-3xl text-ink sm:text-4xl">{heading}</h1>
+  {featured && (
+    <section class="mt-12" aria-label="Destaque">
+      <Card post={featured} featured />
+    </section>
+  )}
+  <ul
+    class:list={["divide-y divide-line", featured ? "mt-20" : "mt-10"]}
+    aria-label="Posts"
+  >
+    {posts.map((post) => (
+      <li class="py-8">
+        <Card post={post} />
+      </li>
+    ))}
+  </ul>
+  <Pagination prev={prev} next={next} />
+</div>

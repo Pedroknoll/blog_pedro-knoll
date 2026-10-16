@@ -1,0 +1,25 @@
+---
+interface Props {
+  prev: string | null;
+  next: string | null;
+}
+
+const { prev, next } = Astro.props;
+const linkClass =
+  "text-ink underline decoration-ink hover:text-accent hover:decoration-accent focus-visible:text-accent focus-visible:decoration-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+---
+
+{(prev || next) && (
+  <nav class="mt-10 flex gap-6" aria-label="Paginação">
+    {prev && (
+      <a class={linkClass} href={prev}>
+        Anterior
+      </a>
+    )}
+    {next && (
+      <a class={linkClass} href={next}>
+        Próxima
+      </a>
+    )}
+  </nav>
+)}
