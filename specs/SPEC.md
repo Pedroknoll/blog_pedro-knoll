@@ -316,6 +316,9 @@ notebooks:
 - O slug é o `id` gerado pelo `generateId` do loader (nome da pasta). `postIdFromEntry` exige exatamente dois segmentos (`pasta/index.md` ou `pasta/index.mdx`) e pasta `^[a-z0-9-]+$`; caso contrário o build falha citando o entry. Nenhuma página recalcula slug por conta própria.
 - Tempo de leitura é calculado por um plugin remark do projeto (200 palavras/min), excluindo blocos de código.
 - Tags são normalizadas em kebab-case; um arquivo `src/data/tags.ts` opcional dá rótulo e descrição para as páginas de tag.
+- A home mostra como destaque o post mais recente com `featured: true`, só em `/`, e ele sai da lista paginada. Sem nenhum `featured`, não há destaque.
+- A página 1 da listagem é `/`; as seguintes são `/page/2/`, `/page/3/`…; `/page/1/` não é gerada.
+- Links internos usam barra final (`/blog/<slug>/`, `/page/2/`): sem ela, a Cloudflare responde 307 (T-05).
 
 ## 7. Pipeline marimo
 
@@ -566,7 +569,7 @@ Um agente pode instalar, sem perguntar, as dependências abaixo, na versão est�
 
 | Área           | npm                                                                                                                                                                          | Python (uv)                                                       |
 | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| Núcleo         | `astro`, `@astrojs/mdx`, `@astrojs/markdown-remark`, `@astrojs/svelte`, `svelte`, `@astrojs/sitemap`, `@astrojs/rss`, `@astrojs/check`, `typescript`                         | `marimo`                                                          |
+| Núcleo         | `astro`, `@astrojs/mdx`, `@astrojs/markdown-remark`, `@astrojs/svelte`, `svelte`, `@astrojs/sitemap`, `@astrojs/rss`, `@astrojs/check`, `typescript`, `sharp` (serviço de imagem do `astro:assets`; com pnpm, precisa ser dependência direta) | `marimo`                                                          |
 | Estilo         | `tailwindcss`, `@tailwindcss/vite`, `@tailwindcss/typography`                                                                                                                | —                                                                 |
 | Conteúdo       | `remark-math`, `rehype-katex`, `katex`                                                                                                                                       | —                                                                 |
 | Gráficos       | `d3-scale`, `d3-shape`, `d3-array`, `d3-format`, `d3-zoom`, `d3-scale-chromatic`                                                                                             | —                                                                 |
