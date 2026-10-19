@@ -39,7 +39,10 @@ test.describe("layout da home [RNF-04, RNF-05]", () => {
 
   test("o primeiro Tab foca o link de pular", async ({ page }) => {
     await page.goto("/");
-    const link = page.getByRole("link", { name: "Pular para o conteúdo" });
+    const link = page.getByRole("link", {
+      name: "Pular para o conteúdo",
+      exact: true,
+    });
     await expect(link).toHaveCount(1);
 
     const before = await link.boundingBox();
@@ -63,15 +66,18 @@ test.describe("layout da home [RNF-04, RNF-05]", () => {
 
   test("link do header para / com o título do site", async ({ page }) => {
     await page.goto("/");
-    const home = page
-      .getByRole("banner")
-      .getByRole("link", { name: "Nome do blog" });
+    const home = page.getByRole("banner").getByRole("link", {
+      name: "Nome do blog",
+      exact: true,
+    });
     await expect(home).toHaveAttribute("href", "/");
   });
 
   test("footer com o nome do autor", async ({ page }) => {
     await page.goto("/");
-    await expect(page.getByRole("contentinfo")).toContainText("Seu Nome");
+    await expect(
+      page.getByRole("contentinfo").getByText("Seu Nome", { exact: true }),
+    ).toHaveText("Seu Nome");
   });
 
   test("axe sem violações serious nem critical", async ({ page }) => {
