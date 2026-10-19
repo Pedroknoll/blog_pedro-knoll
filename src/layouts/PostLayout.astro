@@ -1,0 +1,77 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+import Toc from "~/components/ui/Toc.astro";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { formatPubDate } from "~/lib/format-date";
+import type { TocItem } from "~/lib/toc";
+import { site } from "~/site.config";
+
+interface Props {
+  post: CollectionEntry<"posts">;
+  minutesRead?: number;
+  toc: TocItem[];
+}
+
+const { post, minutesRead, toc } = Astro.props;
+const { title, description, pubDate, updatedDate, tags } = post.data;
+const labelClass =
+  "text-xs tracking-widest text-muted [font-variant-caps:small-caps]";
+const published = formatPubDate(pubDate);
+const updated = updatedDate ? formatPubDate(updatedDate) : undefined;
+---
+
+<BaseLayout title="Blog">
+  <article class="mx-auto w-full max-w-[72rem] px-4 py-10">
+    <header>
+      <h1 class="font-serif text-4xl leading-tight font-normal text-ink sm:text-5xl">
+        {title}
+      </h1>
+      <p class="mt-4 max-w-2xl text-lg leading-relaxed text-ink">
+        {description}
+      </p>
+      <div class="mt-8 grid grid-cols-2 gap-x-8 gap-y-6 border-y border-line py-6 sm:grid-cols-4">
+        <div class="min-w-0">
+          <p class={labelClass}>Autor</p>
+          <p class="mt-2 text-sm text-ink">{site.author.name}</p>
+        </div>
+        <div class="min-w-0">
+          <p class={labelClass}>Publicação</p>
+          <p class="mt-2 text-sm text-ink">
+            <time datetime={published.datetime}>{published.text}</time>
+          </p>
+          {updated && (
+            <p class="mt-1 text-sm text-muted">
+              <span>Atualizado em</span>{" "}
+              <time datetime={updated.datetime}>{updated.text}</time>
+            </p>
+          )}
+        </div>
+        <div class="min-w-0">
+          <p class={labelClass}>Leitura</p>
+          {typeof minutesRead === "number" && (
+            <p class="mt-2 text-sm text-ink">{minutesRead} min de leitura</p>
+          )}
+        </div>
+        {tags.length > 0 && (
+          <div class="min-w-0">
+            <p class={labelClass}>Tags</p>
+            <p class="mt-2 flex flex-wrap gap-2">
+              {tags.map((tag) => (
+                <span class="border border-line px-2 py-0.5 font-mono text-xs text-muted">
+                  {tag}
+                </span>
+              ))}
+            </p>
+          </div>
+        )}
+      </div>
+    </header>
+    <div class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_16rem]">
+      <Toc items={toc} />
+      <div class="prose prose-site min-w-0 lg:col-start-1 lg:row-start-1">
+        <slot />
+      </div>
+    </div>
+  </article>
+</BaseLayout>
