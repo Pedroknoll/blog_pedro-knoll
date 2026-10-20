@@ -19,12 +19,13 @@ interface Props {
 
 const { post } = Astro.props;
 const { Content, headings, remarkPluginFrontmatter } = await render(post);
-const { minutesRead } = remarkPluginFrontmatter;
+const { minutesRead, hasCode } = remarkPluginFrontmatter;
 ---
 
 <PostLayout
   post={post}
   minutesRead={typeof minutesRead === "number" ? minutesRead : undefined}
+  hasCode={hasCode === true}
   toc={buildToc(headings)}
 >
   <Content />

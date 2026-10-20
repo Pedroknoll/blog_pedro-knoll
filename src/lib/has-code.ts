@@ -5,6 +5,6 @@ export type CodeTree = {
 };
 
 export function hasCodeBlock(tree: CodeTree): boolean {
-  void tree;
-  throw new Error("não implementado");
+  if (tree.type === "code" && tree.lang !== "math") return true;
+  return (tree.children ?? []).some((child) => hasCodeBlock(child));
 }

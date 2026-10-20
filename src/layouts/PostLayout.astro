@@ -1,6 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
 
+import "katex/dist/katex.min.css";
+
+import CodeCopy from "~/components/ui/CodeCopy.astro";
 import Toc from "~/components/ui/Toc.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { formatPubDate } from "~/lib/format-date";
@@ -10,10 +13,11 @@ import { site } from "~/site.config";
 interface Props {
   post: CollectionEntry<"posts">;
   minutesRead?: number;
+  hasCode?: boolean;
   toc: TocItem[];
 }
 
-const { post, minutesRead, toc } = Astro.props;
+const { post, minutesRead, hasCode, toc } = Astro.props;
 const { title, description, pubDate, updatedDate, tags } = post.data;
 const labelClass =
   "text-xs tracking-widest text-muted [font-variant-caps:small-caps]";
@@ -73,5 +77,6 @@ const updated = updatedDate ? formatPubDate(updatedDate) : undefined;
         <slot />
       </div>
     </div>
+    {hasCode && <CodeCopy />}
   </article>
 </BaseLayout>

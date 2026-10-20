@@ -1,0 +1,44 @@
+<script>
+  const copyResetMs = 2000;
+  const writeText = navigator.clipboard?.writeText?.bind(navigator.clipboard);
+  const article = document.querySelector("article");
+
+  if (writeText && article) {
+    const status = document.createElement("div");
+    status.setAttribute("role", "status");
+    status.className = "sr-only";
+    article.append(status);
+
+    for (const pre of article.querySelectorAll("pre")) {
+      const wrap = document.createElement("div");
+      wrap.className = "code-copy";
+      pre.replaceWith(wrap);
+      wrap.append(pre);
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "code-copy-button";
+      button.textContent = "Copiar";
+      button.setAttribute("aria-label", "Copiar código");
+      wrap.append(button);
+
+      button.addEventListener("click", () => {
+        const code = pre.querySelector("code");
+        const text = code?.textContent ?? "";
+        void writeText(text).then(
+          () => {
+            button.textContent = "Código copiado";
+            button.setAttribute("aria-label", "Código copiado");
+            status.textContent = "Código copiado";
+            window.setTimeout(() => {
+              button.textContent = "Copiar";
+              button.setAttribute("aria-label", "Copiar código");
+              status.textContent = "";
+            }, copyResetMs);
+          },
+          () => {},
+        );
+      });
+    }
+  }
+</script>
