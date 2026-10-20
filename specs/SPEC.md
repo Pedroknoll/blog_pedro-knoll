@@ -319,6 +319,9 @@ notebooks:
   - **Não conta:** blocos de código, fórmulas (`math` e `inlineMath`), HTML cru, frontmatter, `import`/`export` e expressões do MDX, atributos de componentes e `alt` de imagens.
   - **Palavra:** um trecho entre espaços com pelo menos uma letra ou um dígito.
   - **Resultado:** `max(1, ceil(palavras / 200))`.
+- `hasCode` é calculado por um plugin remark do projeto (`src/lib/remark-has-code.mjs`), registrado nos dois `unified()`, depois do `remark-math`. Ele grava o booleano em `hasCode`, que a página lê em `remarkPluginFrontmatter`. O `PostLayout` só inclui o script de copiar quando `hasCode` é verdadeiro. O botão é criado pelo script, como melhoria progressiva; sem JavaScript não há botão.
+  - **Conta:** nós `code` do mdast, com ou sem `lang` (`lang: null` é cerca sem linguagem), inclusive dentro de `blockquote` e de `list`/`listItem`.
+  - **Não conta:** `inlineCode` nem `code` com `lang === "math"`.
 - Tags são normalizadas em kebab-case; um arquivo `src/data/tags.ts` opcional dá rótulo e descrição para as páginas de tag.
 - A home mostra como destaque o post mais recente com `featured: true`, só em `/`, e ele sai da lista paginada. Sem nenhum `featured`, não há destaque.
 - A página 1 da listagem é `/`; as seguintes são `/page/2/`, `/page/3/`…; `/page/1/` não é gerada.
@@ -344,14 +347,19 @@ import { unified } from '@astrojs/markdown-remark';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import { remarkReadingTime } from './src/lib/remark-reading-time.mjs';
+import { remarkHasCode } from './src/lib/remark-has-code.mjs';
 
-const remarkPlugins = [remarkMath, remarkReadingTime];
+const remarkPlugins = [remarkMath, remarkReadingTime, remarkHasCode];
 const rehypePlugins = [rehypeKatex];
 
 export default defineConfig({
   site: process.env.SITE_URL ?? 'https://blog.exemplo.com',
   output: 'static',
   markdown: {
+    shikiConfig: {
+      themes: { light: 'github-light', dark: 'github-dark' },
+      defaultColor: false,
+    },
     processor: unified({ remarkPlugins, rehypePlugins }),
   },
   integrations: [
@@ -364,7 +372,7 @@ export default defineConfig({
 
 ```
 
-As opções `markdown.remarkPlugins` e `markdown.rehypePlugins` estão depreciadas no Astro 7; os plugins vão dentro de `unified()`. A configuração do Shiki (`markdown.shikiConfig`) é da T-10, que confere na doc atual como ela interage com `unified()`.
+As opções `markdown.remarkPlugins` e `markdown.rehypePlugins` estão depreciadas no Astro 7; os plugins vão dentro de `unified()`. O Shiki fica em `markdown.shikiConfig`, fora do `unified()`; o MDX herda essa opção (`extendMarkdownConfig` tem default `true`) e não repete `shikiConfig`. Com `defaultColor: false`, cada token sai só com `--shiki-light` e `--shiki-dark`. `markdown.syntaxHighlight` permanece no padrão. O CSS do KaTeX entra por import de `katex/dist/katex.min.css` no `PostLayout`, sem CDN, e a home não o recebe.
 
 ### Modo iframe
 
