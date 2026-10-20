@@ -1,0 +1,31 @@
+---
+import { render, type CollectionEntry } from "astro:content";
+
+import PostLayout from "~/layouts/PostLayout.astro";
+import { getPublishedPosts } from "~/lib/getPublishedPosts";
+import { buildToc } from "~/lib/toc";
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<"posts">;
+}
+
+const { post } = Astro.props;
+const { Content, headings, remarkPluginFrontmatter } = await render(post);
+const { minutesRead } = remarkPluginFrontmatter;
+---
+
+<PostLayout
+  post={post}
+  minutesRead={typeof minutesRead === "number" ? minutesRead : undefined}
+  toc={buildToc(headings)}
+>
+  <Content />
+</PostLayout>

@@ -1,0 +1,40 @@
+---
+import type { TocItem } from "~/lib/toc";
+
+interface Props {
+  items: TocItem[];
+}
+
+const { items } = Astro.props;
+
+const linkClass =
+  "text-ink underline decoration-ink hover:text-accent hover:decoration-accent focus-visible:text-accent focus-visible:decoration-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+---
+
+{items.length > 0 && (
+  <nav
+    class="lg:sticky lg:top-8 lg:col-start-2 lg:row-start-1 lg:self-start"
+    aria-label="Sumário"
+  >
+    <ol class="grid gap-2 text-sm">
+      {items.map((item) => (
+        <li>
+          <a class={linkClass} href={`#${item.slug}`}>
+            {item.text}
+          </a>
+          {item.children.length > 0 && (
+            <ol class="mt-2 grid gap-2 pl-4">
+              {item.children.map((child) => (
+                <li>
+                  <a class={linkClass} href={`#${child.slug}`}>
+                    {child.text}
+                  </a>
+                </li>
+              ))}
+            </ol>
+          )}
+        </li>
+      ))}
+    </ol>
+  </nav>
+)}

@@ -16,3 +16,24 @@
   --color-line: var(--site-line);
   --color-accent: var(--site-accent);
 }
+
+@utility prose-site {
+  --tw-prose-body: var(--site-ink);
+  --tw-prose-headings: var(--site-ink);
+  --tw-prose-bold: var(--site-ink);
+  --tw-prose-quotes: var(--site-ink);
+  --tw-prose-code: var(--site-ink);
+  --tw-prose-kbd: var(--site-ink);
+  --tw-prose-lead: var(--site-muted);
+  --tw-prose-captions: var(--site-muted);
+  --tw-prose-counters: var(--site-muted);
+  --tw-prose-bullets: var(--site-muted);
+  --tw-prose-links: var(--site-accent);
+  --tw-prose-hr: var(--site-line);
+  --tw-prose-quote-borders: var(--site-line);
+  --tw-prose-th-borders: var(--site-line);
+  --tw-prose-td-borders: var(--site-line);
+  --tw-prose-pre-bg: var(--site-ink);
+  --tw-prose-pre-code: var(--site-surface);
+  --tw-prose-kbd-shadows: color-mix(in srgb, var(--site-ink) 10%, transparent);
+}
