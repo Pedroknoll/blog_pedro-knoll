@@ -18,7 +18,7 @@ Este blog é o meu caderno de estudos em público. Escrevo sobre aprendizado de 
 
 ## Por que escrever
 
-Explicar uma ideia por escrito é o teste mais honesto que conheço para saber se entendi. Quando um parágrafo não fecha, quase sempre faltou alguma coisa no meu entendimento, não no texto. Publicar me obriga a ir até o fim.
+Explicar uma ideia por escrito é o teste mais honesto que conheço para saber se entendi. Quando um parágrafo não fecha, quase sempre faltou alguma coisa no meu entendimento, não no texto. Publicar me obriga a ir até o fim. Quando a conta é um quadrado, escrevo $x_i^2$.
 
 ## O que muda em relação a um caderno comum
 

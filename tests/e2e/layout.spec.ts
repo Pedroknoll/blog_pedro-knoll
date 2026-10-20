@@ -1,6 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
+import { publishedPosts } from "./published-posts";
+
 const routes = ["/", "/blog/2026-10-como-o-blog-e-feito/"] as const;
 
 async function open(page: Page, path: string) {
@@ -100,13 +102,6 @@ for (const path of routes) {
       expect(blocking.map((violation) => violation.id)).toEqual([]);
     });
 
-    test("nenhum script além de JSON-LD", async ({ page }) => {
-      await open(page, path);
-      await expect(
-        page.locator('script:not([type="application/ld+json"])'),
-      ).toHaveCount(0);
-    });
-
     test("sem rolagem horizontal a 360 px", async ({ page }) => {
       await page.setViewportSize({ width: 360, height: 800 });
       await open(page, path);
@@ -119,3 +114,28 @@ for (const path of routes) {
     });
   });
 }
+
+test("script só na página com bloco de código [RNF-02]", async ({ page }) => {
+  const home = await page.goto("/");
+  expect(home?.status()).toBe(200);
+  await expect(
+    page.locator('script:not([type="application/ld+json"])'),
+  ).toHaveCount(0);
+
+  const posts = await publishedPosts(page);
+  for (const post of posts) {
+    await test.step(post.href, async () => {
+      const response = await page.goto(post.href);
+      expect(response?.status()).toBe(200);
+
+      const extra = page.locator('script:not([type="application/ld+json"])');
+      const pres = await page.getByRole("article").locator("pre").count();
+      if (pres === 0) {
+        await expect(extra).toHaveCount(0);
+      } else {
+        await expect(extra).toHaveCount(1);
+        await expect(extra).toHaveAttribute("type", "module");
+      }
+    });
+  }
+});
