@@ -31,7 +31,7 @@ test.describe("home [RF-01, RF-03]", () => {
 
     const cards = page
       .getByRole("list", { name: "Posts", exact: true })
-      .getByRole("listitem");
+      .locator(":scope > li");
     const count = await cards.count();
     expect(count).toBeGreaterThanOrEqual(1);
     expect(count).toBeLessThanOrEqual(12);
@@ -39,9 +39,8 @@ test.describe("home [RF-01, RF-03]", () => {
     const hrefs: string[] = [];
     let cardsWithoutImage = 0;
     for (const card of await cards.all()) {
-      await expect(card.getByRole("link")).toHaveCount(1);
-
       const link = card.locator("h2").getByRole("link");
+      await expect(link).toHaveCount(1);
       await expect(link).toHaveAttribute("href", /^\/blog\/[a-z0-9-]+\/$/);
       hrefs.push((await link.getAttribute("href")) ?? "");
 

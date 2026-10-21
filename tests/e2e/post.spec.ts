@@ -80,8 +80,6 @@ test.describe("página do post [RF-04, RF-05]", () => {
           }
           expect(await toc.locator("li li a").count()).toBe(h3AfterH2);
         }
-
-        await expect(header.locator('a[href*="/tags/"]')).toHaveCount(0);
       });
     }
   });

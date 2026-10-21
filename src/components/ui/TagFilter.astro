@@ -1,0 +1,42 @@
+---
+import { tagPath } from "~/lib/tags";
+
+interface Props {
+  tags: string[];
+  current: string | null;
+}
+
+const { tags, current } = Astro.props;
+const linkClass =
+  "text-sm whitespace-nowrap text-muted hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+const currentClass =
+  "text-sm whitespace-nowrap text-ink underline decoration-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+---
+
+<nav
+  class="mx-auto w-full min-w-0 max-w-[52rem] overflow-x-auto px-4 pt-10 pb-2"
+  aria-label="Filtrar por tag"
+>
+  <ul class="flex w-max gap-4">
+    <li>
+      <a
+        class={current === null ? currentClass : linkClass}
+        href="/"
+        aria-current={current === null ? "true" : undefined}
+      >
+        Todos
+      </a>
+    </li>
+    {tags.map((tag) => (
+      <li>
+        <a
+          class={current === tag ? currentClass : linkClass}
+          href={tagPath(tag)}
+          aria-current={current === tag ? "true" : undefined}
+        >
+          {tag}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

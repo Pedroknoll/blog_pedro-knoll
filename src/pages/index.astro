@@ -1,9 +1,11 @@
 ---
 import Listing from "~/components/ui/Listing.astro";
+import TagFilter from "~/components/ui/TagFilter.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { splitFeatured } from "~/lib/featured";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
 import { PAGE_SIZE, paginatePosts } from "~/lib/pagination";
+import { collectTags } from "~/lib/tags";
 
 const posts = await getPublishedPosts();
 const { featured, rest } = splitFeatured(posts);
@@ -15,6 +17,7 @@ if (!page) {
 ---
 
 <BaseLayout title="Blog">
+  <TagFilter tags={collectTags(posts)} current={null} />
   <Listing
     heading="Blog"
     featured={featured}

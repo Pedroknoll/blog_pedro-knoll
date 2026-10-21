@@ -1,0 +1,35 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+import Listing from "~/components/ui/Listing.astro";
+import TagFilter from "~/components/ui/TagFilter.astro";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { getPublishedPosts } from "~/lib/getPublishedPosts";
+import { collectTags, postsWithTag } from "~/lib/tags";
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return collectTags(posts).map((tag) => ({
+    params: { tag },
+    props: { posts: postsWithTag(posts, tag) },
+  }));
+}
+
+interface Props {
+  posts: CollectionEntry<"posts">[];
+}
+
+const { posts } = Astro.props;
+const tag = Astro.params.tag;
+
+if (!tag) {
+  throw new Error("Tag ausente.");
+}
+
+const allPosts = await getPublishedPosts();
+---
+
+<BaseLayout title="Blog">
+  <TagFilter tags={collectTags(allPosts)} current={tag} />
+  <Listing heading={`Tag: ${tag}`} posts={posts} prev={null} next={null} />
+</BaseLayout>
