@@ -1,0 +1,24 @@
+---
+import { tagPath } from "~/lib/tags";
+
+interface Props {
+  tags: string[];
+  class?: string;
+}
+
+const { tags, class: className = "mt-3 flex flex-wrap gap-2" } = Astro.props;
+const linkClass =
+  "inline-block border border-line px-2 py-0.5 font-mono text-xs text-muted hover:text-accent focus-visible:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+---
+
+{tags.length > 0 && (
+  <ul class={className} aria-label="Tags">
+    {tags.map((tag) => (
+      <li>
+        <a class={linkClass} href={tagPath(tag)}>
+          {tag}
+        </a>
+      </li>
+    ))}
+  </ul>
+)}

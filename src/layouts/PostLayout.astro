@@ -4,6 +4,7 @@ import type { CollectionEntry } from "astro:content";
 import "katex/dist/katex.min.css";
 
 import CodeCopy from "~/components/ui/CodeCopy.astro";
+import TagList from "~/components/ui/TagList.astro";
 import Toc from "~/components/ui/Toc.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { formatPubDate } from "~/lib/format-date";
@@ -60,13 +61,7 @@ const updated = updatedDate ? formatPubDate(updatedDate) : undefined;
         {tags.length > 0 && (
           <div class="min-w-0">
             <p class={labelClass}>Tags</p>
-            <p class="mt-2 flex flex-wrap gap-2">
-              {tags.map((tag) => (
-                <span class="border border-line px-2 py-0.5 font-mono text-xs text-muted">
-                  {tag}
-                </span>
-              ))}
-            </p>
+            <TagList class="mt-2 flex flex-wrap gap-2" tags={tags} />
           </div>
         )}
       </div>
