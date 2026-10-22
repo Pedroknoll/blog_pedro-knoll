@@ -4,7 +4,7 @@ A ordem de implementação do blog. O **quê** está em `SPEC.md`; aqui ficam as
 
 ## Como usar
 
-1. Pegue a primeira tarefa `pendente` cujas dependências estejam todas `concluída`. Uma fase só começa depois que o gate da anterior estiver `aprovado`.
+1. Pegue a primeira tarefa `pendente` cujas dependências estejam todas `concluída`. Uma fase só começa depois que o gate da anterior estiver `aprovado`, salvo quando a coluna Depende de cita um gate anterior.
 2. Marque-a `em andamento` no primeiro commit do PR. Branch: `t-XX-descricao-curta`.
 3. Leia só as seções da SPEC ligadas aos requisitos citados na tarefa.
 4. Ao fechar o PR, marque `concluída` e acrescente uma linha no [Registro de handoff](#registro-de-handoff), no mesmo PR.
@@ -20,6 +20,7 @@ flowchart LR
   G1 --> F2["Fase 2<br/>Interatividade<br/>~2 semanas"] --> G2{"Gate 2"}
   G2 --> F3["Fase 3<br/>Polimento<br/>~1–2 semanas"] --> G3{"Gate 3<br/>lançamento"}
   G3 -.-> F4["Fase 4<br/>Comunidade<br/>pós-lançamento"]
+  F1 -.-> F1b["Fase 1b<br/>Identidade<br/>sem gate"]
 
 ```
 
@@ -60,7 +61,7 @@ Os spikes (T-03, T-04, T-05) rodam em branch própria. O código fica nesse bran
 | T-09 | `PostLayout` com autor, datas, tempo de leitura (plugin remark no `unified()`) e TOC. Usar `prose` do `@tailwindcss/typography` com as cores dos tokens; remover `/exemplo-md` e `/exemplo-mdx`. O plugin já está registrado | RF-04, RF-05           | T-06, T-07       | concluída |
 | T-10 | Shiki com botão copiar (`markdown.shikiConfig.themes` claro e escuro; conferir na doc atual como ele interage com `unified()`) + KaTeX                                                                                                       | RF-06, RF-07           | T-09             | concluída |
 | T-11 | Páginas de tag                                                                                                                                                                                                                               | RF-02                  | T-06, T-08       | concluída |
-| T-12 | SEO, JSON-LD, RSS e sitemap, com URLs absolutas a partir de `SITE_URL`                                                                                                                                                                       | RF-10, RF-12           | T-06, T-09       | pendente |
+| T-12 | SEO, JSON-LD, RSS e sitemap, com URLs absolutas a partir de `SITE_URL`. O `<title>` segue `{Título do fólio} · {site.title} · {autor}` com o config da hora. Os literais `pk.log` e `Pedro Knoll` entram na T-43. Não depende da Fase 1b; o Gate 1 não espera essa troca                                                                                                                                                                       | RF-10, RF-12           | T-06, T-09       | pendente |
 | T-13 | Lighthouse CI, verificação de JS por página, `size-limit` por island e verificador de links no pipeline, com os limites da SPEC §4. A ferramenta de links não está na lista pré-aprovada: proponha e pergunte                                | RNF-01, RNF-02, RNF-05 | T-02, T-08, T-09 | pendente |
 | T-36 | Job e2e no CI: Playwright e axe contra astro preview do build de produção; incluir e2e nos checks obrigatórios                                                                                                                               | RNF-04, RF-11          | T-02, T-07       | concluída |
 | T-37 | Tornar exatas as asserções de texto de `tests/e2e/layout.spec.ts`: `exact: true` nos locators por nome acessível (ex.: linha 68, link do header) e comparação exata nos textos literais. Hoje "Nome do blog QUEBRA" passa no teste do link do header, porque o match é por substring (achado da T-36) | RNF-04, RNF-05 | T-07 | concluída |
@@ -76,6 +77,63 @@ T-06 e T-07 vêm primeiro; depois disso, T-08 a T-12 podem correr em paralelo.
 
 **Status do gate:** pendente
 
+## Fase 1b — Identidade
+
+A Fase 1b não tem gate e não bloqueia a Fase 2. O texto do Gate 1 permanece. A T-13 não ganha dependência desta fase. T-40, T-41 e T-45 podem correr em paralelo com a T-12 e a T-13; não são critério do Gate 1. Fontes (T-42) e card (T-46) é que dependem da T-13. A trilha marimo segue dependendo só do Gate 0.
+
+Nenhuma tarefa depende da T-43 por causa de arquivo. A seta T-43 → T-44 é o `Wordmark`: a T-43 cria o componente e a saudação da T-44 usa. Os `<link>` do favicon entram no `BaseLayout`, em cima dos arquivos que a T-40 já deixou em `public/`.
+
+```mermaid
+flowchart TD
+  T40[T-40 Specs e arquivos]
+  T41[T-41 Tokens]
+  T13[T-13 Lighthouse]
+  T42[T-42 Fontes]
+  T43[T-43 Chrome]
+  T44[T-44 Saudacao]
+  T45[T-45 Schema]
+  T46[T-46 Card]
+  T47[T-47 Callout]
+  T48[T-48 Shiki]
+  T49[T-49 404]
+  T23[T-23 OG]
+  T24[T-24 Toggle]
+  T39[T-39 Fixtures]
+  T40 --> T41
+  T40 --> T44
+  T40 --> T45
+  T40 --> T49
+  T13 --> T42
+  T41 --> T43
+  T42 --> T43
+  T43 --> T44
+  T42 --> T44
+  T13 --> T46
+  T41 --> T46
+  T42 --> T46
+  T45 --> T46
+  T41 --> T47
+  T41 --> T48
+  T45 --> T23
+  T42 --> T23
+  T45 --> T39
+  T41 --> T24
+  T48 --> T24
+```
+
+| ID | Tarefa | Requisitos | Depende de | Status |
+| --- | --- | --- | --- | --- |
+| T-40 | Atualiza SPEC, ROADMAP e AGENTS. Adiciona `specs/BRAND.md` e, no mesmo PR, a seção 0, os caminhos do apêndice, a §4 (lápis não é texto menor que 24 px sobre folha clara) e a §5 (Cormorant; a assinatura, Wordmark, também é exceção ao mínimo de 28 px, por ser desenho da marca e não texto). Move `pklog-brand/` para a árvore da SPEC §9 e apaga a pasta. `icon-192.png` e `icon-512.png` não são versionados. Prettier em `src/styles/shiki`. O comentário do `pk-claro.json` passa a `#5E5345`; o tema escuro não muda o comentário nesta tarefa | RF-01, RF-04, RF-06, RF-12, RF-16, RF-17, RF-22, RNF-04 | — | concluída |
+| T-41 | Em `src/styles/global.css`, os nomes finais são `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `kind-concept`, `kind-tutorial`, `kind-lab`, `kind-playbook`. `kind-concept` é alias de `accent`. `muted` continua o grafite. Sem `graphite`, `gold`, `pixel`. `grid` não nasce aqui: só na tarefa que desenhar a grade (T-23 ou o diagrama da T-19). Prosa do código usa `sheet`. Paleta escura em `:root[data-theme="dark"]`, sem botão e sem `@custom-variant dark`. Pode sair antes do Gate 1. Foco: contorno 2 px em `accent`, afastamento 3 px, no lugar do `outline-offset-2` do link em `Card.astro` e do `outline-offset: 2px` de `.code-copy-button`. A tarefa escolhe um dos dois mecanismos e registra no PR: uma regra global de `:focus-visible`, ou a troca local nesses dois pontos. A nav de `TagFilter.astro` tem `overflow-x-auto` e `pb-2`; conferir que esse `pb-2` ainda deixa o contorno de 3 px visível | RNF-04 | T-40 | pendente |
+| T-42 | Fonts API do Astro: `fontProviders.fontsource()` em `astro.config.mjs` e `<Font>` de `astro:assets` no `BaseLayout.astro`. Famílias: Cormorant Garamond, IBM Plex Sans, IBM Plex Mono, Caveat. Subset `latin`, `woff2`. Sem `fontProviders.google()` e sem `pnpm add` de `@fontsource/*`. A SPEC §9 não ganha esses pacotes. Conferir o HTML gerado: se o `<Font>` emitir `<style>` inline, o hash entra na lista da T-16. A CSP de página não ganha `unsafe-inline` por causa da fonte | BRAND §5 | T-13 | pendente |
+| T-43 | Não move arquivo. Cria `src/components/ui/Wordmark.astro` com `<em>pk</em><span class="ponto">.</span><span class="ext">log</span>`. O `Header.astro` usa esse componente. Rodapé espelhado, `site.title` `pk.log`, autor `Pedro Knoll`, descrição curta `Aprendizados e experimentos em IA`. Os `<link>` do favicon entram no `BaseLayout.astro`, para os cinco arquivos que a T-40 colocou em `public/`. Atualiza o match exato em `tests/e2e/layout.spec.ts` e em `tests/e2e/post.spec.ts` linhas 34–35 (`Seu Nome`) | RF-12 | T-41, T-42 | pendente |
+| T-44 | Saudação e texto de apresentação. O nome dentro da saudação é o `Wordmark` da T-43. O aceno é um SVG component (`import Aceno from "~/assets/brand/icones/aceno.svg"`), com `aria-hidden` dentro do `h1`. 48 px, 32 px abaixo de 560 px. Esse é o único `h1` de `/`: o heading `Blog` sai da home. Em `/page/n` o `h1` permanece o do Listing, hoje `Blog — página N`. Páginas de tag seguem com o `h1` `Tag: <tag>`. Sem newsletter. E2E com `page.emulateMedia({ reducedMotion: "reduce" })`: a animação do aceno fica parada. Keyframes saem do `<style>` do SVG e vão para `global.css` | RF-01 | T-40, T-42, T-43 | pendente |
+| T-45 | Estende `src/content.config.ts`. `folio` inteiro, exibição `Fól. 006`. `kind`: `concept`, `tutorial`, `lab` ou `playbook`; rótulos pt-BR num mapa (`Conceito`, `Tutorial`, `Lab`, `Playbook`), não no frontmatter. `level`: `z.int().min(1).max(3)`. `benchMinutes`, `material` e `track` opcionais; `benchMinutes` não substitui `minutesRead`; `track` não ganha rota. `tags` continuam; temas da marca são rótulo em `src/data/tags.ts`, não um segundo campo. Lab exige ao menos um item em `notebooks`. Colab segue `gpuUrl`. Unicidade: função pura em `src/lib/`, chamada por `getPublishedPosts` sobre todas as entradas, rascunho incluído, antes do filtro de publicados. Teste unitário: dois fólios iguais falham e citam os ids; a série única passa. Fól. 001 é `2026-10-por-que-este-blog`; Fól. 002 é `2026-10-como-o-blog-e-feito`; os dois entram como `kind: concept` e `level: 1`. Pode sair antes do Gate 1 | RF-01, RF-04, SPEC §6 | T-40 | pendente |
+| T-46 | Ícone parado na lista, animado no cabeçalho do post, os dois como SVG component. Os ícones vêm da T-40 por T-41; não depende da T-43. Hachura de 1, 2 ou 3 traços. Data visível `21.out.2026` em `src/lib/format-date.ts`; o `datetime` continua ISO. Atualiza `tests/e2e/home.spec.ts` linha 50, `tests/unit/format-date.test.ts` e `tests/e2e/post.spec.ts` linha 44. Capa, autor, tempo de leitura e tags permanecem. Meta em `pencil` sobre `surface`. Comentário de código não usa `pencil`. Título do card: Cormorant peso 600, cerca de 1,45rem, nunca abaixo de 22 px. E2E com `emulateMedia({ reducedMotion: "reduce" })` no ícone animado do cabeçalho. Keyframes no `global.css`, como na T-44 | RF-01, RF-04 | T-13, T-41, T-42, T-45 | pendente |
+| T-47 | `src/components/ui/Callout.astro`, prop `variant` `note`, `caution` ou `result`. As três formas da seção 9.4 do BRAND, tudo em tinta. Rótulos visíveis: `// NOTA DE BANCADA`, `[!] CUIDADO`, `= RESULTADO` | RF-22 | T-41 | pendente |
+| T-48 | Troca `github-light` / `github-dark` pelos arquivos em `src/styles/shiki/` (vêm da T-40, pela T-41). Confere o comentário do claro em `#5E5345`. `defaultColor: false` fica. A meta `title=` cola na linguagem; exemplo de cerca `py title=fol-001_embeddings.py`. Teste prova que essa meta chega ao transformer do Shiki; sem `title=`, a barra não inventa nome. O botão visível passa de "Código copiado" para "Copiado" (1,5 s). O `copyResetMs` está duplicado com `tests/e2e/code.spec.ts` (T-10); os dois passam a 1,5 s. O aria-label permanece "Copiar código" | RF-06 | T-41, T-10 | pendente |
+| T-49 | `src/pages/404.astro` com "Esta página foi arrancada do caderno." Não depende da T-43. Os E2E que só checam status 404 ganham a frase | BRAND §10 | T-40 | pendente |
+
 ## Fase 2 — Interatividade
 
 Duas trilhas independentes; a T-21 junta as duas.
@@ -86,9 +144,9 @@ Duas trilhas independentes; a T-21 junta as duas.
 | **Trilha marimo** |                                                                                                                                                                                                                                                   |                        |                        |          |
 | T-14              | `scripts/build-notebooks.py` com cache por hash (`.py` + `uv.lock`) para notebooks iframe leves, saída em `public/notebooks/`. Decidir se o export mostra o código, para tutoriais passo a passo, em vez de `--no-show-code`; atualizar a SPEC §7 na mesma tarefa | RF-08, RNF-08          | Gate 0, T-06, T-35     | pendente |
 | T-15              | `MarimoFrame` (iframe) com carga condicional. Remover ou reescrever os `test.fixme` de cenários inline em `tests/e2e/spec-11.spec.ts`                                                                                                               | RF-08, RNF-03, RNF-09  | T-14, T-09             | pendente |
-| T-16              | Integração `src/integrations/headers.ts` que gera `dist/_headers` com a CSP global e a de `/notebooks/*` (SPEC §10), teste de artefato das regras e falha do build acima de 100 regras                                                            | RNF-06, RNF-07         | T-05, T-15             | pendente |
+| T-16              | Integração `src/integrations/headers.ts` que gera `dist/_headers` com a CSP global e a de `/notebooks/*` (SPEC §10), teste de artefato das regras e falha do build acima de 100 regras. Estilos da marca e fontes saem de `'self'` ou, se o `<Font>` emitir `<style>`, de hash. Sem origem do Google e sem `unsafe-inline` na página por causa da marca. Conferir que o `favicon.svg` troca de cor no modo escuro, no Chrome e no Firefox, com a CSP aplicada                                                            | RNF-06, RNF-07         | T-05, T-15             | pendente |
 | T-17              | Modo `--heavy`: export local em `exports/<slug>/<nome>/`, `export.lock`, upload ao R2 acima de 25 MiB, verificação de frescor no CI e cópia de `exports/` para `public/notebooks/` no build; falha o build se a saída do export tiver `Cache save failed`; o `export.lock` registra o `marimo`, o `numpy` do `--execute` e o `Pyodide`                                                       | RF-08, RNF-09, SPEC §7 | T-14, T-33, T-34                   | pendente |
-| T-18              | Componente `RunOnGpu` e botão "Ativar interatividade"                                                                                                                                                                                             | RF-08, SPEC §7         | T-15                   | pendente |
+| T-18              | Componente `RunOnGpu` e botão "Ativar interatividade". A barra do lab é a pele desta tarefa, em cima de `notebooks` e `gpuUrl`. Sem campo `marimo` nem `colab`. "Abrir no Colab" só com `gpuUrl`. Não espera a Fase 1b                                                                                                                                                                                             | RF-08, SPEC §7         | T-15                   | pendente |
 | T-33              | Spike `precomputed`: a partir do `treino.py` da T-04, treino dentro de uma função com `@mo.persistent_cache(method="lazy")` que retorna `numpy`. Prazo: meio dia. Pergunta única: as células dependentes funcionam no navegador? Se não, notebooks com `torch` ficam em `onnx` ou `static`. Atualiza a SPEC §7 com o resultado. | RF-08, SPEC §7 | Gate 0 | pendente |
 | T-34              | Runtime do marimo compartilhado: um único `assets/` para os exports da mesma versão do marimo, ou commitar só `index.html` e `public/` e gerar os assets no CI. Contar os arquivos por versão contra o limite de 20.000. | RNF-08, SPEC §7 | T-14 | pendente |
 | T-35              | Excluir `public/notebooks/` e `exports/` do `tsconfig.json`; o `astro check` analisa os JS do runtime do marimo e derruba o Node | RNF-12 | Gate 0 | pendente |
@@ -96,10 +154,10 @@ Duas trilhas independentes; a T-21 junta as duas.
 | T-19              | `LineChart` e `BarChart` com testes e fallback acessível; datas ISO convertidas no componente; fixa o contrato que a T-20 copia                                                                                                                   | RF-09, RNF-04          | T-07                   | pendente |
 | T-20              | `Scatter`, `Heatmap`, `Explorable`                                                                                                                                                                                                                | RF-09, RNF-04          | T-19                   | pendente |
 | **Junção**        |                                                                                                                                                                                                                                                   |                        |                        |          |
-| T-21              | Post de demonstração com um notebook iframe leve, um pesado com `compute: precomputed` e três gráficos                                                                                                                                                  | RF-08, RF-09           | T-16, T-17, T-18, T-20 | pendente |
+| T-21              | Post de demonstração com um notebook iframe leve, um pesado com `compute: precomputed` e três gráficos. A primeira célula do lab é convenção no `AGENTS.md` de `src/components/marimo/` (antes da T-14) e neste post, com `src/components/marimo/pk.css`. O `pk.css` não vem no pacote da marca; nasce nessa convenção                                                                                                                                                  | RF-08, RF-09           | T-16, T-17, T-18, T-20 | pendente |
 
 
-Antes de começar a T-14, crie `src/components/marimo/AGENTS.md` com o que os spikes ensinaram. Antes da T-19, crie `src/components/viz/AGENTS.md` a partir da SPEC §8. O Cursor lê AGENTS.md aninhados e combina cada um com o da raiz, com prioridade para o mais específico.
+Antes de começar a T-14, crie `src/components/marimo/AGENTS.md` com o que os spikes ensinaram e com as seções 9.6–9.7 de `specs/BRAND.md`. O `src/components/marimo/pk.css` não vem no pacote da marca; nasce nessa convenção e no post da T-21. Antes da T-19, crie `src/components/viz/AGENTS.md` a partir da SPEC §8 e da seção 9.8 do BRAND. Isso não cria dependência da T-19 com a Fase 1b. O Cursor lê AGENTS.md aninhados e combina cada um com o da raiz, com prioridade para o mais específico. A trilha marimo segue dependendo só do Gate 0.
 
 **Gate 2 — passa quando:**
 
@@ -115,13 +173,13 @@ Antes de começar a T-14, crie `src/components/marimo/AGENTS.md` com o que os sp
 | ID   | Tarefa                                                                                                          | Requisitos     | Depende de       | Status          |
 | ---- | --------------------------------------------------------------------------------------------------------------- | -------------- | ---------------- | --------------- |
 | T-22 | Pagefind indexando só o corpo dos posts                                                                         | RF-15          | T-09             | pendente        |
-| T-23 | Imagens OG geradas no build                                                                                     | RF-16          | T-12             | pendente        |
-| T-24 | Tema escuro com toggle e sem flash; conferir os gráficos no escuro                                              | RF-17          | T-07, T-19       | pendente        |
-| T-25 | Página Sobre e link "Editar no GitHub"                                                                          | RF-13, RF-14   | T-07, T-09       | pendente        |
+| T-23 | Imagens OG geradas no build. A capa do autor ganha quando existe. Sem capa, o PNG segue a seção 11 do BRAND. Os SVG vêm da T-40, pela T-45. O desenho usa a Cormorant (T-42). Rasterizar com `sharp` é hipótese a provar na tarefa, inclusive se as fontes da marca existem no CI. Se a hipótese falhar, a tarefa para e pergunta. Sem Satori enquanto ninguém aprovar a dependência | RF-16 | T-12, T-42, T-45 | pendente |
+| T-24 | Tema escuro com controle segmentado e sem flash; conferir os gráficos no escuro. A T-41 só declara as duas paletas. Nada aplica `data-theme` nem `prefers-color-scheme` antes do script anti-flash. O controle é o segmentado da marca, com `localStorage`. O script inline entra na lista de hashes da CSP quando a T-16 já tiver saído | RF-17 | T-07, T-19, T-41, T-48 | pendente |
+| T-25 | Página Sobre e link "Editar no GitHub". Não espera a Fase 1b. Nome e bio vêm do `site.config` da hora; `pk.log`, `Pedro Knoll` e a descrição curta `Aprendizados e experimentos em IA` entram na T-43. Sem newsletter | RF-13, RF-14 | T-07, T-09 | pendente |
 | T-26 | Posts relacionados                                                                                              | RF-18          | T-09             | pendente        |
 | T-27 | Domínio, troca de `SITE_URL`, `X-Robots-Tag: noindex` no `workers.dev`, Web Analytics e checklist de lançamento | RNF-10, RNF-11 | Q4b, T-22 a T-26 | bloqueada (Q4b) |
 | T-38 | Destaque da seção ativa na TOC como melhoria progressiva, com um `<script>` do Astro (sem Svelte, sem island), `IntersectionObserver` e `aria-current`. E2E com `scrollIntoView` e asserção com retry, sem `waitForTimeout`. Conferir o JS por página com a ferramenta da T-13 | RF-05, RNF-02 | T-09, T-13 | pendente |
-| T-39 | Fixtures de teste para os casos que o conteúdo publicado pode não exercitar (`updatedDate`, h3 e h4, `.md` e `.mdx`, post sem h2/h3, remoção do bloco "Atualizado em"), sem depender dos posts reais; tirar o href literal do `home.spec.ts` (T-08). O mecanismo é decidido na tarefa | RF-01, RF-04, RF-05 | T-09 | pendente |
+| T-39 | Fixtures de teste para os casos que o conteúdo publicado pode não exercitar (`updatedDate`, h3 e h4, `.md` e `.mdx`, post sem h2/h3, remoção do bloco "Atualizado em"), sem depender dos posts reais; tirar o href literal do `home.spec.ts` (T-08). O mecanismo é decidido na tarefa. A fixture precisa poder exercitar `folio`, `kind`, `level`, `benchMinutes`, `material` e `track` | RF-01, RF-04, RF-05 | T-09, T-45 | pendente |
 
 
 **Gate 3 — lançamento — passa quando:**
@@ -163,4 +221,5 @@ Uma linha por tarefa concluída, escrita por quem a fechou. Diz o que a próxima
 - **T-09** (2026-10-19, branch t-09-post-layout): O `.mjs` do plugin importa `reading-time.ts` direto e o build aceita; o plano B (lógica no `.mjs`) não foi preciso. As funções puras ficam em `reading-time.ts` e `toc.ts`; o plugin só chama essas funções. Os E2E da página do post são invariantes sobre todos os posts publicados, descobertos pelos links de título da home, seguindo a paginação. Não dependem do texto dos posts. Hoje o A (`.md`, três h2) e o B (`.mdx`, com `updatedDate`, h3 e h4, conteúdo de teste) exercitam os ramos. Teste que conta zero precisa exigir antes que o contêiner exista; senão passa no 404. O laço do `layout.spec.ts` agora roda em `/` e na página do B, e cada visita exige status 200. O teste "nenhum h1 dentro do header" trocou o seletor de tag `header` pelo landmark `banner`, porque a página do post tem um `<header>` legítimo dentro do `<article>`. A M6 prova que o teste ainda falha com um h1 no `Header.astro`. Sem E2E: a exclusão do h4 e o post sem sumário ficam no Vitest e na M3; a remoção do bloco "Atualizado em" inteiro não é pega pelos invariantes. As três lacunas vão para a T-39. `prose-site` usa só os cinco tokens, sem `--tw-prose-invert-*`. O `pre` invertido (fundo `ink`) é provisório até a T-10. As datas usam o separador "·" antes de "Atualizado em". Continuam abertos: o título da página é "Blog" até a T-12; as tags são texto até a T-11; o destaque da seção ativa é a T-38. As rotas `/exemplo-md` e `/exemplo-mdx` foram apagadas.
 - **T-10** (2026-10-20, branch t-10-shiki-katex): `remark-math` 6.0.0, `rehype-katex` 7.0.1 e `katex` 0.19.0. O `pnpm add` não pediu revisão de build script; o pacote `shiki` não precisou ser instalado. `markdown.shikiConfig` fica fora do `unified()`, com `themes` `github-light`/`github-dark` e `defaultColor: false`; o MDX herda e não repete a opção. O CSS não usa `--shiki-dark`: o `global.css` não tem `prefers-color-scheme` nem `data-theme`; as variáveis `--shiki-dark` já saem no HTML, prontas para a T-24. Fundo do `pre` em `--site-surface`, borda de 1 px em `--site-line`. As crases que o typography punha no code inline foram removidas no `prose-site`. O script de copiar só sai quando `hasCode` é verdadeiro. `copyResetMs` está duplicado entre `CodeCopy.astro` e `tests/e2e/code.spec.ts`, e os dois mudam juntos. No `dist/` deste build o script do B é inline (`<script type="module">`, sem `src`) e pede hash sha256 em `script-src`; o CSS do post tem uma `url(data:font/woff2` e pede `font-src data:`; `style=` aparece 44 vezes no HTML do B (Shiki e KaTeX) e pede `'unsafe-inline'` em `style-src` ou em `style-src-attr`. O A não tem `<script>`; as outras fontes do KaTeX saem como arquivo em `dist/_astro/`. O E5 não detecta `data:`, porque URL `data:` não gera requisição no Playwright. A CSP não mudou. O teste "nenhum script além de JSON-LD" do `layout.spec.ts` virou "script só na página com bloco de código". O helper de descoberta de posts está em `tests/e2e/published-posts.ts`, para os próximos E2E. O teste "pelo menos dois posts com `.katex`" depende dos dois posts publicados terem fórmula e vai para a T-39 (fixture `.md` com fórmula). Chaves dentro de `$$` no `.mdx` (`\sum_{i=1}^{n}`) passaram no build. Se `writeText` rejeita, o botão permanece "Copiar código".
 - **T-11** (2026-10-21, branch t-11-paginas-de-tag): A página de tag usa `BaseLayout` e reusa o `Listing` com `prev` e `next` nulos. `meta` é a tag compartilhada, e o empate de `pubDate` exercita o desempate por `id` no E4. No commit de testes, o `home.spec.ts` e o E4 contam os cards com `:scope > li`, porque a `TagList` aninha listas, e a guarda da T-09 no `post.spec.ts` saiu. O `chipNames` do `tags.spec.ts` lê `span` ou `li a`, e o ramo `span` só serviu ao vermelho da T-11; sai na T-39. A barra em `/page/n/` e o post sem tags ficam sem E2E até as fixtures da T-39. Rascunhos provados só no U6: uma página de tag com `getCollection` direto passaria nos E2E de hoje; a prova vem na T-39. `title`, SEO e sitemap das páginas de tag ficam na T-12. Componentes novos: `TagList`, a lista de tags no card e no post, e `TagFilter`, a barra. O link da `TagList` é `inline-block`, para o padding contar na altura dentro do `li`; a `nav` da barra tem `pb-2`, porque `overflow-x-auto` também recorta na vertical e cortava o contorno de foco.
+- **T-40** (2026-10-22, branch t-40-marca-specs): Identidade em `specs/BRAND.md`; em conflito de comportamento, a SPEC ganha. A seção 14 do BRAND é sugestão e não é a ordem das tarefas. A Fase 1b não tem gate e não bloqueia a Fase 2. T-40, T-41 e T-45 não são critério do Gate 1. `pklog-brand/` foi apagada. Símbolo e ícones em `src/assets/brand/`, temas em `src/styles/shiki/`, cinco favicons em `public/`. `icon-192.png` e `icon-512.png` não foram versionados. O comentário do `pk-claro.json` passou de `#7B6F5A` para `#5E5345`; o do `pk-escuro.json` continua `#869EB6`. O Prettier reformatou os dois JSON. Cormorant: peso 600 desde 22 px só no título do card; a assinatura (Wordmark) também é exceção ao mínimo de 28 px, por ser desenho da marca e não texto; peso 500 e o resto só desde 28 px. Nenhum componente, layout, página, `astro.config.mjs`, `global.css` ou teste mudou. Fól. 001 e 002 estão na SPEC; os posts ainda não têm `folio` (T-45). O schema da SPEC §6 ainda não está no `content.config.ts`.
 

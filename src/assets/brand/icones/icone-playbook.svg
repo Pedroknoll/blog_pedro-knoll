@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
+  <style>.pkp-on0,.pkp-on1,.pkp-on2{opacity:0}.pkp-on0{animation:pkp-n0 4s step-end infinite}.pkp-off0{animation:pkp-f0 4s step-end infinite}.pkp-on1{animation:pkp-n1 4s step-end infinite}.pkp-off1{animation:pkp-f1 4s step-end infinite}.pkp-on2{animation:pkp-n2 4s step-end infinite}.pkp-off2{animation:pkp-f2 4s step-end infinite}@keyframes pkp-n0{0%{opacity:0}18%{opacity:1}100%{opacity:1}}@keyframes pkp-f0{0%{opacity:1}18%{opacity:0}100%{opacity:0}}@keyframes pkp-n1{0%{opacity:0}36%{opacity:1}100%{opacity:1}}@keyframes pkp-f1{0%{opacity:1}36%{opacity:0}100%{opacity:0}}@keyframes pkp-n2{0%{opacity:0}54%{opacity:1}100%{opacity:1}}@keyframes pkp-f2{0%{opacity:1}54%{opacity:0}100%{opacity:0}}@media (prefers-reduced-motion:reduce){.pkp-on0,.pkp-on1,.pkp-on2,.pkp-off0,.pkp-off1,.pkp-off2{animation:none}.pkp-on0,.pkp-on1,.pkp-on2{opacity:1}.pkp-off0,.pkp-off1,.pkp-off2{opacity:0}}</style>
+  <path d="M5 2h6v1h-6zM5 6h6v1h-6zM5 10h6v1h-6z"/>
+  <path class="pkp-on0" d="M3 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM1 3h1v1h-1z"/>
+  <path class="pkp-off0" d="M0 1h3v1h-3zM0 2h1v1h-1zM2 2h1v1h-1zM0 3h3v1h-3z"/>
+  <path class="pkp-on1" d="M3 5h1v1h-1zM0 6h1v1h-1zM2 6h1v1h-1zM1 7h1v1h-1z"/>
+  <path class="pkp-off1" d="M0 5h3v1h-3zM0 6h1v1h-1zM2 6h1v1h-1zM0 7h3v1h-3z"/>
+  <path class="pkp-on2" d="M3 9h1v1h-1zM0 10h1v1h-1zM2 10h1v1h-1zM1 11h1v1h-1z"/>
+  <path class="pkp-off2" d="M0 9h3v1h-3zM0 10h1v1h-1zM2 10h1v1h-1zM0 11h3v1h-3z"/>
+</svg>
