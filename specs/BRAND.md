@@ -291,7 +291,7 @@ Todos em tinta; nenhum usa as cores dos tipos.
 | **Cuidado** | `[!] CUIDADO` (o `!` dentro de um quadrado de 17 px com borda 1,5 px) | Borda 1,5 px sólida em tinta, fundo `--folha`. |
 | **Resultado** | `= RESULTADO` | Filete de 1,5 px em cima e embaixo, sem laterais; valor medido em mono 19 px (`acurácia 61% → 87%`). |
 
-Sugestão para MDX: um componente `<Aviso tipo="bancada|cuidado|resultado">`.
+No MDX, `Callout` com `variant` `note`, `caution` ou `result` (SPEC RF-22).
 
 ### 9.5 Bloco de código
 - Shiki com os temas `src/styles/shiki/pk-claro.json` e `src/styles/shiki/pk-escuro.json` (alternar conforme `data-theme`).
@@ -389,7 +389,7 @@ Arquivos em `public/`. Sem manifesto PWA: `icon-192.png` e `icon-512.png` não e
 
 ## 13. Tokens
 
-Sugestão anterior à T-41. No site valem os nomes da seção 0, não `--papel` / `--prussia` como segundo conjunto. Sem `@custom-variant dark`. A paleta escura fica em `:root[data-theme="dark"]`. Nada aplica `data-theme` nem `prefers-color-scheme` antes do script anti-flash (T-24).
+Sugestão anterior à T-41. No site valem os nomes da seção 0, não `--papel` / `--prussia` como segundo conjunto. Sem `@custom-variant dark`. A paleta escura fica em `:root[data-theme="dark"]`. Até a T-24, nada no site aplica `data-theme` nem `prefers-color-scheme`; a T-41 só declara as paletas.
 
 ### CSS puro
 

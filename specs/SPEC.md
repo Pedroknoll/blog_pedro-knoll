@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 15/10/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 22/10/2026
+
+**Revisão de 22/10/2026:** identidade pk.log em `specs/BRAND.md` (Q12), Fase 1b no ROADMAP, RF-22 e campos `folio`, `kind` e `level` no schema.
 
 **Revisão 2 de 15/10/2026:** detach de CSP validado em Workers Static Assets (T-05). A regra de cache de notebooks usa `/notebooks/:slug/:nome/assets/*`. A CSP de notebook leva hashes dos scripts inline, calculados no build. A v1 não tem interrupts. Gate 0 aprovado. Ver `specs/spikes/T-05-headers.md`.
 
@@ -113,20 +115,20 @@ A v1 entrega 12 requisitos Must; o restante entra por ordem de prioridade sem bl
 | RF-01 | Home com saudação, post em destaque e grid de cards (fólio, tipo, nível, capa, título, data, tags) | Must       | Saudação na home; cards ordenados por data desc; destaque via `featured: true`; o card soma fólio, tipo e nível e mantém capa, data e tags; título do card em Cormorant 600 desde 22 px |
 | RF-02 | Filtro por tag e página `/tags/[tag]`                                                 | Must       | Cada tag usada gera uma página; tag inexistente é 404                                                                   |
 | RF-03 | Paginação da listagem                                                                 | Must       | 12 posts por página; a página 1 é `/` e as seguintes são `/page/2`, `/page/3`… (exceção à regra de rotas em pt-BR, Q10) |
-| RF-04 | Página do post com título, autor, linha `Fól. 006 · 21.out.2026`, tipo, nível, datas e tempo de leitura | Must       | A linha traz fólio, data visível, tipo e nível; o tempo de leitura permanece; os campos vêm do frontmatter validado |
+| RF-04 | Página do post com título, autor, linha `Fól. 006 · 21.out.2026`, tipo, nível, datas e tempo de leitura | Must       | A linha traz fólio, data visível, tipo e nível; o tempo de leitura permanece; os campos vêm do frontmatter validado. Quando o post tem `benchMinutes`, `material` ou `track`, o cabeçalho mostra a ficha da seção 9.3 do BRAND só com os itens presentes; `track` mostra a posição e o total de posts publicados com o mesmo `track` |
 | RF-05 | TOC lateral fixa (h2–h3) com seção ativa destacada                                    | Must       | Funciona sem JS (links âncora); destaque é melhoria progressiva                                                         |
-| RF-06 | Syntax highlighting com botão copiar                                                  | Must       | Shiki em build time, temas `pk-claro` e `pk-escuro`; a meta `title=` cola na linguagem da cerca; rótulo visível Copiar/Copiado; `aria-label` `Copiar código` |
+| RF-06 | Syntax highlighting com botão copiar                                                  | Must       | Shiki em build time, temas `pk-claro` e `pk-escuro`. Uma cerca com a meta `title=<arquivo>` depois da linguagem (```` ```py title=fol-001_embeddings.py ````) mostra o nome do arquivo na barra do bloco; sem `title=`, a barra não mostra nome. O botão diz Copiar e vira Copiado por 1,5 s; o `aria-label` é `Copiar código` |
 | RF-07 | Matemática LaTeX inline e em bloco                                                    | Must       | `remark-math` + `rehype-katex` no processador `unified()`, render no build                                              |
 | RF-08 | Notebook marimo interativo no post, em iframe                                         | Must       | Iframe via `marimo export html-wasm`; pôster estático até "Executar"; Python só dentro do export (seção 7)             |
 | RF-09 | Visualizações Svelte + D3 usadas dentro do MDX                                        | Must       | Hidratam com `client:visible`; têm fallback estático (seção 8)                                                          |
 | RF-10 | Feed RSS e sitemap                                                                    | Must       | `/rss.xml` válido no W3C Validator; `sitemap-index.xml` gerado                                                          |
 | RF-11 | Rascunhos (`draft: true`) visíveis só em preview                                      | Must       | Build de produção exclui drafts de páginas, feed e sitemap                                                              |
-| RF-12 | SEO por post: title, description, canonical, Open Graph, JSON-LD `BlogPosting`        | Must       | O `<title>` segue `{Título do fólio} · {site.title} · {autor}`; validado no Rich Results Test; URLs absolutas montadas a partir de `SITE_URL` |
+| RF-12 | SEO por post: title, description, canonical, Open Graph, JSON-LD `BlogPosting`        | Must       | O `<title>` segue `{Título do fólio} · {site.title} · {autor}`. Na home, `{site.title} · {autor}`. Validado no Rich Results Test; URLs absolutas montadas a partir de `SITE_URL` |
 | RF-13 | Link "Editar no GitHub" por post                                                      | Should     | URL aponta para o arquivo-fonte na branch `main`                                                                        |
 | RF-14 | Página Sobre `/sobre` com bio, foto e links                                           | Should     | Dados vêm do config do site (autor único)                                                                               |
 | RF-15 | Busca full-text estática                                                              | Should     | Pagefind indexa só o corpo dos posts; sem backend                                                                       |
 | RF-16 | Imagem OG gerada por post quando não houver capa                                      | Should     | Com capa, a capa ganha. Sem capa, PNG 1200×630 no layout da seção 11 do BRAND; o gerador é hipótese da T-23 |
-| RF-17 | Tema escuro com controle segmentado e `data-theme`, sem flash                         | Should     | Controle segmentado com `localStorage`; nada aplica `data-theme` nem `prefers-color-scheme` antes do script anti-flash |
+| RF-17 | Tema escuro com controle segmentado, respeitando `prefers-color-scheme`               | Should     | O controle Claro/Escuro grava a escolha em `localStorage` e aplica `data-theme` na raiz. Sem escolha gravada, segue `prefers-color-scheme`. Sem flash de tema errado no carregamento |
 | RF-18 | Posts relacionados ao fim (por tags em comum)                                         | Could      | Até 3 posts, nunca o próprio                                                                                            |
 | RF-19 | Comentários e reações via Giscus                                                      | Could      | Fase 4, pós-sprint 01; carregamento lazy                                                                                |
 | RF-20 | Embed de Hugging Face Spaces e iframes genéricos                                      | Could      | Componente `<Embed>` com `loading="lazy"` e aspect ratio                                                                |
@@ -273,7 +275,7 @@ const posts = defineCollection({
         draft: z.boolean().default(false),
         benchMinutes: z.int().min(1).optional(), // não substitui minutesRead
         material: z.string().optional(),
-        track: z.string().optional(), // sem rota
+        track: z.string().regex(/^[a-z0-9-]+$/).optional(), // mesma regra de tags; sem rota
         // declara os iframes do post
         notebooks: z.array(notebook).default([]),
         canonical: z.url().optional(),
@@ -367,6 +369,8 @@ O modo inline foi adiado em 14/10/2026 por custo de manutenção (T-03). Ver `sp
 `astro.config.mjs` usa o processador `unified()` para Markdown e MDX:
 
 ```js
+import pkClaro from './src/styles/shiki/pk-claro.json';
+import pkEscuro from './src/styles/shiki/pk-escuro.json';
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import svelte from '@astrojs/svelte';
@@ -386,7 +390,7 @@ export default defineConfig({
   output: 'static',
   markdown: {
     shikiConfig: {
-      themes: { light: 'pk-claro', dark: 'pk-escuro' },
+      themes: { light: pkClaro, dark: pkEscuro },
       defaultColor: false,
     },
     processor: unified({ remarkPlugins, rehypePlugins }),
@@ -401,7 +405,7 @@ export default defineConfig({
 
 ```
 
-As opções `markdown.remarkPlugins` e `markdown.rehypePlugins` estão depreciadas no Astro 7; os plugins vão dentro de `unified()`. O Shiki fica em `markdown.shikiConfig`, fora do `unified()`; o MDX herda essa opção (`extendMarkdownConfig` tem default `true`) e não repete `shikiConfig`. Os nomes `pk-claro` e `pk-escuro` são os dos JSON em `src/styles/shiki/`. A T-48 troca os temas embutidos por esses arquivos; até lá o `astro.config.mjs` em disco permanece com `github-light` e `github-dark`. Com `defaultColor: false`, cada token sai só com `--shiki-light` e `--shiki-dark`. `markdown.syntaxHighlight` permanece no padrão. O CSS do KaTeX entra por import de `katex/dist/katex.min.css` no `PostLayout`, sem CDN, e a home não o recebe.
+As opções `markdown.remarkPlugins` e `markdown.rehypePlugins` estão depreciadas no Astro 7; os plugins vão dentro de `unified()`. O Shiki fica em `markdown.shikiConfig`, fora do `unified()`; o MDX herda essa opção (`extendMarkdownConfig` tem default `true`) e não repete `shikiConfig`. Temas próprios entram como objeto importado do JSON, não pelo nome. A doc do Astro mostra JSON importado em `theme`; a T-48 confirma o uso em `themes`. A T-48 troca os temas embutidos por esses arquivos; até lá o `astro.config.mjs` em disco permanece com `github-light` e `github-dark`. Com `defaultColor: false`, cada token sai só com `--shiki-light` e `--shiki-dark`. `markdown.syntaxHighlight` permanece no padrão. O CSS do KaTeX entra por import de `katex/dist/katex.min.css` no `PostLayout`, sem CDN, e a home não o recebe.
 
 ### Modo iframe
 
