@@ -3,6 +3,7 @@
 Blog técnico estático no estilo do Hugging Face Blog: Astro 7 gera o HTML, Python (marimo) gera os notebooks no build, a Cloudflare só serve arquivos. Autor único, conteúdo em pt-BR.
 
 - **O quê:** `[specs/SPEC.md](specs/SPEC.md)` é a fonte de verdade. Requisitos têm IDs (`RF-xx`, `RNF-xx`, `ADR-xx`).
+- **Identidade:** `[specs/BRAND.md](specs/BRAND.md)`, só a seção citada pela tarefa. Se a marca e a SPEC discordarem no comportamento, seguir a SPEC e avisar.
 - **Em que ordem:** `[specs/ROADMAP.md](specs/ROADMAP.md)` tem as tarefas (`T-xx`), dependências, gates e status.
 - **Este arquivo:** como trabalhar no repositório. Pastas com regras próprias têm um `AGENTS.md` aninhado, que complementa este e prevalece no que for mais específico.
 
@@ -11,7 +12,7 @@ Blog técnico estático no estilo do Hugging Face Blog: Astro 7 gera o HTML, Pyt
 ## Como trabalhar uma tarefa
 
 1. Leia a linha da tarefa no `ROADMAP.md` e o registro de handoff das tarefas de que ela depende.
-2. Leia só as seções da SPEC ligadas aos requisitos citados. Não leia a spec inteira por hábito.
+2. Leia só as seções da SPEC ligadas aos requisitos citados. Não leia a spec inteira por hábito. Se a tarefa citar o BRAND, leia só essa seção.
 3. **Antes de editar código**, apresente um plano curto e espere confirmação: arquivos a criar ou mudar, o que fica fora, como vai provar. O mesmo plano vai para a descrição do PR.
 4. Testes primeiro, nas tarefas que entregam comportamento (RF ou RNF). Tire o `test.fixme` dos cenários da tarefa, ou escreva os testes a partir dos critérios de aceite da SPEC §3, §4 e §11. **Rode-os e mostre que falham antes de implementar**: um teste que já passa sem o código não prova nada.
   - Exceções: spikes (T-03, T-04, T-05) provam com o doc em `specs/spikes/`; tarefas de infraestrutura (T-01, T-02, T-13, T-36) provam com o comando ou o pipeline rodando e com a saída colada no PR. Não invente testes artificiais para elas.
@@ -42,20 +43,26 @@ Sempre `pnpm`, nunca `npm` ou `yarn`. Sempre `uv run`, nunca `python` ou `pip` d
 ## Mapa
 
 ```text
-specs/                  SPEC, ROADMAP, spikes/, adr/ (só ADRs substituídos)
+specs/                  SPEC, ROADMAP, BRAND.md, spikes/, adr/ (só ADRs substituídos)
 src/site.config.ts      título, URL (SITE_URL) e autor (não existe collection de autores)
 src/content.config.ts   collection `posts` com schema Zod 4
 src/content/posts/<slug>/index.mdx   cada post é uma pasta: texto, capa, figs/, data/, notebooks/
+src/assets/brand/       pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel}.svg
+src/assets/brand/icones/  aceno.svg; icone-{conceito,tutorial,lab,playbook}.svg e -parado
 src/components/ui/      .astro estáticos
-src/components/viz/     .svelte com D3 (AGENTS.md próprio, criado antes da T-19)
-src/components/marimo/  MarimoFrame, RunOnGpu (AGENTS.md próprio, criado antes da T-14)
+src/components/viz/     .svelte com D3 (AGENTS.md próprio, criado antes da T-19; seção 9.8 do BRAND)
+src/components/marimo/  MarimoFrame, RunOnGpu (AGENTS.md próprio, criado antes da T-14; seções 9.6–9.7)
 src/integrations/headers.ts   gera dist/_headers no build (CSP por rota)
 src/lib/                getPublishedPosts, readingTime, seo
+src/styles/shiki/       pk-claro.json, pk-escuro.json
 scripts/build-notebooks.py
 exports/<slug>/<nome>/  exports pesados commitados + export.lock (não editar à mão)
+public/                 favicon.svg, favicon.ico, favicon-16.png, favicon-32.png, apple-touch-icon.png
 public/notebooks/       gerado no build; fica no .gitignore
 tests/                  vitest (unit) e playwright (e2e)
 ```
+
+Sem `icon-192.png` e sem `icon-512.png`. `src/components/marimo/pk.css` não vem no pacote da marca: nasce na convenção da T-14/T-21.
 
 
 
@@ -70,7 +77,11 @@ tests/                  vitest (unit) e playwright (e2e)
 - **Alias:** `~/` aponta para `src/`.
 - **Dados de gráfico:** importados no MDX a partir de JSON/CSV da pasta do post; nada de `fetch` em runtime. Datas chegam como string ISO e o componente converte.
 - **Notebooks:** `{ mode: iframe, src, compute }`. Detalhes na SPEC §6 e §7.
-- **Cores:** só os tokens semânticos do CSS global, sem paleta literal e sem `dark:` em componentes.
+- **Cores:** só a lista fechada do CSS global: `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `kind-concept`, `kind-tutorial`, `kind-lab`, `kind-playbook`. Sem nome paralelo `--papel` / `--prussia`. Sem `dark:` e sem `@custom-variant dark`. Hex de desenho só em `src/assets/brand/`. As variáveis de `src/styles/global.css` e os JSON do Shiki também carregam hex, porque são a definição da paleta e o tema não lê variável CSS; componente, página e layout não.
+- **Fontes:** Fonts API do Astro, `fontProviders.fontsource`, quatro famílias (Cormorant Garamond, IBM Plex Sans, IBM Plex Mono, Caveat). Sem pacote `@fontsource` instalado à mão e sem Google Fonts.
+- **Ícones:** import default do `.svg` como componente Astro. Animação no CSS global. Versão parada em lista. `prefers-reduced-motion`. O aceno dentro de um `h1` leva `aria-hidden`.
+- **Cormorant:** peso 600 desde 22 px só no título do card. A assinatura (Wordmark) também é exceção ao mínimo de 28 px, por ser desenho da marca e não texto. Peso 500 e os demais usos só desde 28 px.
+- **AGENTS aninhados,** quando forem criados: marimo recebe as seções 9.6–9.7 e o `pk.css`; viz recebe a seção 9.8. Isso não cria dependência da T-19 com a Fase 1b.
 
 
 

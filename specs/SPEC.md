@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 15/10/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 22/10/2026
+
+**Revisão de 22/10/2026:** identidade pk.log em `specs/BRAND.md` (Q12), Fase 1b no ROADMAP, RF-22 e campos `folio`, `kind` e `level` no schema.
 
 **Revisão 2 de 15/10/2026:** detach de CSP validado em Workers Static Assets (T-05). A regra de cache de notebooks usa `/notebooks/:slug/:nome/assets/*`. A CSP de notebook leva hashes dos scripts inline, calculados no build. A v1 não tem interrupts. Gate 0 aprovado. Ver `specs/spikes/T-05-headers.md`.
 
@@ -41,6 +43,9 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 - Posts da comunidade com login, upvotes e comentários nativos (o HF tem; aqui fica para v2).
 - CMS visual. A autoria é via Git.
 - Execução de código Python no servidor ou GPU.
+- Captura de e-mail (newsletter).
+- Peças gráficas que não são o site (YouTube, rede, slide, certificado, pergaminho, adesivo).
+- Manifesto PWA.
 
 ### Personas
 
@@ -60,7 +65,7 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 
 ## 2. Premissas e decisões em aberto
 
-A spec parte de seis premissas; as respostas de 06/10, 09/10 e 14/10 já estão incorporadas e só o domínio segue em aberto, então a Fase 0 pode começar já.
+A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10 e 22/10 já estão incorporadas e só o domínio segue em aberto, então a Fase 0 pode começar já.
 
 ### Premissas assumidas
 
@@ -96,6 +101,10 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10 e 14/10 já estão 
 
 - [x] **Q11 — Notebook inline adiado:** o modo inline fica adiado por custo de manutenção (T-03, `specs/spikes/T-03-mdx-marimo.md`). O blog segue só com notebooks marimo em iframe (`marimo export html-wasm`). Reavaliar quando o mdx-marimo chegar a 0.1, ou quando houver uma opção pública para controlar Python e projeto no build (T-32).
 
+### Decisões de 22/10/2026
+
+- [x] **Q12 — Identidade:** a identidade visual e verbal está em `specs/BRAND.md`. Em conflito de comportamento, a SPEC ganha. Tags no lugar de temas; `minutesRead` permanece junto de `benchMinutes`; imagem OG só quando não há capa; newsletter fora da v1; sem `dark:` nos componentes; chaves de frontmatter em inglês; `kind` no enum inglês (`concept`, `tutorial`, `lab`, `playbook`).
+
 ## 3. Requisitos funcionais
 
 A v1 entrega 12 requisitos Must; o restante entra por ordem de prioridade sem bloquear o lançamento. Os itens espelham o que o HF Blog oferece hoje, menos a camada social.
@@ -103,27 +112,28 @@ A v1 entrega 12 requisitos Must; o restante entra por ordem de prioridade sem bl
 
 | ID    | Requisito                                                                             | Prioridade | Critério de aceite                                                                                                      |
 | ----- | ------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
-| RF-01 | Home com post em destaque e grid de cards (capa, título, data, tags)                  | Must       | Cards ordenados por data desc; destaque via `featured: true`                                                            |
+| RF-01 | Home com saudação, post em destaque e grid de cards (fólio, tipo, nível, capa, título, data, tags) | Must       | Saudação na home; cards ordenados por data desc; destaque via `featured: true`; o card soma fólio, tipo e nível e mantém capa, data e tags; título do card em Cormorant 600 desde 22 px |
 | RF-02 | Filtro por tag e página `/tags/[tag]`                                                 | Must       | Cada tag usada gera uma página; tag inexistente é 404                                                                   |
 | RF-03 | Paginação da listagem                                                                 | Must       | 12 posts por página; a página 1 é `/` e as seguintes são `/page/2`, `/page/3`… (exceção à regra de rotas em pt-BR, Q10) |
-| RF-04 | Página do post com título, autor, datas de publicação e atualização, tempo de leitura | Must       | Todos os campos vêm do frontmatter validado                                                                             |
+| RF-04 | Página do post com título, autor, linha `Fól. 006 · 21.out.2026`, tipo, nível, datas e tempo de leitura | Must       | A linha traz fólio, data visível, tipo e nível; o tempo de leitura permanece; os campos vêm do frontmatter validado. Quando o post tem `benchMinutes`, `material` ou `track`, o cabeçalho mostra a ficha da seção 9.3 do BRAND só com os itens presentes; `track` mostra a posição e o total de posts publicados com o mesmo `track` |
 | RF-05 | TOC lateral fixa (h2–h3) com seção ativa destacada                                    | Must       | Funciona sem JS (links âncora); destaque é melhoria progressiva                                                         |
-| RF-06 | Syntax highlighting com botão copiar                                                  | Must       | Shiki em build time, tema claro e escuro (`markdown.shikiConfig.themes`)                                                |
+| RF-06 | Syntax highlighting com botão copiar                                                  | Must       | Shiki em build time, temas `pk-claro` e `pk-escuro`. Uma cerca com a meta `title=<arquivo>` depois da linguagem (```` ```py title=fol-001_embeddings.py ````) mostra o nome do arquivo na barra do bloco; sem `title=`, a barra não mostra nome. O botão diz Copiar e vira Copiado por 1,5 s; o `aria-label` é `Copiar código` |
 | RF-07 | Matemática LaTeX inline e em bloco                                                    | Must       | `remark-math` + `rehype-katex` no processador `unified()`, render no build                                              |
 | RF-08 | Notebook marimo interativo no post, em iframe                                         | Must       | Iframe via `marimo export html-wasm`; pôster estático até "Executar"; Python só dentro do export (seção 7)             |
 | RF-09 | Visualizações Svelte + D3 usadas dentro do MDX                                        | Must       | Hidratam com `client:visible`; têm fallback estático (seção 8)                                                          |
 | RF-10 | Feed RSS e sitemap                                                                    | Must       | `/rss.xml` válido no W3C Validator; `sitemap-index.xml` gerado                                                          |
 | RF-11 | Rascunhos (`draft: true`) visíveis só em preview                                      | Must       | Build de produção exclui drafts de páginas, feed e sitemap                                                              |
-| RF-12 | SEO por post: title, description, canonical, Open Graph, JSON-LD `BlogPosting`        | Must       | Validado no Rich Results Test; URLs absolutas montadas a partir de `SITE_URL`                                           |
+| RF-12 | SEO por post: title, description, canonical, Open Graph, JSON-LD `BlogPosting`        | Must       | O `<title>` segue `{Título do fólio} · {site.title} · {autor}`. Na home, `{site.title} · {autor}`. Validado no Rich Results Test; URLs absolutas montadas a partir de `SITE_URL` |
 | RF-13 | Link "Editar no GitHub" por post                                                      | Should     | URL aponta para o arquivo-fonte na branch `main`                                                                        |
 | RF-14 | Página Sobre `/sobre` com bio, foto e links                                           | Should     | Dados vêm do config do site (autor único)                                                                               |
 | RF-15 | Busca full-text estática                                                              | Should     | Pagefind indexa só o corpo dos posts; sem backend                                                                       |
-| RF-16 | Imagem OG gerada por post quando não houver capa                                      | Should     | PNG 1200×630 gerado no build                                                                                            |
-| RF-17 | Tema escuro com toggle, respeitando `prefers-color-scheme`                            | Should     | Sem flash de tema errado no carregamento                                                                                |
+| RF-16 | Imagem OG gerada por post quando não houver capa                                      | Should     | Com capa, a capa ganha. Sem capa, PNG 1200×630 no layout da seção 11 do BRAND; o gerador é hipótese da T-23 |
+| RF-17 | Tema escuro com controle segmentado, respeitando `prefers-color-scheme`               | Should     | O controle Claro/Escuro grava a escolha em `localStorage` e aplica `data-theme` na raiz. Sem escolha gravada, segue `prefers-color-scheme`. Sem flash de tema errado no carregamento |
 | RF-18 | Posts relacionados ao fim (por tags em comum)                                         | Could      | Até 3 posts, nunca o próprio                                                                                            |
 | RF-19 | Comentários e reações via Giscus                                                      | Could      | Fase 4, pós-sprint 01; carregamento lazy                                                                                |
 | RF-20 | Embed de Hugging Face Spaces e iframes genéricos                                      | Could      | Componente `<Embed>` com `loading="lazy"` e aspect ratio                                                                |
 | RF-21 | Artigos da comunidade com login e upvote                                              | Won't (v1) | Fora da v1; exigiria D1 + auth                                                                                          |
+| RF-22 | `Callout` com `variant` `note`, `caution` ou `result`                                 | Should     | Rótulos visíveis `// NOTA DE BANCADA`, `[!] CUIDADO` e `= RESULTADO`, tudo em tinta                                    |
 
 
 ## 4. Requisitos não-funcionais
@@ -136,7 +146,7 @@ Cada RNF tem um número verificável no CI; o que não dá para medir automatica
 | RNF-01 | Performance      | LCP < 2,0 s e CLS < 0,05 em 4G simulado (home e post sem notebook)                                                                                                      | Lighthouse CI com budget no PR                                                                                                                                                                                                             |
 | RNF-02 | Performance      | JS inicial ≤ 50 KB gzip **por página** sem islands; cada island D3 ≤ 40 KB gzip. O runtime marimo fica fora desse budget e só existe em páginas com notebook            | Script de artefato que soma, por página de `dist/`, o JS que o HTML referencia (home e post sem notebook); `size-limit` com uma entrada por island. Um glob único sobre `dist/_astro/*.js` não serve: somaria chunks de páginas diferentes |
 | RNF-03 | Performance      | Pyodide e runtime marimo carregam só em páginas que usam notebook e só após o primeiro paint                                                                            | Teste E2E: home e post sem notebook não requisitam `/pyodide                                                                                                                                                                               |
-| RNF-04 | Acessibilidade   | WCAG 2.2 AA; gráficos D3 com `role="img"`, `aria-label` e tabela de dados alternativa                                                                                   | axe-core no Playwright, zero violações serious/critical                                                                                                                                                                                    |
+| RNF-04 | Acessibilidade   | WCAG 2.2 AA; gráficos D3 com `role="img"`, `aria-label` e tabela de dados alternativa. Animações da marca respeitam `prefers-reduced-motion`. Lápis não é texto menor que 24 px sobre folha clara | axe-core no Playwright, zero violações serious/critical; E2E com `prefers-reduced-motion: reduce` nas animações da marca |
 | RNF-05 | SEO              | HTML semântico, um `h1` por página, URLs estáveis `/blog/[slug]`                                                                                                        | Teste de build + Lighthouse SEO ≥ 95                                                                                                                                                                                                       |
 | RNF-06 | Segurança        | Headers: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`                                                                                                         | `dist/_headers` gerado no build e conferido por teste de artefato; securityheaders.com em produção                                                                                                                                         |
 | RNF-07 | Segurança        | CSP com `wasm-unsafe-eval` e as origens do Pyodide só em `/notebooks/*` (o iframe), não na página do post; o `dist/_headers` gerado tem no máximo 100 regras (limite da Cloudflare) | Teste de artefato: rotas sem notebook não têm `wasm-unsafe-eval`; o build falha acima de 100 regras                                                                                                                                        |
@@ -204,7 +214,7 @@ Python só existe no build; em produção, o único código que executa é o do 
 
 ## 6. Modelo de conteúdo
 
-A v1 tem uma única collection, `posts`. O autor é único e vem de `src/site.config.ts`; tags são derivadas dos posts. Todo campo é validado por Zod no build, e um frontmatter inválido quebra o build (RNF-09).
+A v1 tem uma única collection, `posts`. O autor é único e vem de `src/site.config.ts`; tags são derivadas dos posts. Todo campo é validado por Zod no build, e um frontmatter inválido quebra o build (RNF-09). O schema inclui `folio`, `kind` e `level`. A unicidade de `folio` não é um `refine` de entrada única: fica na função descrita nas regras derivadas. A T-45 implementa este schema; até lá o `content.config.ts` em disco não tem esses campos.
 
 ### Convenção de pastas
 
@@ -255,11 +265,17 @@ const posts = defineCollection({
         description: z.string().min(50).max(160),
         pubDate: z.coerce.date(),
         updatedDate: z.coerce.date().optional(),
+        folio: z.int().min(1), // exibido como "Fól. 006"
+        kind: z.enum(['concept', 'tutorial', 'lab', 'playbook']),
+        level: z.int().min(1).max(3),
         tags: z.array(z.string().regex(/^[a-z0-9-]+$/)).max(6).default([]),
         cover: image().optional(),
         coverAlt: z.string().optional(),
         featured: z.boolean().default(false),
         draft: z.boolean().default(false),
+        benchMinutes: z.int().min(1).optional(), // não substitui minutesRead
+        material: z.string().optional(),
+        track: z.string().regex(/^[a-z0-9-]+$/).optional(), // mesma regra de tags; sem rota
         // declara os iframes do post
         notebooks: z.array(notebook).default([]),
         canonical: z.url().optional(),
@@ -267,6 +283,10 @@ const posts = defineCollection({
       .refine((d) => !d.cover || d.coverAlt, {
         error: 'coverAlt é obrigatório quando há cover',
         path: ['coverAlt'],
+      })
+      .refine((d) => d.kind !== 'lab' || d.notebooks.length > 0, {
+        error: 'kind lab exige ao menos um item em notebooks',
+        path: ['notebooks'],
       }),
 });
 
@@ -280,19 +300,21 @@ Notas de Zod 4: `z.url()` substitui `z.string().url()`, e o parâmetro `error` s
 
 ```ts
 export const site = {
-  title: 'Nome do blog',
+  title: 'pk.log',
   // até a Q4b fechar, SITE_URL aponta para o endereço workers.dev do Worker
   url: import.meta.env.SITE_URL ?? 'https://blog.exemplo.com',
   author: {
-    name: 'Seu Nome',
+    name: 'Pedro Knoll',
     avatar: '/avatar.jpg',
-    bio: 'Uma linha sobre você.',
+    bio: 'Aprendizados e experimentos em IA',
     github: 'usuario',
     huggingface: 'usuario',
   },
 } as const;
 
 ```
+
+Os literais `pk.log` e `Pedro Knoll` entram no arquivo na T-43. Até lá, o `site.config.ts` em disco vale. `github` e `huggingface` seguem placeholder.
 
 ### Exemplo de frontmatter
 
@@ -301,6 +323,9 @@ export const site = {
 title: "Embeddings na prática: similaridade de cosseno"
 description: "Como calcular e visualizar similaridade entre frases, com um notebook marimo que roda no seu navegador."
 pubDate: 2026-10-20
+folio: 6
+kind: lab
+level: 2
 tags: [nlp, embeddings]
 cover: ./cover.png
 coverAlt: "Pontos coloridos agrupados num plano 2D"
@@ -312,7 +337,11 @@ notebooks:
 
 ### Regras derivadas
 
-- `getPublishedPosts()` é o único acesso à collection nas páginas: filtra `draft` quando `SHOW_DRAFTS` não é `true` e ordena por `pubDate` desc, com desempate por `id` crescente.
+- `getPublishedPosts()` é o único acesso à collection nas páginas. Antes do filtro de publicados, chama a função pura de unicidade de `folio` (em `src/lib/`) sobre todas as entradas da collection, rascunho incluído. Dois fólios iguais falham o build e a mensagem cita os ids. Em seguida filtra `draft` quando `SHOW_DRAFTS` não é `true` e ordena por `pubDate` desc, com desempate por `id` crescente.
+- `folio` é inteiro e a exibição é `Fól. 006` (três dígitos). **Fól. 001** é `2026-10-por-que-este-blog` ("Por que este blog existe"). **Fól. 002** é `2026-10-como-o-blog-e-feito`. Os dois entram como `kind: concept` e `level: 1`. A T-45 grava esses campos nos posts.
+- `kind` usa o enum inglês. Os rótulos pt-BR (`Conceito`, `Tutorial`, `Lab`, `Playbook`) ficam num mapa no código, não no frontmatter.
+- `benchMinutes` não substitui `minutesRead`. `track` não ganha rota. Temas da marca são rótulo em `src/data/tags.ts`, não um segundo campo. Colab continua `gpuUrl`: não há campo `marimo` nem `colab`.
+- A data visível é `21.out.2026`. O atributo `datetime` continua ISO.
 - O slug é o `id` gerado pelo `generateId` do loader (nome da pasta). `postIdFromEntry` exige exatamente dois segmentos (`pasta/index.md` ou `pasta/index.mdx`) e pasta `^[a-z0-9-]+$`; caso contrário o build falha citando o entry. Nenhuma página recalcula slug por conta própria.
 - O tempo de leitura é calculado por um plugin remark do projeto (`src/lib/remark-reading-time.mjs`), registrado nos dois `unified()`, o do Markdown e o do MDX. Ele grava o valor em `minutesRead`, que a página lê em `remarkPluginFrontmatter`.
   - **Conta:** o texto de nós `text` e `inlineCode`, inclusive dentro de headings, listas, links, citações e componentes MDX.
@@ -340,6 +369,8 @@ O modo inline foi adiado em 14/10/2026 por custo de manutenção (T-03). Ver `sp
 `astro.config.mjs` usa o processador `unified()` para Markdown e MDX:
 
 ```js
+import pkClaro from './src/styles/shiki/pk-claro.json';
+import pkEscuro from './src/styles/shiki/pk-escuro.json';
 import { defineConfig } from 'astro/config';
 import mdx from '@astrojs/mdx';
 import svelte from '@astrojs/svelte';
@@ -359,7 +390,7 @@ export default defineConfig({
   output: 'static',
   markdown: {
     shikiConfig: {
-      themes: { light: 'github-light', dark: 'github-dark' },
+      themes: { light: pkClaro, dark: pkEscuro },
       defaultColor: false,
     },
     processor: unified({ remarkPlugins, rehypePlugins }),
@@ -374,7 +405,7 @@ export default defineConfig({
 
 ```
 
-As opções `markdown.remarkPlugins` e `markdown.rehypePlugins` estão depreciadas no Astro 7; os plugins vão dentro de `unified()`. O Shiki fica em `markdown.shikiConfig`, fora do `unified()`; o MDX herda essa opção (`extendMarkdownConfig` tem default `true`) e não repete `shikiConfig`. Com `defaultColor: false`, cada token sai só com `--shiki-light` e `--shiki-dark`. `markdown.syntaxHighlight` permanece no padrão. O CSS do KaTeX entra por import de `katex/dist/katex.min.css` no `PostLayout`, sem CDN, e a home não o recebe.
+As opções `markdown.remarkPlugins` e `markdown.rehypePlugins` estão depreciadas no Astro 7; os plugins vão dentro de `unified()`. O Shiki fica em `markdown.shikiConfig`, fora do `unified()`; o MDX herda essa opção (`extendMarkdownConfig` tem default `true`) e não repete `shikiConfig`. Temas próprios entram como objeto importado do JSON, não pelo nome. A doc do Astro mostra JSON importado em `theme`; a T-48 confirma o uso em `themes`. A T-48 troca os temas embutidos por esses arquivos; até lá o `astro.config.mjs` em disco permanece com `github-light` e `github-dark`. Com `defaultColor: false`, cada token sai só com `--shiki-light` e `--shiki-dark`. `markdown.syntaxHighlight` permanece no padrão. O CSS do KaTeX entra por import de `katex/dist/katex.min.css` no `PostLayout`, sem CDN, e a home não o recebe.
 
 ### Modo iframe
 
@@ -410,6 +441,8 @@ Notebook pesado nunca roda inteiro no navegador do leitor: o Pyodide só instala
 
 
 Complemento para qualquer estratégia: um botão "Rodar com GPU" apontando para molab, Colab ou um HF Space, para quem quiser reproduzir o treino completo fora do blog.
+
+A barra do lab (T-18) é a pele em cima de `notebooks` e `gpuUrl`: sem campo `marimo` nem `colab`, e "Abrir no Colab" só com `gpuUrl`. A primeira célula do lab é convenção no `AGENTS.md` de `src/components/marimo/` (antes da T-14) e no post da T-21, com `src/components/marimo/pk.css`.
 
 #### Fluxo de um post pesado
 
@@ -515,6 +548,8 @@ import serie from './data/latencia.json'; // [{ "date": "2026-10-01", "value": 1
 | `Explorable` | Wrapper com sliders que alimentam outro gráfico | —                      |
 
 
+Antes da T-19, crie `src/components/viz/AGENTS.md` a partir desta seção e da seção 9.8 de `specs/BRAND.md`. Isso não cria dependência da T-19 com a Fase 1b.
+
 ## 9. Estrutura do repositório e convenções
 
 Um único repositório com dois ambientes (Node e Python) que se encontram no `public/` e no `dist/`. A spec mora no próprio repo em `specs/`, para que mudanças de requisito e de código passem pelo mesmo PR.
@@ -530,12 +565,14 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 ├── specs/
 │   ├── SPEC.md               # este documento
 │   ├── ROADMAP.md            # tarefas, dependências, status e handoff
+│   ├── BRAND.md              # identidade; em conflito de comportamento, esta spec ganha
 │   ├── spikes/               # resultados de T-03 e T-04
 │   └── adr/                  # só ADRs substituídos; os vigentes ficam na seção 5
 ├── src/
 │   ├── site.config.ts        # título, URL (SITE_URL) e autor
 │   ├── content.config.ts
 │   ├── content/posts/
+│   ├── assets/brand/         # símbolo e ícones; ver a árvore da marca abaixo
 │   ├── components/
 │   │   ├── ui/               # .astro: Card, TagList, Toc, AuthorBadge
 │   │   ├── viz/              # .svelte: gráficos D3 (AGENTS.md próprio, criado antes da T-19)
@@ -550,12 +587,19 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   │   ├── tags/[tag].astro
 │   │   ├── sobre.astro
 │   │   └── rss.xml.ts
-│   ├── lib/                  # getPublishedPosts, readingTime, seo
+│   ├── lib/                  # getPublishedPosts, readingTime, seo; unicidade de folio
 │   └── styles/
+│       ├── global.css
+│       └── shiki/            # pk-claro.json, pk-escuro.json
 ├── scripts/
 │   └── build-notebooks.py    # leves no CI; --heavy <slug> para export local
 ├── exports/                  # pesados, commitados: <slug>/<nome>/ + export.lock
 ├── public/
+│   ├── favicon.svg
+│   ├── favicon.ico
+│   ├── favicon-16.png
+│   ├── favicon-32.png
+│   ├── apple-touch-icon.png
 │   ├── _redirects
 │   └── notebooks/            # gerado no build (leves exportados + pesados copiados); no .gitignore
 ├── tests/                    # vitest (unit) e playwright (e2e)
@@ -564,6 +608,19 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 ├── package.json  ·  pnpm-lock.yaml
 └── pyproject.toml  ·  uv.lock
 
+```
+
+Arquivos da marca, sem `icon-192.png` e sem `icon-512.png`:
+
+```text
+specs/BRAND.md
+src/assets/brand/pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel}.svg
+src/assets/brand/icones/aceno.svg
+src/assets/brand/icones/icone-{conceito,tutorial,lab,playbook}.svg
+src/assets/brand/icones/icone-{conceito,tutorial,lab,playbook}-parado.svg
+src/styles/shiki/pk-claro.json
+src/styles/shiki/pk-escuro.json
+public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-touch-icon.png
 ```
 
 ### Convenções
@@ -593,6 +650,8 @@ Um agente pode instalar, sem perguntar, as dependências abaixo, na versão est�
 
 
 Dependências de notebook (numpy, torch etc.) ficam no bloco PEP 723 de cada `.py`, não no `pyproject.toml`.
+
+Fontes: a Fonts API do Astro, com `fontProviders.fontsource()`, carrega Cormorant Garamond, IBM Plex Sans, IBM Plex Mono e Caveat (subset `latin`, `woff2`). Pacotes `@fontsource/*` não entram nesta lista. Não se usa `fontProviders.google()`.
 
 ## 10. Deploy, CI/CD e ambientes
 
