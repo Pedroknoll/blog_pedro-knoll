@@ -24,6 +24,12 @@ export async function titlePostsOnPage(page: Page): Promise<PublishedPost[]> {
   return posts;
 }
 
+export function nextPageLink(page: Page) {
+  return page
+    .getByRole("navigation", { name: "Paginação", exact: true })
+    .getByRole("link", { name: "Próxima", exact: true });
+}
+
 export async function publishedPosts(page: Page): Promise<PublishedPost[]> {
   const posts: PublishedPost[] = [];
   const seen = new Set<string>();
@@ -36,9 +42,7 @@ export async function publishedPosts(page: Page): Promise<PublishedPost[]> {
       posts.push(post);
     }
 
-    const next = page
-      .getByRole("navigation", { name: "Paginação", exact: true })
-      .getByRole("link", { name: "Próxima", exact: true });
+    const next = nextPageLink(page);
     if ((await next.count()) === 0) break;
     await next.click();
   }
