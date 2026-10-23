@@ -5,7 +5,9 @@ import BaseLayout from "~/layouts/BaseLayout.astro";
 import { splitFeatured } from "~/lib/featured";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
 import { PAGE_SIZE, paginatePosts } from "~/lib/pagination";
+import { absoluteUrl, pageTitle } from "~/lib/seo";
 import { collectTags } from "~/lib/tags";
+import { site } from "~/site.config";
 
 export async function getStaticPaths() {
   const posts = await getPublishedPosts();
@@ -30,7 +32,13 @@ if (!page || !current) {
 }
 ---
 
-<BaseLayout title="Blog">
+<BaseLayout
+  title={pageTitle({ page: `Blog — página ${page}` }, site)}
+  description={site.author.bio}
+  canonical={absoluteUrl(Astro.url.pathname, Astro.site)}
+  ogTitle={`Blog — página ${page}`}
+  ogType="website"
+>
   <TagFilter tags={collectTags(posts)} current={null} />
   <Listing
     heading={`Blog — página ${page}`}

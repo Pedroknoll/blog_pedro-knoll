@@ -1,4 +1,5 @@
 ---
+import { getImage } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
 
 import "katex/dist/katex.min.css";
@@ -8,6 +9,7 @@ import TagList from "~/components/ui/TagList.astro";
 import Toc from "~/components/ui/Toc.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { formatPubDate } from "~/lib/format-date";
+import { absoluteUrl, blogPostingJsonLd, pageTitle, postPath } from "~/lib/seo";
 import type { TocItem } from "~/lib/toc";
 import { site } from "~/site.config";
 
@@ -19,14 +21,54 @@ interface Props {
 }
 
 const { post, minutesRead, hasCode, toc } = Astro.props;
-const { title, description, pubDate, updatedDate, tags } = post.data;
+const { title, description, pubDate, updatedDate, tags, cover, coverAlt } =
+  post.data;
 const labelClass =
   "text-xs tracking-widest text-muted [font-variant-caps:small-caps]";
 const published = formatPubDate(pubDate);
 const updated = updatedDate ? formatPubDate(updatedDate) : undefined;
+const canonical =
+  post.data.canonical ?? absoluteUrl(postPath(post.id), Astro.site);
+
+let image:
+  { url: string; width: number; height: number; alt: string } | undefined;
+if (cover && coverAlt) {
+  const optimized = await getImage({
+    src: cover,
+    width: Math.min(1200, cover.width),
+    format: "jpeg",
+  });
+  image = {
+    url: absoluteUrl(optimized.src, Astro.site),
+    width: optimized.attributes.width,
+    height: optimized.attributes.height,
+    alt: coverAlt,
+  };
+}
+
+const jsonLd = blogPostingJsonLd({
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  authorName: site.author.name,
+  canonical,
+  image: image?.url,
+});
 ---
 
-<BaseLayout title="Blog">
+<BaseLayout
+  title={pageTitle({ page: title }, site)}
+  description={description}
+  canonical={canonical}
+  ogTitle={title}
+  ogType="article"
+  publishedTime={pubDate.toISOString()}
+  updatedTime={updatedDate?.toISOString()}
+  tags={tags}
+  image={image}
+  jsonLd={jsonLd}
+>
   <article class="mx-auto w-full max-w-[72rem] px-4 py-10">
     <header>
       <h1 class="font-serif text-4xl leading-tight font-normal text-ink sm:text-5xl">
