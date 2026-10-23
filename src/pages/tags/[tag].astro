@@ -5,7 +5,9 @@ import Listing from "~/components/ui/Listing.astro";
 import TagFilter from "~/components/ui/TagFilter.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
+import { absoluteUrl, pageTitle } from "~/lib/seo";
 import { collectTags, postsWithTag } from "~/lib/tags";
+import { site } from "~/site.config";
 
 export async function getStaticPaths() {
   const posts = await getPublishedPosts();
@@ -27,9 +29,16 @@ if (!tag) {
 }
 
 const allPosts = await getPublishedPosts();
+const heading = `Tag: ${tag}`;
 ---
 
-<BaseLayout title="Blog">
+<BaseLayout
+  title={pageTitle({ page: heading }, site)}
+  description={`Posts com a tag ${tag}.`}
+  canonical={absoluteUrl(Astro.url.pathname, Astro.site)}
+  ogTitle={heading}
+  ogType="website"
+>
   <TagFilter tags={collectTags(allPosts)} current={tag} />
-  <Listing heading={`Tag: ${tag}`} posts={posts} prev={null} next={null} />
+  <Listing heading={heading} posts={posts} prev={null} next={null} />
 </BaseLayout>

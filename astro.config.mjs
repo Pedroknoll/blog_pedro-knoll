@@ -1,6 +1,7 @@
 import { fileURLToPath } from "node:url";
 import mdx from "@astrojs/mdx";
 import { unified } from "@astrojs/markdown-remark";
+import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "astro/config";
 import rehypeKatex from "rehype-katex";
@@ -13,6 +14,7 @@ const remarkPlugins = [remarkMath, remarkReadingTime, remarkHasCode];
 const rehypePlugins = [rehypeKatex];
 
 export default defineConfig({
+  site: process.env.SITE_URL ?? "https://blog.exemplo.com",
   output: "static",
   markdown: {
     shikiConfig: {
@@ -25,6 +27,7 @@ export default defineConfig({
     mdx({
       processor: unified({ remarkPlugins, rehypePlugins }),
     }),
+    sitemap(),
   ],
   vite: {
     plugins: [tailwindcss()],

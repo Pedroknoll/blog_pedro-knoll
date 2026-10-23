@@ -1,0 +1,79 @@
+---
+import { jsonLdScript } from "~/lib/seo";
+
+interface Props {
+  title: string;
+  description: string;
+  canonical: string;
+  ogTitle: string;
+  ogType: "article" | "website";
+  ogSiteName: string;
+  rssHref: string;
+  rssTitle: string;
+  publishedTime?: string;
+  updatedTime?: string;
+  tags?: readonly string[];
+  image?: {
+    url: string;
+    width: number;
+    height: number;
+    alt: string;
+  };
+  jsonLd?: unknown;
+}
+
+const {
+  title,
+  description,
+  canonical,
+  ogTitle,
+  ogType,
+  ogSiteName,
+  rssHref,
+  rssTitle,
+  publishedTime,
+  updatedTime,
+  tags,
+  image,
+  jsonLd,
+} = Astro.props;
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+<meta property="og:title" content={ogTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:site_name" content={ogSiteName} />
+<meta property="og:locale" content="pt_BR" />
+<meta property="og:type" content={ogType} />
+{publishedTime && (
+  <meta property="article:published_time" content={publishedTime} />
+)}
+{updatedTime && <meta property="article:modified_time" content={updatedTime} />}
+{tags?.map((tag) => (
+  <meta property="article:tag" content={tag} />
+))}
+{image && (
+  <>
+    <meta property="og:image" content={image.url} />
+    <meta property="og:image:alt" content={image.alt} />
+    <meta property="og:image:width" content={String(image.width)} />
+    <meta property="og:image:height" content={String(image.height)} />
+  </>
+)}
+<link
+  rel="alternate"
+  type="application/rss+xml"
+  title={rssTitle}
+  href={rssHref}
+/>
+<link rel="sitemap" href="/sitemap-index.xml" />
+{jsonLd && (
+  <script
+    is:inline
+    type="application/ld+json"
+    set:html={jsonLdScript(jsonLd)}
+  />
+)}

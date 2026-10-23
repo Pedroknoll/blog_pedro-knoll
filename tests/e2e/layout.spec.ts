@@ -5,6 +5,12 @@ import { publishedPosts } from "./published-posts";
 
 const routes = ["/", "/blog/2026-10-como-o-blog-e-feito/"] as const;
 
+const expectedTitle: Record<(typeof routes)[number], string> = {
+  "/": "Nome do blog · Seu Nome",
+  "/blog/2026-10-como-o-blog-e-feito/":
+    "Como o blog é feito · Nome do blog · Seu Nome",
+};
+
 async function open(page: Page, path: string) {
   const response = await page.goto(path);
   expect(response?.status()).toBe(200);
@@ -24,7 +30,7 @@ for (const path of routes) {
 
     test("title igual ao que a página passou", async ({ page }) => {
       await open(page, path);
-      await expect(page).toHaveTitle("Blog");
+      await expect(page).toHaveTitle(expectedTitle[path]);
     });
 
     test("exatamente um h1", async ({ page }) => {
