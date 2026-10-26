@@ -109,6 +109,64 @@ jobs:
           path: playwright-report/
           retention-days: 14
 
+  lighthouse:
+    name: lighthouse
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Download dist
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist
+
+      - name: Lighthouse
+        run: pnpm exec lhci autorun
+
+      - name: Upload Lighthouse report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-report
+          path: lhci-report/
+          retention-days: 14
+
+  artifact-checks:
+    name: artifact-checks
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        uses: ./.github/actions/setup
+
+      - name: Download dist
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist
+          path: dist
+
+      - name: Links
+        run: pnpm check:links
+
+      - name: JavaScript per page
+        if: ${{ !cancelled() }}
+        run: pnpm check:js
+
   preview:
     name: preview
     needs: [lint, test, build]
@@ -176,7 +234,7 @@ jobs:
 
   deploy:
     name: deploy
-    needs: [lint, test, build, e2e]
+    needs: [lint, test, build, e2e, lighthouse, artifact-checks]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15

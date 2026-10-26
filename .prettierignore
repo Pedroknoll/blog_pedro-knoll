@@ -10,3 +10,5 @@ public
 .venv
 playwright-report
 test-results
+.lighthouseci
+lhci-report

@@ -8,3 +8,5 @@ public/notebooks/
 .venv/
 playwright-report/
 test-results/
+.lighthouseci/
+lhci-report/
