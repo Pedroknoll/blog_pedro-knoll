@@ -50,3 +50,22 @@ export async function publishedPosts(page: Page): Promise<PublishedPost[]> {
   expect(posts.length).toBeGreaterThan(0);
   return posts;
 }
+
+export async function pagesForTheme(page: Page): Promise<string[]> {
+  const posts = await publishedPosts(page);
+  const home = await page.goto("/");
+  expect(home?.status()).toBe(200);
+
+  const nav = page.getByRole("navigation", {
+    name: "Filtrar por tag",
+    exact: true,
+  });
+  await expect(nav).toHaveCount(1);
+  const hrefs = await nav
+    .getByRole("link")
+    .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+  const tag = hrefs.find((href) => href?.startsWith("/tags/"));
+  expect(tag, "a TagFilter não tem link de tag").toBeTruthy();
+
+  return ["/", ...posts.map((post) => post.href), tag as string];
+}
