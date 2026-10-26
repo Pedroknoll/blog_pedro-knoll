@@ -12,6 +12,8 @@ export default [
       "playwright-report/**",
       "test-results/**",
       "coverage/**",
+      ".lighthouseci/**",
+      "lhci-report/**",
     ],
   },
   ...tseslint.configs.recommended,
