@@ -9,6 +9,8 @@ import remarkMath from "remark-math";
 
 import { remarkHasCode } from "./src/lib/remark-has-code.mjs";
 import { remarkReadingTime } from "./src/lib/remark-reading-time.mjs";
+import pkClaro from "./src/styles/shiki/pk-claro.json";
+import pkEscuro from "./src/styles/shiki/pk-escuro.json";
 
 const remarkPlugins = [remarkMath, remarkReadingTime, remarkHasCode];
 const rehypePlugins = [rehypeKatex];
@@ -18,7 +20,7 @@ export default defineConfig({
   output: "static",
   markdown: {
     shikiConfig: {
-      themes: { light: "github-light", dark: "github-dark" },
+      themes: { light: pkClaro, dark: pkEscuro },
       defaultColor: false,
     },
     processor: unified({ remarkPlugins, rehypePlugins }),
