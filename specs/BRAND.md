@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.8 · outubro de 2026 · pedroknoll.com
+Versão 1.9 · outubro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -35,7 +35,7 @@ public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-t
 |---|---|---|
 | Nome | **pk.log** | Decisão. Sempre minúsculo, sem espaço, com o ponto. |
 | Endereço | **pedroknoll.com** | Decisão. O domínio leva o nome completo; a marca, as iniciais. |
-| Autor | **Pedro Knoll** | Assinatura à mão no fim de cada fólio e no certificado. |
+| Autor | **Pedro Knoll** | Assinatura à mão no certificado e nas peças gráficas; no site, fora das páginas até uma tarefa medir (T-52). |
 | Saudação (headline da home) | **👋 Bem-vindo ao pk.log** | Decisão. A mão é o ícone em pixel `aceno.svg`, nunca o emoji do sistema. |
 | Texto de apresentação | **Olá, eu sou o Pedro. Aqui documento meus aprendizados e experimentos sobre Inteligência Artificial.** | Decisão. Vem logo abaixo da saudação. |
 | Descrição curta | **Aprendizados e experimentos em IA** | Para bio, avatar, meta description, assinatura vertical. |
@@ -43,7 +43,7 @@ public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-t
 
 **Grafias.** Certo: `pk.log`. Errado: `PK.LOG`, `PK Log`, `PK'log`, `Pk.Log`.
 
-**Significado.** "pk" são as iniciais de Pedro Knoll. "log" é ao mesmo tempo o log de treino de um modelo, o diário de bordo dos aviadores e o blog. Na assinatura, "pk" vem em serifa itálica (a mão) e "log" em mono (a máquina). O ponto é sempre azul-da-prússia e é o mesmo nó central do símbolo.
+**Significado.** "pk" são as iniciais de Pedro Knoll. "log" é ao mesmo tempo o log de treino de um modelo, o diário de bordo dos aviadores e o blog. Na assinatura, "pk" vem em serifa e "log" em mono (T-52: o itálico do pk pedia outro arquivo e entrava no LCP). O ponto é sempre azul-da-prússia e é o mesmo nó central do símbolo.
 
 **Vocabulário editorial.**
 - Cada post é um **fólio**, numerado em ordem de publicação com três dígitos: `Fól. 042`. O número nunca é reaproveitado.
@@ -64,7 +64,7 @@ Princípios:
 
 A linguagem visual tem três camadas:
 1. **Base técnica e limpa:** fundo liso, grade de engenharia, tipografia precisa.
-2. **Traço à mão por cima:** linhas de construção, cotas, uma nota manuscrita por seção.
+2. **Traço à mão por cima:** linhas de construção, cotas, uma nota à margem por seção.
 3. **Pixel de terminal:** só nos ícones e no favicon.
 
 A marca **não é** pastiche renascentista, nem futurismo de neon, cérebros brilhando e robôs.
@@ -102,10 +102,12 @@ A marca **não é** pastiche renascentista, nem futurismo de neon, cérebros bri
 .assinatura { display:inline-flex; align-items:center; gap:.42em; color:var(--tinta); text-decoration:none; line-height:1; }
 .assinatura svg { width:1.55em; height:1.55em; flex:none; }
 .nome { font-family:var(--f-display); font-weight:600; font-size:1.08em; white-space:nowrap; }
-.nome em { font-style:italic; font-weight:600; }
-.nome .ponto { color:var(--prussia); font-family:var(--f-mono); font-weight:500; font-size:.8em; }
-.nome .ext { font-family:var(--f-mono); font-weight:500; font-size:.8em; letter-spacing:-.02em; }
+.nome em { font-style:normal; font-weight:600; }
+.nome .ponto { color:var(--prussia); font-family:var(--f-mono); font-weight:400; font-size:.8em; }
+.nome .ext { font-family:var(--f-mono); font-weight:400; font-size:.8em; letter-spacing:-.02em; }
 ```
+
+O `em` fica em estilo normal para o pk usar o mesmo arquivo dos títulos; o ponto e o log ficam no peso 400 (T-52, LCP).
 
 Versão vertical: símbolo em cima, nome, e a descrição curta em mono maiúsculo pequeno (letter-spacing .16em).
 
@@ -169,10 +171,10 @@ As quatro famílias entram pela Fonts API do Astro (`fontProviders.fontsource()`
 
 | Papel | Fonte | Pesos | Regras |
 |---|---|---|---|
-| Títulos | **Cormorant Garamond** | 500 itálico, 600, 600 itálico | De 28 px para cima, com as exceções abaixo. Itálico 600 no "pk" do nome. |
+| Títulos | **Cormorant Garamond** | 500 itálico, 600, 600 itálico | De 28 px para cima, com as exceções abaixo. Nas páginas, só 600 normal, até uma tarefa medir outra face (T-52, LCP). |
 | Texto | **IBM Plex Sans** | 400, 400 itálico, 600 | 17 px, altura de linha 1,65, coluna de ~65 caracteres. |
-| Código, rótulos, fólio, cotas | **IBM Plex Mono** | 400, 500 | Rótulos em maiúsculas com letter-spacing .08–.14em. |
-| Anotação à mão | **Caveat** | 500, 600 | **No máximo uma nota por seção** e nos diagramas. Máximo de uma linha e meia. Nunca em parágrafo, botão ou menu. |
+| Código, rótulos, fólio, cotas | **IBM Plex Mono** | 400 | Rótulos em maiúsculas com letter-spacing .08–.14em. Só o peso 400 (T-52, LCP). |
+| Anotação à mão | **Caveat** | 500, 600 | Fora das páginas do site até uma tarefa medir (T-52, LCP). Quando voltar: no máximo uma nota por seção, no máximo uma linha e meia, nunca em parágrafo, botão ou menu. |
 
 **Cormorant (decisão, 22/10/2026).**
 
@@ -194,10 +196,9 @@ Títulos com `text-wrap: balance`.
 | **Grade milimetrada** | Linhas de 1 px a cada 8 px, reforço a cada 40 px, cores `--grade`/`--grade-forte`. **Só em capas, diagramas e peças gráficas. Nunca atrás de texto corrido.** |
 | **Linhas de construção** | Tracejado fino em prússia, passando além da forma, como num esboço. Em diagramas e no símbolo grande. |
 | **Cotas** | Linha de medida do desenho técnico (traço com marcas nas pontas e valor em mono). Mostram formato de tensor `[batch, 512, 768]`, tempo, tamanho de modelo. Todo diagrama tem pelo menos uma. |
-| **Nota à margem** | Caveat em prússia, com um traço ou seta curva, levemente inclinada (−1,5°). Uma por seção. |
+| **Nota à margem** | IBM Plex Sans itálico, em prússia, com um traço ou seta curva, levemente inclinada (−1,5°). Uma por seção. A T-52 trocou a Caveat por esta face por causa do LCP. |
 | **Hachura de nível** | Traços inclinados para a direita (`\`), como hachurava Leonardo, que era canhoto: 1, 2 ou 3 traços para os três níveis. |
 | **Fólio** | `Fól. 042 · 21.out.2026`, em mono, cor lápis. |
-| **Assinatura espelhada** | No rodapé, "Pedro Knoll" em Caveat espelhado (`transform: scaleX(-1)`), que se desvira no hover/foco. Detalhe opcional. |
 
 ---
 
@@ -310,7 +311,7 @@ Primeira célula de todo lab: cabeçalho renderizado com a assinatura, `Fól. 00
 
 ### 9.8 Diagramas
 - Tinta para elementos; prússia para **um** destaque por diagrama; tracejado fino para guias.
-- Rótulos em mono; no máximo duas notas em Caveat.
+- Rótulos em mono; no máximo duas notas em IBM Plex Sans itálico (T-52, LCP).
 - Sempre uma cota com medida real.
 - Fundo com grade milimetrada; sem sombra, sem gradiente, sem 3D.
 - Funcionam nos dois modos (cores sempre por token).
