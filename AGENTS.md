@@ -78,7 +78,7 @@ Sem `icon-192.png` e sem `icon-512.png`. `src/components/marimo/pk.css` não vem
 - **Dados de gráfico:** importados no MDX a partir de JSON/CSV da pasta do post; nada de `fetch` em runtime. Datas chegam como string ISO e o componente converte.
 - **Notebooks:** `{ mode: iframe, src, compute }`. Detalhes na SPEC §6 e §7.
 - **Cores:** só a lista fechada do CSS global: `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `kind-concept`, `kind-tutorial`, `kind-lab`, `kind-playbook`. Sem nome paralelo `--papel` / `--prussia`. Sem `dark:` e sem `@custom-variant dark`. Hex de desenho só em `src/assets/brand/`. As variáveis de `src/styles/global.css` e os JSON do Shiki também carregam hex, porque são a definição da paleta e o tema não lê variável CSS; componente, página e layout não.
-- **Fontes:** Fonts API do Astro, `fontProviders.fontsource`, quatro famílias (Cormorant Garamond, IBM Plex Sans, IBM Plex Mono, Caveat). Sem pacote `@fontsource` instalado à mão e sem Google Fonts.
+- **Fontes:** Fonts API do Astro, `fontProviders.fontsource`, quatro famílias (Cormorant Garamond, IBM Plex Sans, IBM Plex Mono, Caveat). Tokens `--font-display`, `--font-sans`, `--font-mono` e `--font-hand`. As variáveis de família (`--font-cormorant`, `--font-plex-sans`, `--font-plex-mono`, `--font-caveat`) só aparecem no `astro.config.mjs`, no `BaseLayout.astro` e no bloco `@theme inline` do `global.css`. Componente e página usam o token; a IBM Plex Sans entra no texto e a IBM Plex Mono no código pela troca de `--font-sans` e `--font-mono`. Sem pacote `@fontsource` instalado à mão e sem Google Fonts. O Astro acrescenta um sufixo de hash ao nome da família; use sempre o token ou a variável do `cssVariable`, nunca o nome da família escrito à mão.
 - **Ícones:** import default do `.svg` como componente Astro. Animação no CSS global. Versão parada em lista. `prefers-reduced-motion`. O aceno dentro de um `h1` leva `aria-hidden`.
 - **Cormorant:** peso 600 desde 22 px só no título do card. A assinatura (Wordmark) também é exceção ao mínimo de 28 px, por ser desenho da marca e não texto. Peso 500 e os demais usos só desde 28 px.
 - **AGENTS aninhados,** quando forem criados: marimo recebe as seções 9.6–9.7 e o `pk.css`; viz recebe a seção 9.8. Isso não cria dependência da T-19 com a Fase 1b.
@@ -96,6 +96,7 @@ A stack é recente e a sintaxe antiga ainda domina o que os modelos viram. Antes
   - `src/fetch.ts` é nome reservado. Não crie esse arquivo.
   - Collections em `src/content.config.ts` com `loader: glob({ ..., generateId })`, não em `src/content/config.ts`.
   - `z` vem de `astro/zod`, não de `zod`. Para renderizar, `render(entry)` importado de `astro:content`, não `entry.render()`.
+  - A Fonts API é `fonts` no topo do `defineConfig` e `<Font>` de `astro:assets`. `experimental.fonts` é do Astro 5.
 - **Zod 4:** `z.url()`, não `z.string().url()`; `{ error: '...' }`, não `{ message: '...' }`; `z.strictObject()` em vez de `.strict()`.
 - **TypeScript:** fica em 6.x. O 7 ainda quebra `astro check` e `typescript-eslint` (peers `^5 || ^6`). Só subir quando os dois suportarem; confira os peers antes.
 - **Svelte 5:** runes (`$props()`, `$state`, `$derived`, `$effect`). Eventos como atributo (`onclick`), não `on:click`. Nada de `export let`, `createEventDispatcher` ou stores para estado local.
