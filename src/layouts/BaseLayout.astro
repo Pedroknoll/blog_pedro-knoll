@@ -1,4 +1,6 @@
 ---
+import { Font } from "astro:assets";
+
 import "~/styles/global.css";
 import Seo from "~/components/ui/Seo.astro";
 import Footer from "~/components/ui/Footer.astro";
@@ -43,6 +45,13 @@ const rssHref = absoluteUrl("/rss.xml", Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
+    <Font
+      cssVariable="--font-plex-sans"
+      preload={[{ weight: "400", style: "normal" }]}
+    />
+    <Font cssVariable="--font-plex-mono" />
+    <Font cssVariable="--font-cormorant" />
+    <Font cssVariable="--font-caveat" />
     <Seo
       title={title}
       description={description}

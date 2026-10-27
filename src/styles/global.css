@@ -15,6 +15,13 @@
   --color-kind-playbook: #2e6b5a;
 }
 
+@theme inline {
+  --font-display: var(--font-cormorant);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+  --font-hand: var(--font-caveat);
+}
+
 @layer base {
   :root[data-theme="dark"] {
     --color-surface: #0e2236;
