@@ -79,6 +79,10 @@
   content: none;
 }
 
+.prose-site :where(:not(pre) > code) {
+  font-weight: 400;
+}
+
 .code-copy {
   position: relative;
   display: flow-root;

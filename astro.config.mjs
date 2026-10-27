@@ -63,7 +63,7 @@ export default defineConfig({
       name: "IBM Plex Mono",
       cssVariable: "--font-plex-mono",
       provider: fontProviders.fontsource(),
-      weights: [400, 500],
+      weights: [400],
       styles: ["normal"],
       subsets: ["latin"],
       formats: ["woff2"],

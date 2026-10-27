@@ -47,12 +47,6 @@ const declared = [
     style: "normal",
   },
   {
-    family: "IBM Plex Mono",
-    cssVariable: "--font-plex-mono",
-    weight: 500,
-    style: "normal",
-  },
-  {
     family: "Caveat",
     cssVariable: "--font-caveat",
     weight: 500,
