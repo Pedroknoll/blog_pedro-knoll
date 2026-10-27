@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 26/10/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 27/10/2026
+
+**Revisão de 27/10/2026:** a §9 restringe a IBM Plex Mono ao peso 400 e registra o orçamento de fontes no LCP (T-52).
 
 **Revisão 3 de 26/10/2026:** a §9 descreve as fontes da marca pela opção `fonts` no topo do `defineConfig`, com preload só de IBM Plex Sans 400 normal.
 
@@ -660,7 +662,7 @@ Um agente pode instalar, sem perguntar, as dependências abaixo, na versão est�
 
 Dependências de notebook (numpy, torch etc.) ficam no bloco PEP 723 de cada `.py`, não no `pyproject.toml`.
 
-Fontes: a opção `fonts` no topo do `defineConfig`, estável desde o Astro 6, e não `experimental.fonts`. Com `fontProviders.fontsource()`, o build baixa Cormorant Garamond (600 normal; 500 e 600 itálico; fallback `serif`), IBM Plex Sans (400 e 600 normal; 400 itálico; fallback `sans-serif`), IBM Plex Mono (400 e 500 normal; fallback `monospace`) e Caveat (500 e 600 normal; fallback `cursive`), subset `latin` e `woff2`, e o site serve os arquivos de `/_astro/fonts/`, sem fonte de outra origem. Preload só de IBM Plex Sans 400 normal. Os tokens `--font-display`, `--font-sans`, `--font-mono` e `--font-hand` apontam para as variáveis das famílias; componente e página usam o token, e a troca de `--font-sans` e `--font-mono` é o que põe a IBM Plex Sans no texto e a IBM Plex Mono no código. Pacotes `@fontsource/*` não entram nesta lista. Não se usa `fontProviders.google()`.
+Fontes: a opção `fonts` no topo do `defineConfig`, estável desde o Astro 6, e não `experimental.fonts`. Com `fontProviders.fontsource()`, o build baixa Cormorant Garamond (600 normal; 500 e 600 itálico; fallback `serif`), IBM Plex Sans (400 e 600 normal; 400 itálico; fallback `sans-serif`), IBM Plex Mono (400 normal; fallback `monospace`) e Caveat (500 e 600 normal; fallback `cursive`), subset `latin` e `woff2`, e o site serve os arquivos de `/_astro/fonts/`, sem fonte de outra origem. Preload só de IBM Plex Sans 400 normal. Os tokens `--font-display`, `--font-sans`, `--font-mono` e `--font-hand` apontam para as variáveis das famílias; componente e página usam o token, e a troca de `--font-sans` e `--font-mono` é o que põe a IBM Plex Sans no texto e a IBM Plex Mono no código. Pacotes `@fontsource/*` não entram nesta lista. Não se usa `fontProviders.google()`. Cada arquivo de fonte que a página baixa antes do LCP custa cerca de um degrau de 150 ms no Lantern em HTTP/1.1, e arquivo maior custa mais; `font-display` e preload não mudam isso (T-52). Nas páginas de `pagesForTheme`, as faces da marca carregadas cabem nesta lista: Plex Sans 400 normal, Plex Sans 600 normal, Plex Sans 400 itálico, Plex Mono 400 normal e Cormorant 600 normal. O teto é 3 arquivos e 61.000 bytes na home e na página de tag, e 5 arquivos e 110.000 bytes nos posts. A guarda é `tests/e2e/font-budget.spec.ts`, nas páginas que ela confere: a home, os posts publicados e a primeira página de tag. A Caveat, a Cormorant 500 itálico e a Cormorant 600 itálico continuam no config e ficam fora das páginas até uma tarefa medir.
 
 ## 10. Deploy, CI/CD e ambientes
 
