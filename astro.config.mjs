@@ -3,7 +3,7 @@ import mdx from "@astrojs/mdx";
 import { unified } from "@astrojs/markdown-remark";
 import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
-import { defineConfig } from "astro/config";
+import { defineConfig, fontProviders } from "astro/config";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 
@@ -18,6 +18,68 @@ const rehypePlugins = [rehypeKatex];
 export default defineConfig({
   site: process.env.SITE_URL ?? "https://blog.exemplo.com",
   output: "static",
+  fonts: [
+    {
+      name: "Cormorant Garamond",
+      cssVariable: "--font-cormorant",
+      provider: fontProviders.fontsource(),
+      weights: [600],
+      styles: ["normal"],
+      subsets: ["latin"],
+      formats: ["woff2"],
+      fallbacks: ["serif"],
+    },
+    {
+      name: "Cormorant Garamond",
+      cssVariable: "--font-cormorant",
+      provider: fontProviders.fontsource(),
+      weights: [500, 600],
+      styles: ["italic"],
+      subsets: ["latin"],
+      formats: ["woff2"],
+      fallbacks: ["serif"],
+    },
+    {
+      name: "IBM Plex Sans",
+      cssVariable: "--font-plex-sans",
+      provider: fontProviders.fontsource(),
+      weights: [400, 600],
+      styles: ["normal"],
+      subsets: ["latin"],
+      formats: ["woff2"],
+      fallbacks: ["sans-serif"],
+    },
+    {
+      name: "IBM Plex Sans",
+      cssVariable: "--font-plex-sans",
+      provider: fontProviders.fontsource(),
+      weights: [400],
+      styles: ["italic"],
+      subsets: ["latin"],
+      formats: ["woff2"],
+      fallbacks: ["sans-serif"],
+    },
+    {
+      name: "IBM Plex Mono",
+      cssVariable: "--font-plex-mono",
+      provider: fontProviders.fontsource(),
+      weights: [400, 500],
+      styles: ["normal"],
+      subsets: ["latin"],
+      formats: ["woff2"],
+      fallbacks: ["monospace"],
+    },
+    {
+      name: "Caveat",
+      cssVariable: "--font-caveat",
+      provider: fontProviders.fontsource(),
+      weights: [500, 600],
+      styles: ["normal"],
+      subsets: ["latin"],
+      formats: ["woff2"],
+      fallbacks: ["cursive"],
+    },
+  ],
   markdown: {
     shikiConfig: {
       themes: { light: pkClaro, dark: pkEscuro },
