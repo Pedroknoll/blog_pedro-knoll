@@ -313,4 +313,45 @@ test.describe("saudação [RF-01, RNF-04]", () => {
 
     expect.soft(greetingHeadings).toBe(0);
   });
+
+  test("G9 quebra antes de pk.log só no celular", async ({ page }) => {
+    await open(page, "/", 1280);
+
+    for (const width of [1280, 560, 559, 412, 360] as const) {
+      await test.step(String(width), async () => {
+        await page.setViewportSize({ width, height: 800 });
+        await expect(
+          page.getByRole("heading", {
+            level: 1,
+            name: homeGreeting,
+            exact: true,
+          }),
+        ).toHaveCount(1);
+
+        const measured = await page.evaluate(() => {
+          const h1 = document.querySelector("h1");
+          const center = (element: Element | null | undefined) => {
+            const rect = element?.getBoundingClientRect();
+            return rect ? rect.y + rect.height / 2 : Number.NaN;
+          };
+          return {
+            svgCenter: center(h1?.querySelector("svg")),
+            nomeCenter: center(h1?.querySelector(".nome")),
+            fontSize: h1 ? getComputedStyle(h1).fontSize : "",
+          };
+        });
+
+        const fontSize = /^(-?\d+(?:\.\d+)?)px$/.exec(measured.fontSize.trim());
+        const h1Number = fontSize?.[1] ? Number(fontSize[1]) : Number.NaN;
+        const limit = 0.5 * h1Number;
+        const delta = measured.nomeCenter - measured.svgCenter;
+        const where = String(width);
+        if (width === 1280 || width === 560) {
+          expect.soft(Math.abs(delta), where).toBeLessThan(limit);
+        } else {
+          expect.soft(delta, where).toBeGreaterThanOrEqual(limit);
+        }
+      });
+    }
+  });
 });

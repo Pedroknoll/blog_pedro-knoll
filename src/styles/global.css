@@ -110,3 +110,65 @@
   line-height: 1.25rem;
   cursor: pointer;
 }
+
+/* Aceno da saudação, BRAND §7, T-44. */
+.pka-b {
+  opacity: 0;
+}
+
+.pka-a {
+  animation: pka-fa 3.2s step-end infinite;
+}
+
+.pka-b {
+  animation: pka-fb 3.2s step-end infinite;
+}
+
+@keyframes pka-fa {
+  0% {
+    opacity: 1;
+  }
+  9% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  27% {
+    opacity: 0;
+  }
+  36% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes pka-fb {
+  0% {
+    opacity: 0;
+  }
+  9% {
+    opacity: 1;
+  }
+  18% {
+    opacity: 0;
+  }
+  27% {
+    opacity: 1;
+  }
+  36% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pka-a,
+  .pka-b {
+    animation: none;
+  }
+}

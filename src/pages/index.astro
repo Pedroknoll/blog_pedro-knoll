@@ -1,4 +1,5 @@
 ---
+import Greeting from "~/components/ui/Greeting.astro";
 import Listing from "~/components/ui/Listing.astro";
 import TagFilter from "~/components/ui/TagFilter.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
@@ -25,9 +26,11 @@ if (!page) {
   ogTitle={site.title}
   ogType="website"
 >
+  <Greeting />
   <TagFilter tags={collectTags(posts)} current={null} />
   <Listing
     heading="Blog"
+    showHeading={false}
     featured={featured}
     posts={page.items}
     prev={page.prev}
