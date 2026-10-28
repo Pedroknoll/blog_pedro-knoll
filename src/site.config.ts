@@ -1,11 +1,11 @@
 export const site = {
-  title: "Nome do blog",
+  title: "pk.log",
   // até a Q4b fechar, SITE_URL aponta para o endereço workers.dev do Worker
   url: import.meta.env.SITE_URL ?? "https://blog.exemplo.com",
   author: {
-    name: "Seu Nome",
+    name: "Pedro Knoll",
     avatar: "/avatar.jpg",
-    bio: "Uma linha sobre você.",
+    bio: "Aprendizados e experimentos em IA",
     github: "usuario",
     huggingface: "usuario",
   },

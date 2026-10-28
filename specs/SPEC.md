@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 27/10/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 28/10/2026
+
+**Revisão de 28/10/2026:** os literais `pk.log`, `Pedro Knoll` e a descrição curta entraram no `site.config.ts` na T-43.
 
 **Revisão de 27/10/2026:** a §9 restringe a IBM Plex Mono ao peso 400 e registra o orçamento de fontes no LCP (T-52).
 
@@ -324,7 +326,7 @@ export const site = {
 
 ```
 
-Os literais `pk.log` e `Pedro Knoll` entram no arquivo na T-43. Até lá, o `site.config.ts` em disco vale. `github` e `huggingface` seguem placeholder.
+Os literais `pk.log`, `Pedro Knoll` e a descrição curta entraram na T-43. `github` e `huggingface` seguem placeholder.
 
 ### Exemplo de frontmatter
 

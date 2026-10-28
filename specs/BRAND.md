@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.9 · outubro de 2026 · pedroknoll.com
+Versão 1.10 · outubro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -382,9 +382,11 @@ Arquivos em `public/`. Sem manifesto PWA: `icon-192.png` e `icon-512.png` não e
 
 ```html
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 ```
+
+O `sizes="32x32"` no ICO evita que o Chrome escolha o ICO no lugar do SVG. `favicon-16.png` e `favicon-32.png` ficam em `public/`, sem `<link>`.
 
 ---
 

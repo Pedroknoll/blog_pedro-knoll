@@ -1,0 +1,21 @@
+---
+interface Props {
+  class?: string;
+}
+const { class: className } = Astro.props;
+---
+
+<span
+  class:list={[
+    "nome font-display font-semibold text-[1.08em] whitespace-nowrap",
+    className,
+  ]}
+>
+  <em class="inline font-semibold not-italic">pk</em>
+  <span class="ponto inline font-mono font-normal text-[0.8em] text-accent">
+    .
+  </span>
+  <span class="ext inline font-mono font-normal text-[0.8em] tracking-[-0.02em]">
+    log
+  </span>
+</span>

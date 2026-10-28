@@ -1,6 +1,7 @@
 import { expect, type Locator, test } from "@playwright/test";
 
 import { publishedPosts, titlePostsOnPage } from "./published-posts";
+import { authorName } from "./site-literals";
 
 async function bodyHeadings(article: Locator) {
   return article.locator("h2, h3").evaluateAll((elements) =>
@@ -31,8 +32,8 @@ test.describe("página do post [RF-04, RF-05]", () => {
         await expect(page.locator("h1")).toHaveCount(1);
         await expect(header.locator("h1")).toHaveCount(1);
         await expect(header.locator("h1")).toHaveText(post.title);
-        await expect(header.getByText("Seu Nome", { exact: true })).toHaveText(
-          "Seu Nome",
+        await expect(header.getByText(authorName, { exact: true })).toHaveText(
+          authorName,
         );
 
         const times = header.locator("time");
