@@ -2,13 +2,13 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { publishedPosts } from "./published-posts";
+import { authorName, homeTitle, siteTitle, titled } from "./site-literals";
 
 const routes = ["/", "/blog/2026-10-como-o-blog-e-feito/"] as const;
 
 const expectedTitle: Record<(typeof routes)[number], string> = {
-  "/": "Nome do blog · Seu Nome",
-  "/blog/2026-10-como-o-blog-e-feito/":
-    "Como o blog é feito · Nome do blog · Seu Nome",
+  "/": homeTitle,
+  "/blog/2026-10-como-o-blog-e-feito/": titled("Como o blog é feito"),
 };
 
 async function open(page: Page, path: string) {
@@ -85,7 +85,7 @@ for (const path of routes) {
     test("link do header para / com o título do site", async ({ page }) => {
       await open(page, path);
       const home = page.getByRole("banner").getByRole("link", {
-        name: "Nome do blog",
+        name: siteTitle,
         exact: true,
       });
       await expect(home).toHaveAttribute("href", "/");
@@ -94,8 +94,8 @@ for (const path of routes) {
     test("footer com o nome do autor", async ({ page }) => {
       await open(page, path);
       await expect(
-        page.getByRole("contentinfo").getByText("Seu Nome", { exact: true }),
-      ).toHaveText("Seu Nome");
+        page.getByRole("contentinfo").getByText(authorName, { exact: true }),
+      ).toHaveText(authorName);
     });
 
     test("axe sem violações serious nem critical", async ({ page }) => {
