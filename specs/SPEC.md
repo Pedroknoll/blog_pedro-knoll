@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 28/10/2026
 
+**Revisão 2 de 28/10/2026:** o schema da §6 entrou no `content.config.ts` (T-45). `kind` usa `KINDS` de `src/lib/kind.ts`, os rótulos ficam em `KIND_LABELS`, a unicidade é `assertUniqueFolios` em `src/lib/folio.ts` e o rascunho de teste é Fól. 999.
+
 **Revisão de 28/10/2026:** os literais `pk.log`, `Pedro Knoll` e a descrição curta entraram no `site.config.ts` na T-43.
 
 **Revisão de 27/10/2026:** a §9 restringe a IBM Plex Mono ao peso 400 e registra o orçamento de fontes no LCP (T-52).
@@ -226,7 +228,7 @@ Python só existe no build; em produção, o único código que executa é o do 
 
 ## 6. Modelo de conteúdo
 
-A v1 tem uma única collection, `posts`. O autor é único e vem de `src/site.config.ts`; tags são derivadas dos posts. Todo campo é validado por Zod no build, e um frontmatter inválido quebra o build (RNF-09). O schema inclui `folio`, `kind` e `level`. A unicidade de `folio` não é um `refine` de entrada única: fica na função descrita nas regras derivadas. A T-45 implementa este schema; até lá o `content.config.ts` em disco não tem esses campos.
+A v1 tem uma única collection, `posts`. O autor é único e vem de `src/site.config.ts`; tags são derivadas dos posts. Todo campo é validado por Zod no build, e um frontmatter inválido quebra o build (RNF-09). O schema inclui `folio`, `kind` e `level`. A unicidade de `folio` não é um `refine` de entrada única: fica na função descrita nas regras derivadas. O schema abaixo é o do `content.config.ts` desde a T-45.
 
 ### Convenção de pastas
 
@@ -252,6 +254,7 @@ src/
 import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod'; // Zod 4
+import { KINDS } from './lib/kind';
 import { postIdFromEntry } from './lib/post-id';
 
 // Iframe: notebook inteiro num .py da pasta do post, exportado com html-wasm.
@@ -278,7 +281,7 @@ const posts = defineCollection({
         pubDate: z.coerce.date(),
         updatedDate: z.coerce.date().optional(),
         folio: z.int().min(1), // exibido como "Fól. 006"
-        kind: z.enum(['concept', 'tutorial', 'lab', 'playbook']),
+        kind: z.enum(KINDS), // concept | tutorial | lab | playbook, em src/lib/kind.ts
         level: z.int().min(1).max(3),
         tags: z.array(z.string().regex(/^[a-z0-9-]+$/)).max(6).default([]),
         cover: image().optional(),
@@ -349,9 +352,9 @@ notebooks:
 
 ### Regras derivadas
 
-- `getPublishedPosts()` é o único acesso à collection nas páginas. Antes do filtro de publicados, chama a função pura de unicidade de `folio` (em `src/lib/`) sobre todas as entradas da collection, rascunho incluído. Dois fólios iguais falham o build e a mensagem cita os ids. Em seguida filtra `draft` quando `SHOW_DRAFTS` não é `true` e ordena por `pubDate` desc, com desempate por `id` crescente.
-- `folio` é inteiro e a exibição é `Fól. 006` (três dígitos). **Fól. 001** é `2026-10-por-que-este-blog` ("Por que este blog existe"). **Fól. 002** é `2026-10-como-o-blog-e-feito`. Os dois entram como `kind: concept` e `level: 1`. A T-45 grava esses campos nos posts.
-- `kind` usa o enum inglês. Os rótulos pt-BR (`Conceito`, `Tutorial`, `Lab`, `Playbook`) ficam num mapa no código, não no frontmatter.
+- `getPublishedPosts()` é o único acesso à collection nas páginas. Antes do filtro de publicados, chama `assertUniqueFolios` (`src/lib/folio.ts`) sobre todas as entradas da collection, rascunho incluído. Dois fólios iguais falham o build com a mensagem `Fólio repetido: <n> em <id1>, <id2>`, com os ids em ordem crescente e vários conflitos separados por `; `. Em seguida filtra `draft` quando `SHOW_DRAFTS` não é `true` e ordena por `pubDate` desc, com desempate por `id` crescente.
+- `folio` é inteiro e a exibição é `Fól. 006` (três dígitos). **Fól. 001** é `2026-10-por-que-este-blog` ("Por que este blog existe"). **Fól. 002** é `2026-10-como-o-blog-e-feito`. Os dois entram como `kind: concept` e `level: 1`. O rascunho `2026-10-rascunho-de-teste` é Fól. 999, com `kind: concept` e `level: 1`: ele nunca será publicado, e o 003 fica para o próximo post. Fixture ou rascunho novo também precisa de fólio único.
+- `kind` usa o enum inglês. Os rótulos pt-BR (`Conceito`, `Tutorial`, `Lab`, `Playbook`) ficam em `KIND_LABELS`, em `src/lib/kind.ts`, ao lado de `KINDS`, que o schema usa. Não vão no frontmatter.
 - `benchMinutes` não substitui `minutesRead`. `track` não ganha rota. Temas da marca são rótulo em `src/data/tags.ts`, não um segundo campo. Colab continua `gpuUrl`: não há campo `marimo` nem `colab`.
 - A data visível é `21.out.2026`. O atributo `datetime` continua ISO.
 - O slug é o `id` gerado pelo `generateId` do loader (nome da pasta). `postIdFromEntry` exige exatamente dois segmentos (`pasta/index.md` ou `pasta/index.mdx`) e pasta `^[a-z0-9-]+$`; caso contrário o build falha citando o entry. Nenhuma página recalcula slug por conta própria.
