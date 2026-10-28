@@ -6,17 +6,27 @@ import Pagination from "~/components/ui/Pagination.astro";
 
 interface Props {
   heading: string;
+  showHeading?: boolean;
   posts: CollectionEntry<"posts">[];
   featured?: CollectionEntry<"posts"> | null;
   prev: string | null;
   next: string | null;
 }
 
-const { heading, posts, featured = null, prev, next } = Astro.props;
+const {
+  heading,
+  showHeading = true,
+  posts,
+  featured = null,
+  prev,
+  next,
+} = Astro.props;
 ---
 
 <div class="mx-auto w-full max-w-[52rem] px-4 py-10">
-  <h1 class="font-serif text-3xl text-ink sm:text-4xl">{heading}</h1>
+  {showHeading && (
+    <h1 class="font-serif text-3xl text-ink sm:text-4xl">{heading}</h1>
+  )}
   {featured && (
     <section class="mt-12" aria-label="Destaque">
       <Card post={featured} featured />
