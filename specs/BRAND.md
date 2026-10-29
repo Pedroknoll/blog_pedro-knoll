@@ -272,10 +272,10 @@ A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `benchMinutes`, `
 - A newsletter está fora da v1 (SPEC §1). Não entra na home.
 
 ### 9.2 Card de fólio (listas)
-- Um `article` em grade. No mobile, a ordem é a do DOM: fólio e data, título, resumo, rodapé; a capa, só no destaque, vem por último.
+- Um `article` em grade. No mobile, a ordem é a do DOM: fólio e data, título, resumo, rodapé. No destaque, a capa fica depois do rótulo e do fólio com a data, e antes do título, do resumo e do rodapé.
 - De `sm` em diante, o card da lista tem duas colunas: a faixa do fólio (8rem) à esquerda, centralizada na altura do card, e o texto à direita. O destaque com capa inverte: texto à esquerda, capa de 18rem à direita, centralizada na vertical.
 - Linha do fólio: `Fól.` em mono, lápis; o número em Cormorant 600, tinta, desde 22 px; data em mono, lápis (`09.out.2026`). No mobile e no destaque, ficam na mesma linha (`Fól. 001 · 09.out.2026`). Na lista, de `sm` em diante, a data desce para baixo do número.
-- Título em Cormorant 600 ~1,45rem na lista; no destaque, maior (`text-3xl`, e `sm:text-4xl`). Sem sublinhado em repouso; no hover e no foco, cor acento e sublinhado — exceção à seção 9.10.
+- Título em Cormorant 600 na lista: 26 px abaixo de `sm`, ~1,45rem de `sm` em diante, peso 600 desde 22 px. No destaque, maior (`text-3xl`, e `sm:text-4xl`). Sem sublinhado em repouso; no hover e no foco, cor acento e sublinhado — exceção à seção 9.10.
 - Resumo em Plex Sans, grafite.
 - Rodapé: tipo (ícone parado 12 px + nome), nível (hachura + nome) e tempo de leitura (relógio parado 12 px + `8 min`), em mono 12 px, maiúsculas. Separadores `|` na cor da linha, no vão entre os trechos; quando a linha quebra, o separador não abre nem fecha a linha. Sem tags.
 - A capa só aparece no destaque, na proporção 1200/630. Os cards da lista não mostram capa.
