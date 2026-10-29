@@ -276,8 +276,9 @@ A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `benchMinutes`, `
 - De `sm` em diante, o card da lista tem duas colunas: a faixa do fólio (8rem) à esquerda, centralizada na altura do card, e o texto à direita. O destaque com capa inverte: texto à esquerda, capa de 18rem à direita, centralizada na vertical.
 - Linha do fólio: `Fól.` em mono, lápis; o número em Cormorant 600, tinta, desde 22 px; data em mono, lápis (`09.out.2026`). No mobile e no destaque, ficam na mesma linha (`Fól. 001 · 09.out.2026`). Na lista, de `sm` em diante, a data desce para baixo do número.
 - Título em Cormorant 600 na lista: 26 px abaixo de `sm`, ~1,45rem de `sm` em diante, peso 600 desde 22 px. No destaque, maior (`text-3xl`, e `sm:text-4xl`). Sem sublinhado em repouso; no hover e no foco, cor acento e sublinhado — exceção à seção 9.10.
-- Resumo em Plex Sans, grafite.
-- Rodapé: tipo (ícone parado 12 px + nome), nível (hachura + nome) e tempo de leitura (relógio parado 12 px + `8 min`), em mono 12 px, maiúsculas. Separadores `|` na cor da linha, no vão entre os trechos; quando a linha quebra, o separador não abre nem fecha a linha. Sem tags.
+- Resumo em Plex Sans 17 px, entrelinha 1,65, grafite (seção 5).
+- O card inteiro é tocável: o link do título se estica sobre o card (`after:absolute after:inset-0`, com o `article` em `relative`) e dá retorno em acento no toque (`active:text-accent`). O rodapé não intercepta o toque (`pointer-events-none`).
+- Rodapé: tipo (ícone parado 12 px + nome), nível (hachura + nome) e tempo de leitura (relógio parado 12 px + `8 min`), em mono 12 px, maiúsculas. Separadores `|` na cor da linha, no vão entre os trechos; quando a linha quebra, o separador não abre nem fecha a linha, e as linhas do rodapé têm vão de 0,375rem. Sem tags.
 - A capa só aparece no destaque, na proporção 1200/630. Os cards da lista não mostram capa.
 - A lista separa os cards com divisória `divide-line`. Os cards da lista ficam sem borda de 1 px, sem sombra e sem hover de borda. O destaque tem borda de 1 px `--linha` só embaixo, sem raio e sem sombra. O respiro é só vertical: 1,25rem em cima e 2rem embaixo no mobile, 2rem em cima e embaixo de `sm` em diante. O texto e a capa alinham com os cards da lista. O espaço até o post seguinte é o mesmo que entre os cards da lista: 2rem de cada lado do filete.
 
