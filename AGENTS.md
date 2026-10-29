@@ -48,7 +48,7 @@ src/site.config.ts      título, URL (SITE_URL) e autor (não existe collection 
 src/content.config.ts   collection `posts` com schema Zod 4
 src/content/posts/<slug>/index.mdx   cada post é uma pasta: texto, capa, figs/, data/, notebooks/
 src/assets/brand/       pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel}.svg
-src/assets/brand/icones/  aceno.svg; icone-{conceito,tutorial,lab,playbook}.svg e -parado
+src/assets/brand/icones/  aceno.svg; icone-{conceito,tutorial,lab,playbook}.svg e -parado; icone-relogio.svg
 src/components/ui/      .astro estáticos
 src/components/viz/     .svelte com D3 (AGENTS.md próprio, criado antes da T-19; seção 9.8 do BRAND)
 src/components/marimo/  MarimoFrame, RunOnGpu (AGENTS.md próprio, criado antes da T-14; seções 9.6–9.7)
@@ -80,7 +80,7 @@ Sem `icon-192.png` e sem `icon-512.png`. `src/components/marimo/pk.css` não vem
 - **Cores:** só a lista fechada do CSS global: `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `kind-concept`, `kind-tutorial`, `kind-lab`, `kind-playbook`. Sem nome paralelo `--papel` / `--prussia`. Sem `dark:` e sem `@custom-variant dark`. Hex de desenho só em `src/assets/brand/`. As variáveis de `src/styles/global.css` e os JSON do Shiki também carregam hex, porque são a definição da paleta e o tema não lê variável CSS; componente, página e layout não.
 - **Fontes:** Fonts API do Astro, `fontProviders.fontsource`, quatro famílias (Cormorant Garamond, IBM Plex Sans, IBM Plex Mono, Caveat). Tokens `--font-display`, `--font-sans`, `--font-mono` e `--font-hand`. As variáveis de família (`--font-cormorant`, `--font-plex-sans`, `--font-plex-mono`, `--font-caveat`) só aparecem no `astro.config.mjs`, no `BaseLayout.astro` e no bloco `@theme inline` do `global.css`. Componente e página usam o token; a IBM Plex Sans entra no texto e a IBM Plex Mono no código pela troca de `--font-sans` e `--font-mono`. Sem pacote `@fontsource` instalado à mão e sem Google Fonts. O Astro acrescenta um sufixo de hash ao nome da família; use sempre o token ou a variável do `cssVariable`, nunca o nome da família escrito à mão. A IBM Plex Mono entra só no peso 400. Tarefa que acrescenta face de fonte numa página mede antes e depois com o Lighthouse. Mudar a lista ou os tetos do `font-budget.spec.ts` é decisão de escopo.
 - **Ícones:** import default do `.svg` como componente Astro. Animação no CSS global. Versão parada em lista. `prefers-reduced-motion`. O aceno dentro de um `h1` leva `aria-hidden`.
-- **Cormorant:** peso 600 desde 22 px só no título do card. A assinatura (Wordmark) também é exceção ao mínimo de 28 px, por ser desenho da marca e não texto. Peso 500 e os demais usos só desde 28 px. Nas páginas, só o peso 600 normal, até uma tarefa medir outra face.
+- **Cormorant:** peso 600 desde 22 px no título do card e no número do fólio no card. A assinatura (Wordmark) também é exceção ao mínimo de 28 px, por ser desenho da marca e não texto. Peso 500 e os demais usos só desde 28 px. Nas páginas, só o peso 600 normal, até uma tarefa medir outra face.
 - **AGENTS aninhados,** quando forem criados: marimo recebe as seções 9.6–9.7 e o `pk.css`; viz recebe a seção 9.8. Isso não cria dependência da T-19 com a Fase 1b.
 
 

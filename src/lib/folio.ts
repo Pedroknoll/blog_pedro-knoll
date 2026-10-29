@@ -1,6 +1,9 @@
+export function folioDigits(folio: number): string {
+  return folio > 999 ? String(folio) : String(folio).padStart(3, "0");
+}
+
 export function formatFolio(folio: number): string {
-  const digits = folio > 999 ? String(folio) : String(folio).padStart(3, "0");
-  return `Fól. ${digits}`;
+  return `Fól. ${folioDigits(folio)}`;
 }
 
 export function findFolioConflicts(

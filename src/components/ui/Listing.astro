@@ -3,6 +3,7 @@ import type { CollectionEntry } from "astro:content";
 
 import Card from "~/components/ui/Card.astro";
 import Pagination from "~/components/ui/Pagination.astro";
+import { minutesReadOf } from "~/lib/reading-minutes";
 
 interface Props {
   heading: string;
@@ -21,24 +22,31 @@ const {
   prev,
   next,
 } = Astro.props;
+const featuredMinutes = featured ? await minutesReadOf(featured) : null;
+const items = await Promise.all(
+  posts.map(async (post) => ({
+    post,
+    minutesRead: await minutesReadOf(post),
+  })),
+);
 ---
 
 <div class="mx-auto w-full max-w-[52rem] px-4 py-10">
   {showHeading && (
     <h1 class="font-serif text-3xl text-ink sm:text-4xl">{heading}</h1>
   )}
-  {featured && (
+  {featured && featuredMinutes !== null && (
     <section class="mt-12" aria-label="Destaque">
-      <Card post={featured} featured />
+      <Card post={featured} featured minutesRead={featuredMinutes} />
     </section>
   )}
   <ul
-    class:list={["divide-y divide-line", featured ? "mt-20" : "mt-10"]}
+    class:list={["divide-y divide-line", !featured && "mt-10"]}
     aria-label="Posts"
   >
-    {posts.map((post) => (
+    {items.map(({ post, minutesRead }) => (
       <li class="py-8">
-        <Card post={post} />
+        <Card post={post} minutesRead={minutesRead} />
       </li>
     ))}
   </ul>
