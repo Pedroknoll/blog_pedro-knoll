@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { assertUniqueFolios, findFolioConflicts } from "../../src/lib/folio";
+import {
+  assertUniqueFolios,
+  findFolioConflicts,
+  formatFolio,
+} from "../../src/lib/folio";
 
 function entry(id: string, folio: number) {
   return { id, data: { folio } };
@@ -32,5 +36,11 @@ describe("fólio", () => {
       if (error instanceof Error) message = error.message;
     }
     expect(message).toBe("Fólio repetido: 1 em a, c");
+  });
+
+  it("N1, formatFolio de 1, 42 e 999", () => {
+    expect(formatFolio(1)).toBe("Fól. 001");
+    expect(formatFolio(42)).toBe("Fól. 042");
+    expect(formatFolio(999)).toBe("Fól. 999");
   });
 });

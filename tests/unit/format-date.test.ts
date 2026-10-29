@@ -19,14 +19,14 @@ describe("formatPubDate", () => {
 
   it("formata 2026-10-20 no calendário UTC", () => {
     expect(formatPubDate(new Date("2026-10-20"))).toEqual({
-      text: "20 de outubro de 2026",
+      text: "20.out.2026",
       datetime: "2026-10-20",
     });
   });
 
   it("formata 2026-01-05 no calendário UTC", () => {
     expect(formatPubDate(new Date("2026-01-05"))).toEqual({
-      text: "5 de janeiro de 2026",
+      text: "05.jan.2026",
       datetime: "2026-01-05",
     });
   });

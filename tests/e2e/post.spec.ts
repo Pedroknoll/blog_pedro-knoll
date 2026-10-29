@@ -42,7 +42,9 @@ test.describe("página do post [RF-04, RF-05]", () => {
         for (let index = 0; index < timeCount; index += 1) {
           const time = times.nth(index);
           await expect(time).toHaveAttribute("datetime", /^\d{4}-\d{2}-\d{2}$/);
-          await expect(time).toHaveText(/^\d{1,2} de .+ de \d{4}$/);
+          await expect(time).toHaveText(
+            /^\d{2}\.(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\.\d{4}$/,
+          );
         }
         await expect(
           header.getByText("Atualizado em", { exact: true }),
