@@ -197,7 +197,7 @@ Títulos com `text-wrap: balance`.
 | **Linhas de construção** | Tracejado fino em prússia, passando além da forma, como num esboço. Em diagramas e no símbolo grande. |
 | **Cotas** | Linha de medida do desenho técnico (traço com marcas nas pontas e valor em mono). Mostram formato de tensor `[batch, 512, 768]`, tempo, tamanho de modelo. Todo diagrama tem pelo menos uma. |
 | **Nota à margem** | IBM Plex Sans itálico, em prússia, com um traço ou seta curva, levemente inclinada (−1,5°). Uma por seção. A T-52 trocou a Caveat por esta face por causa do LCP. |
-| **Hachura de nível** | Traços inclinados para a direita (`\`), como hachurava Leonardo, que era canhoto: 1, 2 ou 3 traços para os três níveis. |
+| **Hachura de nível** | Traços inclinados para a direita (`\`), como hachurava Leonardo, que era canhoto: sempre três traços, com 1, 2 ou 3 marcados da esquerda para os três níveis. Os marcados ficam em tinta; os outros, na cor de `--linha` (T-46). |
 | **Fólio** | `Fól. 042 · 21.out.2026`, em mono, cor lápis. |
 
 ---
@@ -236,9 +236,9 @@ Três eixos independentes: **tipo** (formato), **nível** (dificuldade) e **tema
 
 | Valor | Nome | Hachura | Para quem |
 |---|---|---|---|
-| 1 | **Iniciante** | `\` | Curiosidade e Python básico. |
-| 2 | **Intermediário** | `\\` | Já treinou um modelo simples. |
-| 3 | **Avançado** | `\\\` | Fine-tuning, avaliação, agentes em produção. |
+| 1 | **Iniciante** | `\\\`, 1 marcado | Curiosidade e Python básico. |
+| 2 | **Intermediário** | `\\\`, 2 marcados | Já treinou um modelo simples. |
+| 3 | **Avançado** | `\\\`, 3 marcados | Fine-tuning, avaliação, agentes em produção. |
 
 ### Temas
 Etiquetas em mono, sem cor, borda `--linha`: Machine Learning, Deep Learning, Agentes, LLMs, Embeddings, Avaliação, Dados, MLOps. Um fólio pode ter vários.
@@ -270,7 +270,7 @@ A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `benchMinutes`, `
 - A newsletter está fora da v1 (SPEC §1). Não entra na home.
 
 ### 9.2 Card de fólio (listas)
-- Linha 1: `Fól. 007` (mono, lápis) à esquerda; tipo à direita (ícone parado 12 px + nome em mono maiúsculo, na cor do tipo).
+- Linha 1: `Fól. 007 · 21.out.2026` (mono, lápis) à esquerda, com a data que o RF-01 pede; tipo à direita (ícone parado 12 px + nome em mono maiúsculo, na cor do tipo).
 - Título em Cormorant 600 ~1,45rem.
 - Resumo em Plex Sans 14,5 px, grafite.
 - Rodapé: hachura de nível + nome do nível; etiquetas de tema.
@@ -547,6 +547,8 @@ Versões paradas dos ícones e o símbolo com linhas de construção estão em `
   <path class="n" d="M5 6h2v1h-2zM4 7h4v1h-4zM4 8h4v1h-4zM5 9h2v1h-2z"/>
 </svg>
 ```
+
+Desde a T-46, os quatro ícones animados não têm `<style>`. As classes `pkc-`, `pkt-`, `pkl-` e `pkp-`, os keyframes e o `prefers-reduced-motion` estão em `src/styles/global.css`. Os blocos abaixo mostram o desenho e a animação de origem; os arquivos em `src/assets/brand/icones/` são a versão sem `<style>`.
 
 ### Ícone Conceito (animado) · `src/assets/brand/icones/icone-conceito.svg`
 
