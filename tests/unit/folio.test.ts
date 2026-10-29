@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   assertUniqueFolios,
   findFolioConflicts,
+  folioDigits,
   formatFolio,
 } from "../../src/lib/folio";
 
@@ -42,5 +43,12 @@ describe("fólio", () => {
     expect(formatFolio(1)).toBe("Fól. 001");
     expect(formatFolio(42)).toBe("Fól. 042");
     expect(formatFolio(999)).toBe("Fól. 999");
+  });
+
+  it("folioDigits de 1, 42, 999 e 1000", () => {
+    expect(folioDigits(1)).toBe("001");
+    expect(folioDigits(42)).toBe("042");
+    expect(folioDigits(999)).toBe("999");
+    expect(folioDigits(1000)).toBe("1000");
   });
 });

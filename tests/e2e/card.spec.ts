@@ -86,6 +86,52 @@ async function listingPaths(page: Page): Promise<string[]> {
   return ["/", await tagPathFromNav(page)];
 }
 
+async function listingSurfaces(page: Page): Promise<string[]> {
+  await open(page, "/");
+  const paths = ["/"];
+  for (;;) {
+    const next = nextPageLink(page);
+    if ((await next.count()) === 0) break;
+    const href = await next.getAttribute("href");
+    expect(href).toBeTruthy();
+    await open(page, href ?? "");
+    paths.push(href ?? "");
+  }
+  await open(page, "/");
+  const nav = page.getByRole("navigation", {
+    name: "Filtrar por tag",
+    exact: true,
+  });
+  await expect(nav).toHaveCount(1);
+  const hrefs = await nav
+    .getByRole("link")
+    .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+  const tags = hrefs.filter((href) => href?.startsWith("/tags/"));
+  expect(tags.length).toBeGreaterThan(0);
+  return [...paths, ...tags.filter((href): href is string => !!href)];
+}
+
+async function listArticles(page: Page): Promise<Locator[]> {
+  const list = page.getByRole("list", { name: "Posts", exact: true });
+  await expect(list).toHaveCount(1);
+  const items = list.locator(":scope > li").locator("article");
+  const count = await items.count();
+  expect(count).toBeGreaterThan(0);
+  const articles: Locator[] = [];
+  for (let index = 0; index < count; index += 1) {
+    articles.push(items.nth(index));
+  }
+  return articles;
+}
+
+async function featuredArticle(page: Page): Promise<Locator | null> {
+  const destaque = page.getByRole("region", { name: "Destaque", exact: true });
+  if ((await destaque.count()) === 0) return null;
+  const featured = destaque.locator("article");
+  await expect(featured).toHaveCount(1);
+  return featured;
+}
+
 async function cardsOn(page: Page, path: string): Promise<Locator[]> {
   const articles: Locator[] = [];
   if (path === "/") {
@@ -338,6 +384,463 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           .filter({ hasText: title });
         await expect(link).toHaveCount(1);
         await expect(link).toHaveAccessibleName(title);
+      });
+    }
+  });
+
+  test("C8 tempo de leitura do card é o do post", async ({ page }) => {
+    const seen = new Map<string, string>();
+    for (const path of await listingSurfaces(page)) {
+      await test.step(path, async () => {
+        await open(page, path);
+        const featured = await featuredArticle(page);
+        const articles = [
+          ...(featured ? [featured] : []),
+          ...(await listArticles(page)),
+        ];
+        for (const article of articles) {
+          const hidden = article.locator(".sr-only");
+          await expect(hidden).toHaveCount(1);
+          const cardText = await article.evaluate((root) => {
+            const note = root.querySelector(".sr-only");
+            const visible = note?.previousElementSibling;
+            return `${visible?.textContent ?? ""}${note?.textContent ?? ""}`
+              .replace(/\s+/g, " ")
+              .trim();
+          });
+          const href =
+            (await article
+              .locator("h2")
+              .getByRole("link")
+              .getAttribute("href")) ?? "";
+          expect(href).toMatch(/^\/blog\/[a-z0-9-]+\/$/);
+          const previous = seen.get(href);
+          if (previous !== undefined) {
+            expect(cardText).toBe(previous);
+            continue;
+          }
+          await open(page, href);
+          const postReading = page.getByText(/^\d+ min de leitura$/);
+          await expect(postReading).toHaveCount(1);
+          const postText = textOf(await postReading.textContent());
+          expect(cardText).toBe(postText);
+          seen.set(href, cardText);
+          await open(page, path);
+        }
+      });
+    }
+    expect(seen.size).toBeGreaterThan(0);
+  });
+
+  test("C9 capa só no destaque", async ({ page }) => {
+    await open(page, "/");
+    const destaque = page.getByRole("region", {
+      name: "Destaque",
+      exact: true,
+    });
+    await expect(destaque.locator("img")).toHaveCount(1);
+    for (const article of await listArticles(page)) {
+      await expect(article.locator("img")).toHaveCount(0);
+    }
+
+    await open(page, "/");
+    const nav = page.getByRole("navigation", {
+      name: "Filtrar por tag",
+      exact: true,
+    });
+    const hrefs = await nav
+      .getByRole("link")
+      .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+    const tags = hrefs.filter((href) => href?.startsWith("/tags/"));
+    expect(tags.length).toBeGreaterThan(0);
+    for (const path of tags) {
+      await test.step(path ?? "", async () => {
+        await open(page, path ?? "");
+        for (const article of await listArticles(page)) {
+          await expect(article.locator("img")).toHaveCount(0);
+        }
+      });
+    }
+  });
+
+  test("C10 número do fólio em Cormorant 600", async ({ page }) => {
+    for (const path of await listingSurfaces(page)) {
+      await test.step(path, async () => {
+        await open(page, path);
+        const numbers = page
+          .locator("article time")
+          .locator("xpath=..")
+          .getByText(/^\d+$/);
+        const count = await numbers.count();
+        expect(count).toBeGreaterThan(0);
+        for (let index = 0; index < count; index += 1) {
+          const measured = await numbers.nth(index).evaluate((element) => {
+            const style = getComputedStyle(element);
+            const variable = getComputedStyle(document.documentElement)
+              .getPropertyValue("--font-cormorant")
+              .trim();
+            return {
+              text: (element.textContent ?? "").trim(),
+              family: style.fontFamily,
+              variable,
+              weight: style.fontWeight,
+              fontSize: style.fontSize,
+            };
+          });
+          expect(measured.text).toMatch(/^\d+$/);
+          expect(familyPrefix(measured.family, measured.variable)).toBe(
+            normalizeFamily(measured.variable),
+          );
+          expect(measured.weight).toBe("600");
+          expect(fontSizePx(measured.fontSize)).toBeGreaterThanOrEqual(22);
+        }
+      });
+    }
+  });
+
+  test("C11 faixa do fólio e Fól. 1000", async ({ page }) => {
+    const paths = await listingSurfaces(page);
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    for (const path of paths) {
+      await test.step(`${path} 1280`, async () => {
+        await open(page, path);
+        for (const article of await listArticles(page)) {
+          const placed = await article.evaluate((root) => {
+            const folio = root.querySelector("time")?.parentElement;
+            const heading = root.querySelector("h2");
+            if (!folio || !heading) return null;
+            const folioBox = folio.getBoundingClientRect();
+            const headingBox = heading.getBoundingClientRect();
+            const articleBox = root.getBoundingClientRect();
+            return {
+              folioRight: folioBox.right,
+              headingLeft: headingBox.left,
+              folioMid: (folioBox.top + folioBox.bottom) / 2,
+              articleMid: (articleBox.top + articleBox.bottom) / 2,
+            };
+          });
+          expect(placed).not.toBeNull();
+          if (!placed) continue;
+          expect(placed.folioRight).toBeLessThanOrEqual(placed.headingLeft);
+          expect(
+            Math.abs(placed.folioMid - placed.articleMid),
+          ).toBeLessThanOrEqual(2);
+
+          const fitted = await article
+            .locator("time")
+            .locator("xpath=..")
+            .evaluate((column) => {
+              const line = [...column.querySelectorAll("span")].find((span) =>
+                [...span.childNodes].some(
+                  (node) =>
+                    node.nodeType === Node.TEXT_NODE &&
+                    (node.textContent ?? "").includes("Fól."),
+                ),
+              );
+              const number = line
+                ? [...line.querySelectorAll("span")].find((span) =>
+                    /^\d+$/.test((span.textContent ?? "").trim()),
+                  )
+                : undefined;
+              if (!line || !number) {
+                return {
+                  ok: false,
+                  reason: "sem linha",
+                  scrollWidth: 0,
+                  clientWidth: 0,
+                  rects: 0,
+                };
+              }
+              const clone = line.cloneNode(true) as HTMLElement;
+              const clonedNumber = [...clone.querySelectorAll("span")].find(
+                (span) => /^\d+$/.test((span.textContent ?? "").trim()),
+              );
+              if (!clonedNumber) {
+                return {
+                  ok: false,
+                  reason: "sem número",
+                  scrollWidth: 0,
+                  clientWidth: 0,
+                  rects: 0,
+                };
+              }
+              clonedNumber.textContent = "1000";
+              const clientWidth = column.clientWidth;
+              const columnStyle = getComputedStyle(column);
+              const holder = document.createElement("div");
+              holder.style.cssText = `position:absolute;left:0;top:0;visibility:hidden;width:${clientWidth}px;`;
+              holder.style.fontFamily = columnStyle.fontFamily;
+              holder.style.fontSize = columnStyle.fontSize;
+              holder.style.fontWeight = columnStyle.fontWeight;
+              holder.style.letterSpacing = columnStyle.letterSpacing;
+              holder.style.lineHeight = columnStyle.lineHeight;
+              clone.style.display = "inline-block";
+              holder.appendChild(clone);
+              document.body.appendChild(holder);
+              const scrollWidth = clone.scrollWidth;
+              const rects = clone.getClientRects().length;
+              holder.remove();
+              return {
+                ok:
+                  scrollWidth > 0 && scrollWidth <= clientWidth && rects === 1,
+                scrollWidth,
+                clientWidth,
+                rects,
+              };
+            });
+          expect(fitted.ok, JSON.stringify(fitted)).toBe(true);
+        }
+
+        const featured = await featuredArticle(page);
+        if (featured) {
+          const above = await featured.evaluate((root) => {
+            const folio = root.querySelector("time")?.parentElement;
+            const heading = root.querySelector("h2");
+            if (!folio || !heading) return null;
+            const folioBox = folio.getBoundingClientRect();
+            const headingBox = heading.getBoundingClientRect();
+            return {
+              folioTop: folioBox.top,
+              folioBottom: folioBox.bottom,
+              headingTop: headingBox.top,
+            };
+          });
+          expect(above).not.toBeNull();
+          if (!above) return;
+          expect(above.folioTop).toBeLessThan(above.headingTop);
+          expect(above.folioBottom).toBeLessThanOrEqual(above.headingTop + 1);
+        }
+      });
+    }
+
+    await page.setViewportSize({ width: 360, height: 800 });
+    for (const path of paths) {
+      await test.step(`${path} 360`, async () => {
+        await open(page, path);
+        const featured = await featuredArticle(page);
+        const articles = [
+          ...(featured ? [featured] : []),
+          ...(await listArticles(page)),
+        ];
+        for (const article of articles) {
+          const above = await article.evaluate((root) => {
+            const folio = root.querySelector("time")?.parentElement;
+            const heading = root.querySelector("h2");
+            if (!folio || !heading) return null;
+            const folioBox = folio.getBoundingClientRect();
+            const headingBox = heading.getBoundingClientRect();
+            return {
+              folioTop: folioBox.top,
+              folioBottom: folioBox.bottom,
+              headingTop: headingBox.top,
+            };
+          });
+          expect(above).not.toBeNull();
+          if (!above) continue;
+          expect(above.folioTop).toBeLessThan(above.headingTop);
+          expect(above.folioBottom).toBeLessThanOrEqual(above.headingTop + 1);
+        }
+      });
+    }
+  });
+
+  test("C12 rodapé não abre nem fecha linha com pipe", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await open(page, "/");
+    const widths = await page.evaluate(() => ({
+      scrollWidth: document.documentElement.scrollWidth,
+      clientWidth: document.documentElement.clientWidth,
+    }));
+    expect(widths.scrollWidth).toBeLessThanOrEqual(widths.clientWidth);
+
+    const footer = page.locator("article p.footer");
+    await expect(footer.first()).toBeVisible();
+    const edges = await footer.first().evaluate((source) => {
+      const clone = source.cloneNode(true) as HTMLElement;
+      const width = source.getBoundingClientRect().width;
+      const kind = [...clone.querySelectorAll("span")].find((span) =>
+        /^(Conceito|Tutorial|Lab|Playbook)$/.test(
+          (span.textContent ?? "").trim(),
+        ),
+      );
+      if (kind) kind.textContent = "Playbook";
+      const minutes = [...clone.querySelectorAll("span")].find((span) =>
+        /^\d+\s+min$/.test(
+          (span.textContent ?? "").replace(/\s+/g, " ").trim(),
+        ),
+      );
+      if (minutes) minutes.textContent = "20 min";
+      const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
+      while (walker.nextNode()) {
+        const value = walker.currentNode.textContent ?? "";
+        if (/Iniciante|Intermediário|Avançado/.test(value)) {
+          walker.currentNode.textContent = value.replace(
+            /Iniciante|Intermediário|Avançado/,
+            "Intermediário",
+          );
+        }
+      }
+      clone.style.position = "absolute";
+      clone.style.left = "0";
+      clone.style.top = "0";
+      clone.style.width = `${width}px`;
+      clone.style.boxSizing = "border-box";
+      document.body.appendChild(clone);
+      const clip = clone.getBoundingClientRect();
+      const glyphs: { ch: string; left: number; top: number }[] = [];
+      const texts = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
+      while (texts.nextNode()) {
+        const node = texts.currentNode;
+        const parent = node.parentElement;
+        if (!parent || parent.closest(".sr-only")) continue;
+        const raw = node.textContent ?? "";
+        for (let index = 0; index < raw.length; index += 1) {
+          const ch = raw[index] ?? "";
+          if (ch.trim() === "") continue;
+          const range = document.createRange();
+          range.setStart(node, index);
+          range.setEnd(node, index + 1);
+          const rect = range.getBoundingClientRect();
+          const visible =
+            Math.min(rect.right, clip.right) - Math.max(rect.left, clip.left);
+          if (rect.width <= 0 || rect.height <= 0 || visible <= 1) continue;
+          if (rect.bottom <= clip.top || rect.top >= clip.bottom) continue;
+          glyphs.push({ ch, left: rect.left, top: rect.top });
+        }
+      }
+      clone.remove();
+      glyphs.sort(
+        (left, right) => left.top - right.top || left.left - right.left,
+      );
+      const lines: { ch: string; left: number; top: number }[][] = [];
+      for (const glyph of glyphs) {
+        const line = lines.find(
+          (items) => Math.abs((items[0]?.top ?? 0) - glyph.top) < 4,
+        );
+        if (line) line.push(glyph);
+        else lines.push([glyph]);
+      }
+      return lines
+        .map((line) => {
+          line.sort((left, right) => left.left - right.left);
+          return {
+            first: line[0]?.ch ?? "",
+            last: line[line.length - 1]?.ch ?? "",
+            text: line.map((glyph) => glyph.ch).join(""),
+          };
+        })
+        .filter((line) => line.first === "|" || line.last === "|");
+    });
+    expect(edges).toEqual([]);
+  });
+
+  test("C13 vãos na linha do fólio", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    for (const path of await listingSurfaces(page)) {
+      await test.step(path, async () => {
+        await open(page, path);
+        const featured = await featuredArticle(page);
+        const articles = [
+          ...(featured ? [featured] : []),
+          ...(await listArticles(page)),
+        ];
+        for (const article of articles) {
+          const gaps = await article
+            .locator("time")
+            .locator("xpath=..")
+            .evaluate((column) => {
+              const number = [...column.querySelectorAll("span")].find(
+                (span) =>
+                  span.childElementCount === 0 &&
+                  /^\d+$/.test((span.textContent ?? "").trim()),
+              );
+              const dot = [...column.querySelectorAll("span")].find(
+                (span) => (span.textContent ?? "") === "·",
+              );
+              const time = column.querySelector("time");
+              const folioNode = number
+                ? [...(number.parentElement?.childNodes ?? [])].find(
+                    (node) =>
+                      node.nodeType === Node.TEXT_NODE &&
+                      (node.textContent ?? "").includes("Fól."),
+                  )
+                : undefined;
+              if (
+                !number ||
+                !dot ||
+                !time ||
+                !folioNode ||
+                folioNode.nodeType !== Node.TEXT_NODE
+              ) {
+                return null;
+              }
+              const raw = folioNode.textContent ?? "";
+              const start = raw.indexOf("Fól.");
+              const range = document.createRange();
+              range.setStart(folioNode, start);
+              range.setEnd(folioNode, start + "Fól.".length);
+              return [range.getBoundingClientRect(), number, dot, time].map(
+                (box) => {
+                  const rect =
+                    box instanceof Element ? box.getBoundingClientRect() : box;
+                  return { left: rect.left, right: rect.right };
+                },
+              );
+            });
+          expect(gaps).not.toBeNull();
+          if (!gaps) continue;
+          expect(gaps).toHaveLength(4);
+          for (let index = 1; index < gaps.length; index += 1) {
+            const previous = gaps[index - 1];
+            const current = gaps[index];
+            if (!previous || !current) continue;
+            expect(current.left - previous.right).toBeGreaterThan(0);
+          }
+        }
+      });
+    }
+  });
+
+  test("C14 relógio parado e título sem sublinhado", async ({ page }) => {
+    for (const path of await listingSurfaces(page)) {
+      await test.step(path, async () => {
+        await open(page, path);
+        const featured = await featuredArticle(page);
+        const articles = [
+          ...(featured ? [featured] : []),
+          ...(await listArticles(page)),
+        ];
+        for (const article of articles) {
+          const clock = await article.evaluate((root) => {
+            const note = root.querySelector(".sr-only");
+            const span = note?.previousElementSibling;
+            const svg = span?.querySelector(":scope > svg");
+            if (!svg) return { ok: false, reason: "sem svg" };
+            let after = "";
+            for (let node = svg.nextSibling; node; node = node.nextSibling) {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                return { ok: false, reason: "elemento depois do svg" };
+              }
+              after += node.textContent ?? "";
+            }
+            return {
+              ok: /^\d+\s+min$/.test(after.replace(/\s+/g, " ").trim()),
+              hidden: svg.getAttribute("aria-hidden"),
+              after: after.replace(/\s+/g, " ").trim(),
+            };
+          });
+          expect(clock.ok, JSON.stringify(clock)).toBe(true);
+          expect(clock.hidden).toBe("true");
+
+          const decoration = await article
+            .locator("h2")
+            .getByRole("link")
+            .evaluate(
+              (element) => getComputedStyle(element).textDecorationLine,
+            );
+          expect(decoration).toBe("none");
+        }
       });
     }
   });

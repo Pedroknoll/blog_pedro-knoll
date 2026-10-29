@@ -2,6 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import {
+  nextPageLink,
   publishedPosts,
   titlePostsOnPage,
   type PublishedPost,
@@ -70,19 +71,6 @@ async function publishedPostsWithTags(page: Page): Promise<TaggedPost[]> {
   return tagged;
 }
 
-async function expectTagLinks(page: Page) {
-  const links = page
-    .getByRole("list", { name: "Tags", exact: true })
-    .getByRole("link");
-  const count = await links.count();
-  expect(count).toBeGreaterThan(0);
-  for (let index = 0; index < count; index += 1) {
-    const link = links.nth(index);
-    const text = normalize(await link.textContent());
-    await expect(link).toHaveAttribute("href", `/tags/${text}/`);
-  }
-}
-
 test("E1 tags do post são links [RF-02]", async ({ page }) => {
   const posts = await publishedPosts(page);
   let linkCount = 0;
@@ -106,16 +94,45 @@ test("E1 tags do post são links [RF-02]", async ({ page }) => {
   expect(linkCount).toBeGreaterThan(0);
 });
 
-test("E2 tags dos cards são links [RF-02]", async ({ page }) => {
-  const tagged = await publishedPostsWithTags(page);
+test("E2 nenhum card lista tags [RF-02]", async ({ page }) => {
   const home = await page.goto("/");
   expect(home?.status()).toBe(200);
-  await expectTagLinks(page);
 
-  for (const tag of uniqueTags(tagged)) {
-    const response = await page.goto(`/tags/${tag}/`);
+  const paths = ["/"];
+  for (;;) {
+    const next = nextPageLink(page);
+    if ((await next.count()) === 0) break;
+    const href = await next.getAttribute("href");
+    expect(href).toBeTruthy();
+    const response = await page.goto(href ?? "");
     expect(response?.status()).toBe(200);
-    await expectTagLinks(page);
+    paths.push(href ?? "");
+  }
+
+  await page.goto("/");
+  const nav = page.getByRole("navigation", {
+    name: "Filtrar por tag",
+    exact: true,
+  });
+  await expect(nav).toHaveCount(1);
+  const hrefs = await nav
+    .getByRole("link")
+    .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+  const tags = hrefs.filter((href): href is string =>
+    Boolean(href?.startsWith("/tags/")),
+  );
+  expect(tags.length).toBeGreaterThan(0);
+
+  for (const path of [...paths, ...tags]) {
+    await test.step(path, async () => {
+      const response = await page.goto(path ?? "");
+      expect(response?.status()).toBe(200);
+      await expect(
+        page
+          .locator("article")
+          .getByRole("list", { name: "Tags", exact: true }),
+      ).toHaveCount(0);
+    });
   }
 });
 

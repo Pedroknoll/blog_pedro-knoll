@@ -180,6 +180,7 @@ As quatro famílias entram pela Fonts API do Astro (`fontProviders.fontsource()`
 
 - Cormorant só a partir de 28 px.
 - Exceção: título de card, peso 600, a partir de 22 px. O ~1,45rem da seção 9.2 cabe nessa exceção (23 px com raiz de 16 px).
+- Exceção: número do fólio no card, peso 600, a partir de 22 px (T-56).
 - Exceção: a assinatura (Wordmark) também fica abaixo de 28 px, por ser desenho da marca e não texto.
 - Peso 500 nunca abaixo de 28 px.
 - O h3 a 22 px continua IBM Plex Sans 600.
@@ -198,7 +199,7 @@ Títulos com `text-wrap: balance`.
 | **Cotas** | Linha de medida do desenho técnico (traço com marcas nas pontas e valor em mono). Mostram formato de tensor `[batch, 512, 768]`, tempo, tamanho de modelo. Todo diagrama tem pelo menos uma. |
 | **Nota à margem** | IBM Plex Sans itálico, em prússia, com um traço ou seta curva, levemente inclinada (−1,5°). Uma por seção. A T-52 trocou a Caveat por esta face por causa do LCP. |
 | **Hachura de nível** | Traços inclinados para a direita (`\`), como hachurava Leonardo, que era canhoto: sempre três traços, com 1, 2 ou 3 marcados da esquerda para os três níveis. Os marcados ficam em tinta; os outros, na cor de `--linha` (T-46). |
-| **Fólio** | `Fól. 042 · 21.out.2026`, em mono, cor lápis. |
+| **Fólio** | `Fól. 042 · 21.out.2026`, em mono, cor lápis. No card, o número em Cormorant 600 e tinta (seção 9.2). |
 
 ---
 
@@ -214,6 +215,7 @@ Títulos com `text-wrap: balance`.
   - Playbook: a lista se marca item por item e recomeça (4 s).
   - Aceno: dois quadros alternando 4 vezes, depois pausa (3,2 s, contínuo).
 - **Onde anima:** quando o ícone aparece sozinho e em destaque (cartões de tipo, página "sobre", cabeçalho do fólio, saudação). **Parado** em listas, etiquetas e cards de índice (`icone-*-parado.svg`).
+- **Relógio** (`icone-relogio.svg`): 12 × 12, só parado, sem versão animada. Entra no rodapé do card, antes do tempo de leitura (seção 9.2).
 - Todas as animações respeitam `prefers-reduced-motion: reduce` (ficam paradas).
 - Os SVGs animados têm classes com prefixo (`pkc-`, `pkt-`, `pkl-`, `pkp-`, `pka-`), então podem ser inseridos inline juntos sem conflito.
 
@@ -270,11 +272,14 @@ A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `benchMinutes`, `
 - A newsletter está fora da v1 (SPEC §1). Não entra na home.
 
 ### 9.2 Card de fólio (listas)
-- Linha 1: `Fól. 007 · 21.out.2026` (mono, lápis) à esquerda, com a data que o RF-01 pede; tipo à direita (ícone parado 12 px + nome em mono maiúsculo, na cor do tipo).
-- Título em Cormorant 600 ~1,45rem.
-- Resumo em Plex Sans 14,5 px, grafite.
-- Rodapé: hachura de nível + nome do nível; etiquetas de tema.
-- Borda 1 px `--linha`, sem sombra, sem raio grande (máx. 2 px). Hover: borda vira `--tinta`.
+- Um `article` em grade. No mobile, a ordem é a do DOM: fólio e data, título, resumo, rodapé; a capa, só no destaque, vem por último.
+- De `sm` em diante, o card da lista tem duas colunas: a faixa do fólio (8rem) à esquerda, centralizada na altura do card, e o texto à direita. O destaque com capa inverte: texto à esquerda, capa de 18rem à direita, alinhada ao topo.
+- Linha do fólio: `Fól.` em mono, lápis; o número em Cormorant 600, tinta, desde 22 px; data em mono, lápis (`09.out.2026`). No mobile e no destaque, ficam na mesma linha (`Fól. 001 · 09.out.2026`). Na lista, de `sm` em diante, a data desce para baixo do número.
+- Título em Cormorant 600 ~1,45rem na lista; no destaque, maior (`text-3xl`, e `sm:text-4xl`). Sem sublinhado em repouso; no hover e no foco, cor acento e sublinhado — exceção à seção 9.10.
+- Resumo em Plex Sans, grafite.
+- Rodapé: tipo (ícone parado 12 px + nome), nível (hachura + nome) e tempo de leitura (relógio parado 12 px + `8 min`), em mono 12 px, maiúsculas. Separadores `|` na cor da linha, no vão entre os trechos; quando a linha quebra, o separador não abre nem fecha a linha. Sem tags.
+- A capa só aparece no destaque, na proporção 1200/630. Os cards da lista não mostram capa.
+- A lista separa os cards com divisória `divide-line`. Sem borda de 1 px no card, sem sombra e sem hover de borda.
 
 ### 9.3 Cabeçalho do fólio (página do post)
 1. Linha de metadados: `Fól. 006 · 21.out.2026` · tipo (ícone animado) · nível.
