@@ -19,13 +19,13 @@ const { title, description, pubDate, cover, folio, kind, level } = post.data;
 const { text, datetime } = formatPubDate(pubDate);
 const href = `/blog/${post.id}/`;
 const linkClass =
-  "text-ink no-underline hover:text-accent hover:underline hover:decoration-accent focus-visible:text-accent focus-visible:underline focus-visible:decoration-accent";
+  "text-ink no-underline hover:text-accent hover:underline hover:decoration-accent focus-visible:text-accent focus-visible:underline focus-visible:decoration-accent active:text-accent after:absolute after:inset-0";
 const showCover = Boolean(featured && cover);
 ---
 
 <article
   class:list={[
-    "grid gap-y-0",
+    "relative grid gap-y-0",
     featured && "border-b border-line pt-5 pb-8 sm:py-8",
     featured
       ? showCover &&
@@ -55,6 +55,11 @@ const showCover = Boolean(featured && cover);
     <span class:list={[!featured && "sm:hidden"]}>·</span>{" "}
     <time datetime={datetime}>{text}</time>
   </p>
+  {showCover && cover && (
+    <div class="my-4 aspect-[1200/630] w-full overflow-hidden sm:col-start-2 sm:row-start-1 sm:row-span-5 sm:my-0 sm:self-center">
+      <Image src={cover} alt="" class="h-full w-full object-cover" priority />
+    </div>
+  )}
   <div
     class:list={[
       "min-w-0",
@@ -66,15 +71,15 @@ const showCover = Boolean(featured && cover);
     <h2
       class:list={[
         "font-display font-semibold not-italic leading-snug text-ink",
-        featured ? "text-3xl sm:text-4xl" : "text-[1.45rem]",
+        featured ? "text-3xl sm:text-4xl" : "text-[1.625rem] sm:text-[1.45rem]",
       ]}
     >
       <a class={linkClass} href={href}>
         {title}
       </a>
     </h2>
-    <p class="mt-2 text-muted">{description}</p>
-    <p class="footer mt-3 flex flex-wrap items-baseline gap-x-5 overflow-x-clip font-mono text-xs uppercase tracking-widest">
+    <p class="mt-2 text-[1.0625rem] leading-[1.65] text-muted">{description}</p>
+    <p class="footer mt-3 flex flex-wrap items-baseline gap-x-5 gap-y-1.5 overflow-x-clip font-mono text-xs uppercase tracking-widest">
       <span class="whitespace-nowrap">
         <KindLabel kind={kind} animated={false} px={12} />
       </span>
@@ -107,9 +112,4 @@ const showCover = Boolean(featured && cover);
       </span>
     </p>
   </div>
-  {showCover && cover && (
-    <div class="mt-4 aspect-[1200/630] w-full overflow-hidden sm:col-start-2 sm:row-start-1 sm:row-span-5 sm:mt-0 sm:self-center">
-      <Image src={cover} alt="" class="h-full w-full object-cover" priority />
-    </div>
-  )}
 </article>

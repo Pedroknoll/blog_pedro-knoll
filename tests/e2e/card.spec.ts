@@ -1011,4 +1011,242 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     expect(after.delta).toBeLessThanOrEqual(2);
     expect(Math.abs(after.gap - before.gap)).toBeLessThanOrEqual(1);
   });
+
+  test("C17 resumo em 17px com entrelinha de cerca de 28px", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await open(page, "/");
+    const featured = await featuredArticle(page);
+    const articles = [
+      ...(featured ? [featured] : []),
+      ...(await listArticles(page)),
+    ];
+    expect(articles.length).toBeGreaterThan(1);
+    for (const article of articles) {
+      const summary = article.locator("h2 + p");
+      await expect(summary).toHaveCount(1);
+      const measured = await summary.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return { fontSize: style.fontSize, lineHeight: style.lineHeight };
+      });
+      expect(fontSizePx(measured.fontSize)).toBe(17);
+      const lineHeight = fontSizePx(measured.lineHeight);
+      expect(lineHeight).toBeGreaterThanOrEqual(27.5);
+      expect(lineHeight).toBeLessThanOrEqual(28.5);
+    }
+  });
+
+  test("C18 título da lista em 26px abaixo de sm", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await open(page, "/");
+    const narrow = await listArticles(page);
+    expect(narrow.length).toBeGreaterThan(0);
+    for (const article of narrow) {
+      const size = fontSizePx(
+        await article
+          .locator("h2")
+          .evaluate((element) => getComputedStyle(element).fontSize),
+      );
+      expect(size).toBe(26);
+    }
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    for (const article of await listArticles(page)) {
+      const size = fontSizePx(
+        await article
+          .locator("h2")
+          .evaluate((element) => getComputedStyle(element).fontSize),
+      );
+      expect(size).toBeGreaterThanOrEqual(22);
+    }
+  });
+
+  test("C19 clique no resumo abre o post desse card", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await open(page, "/");
+    const article = (await listArticles(page))[0];
+    expect(article).toBeTruthy();
+    if (!article) return;
+
+    const link = article.locator("h2").getByRole("link");
+    const href = (await link.getAttribute("href")) ?? "";
+    expect(href).toMatch(/^\/blog\/[a-z0-9-]+\/$/);
+    const summary = article.locator("h2 + p");
+    const linkBox = await link.boundingBox();
+    const articleBox = await article.boundingBox();
+    expect(linkBox).not.toBeNull();
+    expect(articleBox).not.toBeNull();
+    if (!linkBox || !articleBox) return;
+    expect(linkBox.height).toBeLessThan(articleBox.height / 2);
+
+    await summary.scrollIntoViewIfNeeded();
+    await link.focus();
+    await expect(link).toBeFocused();
+    const summaryBox = await summary.boundingBox();
+    expect(summaryBox).not.toBeNull();
+    if (!summaryBox) return;
+
+    await Promise.all([
+      page.waitForURL((url) => url.pathname === href),
+      page.mouse.click(
+        summaryBox.x + summaryBox.width / 2,
+        summaryBox.y + summaryBox.height / 2,
+      ),
+    ]);
+
+    await page.setViewportSize({ width: 360, height: 800 });
+    await open(page, "/");
+    const featured = await featuredArticle(page);
+    expect(featured).not.toBeNull();
+    if (!featured) return;
+    for (const width of [360, 1280]) {
+      await page.setViewportSize({ width, height: 800 });
+      await featured.locator("img").scrollIntoViewIfNeeded();
+      const hit = await featured.evaluate((root) => {
+        const image = root.querySelector("img");
+        const titleLink = root.querySelector("h2 a");
+        if (!image || !titleLink) return null;
+        const box = image.getBoundingClientRect();
+        const target = document.elementFromPoint(
+          box.left + box.width / 2,
+          box.top + box.height / 2,
+        );
+        const titleBox = titleLink.getBoundingClientRect();
+        const titleTarget = document.elementFromPoint(
+          titleBox.left + titleBox.width / 2,
+          titleBox.top + titleBox.height / 2,
+        );
+        return {
+          cover: target === titleLink || titleLink.contains(target),
+          title: titleTarget === titleLink || titleLink.contains(titleTarget),
+          coverTag: target?.tagName ?? "",
+        };
+      });
+      expect(hit, `${width}`).not.toBeNull();
+      expect(hit?.cover, `${width} ${hit?.coverTag}`).toBe(true);
+      expect(hit?.title, `${width}`).toBe(true);
+    }
+  });
+
+  test("C20 vão vertical quando o rodapé quebra", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await open(page, "/");
+    const footer = page.locator("article p.footer").first();
+    await expect(footer).toBeVisible();
+    const measured = await footer.evaluate((node) => {
+      const block = node as HTMLElement;
+      const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
+      while (walker.nextNode()) {
+        const value = walker.currentNode.textContent ?? "";
+        if (/Iniciante|Intermediário|Avançado/.test(value)) {
+          walker.currentNode.textContent = value.replace(
+            /Iniciante|Intermediário|Avançado/,
+            "Intermediário",
+          );
+        }
+      }
+      const wraps = () => {
+        const tops = [...block.children].map(
+          (child) => child.getBoundingClientRect().top,
+        );
+        return Math.max(...tops) - Math.min(...tops) > 8;
+      };
+      if (!wraps()) {
+        let width = Math.floor(block.getBoundingClientRect().width);
+        while (width > 120 && !wraps()) {
+          width -= 16;
+          block.style.width = `${width}px`;
+        }
+      }
+      const boxes = [...block.children]
+        .map((child) => {
+          const rect = child.getBoundingClientRect();
+          return { top: rect.top, bottom: rect.bottom };
+        })
+        .sort((left, right) => left.top - right.top);
+      const lines: { top: number; bottom: number }[] = [];
+      for (const box of boxes) {
+        const line = lines.find((item) => box.top < item.bottom - 2);
+        if (line) {
+          line.top = Math.min(line.top, box.top);
+          line.bottom = Math.max(line.bottom, box.bottom);
+        } else {
+          lines.push({ top: box.top, bottom: box.bottom });
+        }
+      }
+      const gaps: number[] = [];
+      for (let index = 1; index < lines.length; index += 1) {
+        const previous = lines[index - 1];
+        const current = lines[index];
+        if (!previous || !current) continue;
+        gaps.push(current.top - previous.bottom);
+      }
+      return {
+        lines: lines.length,
+        gaps,
+        rowGap: getComputedStyle(block).rowGap,
+      };
+    });
+    expect(measured.lines, JSON.stringify(measured)).toBeGreaterThan(1);
+    expect(Number.parseFloat(measured.rowGap)).toBeCloseTo(6, 0);
+    expect(measured.gaps.length).toBeGreaterThan(0);
+    for (const gap of measured.gaps) {
+      expect(gap).toBeGreaterThanOrEqual(5);
+      expect(gap).toBeLessThanOrEqual(8);
+    }
+  });
+
+  test("C21 capa do destaque entre o fólio e o título no mobile", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    await open(page, "/");
+    const featured = await featuredArticle(page);
+    expect(featured).not.toBeNull();
+    if (!featured) return;
+
+    const order = await featured.evaluate((root) => {
+      const label = [...root.querySelectorAll("p")].find((paragraph) =>
+        (paragraph.textContent ?? "").includes("Destaque"),
+      );
+      const folio = root.querySelector("time")?.parentElement;
+      const image = root.querySelector("img");
+      const heading = root.querySelector("h2");
+      const summary = heading?.nextElementSibling;
+      const footer = root.querySelector("p.footer");
+      if (!label || !folio || !image || !heading || !summary || !footer) {
+        return null;
+      }
+      const top = (element: Element) => element.getBoundingClientRect().top;
+      return {
+        label: top(label),
+        folio: top(folio),
+        image: top(image),
+        heading: top(heading),
+        summary: top(summary),
+        footer: top(footer),
+      };
+    });
+    expect(order).not.toBeNull();
+    if (!order) return;
+    expect(order.label).toBeLessThan(order.folio);
+    expect(order.folio).toBeLessThan(order.image);
+    expect(order.image).toBeLessThan(order.heading);
+    expect(order.heading).toBeLessThan(order.summary);
+    expect(order.summary).toBeLessThan(order.footer);
+
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const beside = await featured.evaluate((root) => {
+      const image = root.querySelector("img");
+      const heading = root.querySelector("h2");
+      if (!image || !heading) return null;
+      const imageBox = image.getBoundingClientRect();
+      const headingBox = heading.getBoundingClientRect();
+      return { imageLeft: imageBox.left, headingRight: headingBox.right };
+    });
+    expect(beside).not.toBeNull();
+    if (!beside) return;
+    expect(beside.imageLeft).toBeGreaterThanOrEqual(beside.headingRight - 1);
+  });
 });
