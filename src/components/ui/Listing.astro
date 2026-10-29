@@ -41,7 +41,7 @@ const items = await Promise.all(
     </section>
   )}
   <ul
-    class:list={["divide-y divide-line", featured ? "mt-20" : "mt-10"]}
+    class:list={["divide-y divide-line", !featured && "mt-10"]}
     aria-label="Posts"
   >
     {items.map(({ post, minutesRead }) => (

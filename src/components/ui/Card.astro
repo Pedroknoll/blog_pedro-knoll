@@ -26,14 +26,15 @@ const showCover = Boolean(featured && cover);
 <article
   class:list={[
     "grid gap-y-0",
+    featured && "border-b border-line pt-5 pb-8 sm:py-8",
     featured
       ? showCover &&
-        "sm:grid-cols-[minmax(0,1fr)_18rem] sm:items-start sm:gap-x-8"
+        "sm:grid-cols-[minmax(0,1fr)_18rem] sm:grid-rows-[1fr_auto_auto_auto_1fr] sm:gap-x-8"
       : "sm:grid-cols-[8rem_minmax(0,1fr)] sm:items-center sm:gap-x-8",
   ]}
 >
   {featured && (
-    <p class="mb-2 text-xs tracking-widest text-muted [font-variant-caps:small-caps] sm:col-start-1 sm:row-start-1">
+    <p class="mb-2 text-xs tracking-widest text-muted [font-variant-caps:small-caps] sm:col-start-1 sm:row-start-2">
       Destaque
     </p>
   )}
@@ -41,7 +42,7 @@ const showCover = Boolean(featured && cover);
     class:list={[
       "font-mono text-xs text-pencil",
       featured
-        ? "sm:col-start-1 sm:row-start-2"
+        ? "sm:col-start-1 sm:row-start-3"
         : "sm:col-start-1 sm:row-start-1 sm:flex sm:flex-col sm:items-start",
     ]}
   >
@@ -58,7 +59,7 @@ const showCover = Boolean(featured && cover);
     class:list={[
       "min-w-0",
       featured
-        ? "sm:col-start-1 sm:row-start-3"
+        ? "sm:col-start-1 sm:row-start-4"
         : "sm:col-start-2 sm:row-start-1",
     ]}
   >
@@ -107,7 +108,7 @@ const showCover = Boolean(featured && cover);
     </p>
   </div>
   {showCover && cover && (
-    <div class="mt-4 aspect-[1200/630] w-full overflow-hidden sm:col-start-2 sm:row-start-1 sm:row-span-3 sm:mt-0">
+    <div class="mt-4 aspect-[1200/630] w-full overflow-hidden sm:col-start-2 sm:row-start-1 sm:row-span-5 sm:mt-0 sm:self-center">
       <Image src={cover} alt="" class="h-full w-full object-cover" priority />
     </div>
   )}

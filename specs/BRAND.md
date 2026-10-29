@@ -273,13 +273,13 @@ A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `benchMinutes`, `
 
 ### 9.2 Card de fólio (listas)
 - Um `article` em grade. No mobile, a ordem é a do DOM: fólio e data, título, resumo, rodapé; a capa, só no destaque, vem por último.
-- De `sm` em diante, o card da lista tem duas colunas: a faixa do fólio (8rem) à esquerda, centralizada na altura do card, e o texto à direita. O destaque com capa inverte: texto à esquerda, capa de 18rem à direita, alinhada ao topo.
+- De `sm` em diante, o card da lista tem duas colunas: a faixa do fólio (8rem) à esquerda, centralizada na altura do card, e o texto à direita. O destaque com capa inverte: texto à esquerda, capa de 18rem à direita, centralizada na vertical.
 - Linha do fólio: `Fól.` em mono, lápis; o número em Cormorant 600, tinta, desde 22 px; data em mono, lápis (`09.out.2026`). No mobile e no destaque, ficam na mesma linha (`Fól. 001 · 09.out.2026`). Na lista, de `sm` em diante, a data desce para baixo do número.
 - Título em Cormorant 600 ~1,45rem na lista; no destaque, maior (`text-3xl`, e `sm:text-4xl`). Sem sublinhado em repouso; no hover e no foco, cor acento e sublinhado — exceção à seção 9.10.
 - Resumo em Plex Sans, grafite.
 - Rodapé: tipo (ícone parado 12 px + nome), nível (hachura + nome) e tempo de leitura (relógio parado 12 px + `8 min`), em mono 12 px, maiúsculas. Separadores `|` na cor da linha, no vão entre os trechos; quando a linha quebra, o separador não abre nem fecha a linha. Sem tags.
 - A capa só aparece no destaque, na proporção 1200/630. Os cards da lista não mostram capa.
-- A lista separa os cards com divisória `divide-line`. Sem borda de 1 px no card, sem sombra e sem hover de borda.
+- A lista separa os cards com divisória `divide-line`. Os cards da lista ficam sem borda de 1 px, sem sombra e sem hover de borda. O destaque tem borda de 1 px `--linha` só embaixo, sem raio e sem sombra. O respiro é só vertical: 1,25rem em cima e 2rem embaixo no mobile, 2rem em cima e embaixo de `sm` em diante. O texto e a capa alinham com os cards da lista. O espaço até o post seguinte é o mesmo que entre os cards da lista: 2rem de cada lado do filete.
 
 ### 9.3 Cabeçalho do fólio (página do post)
 1. Linha de metadados: `Fól. 006 · 21.out.2026` · tipo (ícone animado) · nível.

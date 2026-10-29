@@ -844,4 +844,171 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       });
     }
   });
+
+  test("C15 borda só no destaque", async ({ page }) => {
+    await open(page, "/");
+    const featured = await featuredArticle(page);
+    expect(featured).not.toBeNull();
+    if (!featured) return;
+    const border = await featured.evaluate((article) => {
+      const style = getComputedStyle(article);
+      const probe = document.createElement("div");
+      probe.style.borderBottomColor = "var(--color-line)";
+      document.body.appendChild(probe);
+      const line = getComputedStyle(probe).borderBottomColor;
+      probe.remove();
+      return {
+        top: style.borderTopWidth,
+        right: style.borderRightWidth,
+        bottom: style.borderBottomWidth,
+        left: style.borderLeftWidth,
+        bottomStyle: style.borderBottomStyle,
+        bottomColor: style.borderBottomColor,
+        line,
+        paddingTop: Number.parseFloat(style.paddingTop),
+        paddingRight: Number.parseFloat(style.paddingRight),
+        paddingBottom: Number.parseFloat(style.paddingBottom),
+        paddingLeft: Number.parseFloat(style.paddingLeft),
+      };
+    });
+    expect(border.bottom).toBe("1px");
+    expect(border.top).toBe("0px");
+    expect(border.left).toBe("0px");
+    expect(border.right).toBe("0px");
+    expect(border.bottomStyle).toBe("solid");
+    expect(border.bottomColor).toBe(border.line);
+    expect(border.paddingTop).toBeGreaterThanOrEqual(20);
+    expect(border.paddingBottom).toBeGreaterThanOrEqual(20);
+
+    for (const width of [1280, 360]) {
+      await page.setViewportSize({ width, height: 800 });
+      const spacing = await page.evaluate(() => {
+        const featured = document.querySelector(
+          'section[aria-label="Destaque"] article',
+        );
+        const item = document.querySelector('ul[aria-label="Posts"] > li');
+        const card = item?.querySelector("article");
+        const featuredTitle = featured?.querySelector("h2");
+        const listTitle = card?.querySelector("h2");
+        const cover = featured?.querySelector("img");
+        if (
+          !featured ||
+          !item ||
+          !card ||
+          !featuredTitle ||
+          !listTitle ||
+          !cover
+        )
+          return null;
+        const itemStyle = getComputedStyle(item);
+        const featuredStyle = getComputedStyle(featured);
+        const featuredTitleBox = featuredTitle.getBoundingClientRect();
+        const listTitleBox = listTitle.getBoundingClientRect();
+        const cardBox = card.getBoundingClientRect();
+        const coverBox = cover.getBoundingClientRect();
+        return {
+          gap:
+            card.getBoundingClientRect().top -
+            featured.getBoundingClientRect().bottom,
+          above: Number.parseFloat(featuredStyle.paddingBottom),
+          below: Number.parseFloat(itemStyle.paddingTop),
+          between: Number.parseFloat(itemStyle.paddingBottom),
+          paddingTop: Number.parseFloat(featuredStyle.paddingTop),
+          paddingBottom: Number.parseFloat(featuredStyle.paddingBottom),
+          paddingLeft: Number.parseFloat(featuredStyle.paddingLeft),
+          paddingRight: Number.parseFloat(featuredStyle.paddingRight),
+          left: featuredTitleBox.left - cardBox.left,
+          titleLeft: featuredTitleBox.left - listTitleBox.left,
+          right: coverBox.right - cardBox.right,
+        };
+      });
+      expect(spacing, `${width}`).not.toBeNull();
+      if (!spacing) continue;
+      expect(
+        Math.abs(spacing.gap - spacing.below),
+        `${width}`,
+      ).toBeLessThanOrEqual(1);
+      expect(
+        Math.abs(spacing.above - spacing.between),
+        `${width}`,
+      ).toBeLessThanOrEqual(1);
+      if (width === 1280) {
+        expect(spacing.paddingTop, `${width}`).toBe(32);
+        expect(spacing.paddingBottom, `${width}`).toBe(32);
+        expect(spacing.paddingLeft, `${width}`).toBe(0);
+        expect(spacing.paddingRight, `${width}`).toBe(0);
+        expect(Math.abs(spacing.left), `${width}`).toBeLessThanOrEqual(1);
+        expect(Math.abs(spacing.right), `${width}`).toBeLessThanOrEqual(1);
+      } else {
+        expect(spacing.paddingLeft, `${width}`).toBe(0);
+        expect(spacing.paddingRight, `${width}`).toBe(0);
+        expect(Math.abs(spacing.titleLeft), `${width}`).toBeLessThanOrEqual(1);
+      }
+    }
+
+    for (const article of await listArticles(page)) {
+      const widths = await article.evaluate((root) => {
+        const style = getComputedStyle(root);
+        return [
+          style.borderTopWidth,
+          style.borderRightWidth,
+          style.borderBottomWidth,
+          style.borderLeftWidth,
+        ].map((value) => Number.parseFloat(value));
+      });
+      expect(widths.every((width) => width === 0)).toBe(true);
+    }
+  });
+
+  test("C16 capa centralizada sem abrir vão", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await open(page, "/");
+    const featured = await featuredArticle(page);
+    expect(featured).not.toBeNull();
+    if (!featured) return;
+
+    const measure = () =>
+      featured.evaluate((root) => {
+        const label = [...root.querySelectorAll("p")].find((paragraph) =>
+          (paragraph.textContent ?? "").includes("Destaque"),
+        );
+        const folio = root.querySelector("time")?.parentElement;
+        const heading = root.querySelector("h2");
+        const footer = root.querySelector("p.footer");
+        const cover = root.querySelector("img")?.parentElement;
+        if (!label || !folio || !heading || !footer || !cover) return null;
+        const labelBox = label.getBoundingClientRect();
+        const footerBox = footer.getBoundingClientRect();
+        const coverBox = cover.getBoundingClientRect();
+        const folioBox = folio.getBoundingClientRect();
+        const headingBox = heading.getBoundingClientRect();
+        return {
+          delta: Math.abs(
+            (coverBox.top + coverBox.bottom) / 2 -
+              (labelBox.top + footerBox.bottom) / 2,
+          ),
+          gap: headingBox.top - folioBox.bottom,
+          coverHeight: coverBox.height,
+          textHeight: footerBox.bottom - labelBox.top,
+        };
+      });
+
+    const before = await measure();
+    expect(before, "medição inicial").not.toBeNull();
+    if (!before) return;
+    expect(before.delta).toBeLessThanOrEqual(2);
+
+    await featured.evaluate((root) => {
+      const link = root.querySelector("h2 a");
+      if (link) link.textContent = "Curto";
+      root.querySelector("h2")?.nextElementSibling?.remove();
+    });
+
+    const after = await measure();
+    expect(after, "medição com texto curto").not.toBeNull();
+    if (!after) return;
+    expect(after.coverHeight).toBeGreaterThan(after.textHeight);
+    expect(after.delta).toBeLessThanOrEqual(2);
+    expect(Math.abs(after.gap - before.gap)).toBeLessThanOrEqual(1);
+  });
 });
