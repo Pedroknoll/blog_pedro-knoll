@@ -106,6 +106,7 @@ flowchart TD
   T54[T-54 Margem LCP]
   T55[T-55 Ficha]
   T56[T-56 Card lista]
+  T57[T-57 Card mobile]
   T40 --> T41
   T40 --> T44
   T40 --> T45
@@ -139,6 +140,7 @@ flowchart TD
   T39 --> T55
   T46 --> T55
   T46 --> T56
+  T56 --> T57
 ```
 
 | ID | Tarefa | Requisitos | Depende de | Status |
@@ -160,6 +162,7 @@ flowchart TD
 | T-54 | Margem de LCP dos posts depois da T-43: posts A e B a 1953–1954 ms, 46 ms do teto. A guarda de fontes admite um 5º arquivo nos posts, a Plex Sans 400 itálico, e um post com ênfase em itálico tende a passar de 2000 ms; o `lighthouserc.json` só mede A e B. Medir com uma fixture de post com itálico e decidir entre tetos da guarda, estratégia de fonte ou URLs do Lighthouse CI, sem relaxar o RNF-01. Hipótese a testar: limite de 6 conexões por origem em HTTP/1.1 no Lantern; o post A passou de 5 para 6 fontes antes do LCP e subiu dois degraus | RNF-01 | T-43, T-39 | pendente |
 | T-55 | Ficha do cabeçalho do post, item 4 da seção 9.3 do BRAND. Quando o post tem `benchMinutes`, `material` ou `track`, o cabeçalho mostra só os itens presentes: tempo de bancada (`≈ 90 min`), material e caderno. `track` mostra a posição e o total de posts publicados com o mesmo `track` (`LLMs · 4 de 12`). A posição é calculada numa função pura em `src/lib/`, com entrada estrutural. A tarefa decide a ordem da contagem (sugestão: `pubDate` crescente, desempate por `id`) e o rótulo do caderno, já que `track` é um slug e `src/data/tags.ts` não existe. Saiu da T-46 porque nenhum post publicado tem esses campos; a prova usa a fixture da T-39. Mede LCP e CLS antes e depois, por causa da margem dos posts (T-54) | RF-04 | T-39, T-46 | pendente |
 | T-56 | Card da listagem num DOM só: fólio e data, título sem sublinhado em repouso, resumo, tipo, nível e tempo de leitura com relógio parado; sem tags; capa só no destaque; destaque com borda embaixo e capa centralizada. O número do fólio é Cormorant 600 desde 22 px, via `folioDigits`. O tempo é o `minutesRead` da página do post, lido por `render()` em `src/lib/reading-minutes.ts`, sem cache. No desktop da lista, a faixa do fólio fica à esquerda e centralizada na altura do card. A lista separa os cards com `divide-line` | RF-01, RF-02 | T-46 | concluída |
+| T-57 | Ajustes de mobile no card de fólio, BRAND §9.2. Resumo em 17 px com entrelinha 1,65. Título da lista em 26 px abaixo de `sm` e ~1,45rem de `sm` em diante, Cormorant 600 desde 22 px; o título do destaque não muda. O card inteiro é tocável pelo link esticado no título, com `active:text-accent`, sem hover de borda nem sombra. O rodapé leva `gap-y-1.5` e `pointer-events-none`, para o separador absoluto não ficar por cima do toque. No mobile, a capa do destaque fica depois do rótulo e do fólio com a data, e antes do título; de `sm` em diante continua à direita | RF-01 | T-56 | em andamento |
 
 ## Fase 2 — Interatividade
 

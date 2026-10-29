@@ -1072,7 +1072,6 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     const link = article.locator("h2").getByRole("link");
     const href = (await link.getAttribute("href")) ?? "";
     expect(href).toMatch(/^\/blog\/[a-z0-9-]+\/$/);
-    const summary = article.locator("h2 + p");
     const linkBox = await link.boundingBox();
     const articleBox = await article.boundingBox();
     expect(linkBox).not.toBeNull();
@@ -1080,10 +1079,45 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     if (!linkBox || !articleBox) return;
     expect(linkBox.height).toBeLessThan(articleBox.height / 2);
 
-    await summary.scrollIntoViewIfNeeded();
-    await link.focus();
-    await expect(link).toBeFocused();
-    const summaryBox = await summary.boundingBox();
+    const level = article.getByText(LEVEL);
+    const reading = article.locator("p.footer span.text-pencil", {
+      hasText: /\d+\s+min/,
+    });
+    for (const piece of [level, reading]) {
+      await piece.scrollIntoViewIfNeeded();
+      const hit = await piece.evaluate((element) => {
+        const rect = element.getBoundingClientRect();
+        const target = document.elementFromPoint(
+          rect.left + rect.width / 2,
+          rect.top + rect.height / 2,
+        );
+        const titleLink = element.closest("article")?.querySelector("h2 a");
+        return {
+          link: target === titleLink,
+          tag: target?.tagName ?? "",
+        };
+      });
+      expect(hit.link, hit.tag).toBe(true);
+      const box = await piece.boundingBox();
+      expect(box).not.toBeNull();
+      if (!box) return;
+      await Promise.all([
+        page.waitForURL((url) => url.pathname === href),
+        page.mouse.click(box.x + box.width / 2, box.y + box.height / 2),
+      ]);
+      await page.setViewportSize({ width: 360, height: 800 });
+      await open(page, "/");
+    }
+
+    const returned = page
+      .locator('ul[aria-label="Posts"] > li article')
+      .filter({ has: page.locator(`a[href="${href}"]`) });
+    await expect(returned).toHaveCount(1);
+    const returnedSummary = returned.locator("h2 + p");
+    await returnedSummary.scrollIntoViewIfNeeded();
+    await returned.locator("h2").getByRole("link").focus();
+    await expect(returned.locator("h2").getByRole("link")).toBeFocused();
+    const summaryBox = await returnedSummary.boundingBox();
     expect(summaryBox).not.toBeNull();
     if (!summaryBox) return;
 
