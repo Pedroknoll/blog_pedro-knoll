@@ -172,3 +172,294 @@
     animation: none;
   }
 }
+
+/* Ícones de tipo, T-46. */
+.pkc-q1,
+.pkc-q2,
+.pkc-q3 {
+  opacity: 0;
+}
+
+.pkc-q0 {
+  animation: pkc-a0 3.2s step-end infinite;
+}
+
+.pkc-q1 {
+  animation: pkc-a1 3.2s step-end infinite;
+}
+
+.pkc-q2 {
+  animation: pkc-a2 3.2s step-end infinite;
+}
+
+.pkc-q3 {
+  animation: pkc-a3 3.2s step-end infinite;
+}
+
+@keyframes pkc-a0 {
+  0% {
+    opacity: 1;
+  }
+  25% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pkc-a1 {
+  0% {
+    opacity: 0;
+  }
+  25% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pkc-a2 {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  75% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pkc-a3 {
+  0% {
+    opacity: 0;
+  }
+  75% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pkc-q0,
+  .pkc-q1,
+  .pkc-q2,
+  .pkc-q3 {
+    animation: none;
+  }
+}
+
+.pkt-cursor {
+  animation: pkt-pisca 1.1s steps(1) infinite;
+}
+
+@keyframes pkt-pisca {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pkt-cursor {
+    animation: none;
+  }
+}
+
+.pkl-q1,
+.pkl-q2 {
+  opacity: 0;
+}
+
+.pkl-q0 {
+  animation: pkl-b0 1.8s step-end infinite;
+}
+
+.pkl-q1 {
+  animation: pkl-b1 1.8s step-end infinite;
+}
+
+.pkl-q2 {
+  animation: pkl-b2 1.8s step-end infinite;
+}
+
+@keyframes pkl-b0 {
+  0% {
+    opacity: 1;
+  }
+  33.3% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pkl-b1 {
+  0% {
+    opacity: 0;
+  }
+  33.3% {
+    opacity: 1;
+  }
+  66.6% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pkl-b2 {
+  0% {
+    opacity: 0;
+  }
+  66.6% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pkl-q0,
+  .pkl-q1,
+  .pkl-q2 {
+    animation: none;
+  }
+}
+
+.pkp-on0,
+.pkp-on1,
+.pkp-on2 {
+  opacity: 0;
+}
+
+.pkp-on0 {
+  animation: pkp-n0 4s step-end infinite;
+}
+
+.pkp-off0 {
+  animation: pkp-f0 4s step-end infinite;
+}
+
+.pkp-on1 {
+  animation: pkp-n1 4s step-end infinite;
+}
+
+.pkp-off1 {
+  animation: pkp-f1 4s step-end infinite;
+}
+
+.pkp-on2 {
+  animation: pkp-n2 4s step-end infinite;
+}
+
+.pkp-off2 {
+  animation: pkp-f2 4s step-end infinite;
+}
+
+@keyframes pkp-n0 {
+  0% {
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes pkp-f0 {
+  0% {
+    opacity: 1;
+  }
+  18% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pkp-n1 {
+  0% {
+    opacity: 0;
+  }
+  36% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes pkp-f1 {
+  0% {
+    opacity: 1;
+  }
+  36% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes pkp-n2 {
+  0% {
+    opacity: 0;
+  }
+  54% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes pkp-f2 {
+  0% {
+    opacity: 1;
+  }
+  54% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pkp-on0,
+  .pkp-on1,
+  .pkp-on2,
+  .pkp-off0,
+  .pkp-off1,
+  .pkp-off2 {
+    animation: none;
+  }
+
+  .pkp-on0,
+  .pkp-on1,
+  .pkp-on2 {
+    opacity: 1;
+  }
+
+  .pkp-off0,
+  .pkp-off1,
+  .pkp-off2 {
+    opacity: 0;
+  }
+}

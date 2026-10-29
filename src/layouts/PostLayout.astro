@@ -5,10 +5,13 @@ import type { CollectionEntry } from "astro:content";
 import "katex/dist/katex.min.css";
 
 import CodeCopy from "~/components/ui/CodeCopy.astro";
+import KindLabel from "~/components/ui/KindLabel.astro";
+import LevelLabel from "~/components/ui/LevelLabel.astro";
 import TagList from "~/components/ui/TagList.astro";
 import Toc from "~/components/ui/Toc.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { formatPubDate } from "~/lib/format-date";
+import { formatFolio } from "~/lib/folio";
 import { absoluteUrl, blogPostingJsonLd, pageTitle, postPath } from "~/lib/seo";
 import type { TocItem } from "~/lib/toc";
 import { site } from "~/site.config";
@@ -21,8 +24,18 @@ interface Props {
 }
 
 const { post, minutesRead, hasCode, toc } = Astro.props;
-const { title, description, pubDate, updatedDate, tags, cover, coverAlt } =
-  post.data;
+const {
+  title,
+  description,
+  pubDate,
+  updatedDate,
+  tags,
+  cover,
+  coverAlt,
+  folio,
+  kind,
+  level,
+} = post.data;
 const labelClass =
   "text-xs tracking-widest text-muted [font-variant-caps:small-caps]";
 const published = formatPubDate(pubDate);
@@ -71,6 +84,17 @@ const jsonLd = blogPostingJsonLd({
 >
   <article class="mx-auto w-full max-w-[72rem] px-4 py-10">
     <header>
+      <p class="font-mono text-xs text-pencil">
+        <span>
+          {formatFolio(folio)}
+          {" · "}
+          <time datetime={published.datetime}>{published.text}</time>
+        </span>
+        {" · "}
+        <KindLabel kind={kind} animated={true} px={24} />
+        {" · "}
+        <LevelLabel level={level} />
+      </p>
       <h1 class="font-serif text-4xl leading-tight font-normal text-ink sm:text-5xl">
         {title}
       </h1>
@@ -82,18 +106,14 @@ const jsonLd = blogPostingJsonLd({
           <p class={labelClass}>Autor</p>
           <p class="mt-2 text-sm text-ink">{site.author.name}</p>
         </div>
-        <div class="min-w-0">
-          <p class={labelClass}>Publicação</p>
-          <p class="mt-2 text-sm text-ink">
-            <time datetime={published.datetime}>{published.text}</time>
-          </p>
-          {updated && (
-            <p class="mt-1 text-sm text-muted">
+        {updated && (
+          <div class="min-w-0">
+            <p class="mt-2 text-sm text-muted">
               <span>Atualizado em</span>{" "}
               <time datetime={updated.datetime}>{updated.text}</time>
             </p>
-          )}
-        </div>
+          </div>
+        )}
         <div class="min-w-0">
           <p class={labelClass}>Leitura</p>
           {typeof minutesRead === "number" && (

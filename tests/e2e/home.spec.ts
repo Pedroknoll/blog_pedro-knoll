@@ -47,7 +47,9 @@ test.describe("home [RF-01, RF-03]", () => {
       const time = card.locator("time");
       await expect(time).toHaveCount(1);
       await expect(time).toHaveAttribute("datetime", /^\d{4}-\d{2}-\d{2}$/);
-      await expect(time).toHaveText(/^\d{1,2} de .+ de \d{4}$/);
+      await expect(time).toHaveText(
+        /^\d{2}\.(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\.\d{4}$/,
+      );
 
       if ((await card.locator("img").count()) === 0) {
         cardsWithoutImage += 1;

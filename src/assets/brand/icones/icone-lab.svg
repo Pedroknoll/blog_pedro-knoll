@@ -1,5 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
-  <style>.pkl-q1,.pkl-q2{opacity:0}.pkl-q0{animation:pkl-b0 1.8s step-end infinite}.pkl-q1{animation:pkl-b1 1.8s step-end infinite}.pkl-q2{animation:pkl-b2 1.8s step-end infinite}@keyframes pkl-b0{0%{opacity:1}33.3%{opacity:0}100%{opacity:0}}@keyframes pkl-b1{0%{opacity:0}33.3%{opacity:1}66.6%{opacity:0}100%{opacity:0}}@keyframes pkl-b2{0%{opacity:0}66.6%{opacity:1}100%{opacity:1}}@media (prefers-reduced-motion:reduce){.pkl-q0,.pkl-q1,.pkl-q2{animation:none}}</style>
   <path d="M3 1h6v1h-6zM4 2h1v1h-1zM7 2h1v1h-1zM4 3h1v1h-1zM7 3h1v1h-1zM3 4h1v1h-1zM8 4h1v1h-1zM2 5h1v1h-1zM9 5h1v1h-1zM2 6h1v1h-1zM9 6h1v1h-1zM1 7h1v1h-1zM10 7h1v1h-1zM1 8h10v1h-10zM0 9h3v1h-3zM4 9h8v1h-8zM0 10h12v1h-12z"/>
   <path class="pkl-q0" d="M5 5h1v1h-1zM6 7h1v1h-1z"/>
   <path class="pkl-q1" d="M6 4h1v1h-1zM5 6h1v1h-1z"/>
