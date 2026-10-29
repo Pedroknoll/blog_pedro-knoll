@@ -23,7 +23,7 @@ const FOLIO_DATE = new RegExp(
   `^Fól\\. \\d{3} · \\d{2}\\.(?:${MONTH})\\.\\d{4}$`,
 );
 const KIND = new RegExp(`^(${Object.values(KIND_LABELS).join("|")})$`);
-const LEVEL = /^(\\{1,3}) (Iniciante|Intermediário|Avançado)$/;
+const LEVEL = /^\\{3} (Iniciante|Intermediário|Avançado)$/;
 const HATCH = {
   Iniciante: 1,
   Intermediário: 2,
@@ -143,9 +143,18 @@ async function expectFolioLine(container: Locator) {
   const level = container.getByText(LEVEL);
   await expect(level).toHaveText(LEVEL);
   const levelText = textOf(await level.textContent());
-  const hatch = /^(\\+) (Iniciante|Intermediário|Avançado)$/.exec(levelText);
-  const label = hatch?.[2] as keyof typeof HATCH | undefined;
-  expect(hatch?.[1]?.length).toBe(label ? HATCH[label] : undefined);
+  const name = /^\\{3} (Iniciante|Intermediário|Avançado)$/.exec(
+    levelText,
+  )?.[1];
+  const label = name as keyof typeof HATCH | undefined;
+  const marked = textOf(
+    await level
+      .locator("[aria-hidden='true'] > span")
+      .first()
+      .evaluate((element) => element.textContent),
+  );
+  const strokes = /^(\\+)$/.exec(marked)?.[1]?.length;
+  expect(strokes).toBe(label ? HATCH[label] : undefined);
 }
 
 async function animationNames(svg: Locator): Promise<string[]> {

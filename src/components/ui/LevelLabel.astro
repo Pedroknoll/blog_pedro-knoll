@@ -1,0 +1,18 @@
+---
+import { LEVEL_LABELS, levelHatch } from "~/lib/level";
+
+interface Props {
+  level: number;
+}
+
+const { level } = Astro.props;
+const { marked, rest } = levelHatch(level);
+---
+
+<span class="font-mono text-xs uppercase tracking-widest text-pencil">
+  <span aria-hidden="true">
+    <span class="text-ink">{marked}</span>
+    <span class="text-line">{rest}</span>
+  </span>{" "}
+  {LEVEL_LABELS[level]}
+</span>

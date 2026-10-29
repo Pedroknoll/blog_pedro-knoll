@@ -7,8 +7,8 @@ describe("nível", () => {
     expect(LEVEL_LABELS[1]).toBe("Iniciante");
     expect(LEVEL_LABELS[2]).toBe("Intermediário");
     expect(LEVEL_LABELS[3]).toBe("Avançado");
-    expect(levelHatch(1)).toBe("\\");
-    expect(levelHatch(2)).toBe("\\\\");
-    expect(levelHatch(3)).toBe("\\\\\\");
+    expect(levelHatch(1)).toEqual({ marked: "\\", rest: "\\\\" });
+    expect(levelHatch(2)).toEqual({ marked: "\\\\", rest: "\\" });
+    expect(levelHatch(3)).toEqual({ marked: "\\\\\\", rest: "" });
   });
 });
