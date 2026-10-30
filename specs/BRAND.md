@@ -88,6 +88,7 @@ A marca **não é** pastiche renascentista, nem futurismo de neon, cérebros bri
 | `pklog-simbolo-currentcolor.svg` | Para inline, herda a cor do texto; o nó continua azul. |
 | `pklog-simbolo-construcao.svg` | Peças grandes (capa, sobre, slides de abertura): mostra as linhas de construção. Nunca em tamanho pequeno. |
 | `pklog-simbolo-pixel.svg` e os favicons em `public/` | Abaixo de 24 px: versão em pixel 16×16, sem os nós das pontas. |
+| `pklog-simbolo-404.svg` | Só a página 404: a folha arrancada, com o símbolo na versão 404 (abaixo). |
 
 **Assinatura (lockup).** Símbolo + nome. Feita em HTML/CSS, não em imagem, para usar as fontes da marca:
 
@@ -113,6 +114,15 @@ Versão vertical: símbolo em cima, nome, e a descrição curta em mono maiúscu
 
 **Área de proteção:** espaço livre em volta igual a ¼ do diâmetro do círculo.
 **Tamanhos mínimos:** símbolo 24 px; versão pixel 16 px; assinatura horizontal 140 px de largura.
+
+**Versão 404 (só na página 404).** O símbolo perdeu um nó. No mesmo viewBox 100×100 do desenho padrão:
+- O círculo continua com r = 44 e traço 3, mas fica tracejado (5 cheio, 4 vazio) e em prússia.
+- A haste e a perna de cima não mudam: traço 6, pontas redondas, em tinta. Os nós (37,22), (37,78) e (67,22) continuam com r = 4,5, cheios, em tinta.
+- A perna de baixo, de (37,50) a (67,78), vira uma aresta pontilhada em tinta: traço 3, pontos redondos a cada 6.
+- O nó (67,78) fica vazio: r = 6, contorno de traço 2 em tinta, miolo da cor do fundo.
+- O nó central continua com r = 8, em prússia. O halo da cor do fundo é um disco de r = 9,5 desenhado por baixo, o mesmo raio externo do halo padrão.
+
+O símbolo entra numa folha arrancada de caderno, com escala uniforme de 1,2, sem girar e sem achatar. A folha tem a proporção A5: a cota de cima marca `148 mm` e a da direita, `210 mm` (seção 6). Da esquerda para a direita vêm uma linha em tinta, uma faixa da cor da folha com os furos da espiral, a borda em zigue-zague e a folha, com o contorno tracejado em lápis. Duas notas à margem (seção 6), "estava aqui" e "nó não encontrado", têm uma seta curva até o nó vazio. As cores vêm dos tokens pela cor do texto (`currentColor`), sem hex, para funcionar nos dois temas. A ilustração é decorativa e entra com `aria-hidden`: não diz nada que o texto da página não diga. Fora da página 404, use as outras versões.
 
 **Proibido:** esticar ou achatar; girar; trocar cores por cores fora da paleta; sombra, brilho ou gradiente; aplicar sobre foto sem fundo sólido.
 
@@ -328,6 +338,9 @@ Dois estados, **Claro** e **Escuro**, num controle segmentado em mono 12 px. Gra
 ### 9.10 Foco e interação
 Foco visível: contorno 2 px prússia com afastamento 3 px. Links em prússia, sublinhado de 1 px com afastamento 3 px.
 
+### 9.11 Link com cara de botão (página 404)
+O "Voltar ao início" da página 404 parece um botão, mas continua um link (`<a>`) para `/`. Fundo tinta, texto papel, IBM Plex Mono 400 em 14 px, 44 px de altura, 20 px de respiro nas laterais. Cantos retos e sem sombra, como os botões da seção 9.6. Sem sublinhado em repouso; no hover e no foco, sublinhado com afastamento de 3 px, sem troca de cor. O foco é o da seção 9.10. No tema escuro, os mesmos tokens invertem o par: fundo claro, texto escuro.
+
 ---
 
 ## 10. Voz
@@ -352,7 +365,7 @@ Um colega experiente puxando a cadeira ao lado, com uma pitada de inventor curio
 |---|---|
 | Saudação | Bem-vindo ao pk.log |
 | Newsletter | Receba os próximos fólios por e-mail. · botão: Receber fólios |
-| Página 404 | Esta página foi arrancada do caderno. · link: Voltar para o início |
+| Página 404 | Esta página foi arrancada do caderno. · texto: O endereço pode ter mudado, ou esta página ainda não foi escrita. O resto do caderno continua aqui. · link: Voltar ao início · notas da ilustração: estava aqui · nó não encontrado |
 | Botão de código | Copiar → Copiado |
 | Fim de fólio | Achou um erro? Anote na margem: abra uma issue. |
 | Botão de tema | Claro · Escuro |

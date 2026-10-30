@@ -14,3 +14,6 @@ export const homeIntro =
   "Olá, eu sou o Pedro. Aqui documento meus aprendizados e experimentos sobre Inteligência Artificial.";
 
 export const notFoundHeading = "Esta página foi arrancada do caderno.";
+
+export const notFoundIntro =
+  "O endereço pode ter mudado, ou esta página ainda não foi escrita. O resto do caderno continua aqui.";
