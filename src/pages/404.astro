@@ -1,0 +1,28 @@
+---
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { pageTitle } from "~/lib/seo";
+import { site } from "~/site.config";
+
+const description = "Esta página foi arrancada do caderno.";
+const linkClass =
+  "text-ink underline decoration-ink hover:text-accent hover:decoration-accent focus-visible:text-accent focus-visible:decoration-accent";
+---
+
+<BaseLayout
+  title={pageTitle({ page: "Página não encontrada" }, site)}
+  description={description}
+  ogTitle="Página não encontrada"
+  ogType="website"
+>
+  <meta slot="head" name="robots" content="noindex" />
+  <div class="mx-auto w-full max-w-[52rem] px-4 py-10">
+    <h1 class="font-display text-3xl font-semibold text-balance text-ink sm:text-4xl">
+      Esta página foi arrancada do caderno.
+    </h1>
+    <p class="mt-4">
+      <a class={linkClass} href="/">
+        Voltar para o início
+      </a>
+    </p>
+  </div>
+</BaseLayout>

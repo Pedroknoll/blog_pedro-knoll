@@ -4,7 +4,7 @@ import { jsonLdScript } from "~/lib/seo";
 interface Props {
   title: string;
   description: string;
-  canonical: string;
+  canonical?: string;
   ogTitle: string;
   ogType: "article" | "website";
   ogSiteName: string;
@@ -41,10 +41,10 @@ const {
 
 <title>{title}</title>
 <meta name="description" content={description} />
-<link rel="canonical" href={canonical} />
+{canonical && <link rel="canonical" href={canonical} />}
 <meta property="og:title" content={ogTitle} />
 <meta property="og:description" content={description} />
-<meta property="og:url" content={canonical} />
+{canonical && <meta property="og:url" content={canonical} />}
 <meta property="og:site_name" content={ogSiteName} />
 <meta property="og:locale" content="pt_BR" />
 <meta property="og:type" content={ogType} />
