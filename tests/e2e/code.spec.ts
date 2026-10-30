@@ -3,7 +3,7 @@ import { expect, test, type Request } from "@playwright/test";
 import { publishedPosts } from "./published-posts";
 
 // Igual a `copyResetMs` no script de src/components/ui/CodeCopy.astro.
-const copyResetMs = 2000;
+const copyResetMs = 1500;
 const clockStart = new Date("2024-02-02T08:00:00");
 const twoHoursMs = 2 * 60 * 60 * 1000;
 
@@ -77,10 +77,16 @@ test.describe("código e fórmulas [RF-06, RF-07, RNF-01]", () => {
           const codeText = await pre
             .locator("code")
             .evaluate((node) => node.textContent ?? "");
-          const button = pre.locator("..").getByRole("button");
+          const button = pre
+            .locator("..")
+            .locator(":scope > *")
+            .first()
+            .getByRole("button");
           await expect(button).toHaveCount(1);
+          await expect(button).toHaveText("Copiar");
           await expect(button).toHaveAccessibleName(/^Copiar código$/);
           await button.click();
+          await expect(button).toHaveText("Copiado");
           await expect(button).toHaveAccessibleName(/^Código copiado$/);
           await expect
             .poll(async () => {
@@ -90,7 +96,10 @@ test.describe("código e fórmulas [RF-06, RF-07, RNF-01]", () => {
               return { text, mentionsCopiar: text.includes("Copiar") };
             })
             .toEqual({ text: codeText, mentionsCopiar: false });
-          await page.clock.fastForward(copyResetMs + 1);
+          await page.clock.fastForward(copyResetMs - 1);
+          await expect(button).toHaveText("Copiado");
+          await page.clock.fastForward(2);
+          await expect(button).toHaveText("Copiar");
           await expect(button).toHaveAccessibleName(/^Copiar código$/);
         }
 
@@ -99,6 +108,69 @@ test.describe("código e fórmulas [RF-06, RF-07, RNF-01]", () => {
     }
 
     expect(pres).toBeGreaterThan(0);
+  });
+
+  test("barra do bloco [RF-06]", async ({ page }) => {
+    const posts = await publishedPosts(page);
+    let named = 0;
+    let unnamed = 0;
+
+    for (const post of posts) {
+      await test.step(post.href, async () => {
+        const response = await page.goto(post.href);
+        expect(response?.status()).toBe(200);
+
+        const blocks = page.getByRole("article").locator("pre");
+        const count = await blocks.count();
+
+        for (let index = 0; index < count; index += 1) {
+          const bar = await blocks.nth(index).evaluate((pre) => {
+            const parent = pre.parentElement;
+            const children = parent ? [...parent.children] : [];
+            const first = children[0];
+            const elementChildren = first ? [...first.children] : [];
+            const span = elementChildren.find(
+              (child) => child.tagName === "SPAN",
+            );
+            const spanStyle = span ? getComputedStyle(span) : null;
+
+            return {
+              childCount: children.length,
+              lastIsPre: children.at(-1) === pre,
+              buttonCount: elementChildren.filter(
+                (child) => child.tagName === "BUTTON",
+              ).length,
+              spanCount: elementChildren.filter(
+                (child) => child.tagName === "SPAN",
+              ).length,
+              text: span?.textContent ?? "",
+              fontFamily: spanStyle?.fontFamily ?? "",
+              preFontFamily: getComputedStyle(pre).fontFamily,
+              fontSize: spanStyle?.fontSize ?? "",
+              color: spanStyle?.color ?? "",
+            };
+          });
+
+          expect(bar.childCount).toBe(2);
+          expect(bar.lastIsPre).toBe(true);
+          expect(bar.buttonCount).toBe(1);
+          expect([0, 1]).toContain(bar.spanCount);
+
+          if (bar.spanCount === 1) {
+            expect(bar.text).not.toBe("");
+            expect(bar.fontFamily).toBe(bar.preFontFamily);
+            expect(bar.fontSize).toBe("12px");
+            expect(bar.color).toBe("rgb(94, 83, 69)");
+            named += 1;
+          } else {
+            unnamed += 1;
+          }
+        }
+      });
+    }
+
+    expect(named).toBeGreaterThan(0);
+    expect(unnamed).toBeGreaterThan(0);
   });
 
   test("fonte KaTeX_Main carrega da mesma origem [RF-07]", async ({ page }) => {
@@ -181,6 +253,7 @@ test.describe("código e fórmulas sem JavaScript [RF-06, RF-07]", () => {
   }) => {
     const posts = await publishedPosts(page);
     let pres = 0;
+    let names = 0;
 
     for (const post of posts) {
       await test.step(post.href, async () => {
@@ -192,10 +265,28 @@ test.describe("código e fórmulas sem JavaScript [RF-06, RF-07]", () => {
         await expect(
           page.getByRole("button", { name: "Copiar código", exact: true }),
         ).toHaveCount(0);
+
+        const blocks = article.locator("pre");
+        const count = await blocks.count();
+        for (let index = 0; index < count; index += 1) {
+          const span = blocks
+            .nth(index)
+            .locator("..")
+            .locator(":scope > *")
+            .first()
+            .locator(":scope > span");
+          if ((await span.count()) === 0) continue;
+          await expect(span).toHaveCount(1);
+          await expect(span).toBeVisible();
+          const text = await span.evaluate((node) => node.textContent ?? "");
+          expect(text).not.toBe("");
+          names += 1;
+        }
       });
     }
 
     expect(pres).toBeGreaterThan(0);
+    expect(names).toBeGreaterThan(0);
   });
 
   test("fórmulas inline e em bloco viram KaTeX [RF-07]", async ({ page }) => {

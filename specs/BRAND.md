@@ -303,7 +303,7 @@ No MDX, `Callout` com `variant` `note`, `caution` ou `result` (SPEC RF-22), impo
 ### 9.5 Bloco de código
 - Shiki com os temas `src/styles/shiki/pk-claro.json` e `src/styles/shiki/pk-escuro.json` (alternar conforme `data-theme`).
 - Cores da sintaxe: palavra-chave prússia, texto (string) verdete, número latão, função sanguínea, comentário em itálico. No tema claro o comentário é grafite `#5E5345`, não lápis. No tema escuro o comentário permanece `#869EB6`. Dentro do código, as cores são só sintaxe.
-- Moldura: fundo `--folha`, borda `--linha`. Barra superior com o nome do arquivo em mono 12 px (ex.: `fol-001_embeddings.py`) e o botão **Copiar**, que vira **Copiado** por 1,5 s.
+- Moldura: fundo `--folha`, borda `--linha`. Barra superior com o nome do arquivo em mono 12 px (ex.: `fol-001_embeddings.py`) e o botão **Copiar**, que vira **Copiado** por 1,5 s. O nome fica em grafite (lápis sobre folha clara é 4,2), na caixa original, alinhado ao começo do código. Sem nome, a barra fica só com o botão. A linha entre a barra e o código é a borda de cima do bloco (T-48).
 - Opcional: linha de "saída" abaixo do código, no formato de cota (`saída ├────┤ [4, 384]`).
 
 ### 9.6 Barra do lab

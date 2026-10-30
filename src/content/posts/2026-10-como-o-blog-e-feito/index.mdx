@@ -38,10 +38,16 @@ Esta linha fica de fora do sumário.
 
 O processador `unified` trata o Markdown.
 
-```ts
+```ts title=dobro.ts
 function dobro(n: number): number {
   return n * 2;
 }
+```
+
+Para gerar o site, um comando basta:
+
+```sh
+pnpm build
 ```
 
 A soma dos quadrados de $x_i$ é a norma ao quadrado:
