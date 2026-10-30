@@ -15,7 +15,7 @@ Blog técnico estático no estilo do Hugging Face Blog: Astro 7 gera o HTML, Pyt
 2. Leia só as seções da SPEC ligadas aos requisitos citados. Não leia a spec inteira por hábito. Se a tarefa citar o BRAND, leia só essa seção.
 3. **Antes de editar código**, apresente um plano curto e espere confirmação: arquivos a criar ou mudar, o que fica fora, como vai provar. O mesmo plano vai para a descrição do PR.
 4. Testes primeiro, nas tarefas que entregam comportamento (RF ou RNF). Tire o `test.fixme` dos cenários da tarefa, ou escreva os testes a partir dos critérios de aceite da SPEC §3, §4 e §11. **Rode-os e mostre que falham antes de implementar**: um teste que já passa sem o código não prova nada.
-  - Exceções: spikes (T-03, T-04, T-05) provam com o doc em `specs/spikes/`; tarefas de infraestrutura (T-01, T-02, T-13, T-36) provam com o comando ou o pipeline rodando e com a saída colada no PR. Não invente testes artificiais para elas.
+  - Exceções: spikes (T-03, T-04, T-05) provam com o doc em `specs/spikes/`; tarefas de infraestrutura (T-01, T-02, T-13, T-36, T-50) provam com o comando ou o pipeline rodando e com a saída colada no PR. Não invente testes artificiais para elas.
 5. Implemente até os testes e os gates ficarem verdes.
 6. Feche: tarefa `concluída` e linha de handoff no `ROADMAP.md`; `SPEC.md` atualizado se o comportamento mudou; tudo no mesmo PR.
 
@@ -100,7 +100,7 @@ A stack é recente e a sintaxe antiga ainda domina o que os modelos viram. Antes
 - **Zod 4:** `z.url()`, não `z.string().url()`; `{ error: '...' }`, não `{ message: '...' }`; `z.strictObject()` em vez de `.strict()`.
 - **TypeScript:** fica em 6.x. O 7 ainda quebra `astro check` e `typescript-eslint` (peers `^5 || ^6`). Só subir quando os dois suportarem; confira os peers antes.
 - **Svelte 5:** runes (`$props()`, `$state`, `$derived`, `$effect`). Eventos como atributo (`onclick`), não `on:click`. Nada de `export let`, `createEventDispatcher` ou stores para estado local.
-- **Tailwind v4:** configuração no CSS (`@import "tailwindcss"`, `@theme`, `@plugin "@tailwindcss/typography"`), integrada pelo plugin `@tailwindcss/vite`. Não existe `tailwind.config.js` e não se usa `@astrojs/tailwind`.
+- **Tailwind v4:** configuração no CSS (`@import "tailwindcss" source("..")`, `@theme`, `@plugin "@tailwindcss/typography"`), integrada pelo plugin `@tailwindcss/vite`. O `source("..")` limita a detecção de classes a `src/` (T-50): texto em `specs/`, em `tests/` e na raiz não gera CSS, e classe escrita só fora de `src/` não é gerada. Não existe `tailwind.config.js` e não se usa `@astrojs/tailwind`.
 - **D3 v7:** importe módulos avulsos (`d3-scale`, `d3-shape`, `d3-array`, `d3-format`), nunca o pacote `d3`. O DOM é do Svelte: `d3-selection` não cria nem altera elementos (exceção: `d3-zoom`/`d3-drag` via action).
 - **Cloudflare:** o site roda em **Workers com Static Assets** (`wrangler.jsonc`, `assets.directory: ./dist`). Não é Pages: nada de `wrangler pages deploy` nem `@astrojs/cloudflare` (o site é estático, sem adapter).
 - **Modo inline:** adiado na T-03; não instale `@marimo-team/mdx-marimo`.
