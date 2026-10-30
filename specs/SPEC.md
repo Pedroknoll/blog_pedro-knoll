@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 30/10/2026
 
+**Revisão 3 de 30/10/2026:** a árvore da marca na §9 ganha `pklog-simbolo-404.svg`, a ilustração da página 404 (T-58).
+
 **Revisão 2 de 30/10/2026:** o RF-12 define o `<title>` da página 404 e registra que ela não tem canonical nem `og:url` e leva `noindex` (T-49).
 
 **Revisão de 30/10/2026:** o RF-06 registra que o `aria-label` do botão de copiar acompanha o texto visível (WCAG 2.5.3) e que a barra do bloco de código sai do build; a §7 cita o transformer da barra (T-48).
@@ -638,7 +640,7 @@ Arquivos da marca, sem `icon-192.png` e sem `icon-512.png`:
 
 ```text
 specs/BRAND.md
-src/assets/brand/pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel}.svg
+src/assets/brand/pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel,-404}.svg
 src/assets/brand/icones/aceno.svg
 src/assets/brand/icones/icone-{conceito,tutorial,lab,playbook}.svg
 src/assets/brand/icones/icone-{conceito,tutorial,lab,playbook}-parado.svg

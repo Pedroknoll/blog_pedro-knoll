@@ -16,7 +16,7 @@ Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele 
 
 ```text
 specs/BRAND.md
-src/assets/brand/pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel}.svg
+src/assets/brand/pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel,-404}.svg
 src/assets/brand/icones/aceno.svg
 src/assets/brand/icones/icone-{conceito,tutorial,lab,playbook}.svg
 src/assets/brand/icones/icone-{conceito,tutorial,lab,playbook}-parado.svg

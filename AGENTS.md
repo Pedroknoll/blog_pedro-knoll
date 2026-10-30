@@ -47,7 +47,7 @@ specs/                  SPEC, ROADMAP, BRAND.md, spikes/, adr/ (só ADRs substit
 src/site.config.ts      título, URL (SITE_URL) e autor (não existe collection de autores)
 src/content.config.ts   collection `posts` com schema Zod 4
 src/content/posts/<slug>/index.mdx   cada post é uma pasta: texto, capa, figs/, data/, notebooks/
-src/assets/brand/       pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel}.svg
+src/assets/brand/       pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel,-404}.svg
 src/assets/brand/icones/  aceno.svg; icone-{conceito,tutorial,lab,playbook}.svg e -parado; icone-relogio.svg
 src/components/ui/      .astro estáticos
 src/components/viz/     .svelte com D3 (AGENTS.md próprio, criado antes da T-19; seção 9.8 do BRAND)
