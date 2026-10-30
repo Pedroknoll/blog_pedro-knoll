@@ -21,7 +21,9 @@ test("página 404 [BRAND §10, RF-12]", async ({ page }) => {
   });
   await expect(back).toHaveCount(1);
   await expect(back).toHaveAttribute("href", "/");
-  await expect(page.locator('main svg[aria-hidden="true"]')).toHaveCount(1);
+  const svg = page.locator('main svg[aria-hidden="true"]');
+  await expect(svg).toHaveCount(1);
+  await expect(svg).toContainText("nó não encontrado");
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
     "content",
     "noindex",
