@@ -1,7 +1,7 @@
 import { expect, type Locator, test } from "@playwright/test";
 
 import { publishedPosts, titlePostsOnPage } from "./published-posts";
-import { authorName } from "./site-literals";
+import { authorName, notFoundHeading } from "./site-literals";
 
 async function bodyHeadings(article: Locator) {
   return article.locator("h2, h3").evaluateAll((elements) =>
@@ -91,6 +91,13 @@ test.describe("página do post [RF-04, RF-05]", () => {
     for (const path of ["/blog/nao-existe/", "/exemplo-md/", "/exemplo-mdx/"]) {
       const response = await page.goto(path);
       expect(response?.status()).toBe(404);
+      await expect(
+        page.getByRole("heading", {
+          level: 1,
+          name: notFoundHeading,
+          exact: true,
+        }),
+      ).toHaveCount(1);
     }
   });
 

@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { notFoundHeading } from "./site-literals";
+
 const featuredHref = "/blog/2026-10-por-que-este-blog/";
 
 test.describe("home [RF-01, RF-03]", () => {
@@ -63,5 +65,12 @@ test.describe("home [RF-01, RF-03]", () => {
   test("/page/1/ responde 404", async ({ page }) => {
     const response = await page.goto("/page/1/");
     expect(response?.status()).toBe(404);
+    await expect(
+      page.getByRole("heading", {
+        level: 1,
+        name: notFoundHeading,
+        exact: true,
+      }),
+    ).toHaveCount(1);
   });
 });

@@ -352,7 +352,7 @@ Um colega experiente puxando a cadeira ao lado, com uma pitada de inventor curio
 |---|---|
 | Saudação | Bem-vindo ao pk.log |
 | Newsletter | Receba os próximos fólios por e-mail. · botão: Receber fólios |
-| Página 404 | Esta página foi arrancada do caderno. |
+| Página 404 | Esta página foi arrancada do caderno. · link: Voltar para o início |
 | Botão de código | Copiar → Copiado |
 | Fim de fólio | Achou um erro? Anote na margem: abra uma issue. |
 | Botão de tema | Claro · Escuro |
