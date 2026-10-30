@@ -9,6 +9,7 @@ import remarkMath from "remark-math";
 
 import { remarkHasCode } from "./src/lib/remark-has-code.mjs";
 import { remarkReadingTime } from "./src/lib/remark-reading-time.mjs";
+import { shikiCodeFrame } from "./src/lib/shiki-code-frame.mjs";
 import pkClaro from "./src/styles/shiki/pk-claro.json";
 import pkEscuro from "./src/styles/shiki/pk-escuro.json";
 
@@ -84,6 +85,7 @@ export default defineConfig({
     shikiConfig: {
       themes: { light: pkClaro, dark: pkEscuro },
       defaultColor: false,
+      transformers: [shikiCodeFrame()],
     },
     processor: unified({ remarkPlugins, rehypePlugins }),
   },

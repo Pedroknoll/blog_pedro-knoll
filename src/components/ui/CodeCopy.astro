@@ -1,5 +1,5 @@
 <script>
-  const copyResetMs = 2000;
+  const copyResetMs = 1500;
   const writeText = navigator.clipboard?.writeText?.bind(navigator.clipboard);
   const article = document.querySelector("article");
 
@@ -10,24 +10,24 @@
     article.append(status);
 
     for (const pre of article.querySelectorAll("pre")) {
-      const wrap = document.createElement("div");
-      wrap.className = "code-copy";
-      pre.replaceWith(wrap);
-      wrap.append(pre);
+      const frame = pre.parentElement;
+      if (!frame?.classList.contains("code-frame")) continue;
+      const bar = frame.firstElementChild;
+      if (!bar) continue;
 
       const button = document.createElement("button");
       button.type = "button";
       button.className = "code-copy-button";
       button.textContent = "Copiar";
       button.setAttribute("aria-label", "Copiar código");
-      wrap.append(button);
+      bar.append(button);
 
       button.addEventListener("click", () => {
         const code = pre.querySelector("code");
         const text = code?.textContent ?? "";
         void writeText(text).then(
           () => {
-            button.textContent = "Código copiado";
+            button.textContent = "Copiado";
             button.setAttribute("aria-label", "Código copiado");
             status.textContent = "Código copiado";
             window.setTimeout(() => {
