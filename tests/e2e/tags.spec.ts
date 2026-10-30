@@ -7,6 +7,7 @@ import {
   titlePostsOnPage,
   type PublishedPost,
 } from "./published-posts";
+import { notFoundHeading } from "./site-literals";
 
 type TaggedPost = PublishedPost & { tags: string[] };
 
@@ -201,6 +202,13 @@ test("E4 página de tag lista os posts na ordem de publicação [RF-02]", async 
 test("E5 tag inexistente responde 404 [RF-02]", async ({ page }) => {
   const response = await page.goto("/tags/tag-que-nao-existe/");
   expect(response?.status()).toBe(404);
+  await expect(
+    page.getByRole("heading", {
+      level: 1,
+      name: notFoundHeading,
+      exact: true,
+    }),
+  ).toHaveCount(1);
 });
 
 test("E6 página de tag sem script e com um h1 fora do banner [RF-02]", async ({
