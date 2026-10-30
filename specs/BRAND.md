@@ -295,10 +295,10 @@ Todos em tinta; nenhum usa as cores dos tipos.
 | Aviso | Rótulo (mono maiúsculo) | Forma |
 |---|---|---|
 | **Nota de bancada** (dica) | `// NOTA DE BANCADA` | Borda 1 px tracejada em lápis. |
-| **Cuidado** | `[!] CUIDADO` (o `!` dentro de um quadrado de 17 px com borda 1,5 px) | Borda 1,5 px sólida em tinta, fundo `--folha`. |
-| **Resultado** | `= RESULTADO` | Filete de 1,5 px em cima e embaixo, sem laterais; valor medido em mono 19 px (`acurácia 61% → 87%`). |
+| **Cuidado** | `[!] CUIDADO` (o `!` dentro de um quadrado de 17 px com borda 2 px) | Borda 2 px sólida em tinta, fundo `--folha`. |
+| **Resultado** | `= RESULTADO` | Filete de 2 px em cima e embaixo, sem laterais; valor medido em mono 19 px (`acurácia 61% → 87%`). |
 
-No MDX, `Callout` com `variant` `note`, `caution` ou `result` (SPEC RF-22).
+No MDX, `Callout` com `variant` `note`, `caution` ou `result` (SPEC RF-22), importado no próprio `.mdx`; o `result` recebe o valor medido na prop `value`. As bordas não usam 1,5 px: o Chrome arredonda a largura de borda para pixel CSS inteiro, mesmo em tela de densidade 2 (T-47).
 
 ### 9.5 Bloco de código
 - Shiki com os temas `src/styles/shiki/pk-claro.json` e `src/styles/shiki/pk-escuro.json` (alternar conforme `data-theme`).
