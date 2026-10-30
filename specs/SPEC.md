@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 29/10/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 30/10/2026
+
+**Revisão de 30/10/2026:** o RF-06 registra que o `aria-label` do botão de copiar acompanha o texto visível (WCAG 2.5.3) e que a barra do bloco de código sai do build; a §7 cita o transformer da barra (T-48).
 
 **Revisão 4 de 29/10/2026:** o card da listagem mostra fólio, data, título, resumo, tipo, nível e tempo de leitura com ícone de relógio parado, sem tags; só o destaque mostra capa; o número do fólio é Cormorant 600 desde 22 px; título do card sem sublinhado (T-56).
 
@@ -135,7 +137,7 @@ A v1 entrega 12 requisitos Must; o restante entra por ordem de prioridade sem bl
 | RF-03 | Paginação da listagem                                                                 | Must       | 12 posts por página; a página 1 é `/` e as seguintes são `/page/2`, `/page/3`… (exceção à regra de rotas em pt-BR, Q10) |
 | RF-04 | Página do post com título, autor, linha `Fól. 006 · 21.out.2026`, tipo, nível, datas e tempo de leitura | Must       | A linha traz fólio, data visível, tipo e nível; o tempo de leitura permanece; os campos vêm do frontmatter validado. Quando o post tem `benchMinutes`, `material` ou `track`, o cabeçalho mostra a ficha da seção 9.3 do BRAND só com os itens presentes; `track` mostra a posição e o total de posts publicados com o mesmo `track` |
 | RF-05 | TOC lateral fixa (h2–h3) com seção ativa destacada                                    | Must       | Funciona sem JS (links âncora); destaque é melhoria progressiva                                                         |
-| RF-06 | Syntax highlighting com botão copiar                                                  | Must       | Shiki em build time, temas `pk-claro` e `pk-escuro`. Uma cerca com a meta `title=<arquivo>` depois da linguagem (```` ```py title=fol-001_embeddings.py ````) mostra o nome do arquivo na barra do bloco; sem `title=`, a barra não mostra nome. O botão diz Copiar e vira Copiado por 1,5 s; o `aria-label` é `Copiar código` |
+| RF-06 | Syntax highlighting com botão copiar                                                  | Must       | Shiki em build time, temas `pk-claro` e `pk-escuro`. Uma cerca com a meta `title=<arquivo>` depois da linguagem (```` ```py title=fol-001_embeddings.py ````) mostra o nome do arquivo na barra do bloco; sem `title=`, a barra não mostra nome. O botão diz Copiar e vira Copiado por 1,5 s; o `aria-label` é `Copiar código` e vira `Código copiado` junto com o texto, para o nome acessível conter o rótulo visível (WCAG 2.5.3). A barra existe com ou sem `title=` e com ou sem JavaScript; o nome do arquivo sai do build |
 | RF-07 | Matemática LaTeX inline e em bloco                                                    | Must       | `remark-math` + `rehype-katex` no processador `unified()`, render no build                                              |
 | RF-08 | Notebook marimo interativo no post, em iframe                                         | Must       | Iframe via `marimo export html-wasm`; pôster estático até "Executar"; Python só dentro do export (seção 7)             |
 | RF-09 | Visualizações Svelte + D3 usadas dentro do MDX                                        | Must       | Hidratam com `client:visible`; têm fallback estático (seção 8)                                                          |
@@ -424,7 +426,7 @@ export default defineConfig({
 
 ```
 
-As opções `markdown.remarkPlugins` e `markdown.rehypePlugins` estão depreciadas no Astro 7; os plugins vão dentro de `unified()`. O Shiki fica em `markdown.shikiConfig`, fora do `unified()`; o MDX herda essa opção (`extendMarkdownConfig` tem default `true`) e não repete `shikiConfig`. Temas próprios entram como objeto importado do JSON, não pelo nome. `themes` aceita o JSON importado, sem `with { type: "json" }` (confirmado na T-41). A T-41 trocou os temas embutidos por esses arquivos, porque o `github-light` ficava abaixo de 4,5 sobre `sheet`. Com `defaultColor: false`, cada token sai só com `--shiki-light` e `--shiki-dark`. `markdown.syntaxHighlight` permanece no padrão. O CSS do KaTeX entra por import de `katex/dist/katex.min.css` no `PostLayout`, sem CDN, e a home não o recebe.
+As opções `markdown.remarkPlugins` e `markdown.rehypePlugins` estão depreciadas no Astro 7; os plugins vão dentro de `unified()`. O Shiki fica em `markdown.shikiConfig`, fora do `unified()`; o MDX herda essa opção (`extendMarkdownConfig` tem default `true`) e não repete `shikiConfig`. Temas próprios entram como objeto importado do JSON, não pelo nome. `themes` aceita o JSON importado, sem `with { type: "json" }` (confirmado na T-41). A T-41 trocou os temas embutidos por esses arquivos, porque o `github-light` ficava abaixo de 4,5 sobre `sheet`. Com `defaultColor: false`, cada token sai só com `--shiki-light` e `--shiki-dark`. `shikiConfig.transformers` tem um transformer próprio, `shikiCodeFrame()` de `src/lib/shiki-code-frame.mjs` (T-48), que envolve o `pre` numa moldura com a barra do nome do arquivo; o MDX herda o transformer sem repetir. A meta da cerca chega ao transformer em `this.options.meta.__raw`, e a regra do `title=` é a função pura `codeTitle` de `src/lib/code-title.ts`. `markdown.syntaxHighlight` permanece no padrão. O CSS do KaTeX entra por import de `katex/dist/katex.min.css` no `PostLayout`, sem CDN, e a home não o recebe.
 
 ### Modo iframe
 
