@@ -1,11 +1,10 @@
 ---
+import Symbol404 from "~/assets/brand/pklog-simbolo-404.svg";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { pageTitle } from "~/lib/seo";
 import { site } from "~/site.config";
 
 const description = "Esta página foi arrancada do caderno.";
-const linkClass =
-  "text-ink underline decoration-ink hover:text-accent hover:decoration-accent focus-visible:text-accent focus-visible:decoration-accent";
 ---
 
 <BaseLayout
@@ -15,14 +14,27 @@ const linkClass =
   ogType="website"
 >
   <meta slot="head" name="robots" content="noindex" />
-  <div class="mx-auto w-full max-w-[52rem] px-4 py-10">
-    <h1 class="font-display text-3xl font-semibold text-balance text-ink sm:text-4xl">
-      Esta página foi arrancada do caderno.
-    </h1>
-    <p class="mt-4">
-      <a class={linkClass} href="/">
-        Voltar para o início
-      </a>
-    </p>
+  <div class="mx-auto w-full max-w-[52rem] px-4 py-10 md:grid md:grid-cols-[minmax(0,1fr)_17.5rem] md:items-center md:gap-12">
+    <div>
+      <h1 class="font-display text-3xl font-semibold text-balance text-ink sm:text-4xl">
+        Esta página foi arrancada do caderno.
+      </h1>
+      <p class="mt-4 text-[1.0625rem] leading-[1.65] text-muted">
+        O endereço pode ter mudado, ou esta página ainda não foi escrita. O
+        resto do caderno continua aqui.
+      </p>
+      <p class="mt-8">
+        <a
+          class="inline-flex min-h-11 items-center bg-ink px-5 font-mono text-sm text-surface hover:underline focus-visible:underline underline-offset-3"
+          href="/"
+        >
+          Voltar ao início
+        </a>
+      </p>
+    </div>
+    <Symbol404
+      aria-hidden="true"
+      class="mt-10 h-auto w-full max-w-60 md:mt-0 md:max-w-none"
+    />
   </div>
 </BaseLayout>
