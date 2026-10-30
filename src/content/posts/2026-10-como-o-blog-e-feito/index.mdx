@@ -14,6 +14,8 @@ level: 1
 tags: [astro, marimo, cloudflare, meta]
 ---
 
+import Callout from "~/components/ui/Callout.astro";
+
 O blog é um site estático — o motivo está em [por que este blog existe](/blog/2026-10-por-que-este-blog/). O HTML sai pronto no build.
 
 ## Como a página é gerada
@@ -47,3 +49,21 @@ A soma dos quadrados de $x_i$ é a norma ao quadrado:
 $$
 \sum_{i=1}^{n} x_i^2 = \lVert x \rVert^2
 $$
+
+<Callout variant="note">
+
+Para ver o site como em produção, rode `pnpm build && npx wrangler dev`.
+
+</Callout>
+
+<Callout variant="caution">
+
+Não edite `dist/_headers` à mão: o arquivo é gerado no build.
+
+</Callout>
+
+<Callout variant="result" value="LCP da home 1202 ms → 1352 ms">
+
+Efeito das fontes da assinatura na T-43, mediana de 3 no Lighthouse local.
+
+</Callout>

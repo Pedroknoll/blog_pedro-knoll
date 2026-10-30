@@ -1,0 +1,45 @@
+---
+interface Props {
+  variant: "note" | "caution" | "result";
+  value?: string;
+}
+
+const { variant, value } = Astro.props;
+
+const variants = {
+  note: { sign: "//", word: "Nota de bancada" },
+  caution: { sign: "!", word: "Cuidado" },
+  result: { sign: "=", word: "Resultado" },
+} as const;
+
+const { sign, word } = variants[variant];
+
+const shape = {
+  note: "my-5 border border-dashed border-pencil bg-transparent px-5 py-4",
+  caution: "my-5 border-2 border-solid border-ink bg-sheet px-5 py-4",
+  result: "my-5 border-y-2 border-solid border-ink bg-transparent py-4",
+} as const;
+---
+
+<div role="note" class={shape[variant]}>
+  <p class="not-prose mb-2 flex items-center gap-2 font-mono text-xs tracking-widest text-ink uppercase">
+    <span
+      aria-hidden="true"
+      class:list={[
+        variant === "caution" &&
+          "inline-flex size-[17px] shrink-0 items-center justify-center border-2 border-solid border-ink leading-none",
+      ]}
+    >
+      {sign}
+    </span>
+    <span>{word}</span>
+  </p>
+  {variant === "result" && value && (
+    <p class="mt-2 mb-2 font-mono text-[1.1875rem] leading-normal text-ink">
+      {value}
+    </p>
+  )}
+  <div class="[&>:first-child]:mt-0 [&>:last-child]:mb-0">
+    <slot />
+  </div>
+</div>
