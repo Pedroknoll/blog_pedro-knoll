@@ -113,7 +113,7 @@ O `em` fica em estilo normal para o pk usar o mesmo arquivo dos títulos; o pont
 Versão vertical: símbolo em cima, nome, e a descrição curta em mono maiúsculo pequeno (letter-spacing .16em).
 
 **Área de proteção:** espaço livre em volta igual a ¼ do diâmetro do círculo.
-**Tamanhos mínimos:** símbolo 24 px; versão pixel 16 px; assinatura horizontal 140 px de largura.
+**Tamanhos mínimos:** símbolo 24 px; versão pixel 16 px; assinatura horizontal 100 px de largura, o tamanho do header do site (corpo de 1,25rem, símbolo de 31 px; 101,5 px medidos na T-53).
 
 **Versão 404 (só na página 404).** O símbolo perdeu um nó. No mesmo viewBox 100×100 do desenho padrão:
 - O círculo continua com r = 44 e traço 3, mas fica tracejado (5 cheio, 4 vazio) e em prússia.
