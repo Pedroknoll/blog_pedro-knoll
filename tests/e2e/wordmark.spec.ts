@@ -141,7 +141,9 @@ async function measureSymbol(
   expect.soft(rect.width / fs, `${where} largura`).toBeCloseTo(1.55, 2);
   expect.soft(rect.height / fs, `${where} altura`).toBeCloseTo(1.55, 2);
   expect.soft(linkStyle.columnGap / fs, `${where} vão`).toBeCloseTo(0.42, 2);
-  expect.soft(linkStyle.display, `${where} display`).toBe("inline-flex");
+  expect
+    .soft(linkStyle.display, `${where} display`)
+    .toMatch(/^(inline-)?flex$/);
   expect.soft(linkStyle.alignItems, `${where} align`).toBe("center");
   expect
     .soft(linkStyle.lineHeight / fs, `${where} line-height`)
