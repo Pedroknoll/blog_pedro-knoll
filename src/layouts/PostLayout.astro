@@ -36,8 +36,7 @@ const {
   kind,
   level,
 } = post.data;
-const labelClass =
-  "text-xs tracking-widest text-muted [font-variant-caps:small-caps]";
+const labelClass = "font-mono text-xs uppercase tracking-widest text-muted";
 const published = formatPubDate(pubDate);
 const updated = updatedDate ? formatPubDate(updatedDate) : undefined;
 const canonical =
@@ -95,7 +94,7 @@ const jsonLd = blogPostingJsonLd({
         {" · "}
         <LevelLabel level={level} />
       </p>
-      <h1 class="font-serif text-4xl leading-tight font-normal text-ink sm:text-5xl">
+      <h1 class="font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem]">
         {title}
       </h1>
       <p class="mt-4 max-w-2xl text-lg leading-relaxed text-ink">

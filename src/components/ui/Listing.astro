@@ -33,7 +33,9 @@ const items = await Promise.all(
 
 <div class="mx-auto w-full max-w-[52rem] px-4 py-10">
   {showHeading && (
-    <h1 class="font-serif text-3xl text-ink sm:text-4xl">{heading}</h1>
+    <h1 class="font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem]">
+      {heading}
+    </h1>
   )}
   {featured && featuredMinutes !== null && (
     <section class="mt-12" aria-label="Destaque">
