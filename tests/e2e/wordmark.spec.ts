@@ -101,6 +101,100 @@ function firstFamily(stack: string): string {
   return familyNames(stack)[0] ?? "";
 }
 
+async function measureSymbol(
+  page: Page,
+  path: string,
+  tema: "claro" | "escuro",
+  lightAccent?: string,
+): Promise<string> {
+  const where = `${path} ${tema}`;
+  const link = page
+    .getByRole("banner")
+    .getByRole("link", { name: mark, exact: true });
+  const svg = link.locator(":scope > svg");
+  await expect(svg, where).toHaveCount(1);
+
+  await expect.soft(svg, where).toHaveAttribute("aria-hidden", "true");
+
+  const place = await svg.evaluate((el) => ({
+    isFirst: el.parentElement?.firstElementChild === el,
+    nextHasNome: el.nextElementSibling?.classList.contains("nome") ?? false,
+  }));
+  expect.soft(place.isFirst, `${where} primeiro`).toBe(true);
+  expect.soft(place.nextHasNome, `${where} nome`).toBe(true);
+
+  const linkStyle = await link.evaluate((el) => {
+    const style = getComputedStyle(el);
+    return {
+      fontSize: Number.parseFloat(style.fontSize),
+      columnGap: Number.parseFloat(style.columnGap),
+      display: style.display,
+      alignItems: style.alignItems,
+      lineHeight: Number.parseFloat(style.lineHeight),
+    };
+  });
+  const rect = await svg.evaluate((el) => {
+    const box = el.getBoundingClientRect();
+    return { width: box.width, height: box.height };
+  });
+  const fs = linkStyle.fontSize;
+  expect.soft(rect.width / fs, `${where} largura`).toBeCloseTo(1.55, 2);
+  expect.soft(rect.height / fs, `${where} altura`).toBeCloseTo(1.55, 2);
+  expect.soft(linkStyle.columnGap / fs, `${where} vão`).toBeCloseTo(0.42, 2);
+  expect.soft(linkStyle.display, `${where} display`).toBe("inline-flex");
+  expect.soft(linkStyle.alignItems, `${where} align`).toBe("center");
+  expect
+    .soft(linkStyle.lineHeight / fs, `${where} line-height`)
+    .toBeCloseTo(1, 2);
+
+  const probes = await page.evaluate(() => {
+    const span = document.createElement("span");
+    document.body.appendChild(span);
+    const read = (token: string) => {
+      span.style.color = `var(${token})`;
+      return getComputedStyle(span).color;
+    };
+    const accent = read("--color-accent");
+    const surface = read("--color-surface");
+    const ink = read("--color-ink");
+    span.remove();
+    return { accent, surface, ink };
+  });
+
+  const node = svg.locator('circle[cx="37"][cy="50"]:not([fill="none"])');
+  await expect.soft(node, `${where} nó`).toHaveCount(1);
+  if ((await node.count()) === 1) {
+    const fill = await node.evaluate((el) => getComputedStyle(el).fill);
+    expect.soft(fill, `${where} nó`).toBe(probes.accent);
+  }
+
+  const halo = svg.locator('circle[cx="37"][cy="50"][fill="none"]');
+  await expect.soft(halo, `${where} halo`).toHaveCount(1);
+  if ((await halo.count()) === 1) {
+    const stroke = await halo.evaluate((el) => getComputedStyle(el).stroke);
+    const bannerBg = await page
+      .getByRole("banner")
+      .evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect.soft(stroke, `${where} halo`).toBe(probes.surface);
+    expect.soft(stroke, `${where} banner`).toBe(bannerBg);
+  }
+
+  const trace = svg.locator("path");
+  await expect.soft(trace, `${where} traço`).toHaveCount(1);
+  if ((await trace.count()) === 1) {
+    const stroke = await trace.evaluate((el) => getComputedStyle(el).stroke);
+    const linkColor = await link.evaluate((el) => getComputedStyle(el).color);
+    expect.soft(stroke, `${where} traço`).toBe(linkColor);
+    expect.soft(stroke, `${where} tinta`).toBe(probes.ink);
+  }
+
+  if (tema === "escuro") {
+    expect.soft(probes.accent, `${where} accent`).not.toBe(lightAccent);
+  }
+
+  return probes.accent;
+}
+
 test.describe("assinatura [RF-12, RNF-04]", () => {
   test("W1 link no banner", async ({ page }) => {
     const pages = await pagesForTheme(page);
@@ -289,6 +383,20 @@ test.describe("assinatura [RF-12, RNF-04]", () => {
         await expect
           .soft(footer.getByText(authorName, { exact: true }), path)
           .toHaveText(authorName);
+      });
+    }
+  });
+
+  test("W6 símbolo", async ({ page }) => {
+    const pages = await pagesForTheme(page);
+    for (const path of pages) {
+      await test.step(path, async () => {
+        await open(page, path);
+        const lightAccent = await measureSymbol(page, path, "claro");
+        await page.evaluate(() => {
+          document.documentElement.dataset.theme = "dark";
+        });
+        await measureSymbol(page, path, "escuro", lightAccent);
       });
     }
   });

@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.11 · novembro de 2026 · pedroknoll.com
+Versão 1.12 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -85,7 +85,7 @@ A marca **não é** pastiche renascentista, nem futurismo de neon, cérebros bri
 |---|---|
 | `pklog-simbolo.svg` | Padrão, fundo claro. |
 | `pklog-simbolo-escuro.svg` | Fundo escuro (cianotipia). |
-| `pklog-simbolo-currentcolor.svg` | Para inline, herda a cor do texto; o nó continua azul. |
+| `pklog-simbolo-currentcolor.svg` | Para inline, como SVG component. O traço e os nós das pontas herdam a cor do texto (`currentColor`); o nó central fica em `accent` e o halo, em `surface`, a cor do fundo do header, pelos tokens, nos dois temas. Sem `<title>`, `role`, tamanho nem hex no arquivo: é decorativo e leva `aria-hidden` no uso (T-53). |
 | `pklog-simbolo-construcao.svg` | Peças grandes (capa, sobre, slides de abertura): mostra as linhas de construção. Nunca em tamanho pequeno. |
 | `pklog-simbolo-pixel.svg` e os favicons em `public/` | Abaixo de 24 px: versão em pixel 16×16, sem os nós das pontas. |
 | `pklog-simbolo-404.svg` | Só a página 404: a folha arrancada, com o símbolo na versão 404 (abaixo). |
