@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.10 · outubro de 2026 · pedroknoll.com
+Versão 1.11 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -195,7 +195,7 @@ As quatro famílias entram pela Fonts API do Astro (`fontProviders.fontsource()`
 - Peso 500 nunca abaixo de 28 px.
 - O h3 a 22 px continua IBM Plex Sans 600.
 
-**Escala (px):** display 64 · h1 44 · h2 30 · h3 22 (Plex Sans 600) · texto 17 · rótulo 12.
+**Escala (px):** display 64 · h1 44 · h2 30 · h3 22 (Plex Sans 600) · texto 17 · rótulo 12. O h1 de página (post, tag e 404) fica em 36 px abaixo de `sm` (640 px) e em 44 px de `sm` em diante; a saudação da home tem tamanho próprio (§9.1). O rótulo usa letter-spacing de 0,1em (T-51).
 Títulos com `text-wrap: balance`.
 
 ---
