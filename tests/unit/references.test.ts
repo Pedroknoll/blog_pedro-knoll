@@ -57,14 +57,16 @@ function thrownMessage(run: () => void): string {
 
 describe("applyCitations", () => {
   it("um marcador vira o link da posição na lista", () => {
-    const tree = root("Veja [@segunda] aqui.");
+    const tree = root("Veja [@segunda] e [@primeira].");
 
     applyCitations(tree, [reference("primeira"), reference("segunda")], file);
 
     expect(tree.children[0]?.children).toEqual([
       { type: "text", value: "Veja " },
       cite(2, "segunda"),
-      { type: "text", value: " aqui." },
+      { type: "text", value: " e " },
+      cite(1, "primeira"),
+      { type: "text", value: "." },
     ]);
   });
 
@@ -83,7 +85,8 @@ describe("applyCitations", () => {
   });
 
   it("marcador dentro de emphasis, list, blockquote e componente MDX", () => {
-    const tree = {
+    type TestNode = { type: string; value?: string; children?: TestNode[] };
+    const tree: { type: string; children: TestNode[] } = {
       type: "root",
       children: [
         {
@@ -138,29 +141,26 @@ describe("applyCitations", () => {
     ]);
   });
 
-  it.each(["code", "inlineCode", "math"])(
-    "preserva [@chave] em %s",
-    (type) => {
-      const tree = {
-        type: "root",
-        children: [
-          { type, value: "veja [@chave]" },
-          {
-            type: "paragraph",
-            children: [{ type: "text", value: "citada [@chave]" }],
-          },
-        ],
-      };
+  it.each(["code", "inlineCode", "math"])("preserva [@chave] em %s", (type) => {
+    const tree = {
+      type: "root",
+      children: [
+        { type, value: "veja [@chave]" },
+        {
+          type: "paragraph",
+          children: [{ type: "text", value: "citada [@chave]" }],
+        },
+      ],
+    };
 
-      applyCitations(tree, [reference("chave")], file);
+    applyCitations(tree, [reference("chave")], file);
 
-      expect(tree.children[0]).toEqual({ type, value: "veja [@chave]" });
-      expect(tree.children[1]?.children).toEqual([
-        { type: "text", value: "citada " },
-        cite(1, "chave"),
-      ]);
-    },
-  );
+    expect(tree.children[0]).toEqual({ type, value: "veja [@chave]" });
+    expect(tree.children[1]?.children).toEqual([
+      { type: "text", value: "citada " },
+      cite(1, "chave"),
+    ]);
+  });
 
   it("citação sem referência", () => {
     expect(
@@ -195,9 +195,7 @@ describe("applyCitations", () => {
       };
 
       expect(
-        thrownMessage(() =>
-          applyCitations(tree, [reference("chave")], file),
-        ),
+        thrownMessage(() => applyCitations(tree, [reference("chave")], file)),
         type,
       ).toBe("Citação dentro de link: @chave em arquivo.md");
     }

@@ -3,6 +3,7 @@ import { render, type CollectionEntry } from "astro:content";
 
 import PostLayout from "~/layouts/PostLayout.astro";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
+import { postAppendix } from "~/lib/references";
 import { buildToc } from "~/lib/toc";
 
 export async function getStaticPaths() {
@@ -20,13 +21,15 @@ interface Props {
 const { post } = Astro.props;
 const { Content, headings, remarkPluginFrontmatter } = await render(post);
 const { minutesRead, hasCode } = remarkPluginFrontmatter;
+const appendix = postAppendix(post.data.references, post.data.appendices);
 ---
 
 <PostLayout
   post={post}
   minutesRead={typeof minutesRead === "number" ? minutesRead : undefined}
   hasCode={hasCode === true}
-  toc={buildToc(headings)}
+  toc={[...buildToc(headings), ...(appendix?.toc ?? [])]}
+  appendix={appendix}
 >
   <Content />
 </PostLayout>

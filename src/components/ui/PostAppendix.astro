@@ -1,0 +1,33 @@
+---
+import type { PostAppendixModel } from "~/lib/references";
+
+interface Props {
+  appendix: PostAppendixModel;
+}
+
+const { appendix } = Astro.props;
+---
+
+<hr />
+{appendix.appendices.map((section) => (
+  <section>
+    <h2 id={section.id}>{section.text}</h2>
+    {section.paragraphs.map((paragraph) => (
+      <p>{paragraph}</p>
+    ))}
+  </section>
+))}
+{appendix.references && (
+  <section>
+    <h2 id={appendix.references.id}>{appendix.references.text}</h2>
+    <ol>
+      {appendix.references.items.map((item) => (
+        <li id={item.id}>
+          {`${item.authors}, ${item.year}. `}
+          <a href={item.url}>{item.title}</a>
+          {`. ${item.venue}.`}
+        </li>
+      ))}
+    </ol>
+  </section>
+)}

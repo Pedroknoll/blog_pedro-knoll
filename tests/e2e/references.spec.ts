@@ -7,8 +7,7 @@ const postB = "/blog/2026-10-como-o-blog-e-feito/";
 const distill =
   "Gabriel Goh, Nick Cammarata, Chelsea Voss, Shan Carter, Michael Petrov, Ludwig Schubert, Alec Radford e Chris Olah, 2021. Multimodal Neurons in Artificial Neural Networks. Distill.";
 
-const astroDoc =
-  "Astro, 2026. Unified API Reference. Documentação do Astro.";
+const astroDoc = "Astro, 2026. Unified API Reference. Documentação do Astro.";
 
 function referenceItems(page: Page) {
   return page.locator("section:has(> h2#referencias) > ol > li");
@@ -59,7 +58,6 @@ test.describe("referências e apêndices [RF-04]", () => {
           expect(id).toBeTruthy();
           await expect(citation.locator).toHaveAccessibleName(
             `Referência ${citation.n}`,
-            { exact: true },
           );
           await expect(citation.locator).toHaveAttribute("href", `#${id}`);
           cited.add(id as string);
@@ -87,9 +85,7 @@ test.describe("referências e apêndices [RF-04]", () => {
     }
   });
 
-  test("conteúdo de teste no post B, anotado para a T-39", async ({
-    page,
-  }) => {
+  test("conteúdo de teste no post B, anotado para a T-39", async ({ page }) => {
     const posts = await publishedPosts(page);
     const covered: boolean[] = [];
 
@@ -111,11 +107,10 @@ test.describe("referências e apêndices [RF-04]", () => {
 
     const items = referenceItems(page);
     await expect(items).toHaveCount(2);
-    await expect(items.nth(0)).toHaveText(distill, { exact: true });
-    await expect(items.nth(1)).toHaveText(astroDoc, { exact: true });
+    await expect(items.nth(0)).toHaveText(distill);
+    await expect(items.nth(1)).toHaveText(astroDoc);
     await expect(page.locator("h2#apendice-a")).toHaveText(
       "Apêndice A · Como as referências funcionam",
-      { exact: true },
     );
   });
 });

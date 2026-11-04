@@ -7,11 +7,13 @@ import "katex/dist/katex.min.css";
 import CodeCopy from "~/components/ui/CodeCopy.astro";
 import KindLabel from "~/components/ui/KindLabel.astro";
 import LevelLabel from "~/components/ui/LevelLabel.astro";
+import PostAppendix from "~/components/ui/PostAppendix.astro";
 import TagList from "~/components/ui/TagList.astro";
 import Toc from "~/components/ui/Toc.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { formatPubDate } from "~/lib/format-date";
 import { formatFolio } from "~/lib/folio";
+import type { PostAppendixModel } from "~/lib/references";
 import { absoluteUrl, blogPostingJsonLd, pageTitle, postPath } from "~/lib/seo";
 import type { TocItem } from "~/lib/toc";
 import { site } from "~/site.config";
@@ -21,9 +23,10 @@ interface Props {
   minutesRead?: number;
   hasCode?: boolean;
   toc: TocItem[];
+  appendix?: PostAppendixModel;
 }
 
-const { post, minutesRead, hasCode, toc } = Astro.props;
+const { post, minutesRead, hasCode, toc, appendix } = Astro.props;
 const {
   title,
   description,
@@ -131,6 +134,7 @@ const jsonLd = blogPostingJsonLd({
       <Toc items={toc} />
       <div class="prose prose-site min-w-0 lg:col-start-1 lg:row-start-1">
         <slot />
+        {appendix && <PostAppendix appendix={appendix} />}
       </div>
     </div>
     {hasCode && <CodeCopy />}
