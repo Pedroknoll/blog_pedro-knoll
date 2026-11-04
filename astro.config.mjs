@@ -7,13 +7,19 @@ import { defineConfig, fontProviders } from "astro/config";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 
+import { remarkCitations } from "./src/lib/remark-citations.mjs";
 import { remarkHasCode } from "./src/lib/remark-has-code.mjs";
 import { remarkReadingTime } from "./src/lib/remark-reading-time.mjs";
 import { shikiCodeFrame } from "./src/lib/shiki-code-frame.mjs";
 import pkClaro from "./src/styles/shiki/pk-claro.json";
 import pkEscuro from "./src/styles/shiki/pk-escuro.json";
 
-const remarkPlugins = [remarkMath, remarkReadingTime, remarkHasCode];
+const remarkPlugins = [
+  remarkMath,
+  remarkCitations,
+  remarkReadingTime,
+  remarkHasCode,
+];
 const rehypePlugins = [rehypeKatex];
 
 export default defineConfig({

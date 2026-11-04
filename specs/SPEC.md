@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 04/11/2026
 
+**Revisão 2 de 04/11/2026:** o RF-04 troca a ficha da seção 9.3 do BRAND por referências e apêndices no fim do post. Saem do schema da §6 `benchMinutes`, `material` e `track`; entram `references` e `appendices`. A citação `[@chave]` vira `[n]` pelo plugin `remarkCitations`, registrado nos dois `unified()` da §7 (T-62).
+
 **Revisão de 04/11/2026:** a §10 registra que o `pnpm lint` começa pela guarda de codificação de `src/`, `pnpm check:utf8` (T-59).
 
 **Revisão de 03/11/2026:** a §9 corrige o custo das fontes no LCP: ele segue os bytes e a página, e não um degrau por arquivo, e as fontes do KaTeX também entram (T-54).
@@ -131,7 +133,7 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10 e 22/10 já 
 
 ### Decisões de 22/10/2026
 
-- [x] **Q12 — Identidade:** a identidade visual e verbal está em `specs/BRAND.md`. Em conflito de comportamento, a SPEC ganha. Tags no lugar de temas; `minutesRead` permanece junto de `benchMinutes`; imagem OG só quando não há capa; newsletter fora da v1; sem `dark:` nos componentes; chaves de frontmatter em inglês; `kind` no enum inglês (`concept`, `tutorial`, `lab`, `playbook`).
+- [x] **Q12 — Identidade:** a identidade visual e verbal está em `specs/BRAND.md`. Em conflito de comportamento, a SPEC ganha. Tags no lugar de temas; o tempo do post é só o `minutesRead` (o `benchMinutes` saiu na T-62); imagem OG só quando não há capa; newsletter fora da v1; sem `dark:` nos componentes; chaves de frontmatter em inglês; `kind` no enum inglês (`concept`, `tutorial`, `lab`, `playbook`).
 
 ## 3. Requisitos funcionais
 
@@ -143,7 +145,7 @@ A v1 entrega 12 requisitos Must; o restante entra por ordem de prioridade sem bl
 | RF-01 | Home com saudação, post em destaque e lista de cards (fólio, data, título, resumo, tipo, nível, tempo de leitura) | Must       | Saudação na home; cards ordenados por data desc; destaque via `featured: true`; o card mostra fólio, data, título, resumo, tipo, nível e tempo de leitura com ícone de relógio parado, sem tags; só o destaque mostra capa; título do card e número do fólio em Cormorant 600 desde 22 px; o tempo de leitura do card é o mesmo `minutesRead` da página do post |
 | RF-02 | Filtro por tag e página `/tags/[tag]`                                                 | Must       | Cada tag usada gera uma página; tag inexistente é 404                                                                   |
 | RF-03 | Paginação da listagem                                                                 | Must       | 12 posts por página; a página 1 é `/` e as seguintes são `/page/2`, `/page/3`… (exceção à regra de rotas em pt-BR, Q10) |
-| RF-04 | Página do post com título, autor, linha `Fól. 006 · 21.out.2026`, tipo, nível, datas e tempo de leitura | Must       | A linha traz fólio, data visível, tipo e nível; o tempo de leitura permanece; os campos vêm do frontmatter validado. Quando o post tem `benchMinutes`, `material` ou `track`, o cabeçalho mostra a ficha da seção 9.3 do BRAND só com os itens presentes; `track` mostra a posição e o total de posts publicados com o mesmo `track` |
+| RF-04 | Página do post com título, autor, linha `Fól. 006 · 21.out.2026`, tipo, nível, datas e tempo de leitura | Must       | A linha traz fólio, data visível, tipo e nível; o tempo de leitura permanece; os campos vêm do frontmatter validado. Quando o post tem `references` ou `appendices`, o fim do post tem a área de apêndice, com os apêndices do autor (Apêndice A, B…) e a lista numerada de referências, que também entram no fim do sumário. No texto, a citação `[@chave]` vira `[n]`, com link para a referência e nome acessível `Referência n`, sem JavaScript. Chave citada sem referência, referência não citada, citação dentro de link e chave repetida quebram o build. Post sem os dois campos não muda |
 | RF-05 | TOC lateral fixa (h2–h3) com seção ativa destacada                                    | Must       | Funciona sem JS (links âncora); destaque é melhoria progressiva                                                         |
 | RF-06 | Syntax highlighting com botão copiar                                                  | Must       | Shiki em build time, temas `pk-claro` e `pk-escuro`. Uma cerca com a meta `title=<arquivo>` depois da linguagem (```` ```py title=fol-001_embeddings.py ````) mostra o nome do arquivo na barra do bloco; sem `title=`, a barra não mostra nome. O botão diz Copiar e vira Copiado por 1,5 s; o `aria-label` é `Copiar código` e vira `Código copiado` junto com o texto, para o nome acessível conter o rótulo visível (WCAG 2.5.3). A barra existe com ou sem `title=` e com ou sem JavaScript; o nome do arquivo sai do build |
 | RF-07 | Matemática LaTeX inline e em bloco                                                    | Must       | `remark-math` + `rehype-katex` no processador `unified()`, render no build                                              |
@@ -270,6 +272,7 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod'; // Zod 4
 import { KINDS } from './lib/kind';
 import { postIdFromEntry } from './lib/post-id';
+import { duplicateReferenceKeys } from './lib/references';
 
 // Iframe: notebook inteiro num .py da pasta do post, exportado com html-wasm.
 const notebook = z.strictObject({
@@ -278,6 +281,22 @@ const notebook = z.strictObject({
   // estratégia de execução, ver seção 7
   compute: z.enum(['browser', 'cache', 'precomputed', 'onnx', 'static']).default('browser'),
   gpuUrl: z.url().optional(), // botão "Rodar com GPU" (molab, Colab, HF Space)
+});
+
+// Referência citada no texto por [@chave]; o número é a posição na lista.
+const reference = z.strictObject({
+  key: z.string().regex(/^[a-z0-9-]+$/), // mesma regra de tags
+  authors: z.array(z.string().min(1)).min(1),
+  title: z.string().min(1),
+  year: z.int(),
+  venue: z.string().min(1),
+  url: z.url(),
+});
+
+// Apêndice do autor, em texto puro: um <p> por parágrafo.
+const appendix = z.strictObject({
+  title: z.string().min(1),
+  paragraphs: z.array(z.string().min(1)).min(1),
 });
 
 const posts = defineCollection({
@@ -302,9 +321,14 @@ const posts = defineCollection({
         coverAlt: z.string().optional(),
         featured: z.boolean().default(false),
         draft: z.boolean().default(false),
-        benchMinutes: z.int().min(1).optional(), // não substitui minutesRead
-        material: z.string().optional(),
-        track: z.string().regex(/^[a-z0-9-]+$/).optional(), // mesma regra de tags; sem rota
+        references: z
+          .array(reference)
+          .refine((items) => duplicateReferenceKeys(items).length === 0, {
+            error: (iss) =>
+              `Chave de referência repetida: ${Array.isArray(iss.input) ? duplicateReferenceKeys(iss.input)[0] : ''}`,
+          })
+          .default([]),
+        appendices: z.array(appendix).max(26).default([]),
         // declara os iframes do post
         notebooks: z.array(notebook).default([]),
         canonical: z.url().optional(),
@@ -369,7 +393,11 @@ notebooks:
 - `getPublishedPosts()` é o único acesso à collection nas páginas. Antes do filtro de publicados, chama `assertUniqueFolios` (`src/lib/folio.ts`) sobre todas as entradas da collection, rascunho incluído. Dois fólios iguais falham o build com a mensagem `Fólio repetido: <n> em <id1>, <id2>`, com os ids em ordem crescente e vários conflitos separados por `; `. Em seguida filtra `draft` quando `SHOW_DRAFTS` não é `true` e ordena por `pubDate` desc, com desempate por `id` crescente.
 - `folio` é inteiro e a exibição é `Fól. 006`: três dígitos até 999 e o número inteiro acima disso (`formatFolio`, em `src/lib/folio.ts`). **Fól. 001** é `2026-10-por-que-este-blog` ("Por que este blog existe"). **Fól. 002** é `2026-10-como-o-blog-e-feito`. Os dois entram como `kind: concept` e `level: 1`. O rascunho `2026-10-rascunho-de-teste` é Fól. 999, com `kind: concept` e `level: 1`: ele nunca será publicado, e o 003 fica para o próximo post. Fixture ou rascunho novo também precisa de fólio único.
 - `kind` usa o enum inglês. Os rótulos pt-BR (`Conceito`, `Tutorial`, `Lab`, `Playbook`) ficam em `KIND_LABELS`, em `src/lib/kind.ts`, ao lado de `KINDS`, que o schema usa. Não vão no frontmatter. Os rótulos de nível (`Iniciante`, `Intermediário`, `Avançado`) e a hachura ficam em `src/lib/level.ts` (`LEVEL_LABELS` e `levelHatch`).
-- `benchMinutes` não substitui `minutesRead`. `track` não ganha rota. Temas da marca são rótulo em `src/data/tags.ts`, não um segundo campo. Colab continua `gpuUrl`: não há campo `marimo` nem `colab`.
+- O tempo do post é só o `minutesRead`. Temas da marca são rótulo em `src/data/tags.ts`, não um segundo campo. Colab continua `gpuUrl`: não há campo `marimo` nem `colab`.
+- Referências e apêndices ficam no frontmatter (`references` e `appendices`) e não contam no `minutesRead`. A citação no corpo, no `.md` e no `.mdx`, é `[@chave]`, uma chave por marcador; duas seguidas se escrevem `[@a] [@b]`.
+  - **Plugin:** `src/lib/remark-citations.mjs`, registrado nos dois `unified()` entre o `remark-math` e o do tempo de leitura, lê as chaves em `file.data.astro.frontmatter.references` (o frontmatter cru) e chama `applyCitations`, de `src/lib/references.ts`. Cada marcador vira um link `[n]` para `#ref-<chave>`, com `aria-label` `Referência n`. O `n` é a posição na lista `references`, a partir de 1, e não a ordem da primeira citação. O marcador não é procurado em código, fórmula, HTML cru nem expressão MDX.
+  - **Quebram o build:** chave citada que não está em `references` (`Citação sem referência: @<chave> em <arquivo>`), referência nunca citada no corpo (`Referência não citada: <chave> em <arquivo>`), citação dentro de link (`Citação dentro de link: @<chave> em <arquivo>`) e chave repetida (`Chave de referência repetida: <chave>`, pelo schema, que falha antes do plugin).
+  - **Área:** sai de `postAppendix` e fica dentro do mesmo `div` da prosa, depois do corpo: `<hr />`; um h2 `Apêndice A · <título>` por apêndice (`id` `apendice-a`, `apendice-b`…), com um `<p>` de texto puro por parágrafo; e o h2 `Referências` (`id` `referencias`) com a lista numerada. Cada item é `<autores>, <ano>. <título com link>. <veículo>.`, com `id` `ref-<chave>`; dois autores com " e ", três ou mais com vírgulas e " e " antes do último. Os h2 da área entram no fim do sumário. Sem link de volta da referência para a citação e sem itálico na área.
 - A data visível é `21.out.2026`. O dia tem dois dígitos (`05.out.2026`), o mês vem de uma lista fixa em minúsculas e sem ponto, e o ano tem quatro dígitos, sempre em UTC. A função é `formatPubDate`, em `src/lib/format-date.ts`, sem `Intl`. Vale para a publicação e para o "Atualizado em". O atributo `datetime` continua ISO.
 - O slug é o `id` gerado pelo `generateId` do loader (nome da pasta). `postIdFromEntry` exige exatamente dois segmentos (`pasta/index.md` ou `pasta/index.mdx`) e pasta `^[a-z0-9-]+$`; caso contrário o build falha citando o entry. Nenhuma página recalcula slug por conta própria.
 - O tempo de leitura é calculado por um plugin remark do projeto (`src/lib/remark-reading-time.mjs`), registrado nos dois `unified()`, o do Markdown e o do MDX. Ele grava o valor em `minutesRead`, que a página lê em `remarkPluginFrontmatter`.
@@ -408,10 +436,11 @@ import tailwindcss from '@tailwindcss/vite';
 import { unified } from '@astrojs/markdown-remark';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
+import { remarkCitations } from './src/lib/remark-citations.mjs';
 import { remarkReadingTime } from './src/lib/remark-reading-time.mjs';
 import { remarkHasCode } from './src/lib/remark-has-code.mjs';
 
-const remarkPlugins = [remarkMath, remarkReadingTime, remarkHasCode];
+const remarkPlugins = [remarkMath, remarkCitations, remarkReadingTime, remarkHasCode];
 const rehypePlugins = [rehypeKatex];
 
 export default defineConfig({

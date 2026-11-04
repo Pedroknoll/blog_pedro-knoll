@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.12 · novembro de 2026 · pedroknoll.com
+Versão 1.13 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -47,7 +47,6 @@ public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-t
 
 **Vocabulário editorial.**
 - Cada post é um **fólio**, numerado em ordem de publicação com três dígitos: `Fól. 042`. O número nunca é reaproveitado.
-- Cada trilha temática é um **caderno**: Caderno de ML, de Deep Learning, de Agentes, de LLMs.
 - Datas no formato `21.out.2026`.
 
 ---
@@ -262,14 +261,11 @@ folio: 6                  # número do fólio, exibido como "Fól. 006"
 tipo: lab                 # conceito | tutorial | lab | playbook
 nivel: 3                  # 1 iniciante | 2 intermediário | 3 avançado
 temas: [LLMs, Fine-tuning, PyTorch]
-caderno: llms             # opcional
-tempoDeBancada: 90        # minutos para ler E executar
-material: "marimo · GPU 16 GB"
 marimo: "https://..."     # obrigatório em labs
 colab: "https://..."      # só quando o lab precisa de GPU
 ```
 
-A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `benchMinutes`, `material`, `track`); `kind` no enum inglês; temas da marca são rótulo em `src/data/tags.ts`, não um campo; `minutesRead` permanece ao lado de `benchMinutes`; lab exige `notebooks`; Colab é `gpuUrl`. Este bloco é a sugestão anterior a essa decisão.
+A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `tags`, `references`, `appendices`); `kind` no enum inglês; temas da marca são rótulo em `src/data/tags.ts`, não um campo; o tempo do post é só o `minutesRead`; lab exige `notebooks`; Colab é `gpuUrl`. Este bloco é a sugestão anterior a essa decisão; caderno, tempo de bancada e material saíram na T-62.
 
 ---
 
@@ -296,8 +292,9 @@ A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `benchMinutes`, `
 1. Linha de metadados: `Fól. 006 · 21.out.2026` · tipo (ícone animado) · nível.
 2. Título (h1).
 3. Linha fina de introdução em grafite.
-4. Ficha em três colunas, separadas por filetes: **Tempo de bancada** (`≈ 90 min`), **Material** (`marimo · GPU 16 GB · Colab se faltar GPU`), **Caderno** (`LLMs · 4 de 12`).
-5. Temas.
+4. Temas.
+
+A ficha de bancada saiu na T-62. No fim do fólio, a área de apêndice traz os apêndices do autor e as referências numeradas, no modelo do Distill (SPEC RF-04).
 
 ### 9.4 Avisos dentro do texto (decisão: forma, não cor)
 Todos em tinta; nenhum usa as cores dos tipos.
@@ -518,7 +515,7 @@ Ordem que estava sugerida antes desse encaixe:
 2. **Fontes:** carregar as quatro famílias (de preferência auto-hospedadas).
 3. **Marca no layout:** assinatura no cabeçalho, favicon (seção 12), `<title>` no padrão da seção 1, rodapé com assinatura espelhada opcional.
 4. **Home:** saudação com aceno animado, texto de apresentação, newsletter, lista de fólios.
-5. **Schema de conteúdo:** campos de fólio, tipo, nível, temas, tempo de bancada, material, links marimo/Colab.
+5. **Schema de conteúdo:** campos de fólio, tipo, nível, temas, links marimo/Colab.
 6. **Card e cabeçalho de fólio:** com ícones parados nas listas e animado no cabeçalho, hachura de nível.
 7. **Avisos em MDX:** componente com os três tipos da seção 9.4.
 8. **Código:** temas Shiki próprios + barra com nome do arquivo e Copiar/Copiado.

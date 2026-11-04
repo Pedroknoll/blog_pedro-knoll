@@ -12,6 +12,34 @@ kind: concept
 level: 1
 
 tags: [astro, marimo, cloudflare, meta]
+
+references:
+  - key: distill-multimodal
+    authors:
+      - Gabriel Goh
+      - Nick Cammarata
+      - Chelsea Voss
+      - Shan Carter
+      - Michael Petrov
+      - Ludwig Schubert
+      - Alec Radford
+      - Chris Olah
+    title: Multimodal Neurons in Artificial Neural Networks
+    year: 2021
+    venue: Distill
+    url: https://distill.pub/2021/multimodal-neurons/
+  - key: astro-unified
+    authors:
+      - Astro
+    title: Unified API Reference
+    year: 2026
+    venue: Documentação do Astro
+    url: https://docs.astro.build/en/reference/markdown-processors/unified/
+
+appendices:
+  - title: Como as referências funcionam
+    paragraphs:
+      - A citação no texto é um número entre colchetes. O número é a posição da obra na lista de referências, e o link leva ao item correspondente no fim do post.
 ---
 
 import Callout from "~/components/ui/Callout.astro";
@@ -36,7 +64,9 @@ Esta linha fica de fora do sumário.
 
 ## O que o texto carrega
 
-O processador `unified` trata o Markdown.
+O processador `unified` trata o Markdown [@astro-unified].
+
+O fim do post segue o modelo do Distill [@distill-multimodal].
 
 ```ts title=dobro.ts
 function dobro(n: number): number {
