@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 03/11/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 04/11/2026
+
+**Revisão de 04/11/2026:** a §10 registra que o `pnpm lint` começa pela guarda de codificação de `src/`, `pnpm check:utf8` (T-59).
 
 **Revisão de 03/11/2026:** a §9 corrige o custo das fontes no LCP: ele segue os bytes e a página, e não um degrau por arquivo, e as fontes do KaTeX também entram (T-54).
 
@@ -734,7 +736,7 @@ A T-05 confirmou o detach: `! Content-Security-Policy` seguido de nova CSP no me
 ### Pipeline (`.github/workflows/ci.yml`)
 
 1. **Setup:** pnpm, Node LTS, uv; cache de `~/.cache/uv`, `node_modules` e `public/notebooks` (chave = hash dos `.py` + `uv.lock`).
-2. **Lint e tipos:** `pnpm lint`, `astro check`, `ruff check`, `marimo check --select MW` em todos os notebooks.
+2. **Lint e tipos:** `pnpm lint`, que começa pela guarda de codificação (`pnpm check:utf8`: todo arquivo de texto em `src/` é UTF-8 válido e sem BOM), `astro check`, `ruff check`, `marimo check --select MW` em todos os notebooks.
 3. **Testes unitários:** `vitest` em `src/lib`.
 4. **Build de produção:** `pnpm build` sem `SHOW_DRAFTS` (notebooks leves → Astro → Pagefind; notebooks pesados não executam, só têm o `export.lock` conferido e são copiados).
 5. **Verificações do artefato:** dois jobs sobre o `dist/` do passo 4 (artifact), em paralelo ao E2E. `artifact-checks` roda os links internos (`pnpm check:links`, linkinator com fragmentos) e o JS por página (`pnpm check:js`); o segundo roda mesmo se o primeiro falhar. `lighthouse` roda o Lighthouse CI com budgets e guarda o relatório no artifact `lighthouse-report` (14 dias). As regras do `dist/_headers` entram com a T-16 e o `size-limit` com a T-19 (RNF-01/02/05/06/07).
