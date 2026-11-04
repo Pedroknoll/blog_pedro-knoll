@@ -10,8 +10,9 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "lint": "eslint . && prettier --check .",
+    "lint": "pnpm check:utf8 && eslint . && prettier --check .",
     "check:js": "node scripts/check-page-js.mjs",
+    "check:utf8": "node scripts/check-utf8.mjs",
     "check:links": "linkinator ./dist"
   },
   "dependencies": {
