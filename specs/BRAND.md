@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.13 · novembro de 2026 · pedroknoll.com
+Versão 1.14 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -197,6 +197,10 @@ As quatro famílias entram pela Fonts API do Astro (`fontProviders.fontsource()`
 **Escala (px):** display 64 · h1 44 · h2 30 · h3 22 (Plex Sans 600) · texto 17 · rótulo 12. O h1 de página (post, tag e 404) fica em 36 px abaixo de `sm` (640 px) e em 44 px de `sm` em diante; a saudação da home tem tamanho próprio (§9.1). O rótulo usa letter-spacing de 0,1em (T-51).
 Títulos com `text-wrap: balance`.
 
+**Fonte de display (decisão, 04/11/2026, T-63).** A IBM Plex Sans Condensed 600 substitui a Cormorant Garamond em tudo que usa o token de display: assinatura, saudação, card, h1 de página, h2 da prosa e 404. É da mesma superfamília do texto e dos rótulos. O arquivo latin tem 19.816 bytes, contra 23.396 da Cormorant: a home e a tag caem de 60.692 para 57.112 bytes, sem mudar o teto de 61.000. A troca é a T-60, que atualiza esta seção e a seção 1; até lá, a tabela acima vale como está.
+
+**Escala do post (decisão, T-63).** O h1 do post fica em 36 px abaixo de `sm`, 44 px de `sm` em diante e 72 px de `lg` em diante, com entrelinha 1,02 no `lg`; a linha fina, em 18 px e 24 px de `lg` em diante. Os 72 px passam do display de 64 px e valem só para o h1 do post (seção 9.3, T-65).
+
 ---
 
 ## 6. Elementos gráficos
@@ -274,27 +278,31 @@ A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `tags`, `referenc
 ### 9.1 Saudação (home)
 - `<h1>` em Cormorant 600, `clamp(2.4rem, 4.4vw, 3.5rem)` (no máximo 56 px, abaixo do display de 64 px da seção 5; T-44), com `aceno.svg` inline antes do texto (48 px no desktop, 32 px abaixo de 560 px), `vertical-align: -.02em`, margem direita `.2em`.
 - O nome dentro da saudação usa a mesma marcação da assinatura (`<em>pk</em><span class="ponto">.</span><span class="ext">log</span>`), sem quebrar linha dentro do nome. Abaixo de 560 px o nome começa sempre na segunda linha (`Bem-vindo ao` / `pk.log`): a quebra não pode depender da fonte, senão a troca da fonte reserva pela Cormorant desloca a página (T-44, CLS).
-- Abaixo, o texto de apresentação em Plex Sans `clamp(1.18rem, 2.1vw, 1.4rem)`, cor tinta, máximo ~42 caracteres por linha.
+- Abaixo, o texto de apresentação em Plex Sans 18 px, entrelinha 1,55, cor grafite, máximo ~46 caracteres por linha, para a saudação ficar sozinha no topo (T-63, T-64).
 - A newsletter está fora da v1 (SPEC §1). Não entra na home.
 
 ### 9.2 Card de fólio (listas)
 - Um `article` em grade. No mobile, a ordem é a do DOM: fólio e data, título, resumo, rodapé. No destaque, a capa fica depois do rótulo e do fólio com a data, e antes do título, do resumo e do rodapé.
-- De `sm` em diante, o card da lista tem duas colunas: a faixa do fólio (8rem) à esquerda, centralizada na altura do card, e o texto à direita. O destaque com capa inverte: texto à esquerda, capa de 18rem à direita, centralizada na vertical.
+- De `sm` em diante, o card da lista tem duas colunas: a faixa do fólio (6,5rem) à esquerda, alinhada ao topo do título, e o texto à direita (T-63). O destaque com capa inverte: texto à esquerda, capa de 18rem à direita, centralizada na vertical.
 - Linha do fólio: `Fól.` em mono, lápis; o número em Cormorant 600, tinta, desde 22 px; data em mono, lápis (`09.out.2026`). No mobile e no destaque, ficam na mesma linha (`Fól. 001 · 09.out.2026`). Na lista, de `sm` em diante, a data desce para baixo do número.
-- Título em Cormorant 600 na lista: 26 px abaixo de `sm`, ~1,45rem de `sm` em diante, peso 600 desde 22 px. No destaque, maior (`text-3xl`, e `sm:text-4xl`). Sem sublinhado em repouso; no hover e no foco, cor acento e sublinhado — exceção à seção 9.10.
-- Resumo em Plex Sans 17 px, entrelinha 1,65, grafite (seção 5).
+- Título na fonte de display 600 na lista: 28 px em todas as larguras, entrelinha 1,2. No destaque, 36 px abaixo de `sm` e 44 px de `sm` em diante. Sem sublinhado e sem troca de cor, em repouso, no hover e no foco (T-63).
+- Resumo em Plex Sans 16 px, entrelinha 1,6, grafite (T-63).
 - O card inteiro é tocável: o link do título se estica sobre o card (`after:absolute after:inset-0`, com o `article` em `relative`) e dá retorno em acento no toque (`active:text-accent`). O rodapé não intercepta o toque (`pointer-events-none`).
+- Hover, no modelo do claude.dev: com o ponteiro sobre um card da listagem, destaque incluído, os outros caem para opacidade 0,35, com transição curta. Só com mouse (`hover: hover` e `pointer: fine`); o foco do teclado faz o mesmo. Sem transição com `prefers-reduced-motion`. Exceção à seção 9.10 (T-63).
 - Rodapé: tipo (ícone parado 12 px + nome), nível (hachura + nome) e tempo de leitura (relógio parado 12 px + `8 min`), em mono 12 px, maiúsculas. Separadores `|` na cor da linha, no vão entre os trechos; quando a linha quebra, o separador não abre nem fecha a linha, e as linhas do rodapé têm vão de 0,375rem. Sem tags.
 - A capa só aparece no destaque, na proporção 1200/630. Os cards da lista não mostram capa.
 - A lista separa os cards com divisória `divide-line`. Os cards da lista ficam sem borda de 1 px, sem sombra e sem hover de borda. O destaque tem borda de 1 px `--linha` só embaixo, sem raio e sem sombra. O respiro é só vertical: 1,25rem em cima e 2rem embaixo no mobile, 2rem em cima e embaixo de `sm` em diante. O texto e a capa alinham com os cards da lista. O espaço até o post seguinte é o mesmo que entre os cards da lista: 2rem de cada lado do filete.
 
 ### 9.3 Cabeçalho do fólio (página do post)
-1. Linha de metadados: `Fól. 006 · 21.out.2026` · tipo (ícone animado) · nível.
-2. Título (h1).
-3. Linha fina de introdução em grafite.
-4. Temas.
+Decisão da T-63, no modelo do Stripe (stripe.dev); entra nas T-65 e T-66.
 
-A ficha de bancada saiu na T-62. No fim do fólio, a área de apêndice traz os apêndices do autor e as referências numeradas, no modelo do Distill (SPEC RF-04).
+- **Título em cima, sozinho:** h1 na escala do post (seção 5), na largura toda, com `text-wrap: balance`. Abaixo, a linha fina de introdução em grafite, até ~52 caracteres.
+- **Lateral, de `lg` em diante:** à esquerda, com 15rem, vão de 4rem até o texto, sticky. No topo, `Fól.` em mono e o número na fonte de display, em 44 px. Abaixo, entre filetes, os metadados, cada um com o rótulo em mono 12 px maiúsculo acima do valor: data, atualizado em (quando houver), leitura, tipo (ícone animado), nível, autor e tags.
+- **Título na lateral:** quando o h1 sai da tela, o número do fólio dá lugar ao título, em 28 px. Os dois dividem o mesmo espaço, então nada se desloca ao rolar. O título da lateral é texto com `aria-hidden`, não heading. A troca usa só opacidade e `transform`, sem transição com `prefers-reduced-motion`. Sem JavaScript, fica o fólio.
+- **Abaixo de `lg`:** sem lateral. `Fól. 006` em mono, o título, a linha fina e os metadados em duas colunas entre filetes, tudo rolando com o texto.
+- **Sem sumário** (SPEC: o RF-05 saiu na T-63).
+
+**Apêndice, no modelo do Distill.** No fim do fólio, numa faixa própria depois do texto, com filete em cima e fundo `sheet`: os apêndices do autor e as referências numeradas (SPEC RF-04). De `lg` em diante, os títulos (`Apêndice A`, `Referências`) ficam como rótulo em mono 12 px maiúsculo na coluna da lateral, e o texto, em Plex Sans 15 px com entrelinha 1,6, na coluna do texto. Cada referência traz o número, o título com link numa linha e, abaixo, autores, ano e veículo em grafite. A ficha de bancada saiu na T-62.
 
 ### 9.4 Avisos dentro do texto (decisão: forma, não cor)
 Todos em tinta; nenhum usa as cores dos tipos.
@@ -337,6 +345,9 @@ Foco visível: contorno 2 px prússia com afastamento 3 px. Links em prússia, s
 
 ### 9.11 Link com cara de botão (página 404)
 O "Voltar ao início" da página 404 parece um botão, mas continua um link (`<a>`) para `/`. Fundo tinta, texto papel, IBM Plex Mono 400 em 14 px, 44 px de altura, 20 px de respiro nas laterais. Cantos retos e sem sombra, como os botões da seção 9.6. Sem sublinhado em repouso; no hover e no foco, sublinhado com afastamento de 3 px, sem troca de cor. O foco é o da seção 9.10. No tema escuro, os mesmos tokens invertem o par: fundo claro, texto escuro.
+
+### 9.12 Filtro por tipo (listas)
+Decisão da T-63, na disposição do claude.dev; entra na T-64. Uma linha de links acima da lista, com filete embaixo: `Todos` e os tipos com post publicado, na ordem de `KINDS` (SPEC §6). Cada item em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, lápis. Cada tipo leva o ícone parado de 12 px na cor do tipo, apagado (opacidade .55) fora do tipo ativo, e o número de posts publicados em sobrescrito. O ativo vai para tinta, com sublinhado de 2 px na cor do texto e o ícone inteiro. No celular, a linha rola na horizontal. Só links, sem JavaScript.
 
 ---
 
