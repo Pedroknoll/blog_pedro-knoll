@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 04/11/2026
 
+**Revisão 3 de 04/11/2026:** a revisão visual da T-63 troca a barra "Filtrar por tag" pela "Filtrar por tipo", com páginas `/tipos/<tipo>/` que espelham a home (RF-02 e §6). O RF-05 sai: o post não tem mais sumário, e o cabeçalho ganha uma lateral com o fólio, os metadados e o título ao rolar (RF-04). A área de apêndice sai do `div` da prosa, e cada referência traz o título antes dos autores (§6). A v1 passa a ter 11 requisitos Must. A implementação é das T-64, T-65 e T-66; até elas, o site segue o comportamento anterior.
+
 **Revisão 2 de 04/11/2026:** o RF-04 troca a ficha da seção 9.3 do BRAND por referências e apêndices no fim do post. Saem do schema da §6 `benchMinutes`, `material` e `track`; entram `references` e `appendices`. A citação `[@chave]` vira `[n]` pelo plugin `remarkCitations`, registrado nos dois `unified()` da §7 (T-62).
 
 **Revisão de 04/11/2026:** a §10 registra que o `pnpm lint` começa pela guarda de codificação de `src/`, `pnpm check:utf8` (T-59).
@@ -63,7 +65,7 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 
 ### Objetivos
 
-- Publicar posts em Markdown/MDX com a mesma ergonomia de leitura do HF Blog: listagem em cards, página de post com TOC, autor, tags e data.
+- Publicar posts em Markdown/MDX com a mesma ergonomia de leitura do HF Blog: listagem em cards, página de post com os metadados ao lado do texto, autor, tags e data.
 - Permitir que um post embuta um notebook marimo interativo em iframe (Python no browser via WebAssembly), sem servidor Python em produção.
 - Permitir gráficos D3 interativos encapsulados em componentes Svelte, hidratados só quando visíveis.
 - Deploy automático a cada push, com preview por pull request.
@@ -137,16 +139,16 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10 e 22/10 já 
 
 ## 3. Requisitos funcionais
 
-A v1 entrega 12 requisitos Must; o restante entra por ordem de prioridade sem bloquear o lançamento. Os itens espelham o que o HF Blog oferece hoje, menos a camada social.
+A v1 entrega 11 requisitos Must; o restante entra por ordem de prioridade sem bloquear o lançamento. Os itens espelham o que o HF Blog oferece hoje, menos a camada social.
 
 
 | ID    | Requisito                                                                             | Prioridade | Critério de aceite                                                                                                      |
 | ----- | ------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
-| RF-01 | Home com saudação, post em destaque e lista de cards (fólio, data, título, resumo, tipo, nível, tempo de leitura) | Must       | Saudação na home; cards ordenados por data desc; destaque via `featured: true`; o card mostra fólio, data, título, resumo, tipo, nível e tempo de leitura com ícone de relógio parado, sem tags; só o destaque mostra capa; título do card e número do fólio em Cormorant 600 desde 22 px; o tempo de leitura do card é o mesmo `minutesRead` da página do post |
-| RF-02 | Filtro por tag e página `/tags/[tag]`                                                 | Must       | Cada tag usada gera uma página; tag inexistente é 404                                                                   |
+| RF-01 | Home com saudação, post em destaque e lista de cards (fólio, data, título, resumo, tipo, nível, tempo de leitura) | Must       | Saudação na home; cards ordenados por data desc; destaque via `featured: true`; o card mostra fólio, data, título, resumo, tipo, nível e tempo de leitura com ícone de relógio parado, sem tags; só o destaque mostra capa; título do card e número do fólio na fonte de display, peso 600 (BRAND §5); o tempo de leitura do card é o mesmo `minutesRead` da página do post |
+| RF-02 | Filtro por tipo e páginas `/tipos/[tipo]` e `/tags/[tag]`                             | Must       | Cada tipo com post publicado e cada tag usada geram uma página; tipo ou tag inexistente é 404; a barra de tipos funciona sem JavaScript |
 | RF-03 | Paginação da listagem                                                                 | Must       | 12 posts por página; a página 1 é `/` e as seguintes são `/page/2`, `/page/3`… (exceção à regra de rotas em pt-BR, Q10) |
-| RF-04 | Página do post com título, autor, linha `Fól. 006 · 21.out.2026`, tipo, nível, datas e tempo de leitura | Must       | A linha traz fólio, data visível, tipo e nível; o tempo de leitura permanece; os campos vêm do frontmatter validado. Quando o post tem `references` ou `appendices`, o fim do post tem a área de apêndice, com os apêndices do autor (Apêndice A, B…) e a lista numerada de referências, que também entram no fim do sumário. No texto, a citação `[@chave]` vira `[n]`, com link para a referência e nome acessível `Referência n`, sem JavaScript. Chave citada sem referência, referência não citada, citação dentro de link e chave repetida quebram o build. Post sem os dois campos não muda |
-| RF-05 | TOC lateral fixa (h2–h3) com seção ativa destacada                                    | Must       | Funciona sem JS (links âncora); destaque é melhoria progressiva                                                         |
+| RF-04 | Página do post com título, autor, fólio, data `21.out.2026`, tipo, nível, datas e tempo de leitura | Must       | O cabeçalho traz fólio, data visível, tipo e nível; o tempo de leitura permanece; os campos vêm do frontmatter validado. O título fica em cima; de `lg` em diante, o fólio e os metadados ficam numa lateral fixa ao lado do texto, e o título aparece nela quando o `h1` sai da tela, como melhoria progressiva, sem deslocar a página; sem JavaScript, a lateral mostra o fólio. Quando o post tem `references` ou `appendices`, o fim do post tem a área de apêndice, com os apêndices do autor (Apêndice A, B…) e a lista numerada de referências. No texto, a citação `[@chave]` vira `[n]`, com link para a referência e nome acessível `Referência n`, sem JavaScript. Chave citada sem referência, referência não citada, citação dentro de link e chave repetida quebram o build. Post sem os dois campos não muda |
+| RF-05 | ~~TOC lateral fixa (h2–h3) com seção ativa destacada~~                                | Removido   | Saiu na T-63: o post não tem sumário; a lateral do cabeçalho é parte do RF-04                                           |
 | RF-06 | Syntax highlighting com botão copiar                                                  | Must       | Shiki em build time, temas `pk-claro` e `pk-escuro`. Uma cerca com a meta `title=<arquivo>` depois da linguagem (```` ```py title=fol-001_embeddings.py ````) mostra o nome do arquivo na barra do bloco; sem `title=`, a barra não mostra nome. O botão diz Copiar e vira Copiado por 1,5 s; o `aria-label` é `Copiar código` e vira `Código copiado` junto com o texto, para o nome acessível conter o rótulo visível (WCAG 2.5.3). A barra existe com ou sem `title=` e com ou sem JavaScript; o nome do arquivo sai do build |
 | RF-07 | Matemática LaTeX inline e em bloco                                                    | Must       | `remark-math` + `rehype-katex` no processador `unified()`, render no build                                              |
 | RF-08 | Notebook marimo interativo no post, em iframe                                         | Must       | Iframe via `marimo export html-wasm`; pôster estático até "Executar"; Python só dentro do export (seção 7)             |
@@ -397,7 +399,7 @@ notebooks:
 - Referências e apêndices ficam no frontmatter (`references` e `appendices`) e não contam no `minutesRead`. A citação no corpo, no `.md` e no `.mdx`, é `[@chave]`, uma chave por marcador; duas seguidas se escrevem `[@a] [@b]`.
   - **Plugin:** `src/lib/remark-citations.mjs`, registrado nos dois `unified()` entre o `remark-math` e o do tempo de leitura, lê as chaves em `file.data.astro.frontmatter.references` (o frontmatter cru) e chama `applyCitations`, de `src/lib/references.ts`. Cada marcador vira um link `[n]` para `#ref-<chave>`, com `aria-label` `Referência n`. O `n` é a posição na lista `references`, a partir de 1, e não a ordem da primeira citação. O marcador não é procurado em código, fórmula, HTML cru nem expressão MDX.
   - **Quebram o build:** chave citada que não está em `references` (`Citação sem referência: @<chave> em <arquivo>`), referência nunca citada no corpo (`Referência não citada: <chave> em <arquivo>`), citação dentro de link (`Citação dentro de link: @<chave> em <arquivo>`) e chave repetida (`Chave de referência repetida: <chave>`, pelo schema, que falha antes do plugin).
-  - **Área:** sai de `postAppendix` e fica dentro do mesmo `div` da prosa, depois do corpo: `<hr />`; um h2 `Apêndice A · <título>` por apêndice (`id` `apendice-a`, `apendice-b`…), com um `<p>` de texto puro por parágrafo; e o h2 `Referências` (`id` `referencias`) com a lista numerada. Cada item é `<autores>, <ano>. <título com link>. <veículo>.`, com `id` `ref-<chave>`; dois autores com " e ", três ou mais com vírgulas e " e " antes do último. Os h2 da área entram no fim do sumário. Sem link de volta da referência para a citação e sem itálico na área.
+  - **Área:** sai de `postAppendix` e fica fora do `div` da prosa, depois dele, numa faixa própria com corpo menor (BRAND §9.3): um h2 `Apêndice A · <título>` por apêndice (`id` `apendice-a`, `apendice-b`…), com um `<p>` de texto puro por parágrafo; e o h2 `Referências` (`id` `referencias`) com a lista numerada. Cada item traz o título com link numa linha e, abaixo, `<autores>, <ano>. <veículo>.`, com `id` `ref-<chave>`; dois autores com " e ", três ou mais com vírgulas e " e " antes do último. Sem link de volta da referência para a citação e sem itálico na área.
 - A data visível é `21.out.2026`. O dia tem dois dígitos (`05.out.2026`), o mês vem de uma lista fixa em minúsculas e sem ponto, e o ano tem quatro dígitos, sempre em UTC. A função é `formatPubDate`, em `src/lib/format-date.ts`, sem `Intl`. Vale para a publicação e para o "Atualizado em". O atributo `datetime` continua ISO.
 - O slug é o `id` gerado pelo `generateId` do loader (nome da pasta). `postIdFromEntry` exige exatamente dois segmentos (`pasta/index.md` ou `pasta/index.mdx`) e pasta `^[a-z0-9-]+$`; caso contrário o build falha citando o entry. Nenhuma página recalcula slug por conta própria.
 - O tempo de leitura é calculado por um plugin remark do projeto (`src/lib/remark-reading-time.mjs`), registrado nos dois `unified()`, o do Markdown e o do MDX. Ele grava o valor em `minutesRead`, que a página lê em `remarkPluginFrontmatter`.
@@ -409,8 +411,9 @@ notebooks:
   - **Conta:** nós `code` do mdast, com ou sem `lang` (`lang: null` é cerca sem linguagem), inclusive dentro de `blockquote` e de `list`/`listItem`.
   - **Não conta:** `inlineCode` nem `code` com `lang === "math"`.
 - Tags são validadas pelo schema, com `^[a-z0-9-]+$` e até 6 por post, e o build falha fora disso; não há normalização. Um arquivo `src/data/tags.ts` opcional dá rótulo e descrição para as páginas de tag.
-- A página `/tags/<tag>/` existe para cada tag de post publicado e lista todos os posts publicados com a tag, na ordem de `getPublishedPosts()`, sem paginação, com h1 `Tag: <tag>`. Não há página `/tags/`. As tags aparecem como links na página do post e na barra "Filtrar por tag"; os cards não mostram tags (T-56).
-- `/`, `/page/n/` e as páginas de tag têm a barra "Filtrar por tag", só com links e sem JavaScript, com "Todos" e as tags dos posts publicados em ordem alfabética. O filtro ativo leva `aria-current="true"`.
+- A página `/tags/<tag>/` existe para cada tag de post publicado e lista todos os posts publicados com a tag, na ordem de `getPublishedPosts()`, sem paginação, com h1 `Tag: <tag>`. Não há página `/tags/`. As tags aparecem como links na página do post; os cards não mostram tags (T-56). As páginas de tag não têm barra.
+- A página `/tipos/<tipo>/` existe para cada tipo com post publicado, com o slug em pt-BR (`conceito`, `tutorial`, `lab`, `playbook`) definido em `src/lib/kind.ts`, e lista todos os posts publicados do tipo, na ordem de `getPublishedPosts()`, sem paginação e sem destaque. Ela espelha a home: a saudação continua o h1, e o `<title>`, a descrição e o nome acessível da lista dizem o tipo. Não há página `/tipos/`.
+- `/`, `/page/n/` e as páginas de tipo têm a barra "Filtrar por tipo", só com links e sem JavaScript, com "Todos" e os tipos com post publicado, na ordem de `KINDS`, cada um com o ícone parado do tipo e o número de posts publicados. O filtro ativo leva `aria-current="true"`.
 - A home mostra como destaque o post mais recente com `featured: true`, só em `/`, e ele sai da lista paginada. Sem nenhum `featured`, não há destaque.
 - A página 1 da listagem é `/`; as seguintes são `/page/2/`, `/page/3/`…; `/page/1/` não é gerada.
 - Links internos usam barra final (`/blog/<slug>/`, `/page/2/`): sem ela, a Cloudflare responde 307 (T-05).
@@ -822,7 +825,7 @@ Funcionalidade: Rascunhos [RF-11]
   Cenário: draft em produção
     Dado um post com draft: true
     Quando o build roda sem SHOW_DRAFTS
-    Então o post não aparece na home, nas tags, no RSS nem no sitemap
+    Então o post não aparece na home, nas páginas de tag e de tipo, no RSS nem no sitemap
 
 Funcionalidade: Gráfico acessível [RF-09, RNF-04]
   Cenário: leitor sem JavaScript
