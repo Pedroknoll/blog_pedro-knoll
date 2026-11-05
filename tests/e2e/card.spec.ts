@@ -223,7 +223,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     }
   });
 
-  test("C2 título do card em Cormorant 600", async ({ page }) => {
+  test("C2 título do card na fonte de display 600", async ({ page }) => {
     for (const path of await listingPaths(page)) {
       await test.step(path, async () => {
         await open(page, path);
@@ -234,7 +234,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           const measured = await headings.nth(index).evaluate((element) => {
             const style = getComputedStyle(element);
             const variable = getComputedStyle(document.documentElement)
-              .getPropertyValue("--font-cormorant")
+              .getPropertyValue("--font-plex-condensed")
               .trim();
             return {
               family: style.fontFamily,
@@ -463,7 +463,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     }
   });
 
-  test("C10 número do fólio em Cormorant 600", async ({ page }) => {
+  test("C10 número do fólio na fonte de display 600", async ({ page }) => {
     for (const path of await listingSurfaces(page)) {
       await test.step(path, async () => {
         await open(page, path);
@@ -477,7 +477,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           const measured = await numbers.nth(index).evaluate((element) => {
             const style = getComputedStyle(element);
             const variable = getComputedStyle(document.documentElement)
-              .getPropertyValue("--font-cormorant")
+              .getPropertyValue("--font-plex-condensed")
               .trim();
             return {
               text: (element.textContent ?? "").trim(),

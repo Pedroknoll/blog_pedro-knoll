@@ -4,7 +4,7 @@ import { pagesForTheme } from "./published-posts";
 import { authorName } from "./site-literals";
 
 const mark = "pk.log";
-const displayVariable = "--font-cormorant";
+const displayVariable = "--font-plex-condensed";
 const monoVariable = "--font-plex-mono";
 const iconHrefs = [
   "/favicon.svg",

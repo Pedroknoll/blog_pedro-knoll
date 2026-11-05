@@ -6,7 +6,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { pagesForTheme } from "./published-posts";
 
 const variables = [
-  "--font-cormorant",
+  "--font-plex-condensed",
   "--font-plex-sans",
   "--font-plex-mono",
   "--font-caveat",
@@ -17,7 +17,7 @@ const allowed = [
   { variable: "--font-plex-sans", weight: "600", style: "normal" },
   { variable: "--font-plex-sans", weight: "400", style: "italic" },
   { variable: "--font-plex-mono", weight: "400", style: "normal" },
-  { variable: "--font-cormorant", weight: "600", style: "normal" },
+  { variable: "--font-plex-condensed", weight: "600", style: "normal" },
 ] as const;
 
 const generics = new Set([
