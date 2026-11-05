@@ -1,24 +1,9 @@
-import { expect, type Locator, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 import { publishedPosts, titlePostsOnPage } from "./published-posts";
 import { authorName, notFoundHeading } from "./site-literals";
 
-async function bodyHeadings(article: Locator) {
-  return article.locator("h2, h3").evaluateAll((elements) =>
-    elements
-      .filter(
-        (element) =>
-          element.closest("header") === null && element.closest("nav") === null,
-      )
-      .map((element) => ({
-        tag: element.tagName,
-        id: element.id,
-        text: (element.textContent ?? "").replace(/\s+/g, " ").trim(),
-      })),
-  );
-}
-
-test.describe("página do post [RF-04, RF-05]", () => {
+test.describe("página do post [RF-04]", () => {
   test("invariantes de cada post publicado", async ({ page }) => {
     const posts = await publishedPosts(page);
 
@@ -52,37 +37,9 @@ test.describe("página do post [RF-04, RF-05]", () => {
 
         await expect(header.getByText(/^\d+ min de leitura$/)).toHaveCount(1);
 
-        const article = page.getByRole("article");
-        const toc = page.getByRole("main").getByRole("navigation", {
-          name: "Sumário",
-          exact: true,
-        });
-        await expect(toc.locator("h1, h2, h3, h4, h5, h6")).toHaveCount(0);
-
-        const headings = await bodyHeadings(article);
-        if (headings.length === 0) {
-          await expect(toc).toHaveCount(0);
-        } else {
-          const links = toc.getByRole("link");
-          await expect(links).toHaveCount(headings.length);
-          for (const [index, heading] of headings.entries()) {
-            expect(heading.id).not.toBe("");
-            const link = links.nth(index);
-            await expect(link).toHaveText(heading.text);
-            await expect(link).toHaveAttribute("href", `#${heading.id}`);
-            await expect(article.locator(`[id="${heading.id}"]`)).toHaveCount(
-              1,
-            );
-          }
-
-          let h3AfterH2 = 0;
-          let seenH2 = false;
-          for (const heading of headings) {
-            if (heading.tag === "H2") seenH2 = true;
-            if (heading.tag === "H3" && seenH2) h3AfterH2 += 1;
-          }
-          expect(await toc.locator("li li a").count()).toBe(h3AfterH2);
-        }
+        await expect(
+          page.getByRole("navigation", { name: "Sumário", exact: true }),
+        ).toHaveCount(0);
       });
     }
   });

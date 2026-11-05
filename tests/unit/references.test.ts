@@ -229,7 +229,7 @@ describe("formatAuthors", () => {
 });
 
 describe("postAppendix", () => {
-  it("área completa traz os h2 e o sumário na mesma ordem", () => {
+  it("área completa traz os h2 na mesma ordem", () => {
     const first = "Primeiro título";
     const second = "Segundo título";
     const model = postAppendix(
@@ -277,21 +277,7 @@ describe("postAppendix", () => {
       authors: "Autor Um e Autor Dois",
     });
 
-    const headings = [
-      ...model.appendices.map((section) => ({
-        id: section.id,
-        text: section.text,
-      })),
-      { id: model.references.id, text: model.references.text },
-    ];
-    expect(model.toc).toEqual(
-      headings.map((heading) => ({
-        depth: 2,
-        slug: heading.id,
-        text: heading.text,
-        children: [],
-      })),
-    );
+    expect(model).not.toHaveProperty("toc");
   });
 
   it.each([
@@ -311,16 +297,12 @@ describe("postAppendix", () => {
     const model = postAppendix(references, appendices);
 
     expect(model).toBeDefined();
-    expect(model?.toc.map((item) => item.slug)).toEqual(slugs);
+    expect(model).not.toHaveProperty("toc");
     if (slugs[0] === "referencias") {
       expect(model?.appendices).toEqual([]);
-      expect(model?.toc.some((item) => item.slug.includes("apendice"))).toBe(
-        false,
-      );
       return;
     }
     expect(model?.references).toBeUndefined();
-    expect(model?.toc.some((item) => item.slug === "referencias")).toBe(false);
   });
 
   it("sem campos devolve undefined", () => {
