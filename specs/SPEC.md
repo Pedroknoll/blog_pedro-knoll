@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 05/11/2026
 
+**Revisão 2 de 05/11/2026:** a §9 troca o `Toc` pelo `PostRail` na árvore de componentes, e o exemplo de commit, que citava o RF-05 removido, passa a citar o RF-04 (T-65).
+
 **Revisão de 05/11/2026:** a §9 troca a Cormorant Garamond pela IBM Plex Sans Condensed na fonte de display: 600 normal, fallback `sans-serif`, sem itálico; saem a Cormorant 500 e 600 itálico (T-60).
 
 **Revisão 3 de 04/11/2026:** a revisão visual da T-63 troca a barra "Filtrar por tag" pela "Filtrar por tipo", com páginas `/tipos/<tipo>/` que espelham a home (RF-02 e §6). O RF-05 sai: o post não tem mais sumário, e o cabeçalho ganha uma lateral com o fólio, os metadados e o título ao rolar (RF-04). A área de apêndice sai do `div` da prosa, e cada referência traz o título antes dos autores (§6). A v1 passa a ter 11 requisitos Must. A implementação é das T-64, T-65 e T-66; até elas, o site segue o comportamento anterior.
@@ -637,7 +639,7 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   ├── content/posts/
 │   ├── assets/brand/         # símbolo e ícones; ver a árvore da marca abaixo
 │   ├── components/
-│   │   ├── ui/               # .astro: Card, TagList, Toc, AuthorBadge
+│   │   ├── ui/               # .astro: Card, TagList, PostRail, AuthorBadge
 │   │   ├── viz/              # .svelte: gráficos D3 (AGENTS.md próprio, criado antes da T-19)
 │   │   └── marimo/           # MarimoFrame, RunOnGpu (AGENTS.md próprio, criado antes da T-14)
 │   ├── integrations/
@@ -689,7 +691,7 @@ public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-t
 
 ### Convenções
 
-- **Commits:** Conventional Commits citando o requisito, ex.: `feat(post): TOC com seção ativa [RF-05]`.
+- **Commits:** Conventional Commits citando o requisito, ex.: `feat(post): lateral do cabeçalho com o título ao rolar [RF-04]`.
 - **Branches:** `main` = produção; toda mudança via PR com preview. Nome de branch: `t-XX-descricao-curta`.
 - **Componentes:** `.astro` para tudo que é estático; `.svelte` só quando houver estado no cliente.
 - **Rotas:** em pt-BR (`/sobre`, `/tags/[tag]`), com `/blog/[slug]` e a exceção `/page/[n]` (Q10).
