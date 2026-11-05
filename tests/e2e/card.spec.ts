@@ -312,15 +312,17 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     }
   });
 
-  test("C5 ícone animado no cabeçalho", async ({ page }) => {
+  test("C5 ícone parado em 12 px no cabeçalho", async ({ page }) => {
     for (const href of await publishedHrefs(page)) {
       await test.step(href, async () => {
         await open(page, href);
         const svg = page.getByRole("article").locator("header svg");
         expect(await svg.count()).toBe(1);
         await expect(svg).toHaveAttribute("aria-hidden", "true");
+        await expect(svg).toHaveCSS("width", "12px");
+        await expect(svg).toHaveCSS("height", "12px");
         const names = await animationNames(svg);
-        expect(names.some((name) => name !== "none")).toBe(true);
+        expect(names.every((name) => name === "none")).toBe(true);
       });
     }
   });

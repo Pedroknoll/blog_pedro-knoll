@@ -84,31 +84,42 @@ async function box(locator: Locator) {
 
 async function railMetrics(rail: Locator) {
   return rail.evaluate((element) => {
-    const cell = element.firstElementChild;
+    const cell = element.querySelector(":scope > div");
     const meta = element.lastElementChild;
     if (!(cell instanceof HTMLElement) || !(meta instanceof HTMLElement)) {
       return null;
     }
     const railBox = element.getBoundingClientRect();
+    const cellBox = cell.getBoundingClientRect();
     const metaBox = meta.getBoundingClientRect();
     return {
-      cellHeight: cell.getBoundingClientRect().height,
+      cellHeight: cellBox.height,
       metaTop: metaBox.top - railBox.top,
+      railHeight: railBox.height,
     };
   });
+}
+
+async function columnTracks(row: Locator): Promise<string[]> {
+  return row.evaluate((element) =>
+    getComputedStyle(element)
+      .gridTemplateColumns.split(" ")
+      .filter((part) => part.length > 0),
+  );
 }
 
 test.describe("cabeçalho do post [RF-04]", () => {
   test("H1 lateral a 1280", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     const posts = await publishedPosts(page);
-    const display = await variableFamily(page, "--font-plex-condensed");
+    const mono = await variableFamily(page, "--font-plex-mono");
 
     for (const post of posts) {
       await test.step(post.href, async () => {
         const response = await page.goto(post.href);
         expect(response?.status()).toBe(200);
-        const header = page.getByRole("article").locator("header");
+        const article = page.getByRole("article");
+        const header = article.locator("header");
         const rail = header.locator("[data-post-rail]");
         await expect(rail).toHaveCount(1);
 
@@ -120,17 +131,122 @@ test.describe("cabeçalho do post [RF-04]", () => {
         const proseBox = await box(prose);
         expect(proseBox.x - (railBox.x + railBox.width)).toBeCloseTo(64, 0);
 
+        await expect(rail).toHaveCSS("top", "120px");
+
+        const articleBox = await box(article);
+        const h1Box = await box(header.locator("h1"));
+        expect(h1Box.y - articleBox.y).toBeCloseTo(56, 0);
+
+        const deck = header.locator("> p");
+        await expect(deck).toHaveCount(1);
+        await expect(deck).toHaveCSS("font-size", "20px");
+        const [ink, muted] = await page.evaluate(() => {
+          const style = getComputedStyle(document.documentElement);
+          return [
+            style.getPropertyValue("--color-ink").trim(),
+            style.getPropertyValue("--color-muted").trim(),
+          ];
+        });
+        const deckColor = await deck.evaluate(
+          (element) => getComputedStyle(element).color,
+        );
+        expect(channels(deckColor)).toEqual(channels(muted));
+
         const cell = rail.locator("> div").first();
-        const digits = cell.locator("> div > span").nth(1);
-        await expect(digits).toHaveCSS("font-size", "44px");
-        await expect(digits).toHaveCSS("font-weight", "600");
-        const family = await digits.evaluate(
+        const folio = cell.locator("> div").first();
+        const bar = cell.locator("> span");
+        const table = rail.locator("> div").nth(1);
+        await expect(folio).toHaveCSS("font-size", "12px");
+        await expect(folio).toHaveCSS("text-transform", "uppercase");
+        await expect(folio).toHaveCSS("letter-spacing", "1.2px");
+        const family = await folio.evaluate(
           (element) => getComputedStyle(element).fontFamily,
         );
-        expect(firstFamily(family)).toBe(display);
+        expect(firstFamily(family)).toBe(mono);
+        const folioColor = await folio.evaluate(
+          (element) => getComputedStyle(element).color,
+        );
+        expect(channels(folioColor)).toEqual(channels(ink));
 
-        const meta = rail.locator("> div").nth(1);
-        const found = await meta
+        const mark = page.locator("article > .prose > [data-prose-mark]");
+        await expect(mark).toHaveCSS("letter-spacing", "1.2px");
+
+        await expect(bar).toHaveCount(1);
+        await expect(bar).toHaveAttribute("aria-hidden", "true");
+
+        await expect(cell).toHaveCSS("border-bottom-width", "1px");
+        await expect(cell).toHaveCSS("border-bottom-style", "solid");
+        await expect(cell).toHaveCSS("padding-bottom", "8px");
+        const cellBorder = await cell.evaluate(
+          (element) => getComputedStyle(element).borderBottomColor,
+        );
+        expect(channels(cellBorder)).toEqual(channels(ink));
+
+        const first = page.locator("article > .prose > :first-child");
+        await expect(first).toHaveAttribute("data-prose-mark", "");
+        await expect(first).toHaveAttribute("aria-hidden", "true");
+        expect(await first.evaluate((element) => element.tagName)).not.toBe(
+          "P",
+        );
+        await expect(first).toHaveCSS("border-bottom-width", "1px");
+        await expect(first).toHaveCSS("border-bottom-style", "solid");
+        await expect(first).toHaveCSS("padding-bottom", "8px");
+        const markBorder = await first.evaluate(
+          (element) => getComputedStyle(element).borderBottomColor,
+        );
+        expect(channels(markBorder)).toEqual(channels(ink));
+
+        const markBox = await box(first);
+        const cellBox = await box(cell);
+        expect(Math.abs(cellBox.y - markBox.y)).toBeLessThanOrEqual(1);
+        expect(
+          Math.abs(cellBox.y + cellBox.height - (markBox.y + markBox.height)),
+        ).toBeLessThanOrEqual(1);
+
+        const tableBox = await box(table);
+        expect(
+          Math.abs(tableBox.y - (cellBox.y + cellBox.height)),
+        ).toBeLessThanOrEqual(1);
+        await expect(table).toHaveCSS("border-top-width", "0px");
+
+        const rows = table.locator("> div");
+        const rowCount = await rows.count();
+        expect(rowCount).toBeGreaterThan(0);
+        const rowLabels: string[] = [];
+        for (let index = 0; index < rowCount; index += 1) {
+          rowLabels.push(
+            text(await rows.nth(index).locator("p").first().textContent()),
+          );
+        }
+        for (let index = 0; index < rowCount; index += 1) {
+          if (rowLabels[index] === "Tags") continue;
+          const row = rows.nth(index);
+          const tracks = await columnTracks(row);
+          expect(Number.parseFloat(tracks[0] ?? "")).toBeCloseTo(112, 0);
+          await expect(row).toHaveCSS("padding-top", "9px");
+          await expect(row).toHaveCSS("padding-bottom", "9px");
+        }
+        for (let index = 0; index < rowCount; index += 1) {
+          const row = rows.nth(index);
+          if (index === rowCount - 1) {
+            await expect(row).toHaveCSS("border-bottom-width", "0px");
+          } else {
+            await expect(row).toHaveCSS("border-bottom-width", "1px");
+            await expect(row).toHaveCSS("border-bottom-style", "dotted");
+          }
+        }
+        await expect(table).toHaveCSS("border-bottom-style", "solid");
+        await expect(table).toHaveCSS("border-bottom-width", "1px");
+
+        const tagsIndex = rowLabels.indexOf("Tags");
+        expect(tagsIndex).toBeGreaterThanOrEqual(0);
+        const tagsRow = rows.nth(tagsIndex);
+        const labelBox = await box(tagsRow.locator("p").first());
+        const listBox = await box(tagsRow.locator("ul"));
+        expect(labelBox.y + labelBox.height).toBeLessThanOrEqual(listBox.y + 1);
+        expect(await columnTracks(tagsRow)).toHaveLength(1);
+
+        const found = await table
           .locator("p")
           .evaluateAll(
             (nodes, labels) =>
@@ -147,27 +263,14 @@ test.describe("cabeçalho do post [RF-04]", () => {
         );
         expect(found).toEqual(expected);
 
-        const title = cell.locator("p[aria-hidden='true']");
+        const title = rail.locator("p[aria-hidden='true']");
         await expect(title).toHaveCount(1);
         await expect(title).toHaveAttribute("aria-hidden", "true");
-        expect(await title.evaluate((element) => element.tagName)).toBe("P");
         expect(text(await title.textContent())).toBe(post.title);
+        await expect(title).toHaveCSS("position", "absolute");
         await expect(
           page.getByRole("heading", { name: post.title, exact: true }),
         ).toHaveCount(1);
-
-        const deck = header.locator("> p");
-        await expect(deck).toHaveCount(1);
-        await expect(deck).toHaveCSS("font-size", "24px");
-        const muted = await page.evaluate(() =>
-          getComputedStyle(document.documentElement)
-            .getPropertyValue("--color-muted")
-            .trim(),
-        );
-        const color = await deck.evaluate(
-          (element) => getComputedStyle(element).color,
-        );
-        expect(channels(color)).toEqual(channels(muted));
       });
     }
   });
@@ -186,30 +289,61 @@ test.describe("cabeçalho do post [RF-04]", () => {
         await expect(rail).not.toHaveCSS("position", "sticky");
 
         const cell = rail.locator("> div").first();
+        const folio = cell.locator("> div").first();
         const deck = header.locator("> p");
-        const meta = rail.locator("> div").nth(1);
-        const folioTop = (await box(cell)).y;
+        const table = rail.locator("> div").nth(1);
+        const articleBox = await box(page.getByRole("article"));
+        const cellBox = await box(cell);
+        expect(cellBox.y - articleBox.y).toBeCloseTo(56, 0);
+
+        const folioBox = await box(folio);
         const titleTop = (await box(header.locator("h1"))).y;
         const deckTop = (await box(deck)).y;
-        const metaTop = (await box(meta)).y;
-        expect(folioTop).toBeLessThan(titleTop);
+        const tableTop = (await box(table)).y;
+        expect(folioBox.y).toBeLessThan(titleTop);
         expect(titleTop).toBeLessThan(deckTop);
-        expect(deckTop).toBeLessThan(metaTop);
+        expect(deckTop).toBeLessThan(tableTop);
 
-        const tracks = await meta.evaluate((element) =>
-          getComputedStyle(element)
-            .gridTemplateColumns.split(" ")
-            .filter((part) => part.length > 0),
+        await expect(
+          page.locator("article > .prose > [data-prose-mark]"),
+        ).toHaveCSS("display", "none");
+        await expect(cell.locator("> span")).toBeVisible();
+        await expect(cell).toHaveCSS("border-bottom-width", "0px");
+
+        const rows = table.locator("> div");
+        const rowCount = await rows.count();
+        expect(rowCount).toBeGreaterThan(1);
+        let previousBottom = Number.NEGATIVE_INFINITY;
+        for (let index = 0; index < rowCount; index += 1) {
+          const row = rows.nth(index);
+          const rowBox = await box(row);
+          if (index > 0) {
+            expect(rowBox.y).toBeGreaterThanOrEqual(previousBottom - 1);
+          }
+          previousBottom = rowBox.y + rowBox.height;
+          const label = text(await row.locator("p").first().textContent());
+          if (label === "Tags") continue;
+          const tracks = await columnTracks(row);
+          expect(Number.parseFloat(tracks[0] ?? "")).toBeCloseTo(112, 0);
+        }
+
+        await expect(table).toHaveCSS("border-top-width", "1px");
+        await expect(table).toHaveCSS("border-top-style", "solid");
+        await expect(table).toHaveCSS("margin-top", "32px");
+
+        const paragraph = page.locator("article > .prose > p").first();
+        const paragraphBox = await box(paragraph);
+        const tableBox = await box(table);
+        expect(paragraphBox.y - (tableBox.y + tableBox.height)).toBeCloseTo(
+          40,
+          0,
         );
-        expect(tracks).toHaveLength(2);
-        const first = await box(meta.locator("> div").nth(0));
-        const second = await box(meta.locator("> div").nth(1));
-        expect(Math.abs(first.y - second.y)).toBeLessThan(1);
-        expect(second.x - first.x).toBeGreaterThan(8);
 
-        const hiddenTitle = cell.locator("p[aria-hidden='true']");
-        await expect(hiddenTitle).toHaveCSS("display", "none");
         await expect(deck).toHaveCSS("font-size", "18px");
+        await expect(rail.locator("p[aria-hidden='true']")).toHaveCSS(
+          "display",
+          "none",
+        );
       });
     }
   });
@@ -238,17 +372,21 @@ test.describe("cabeçalho do post [RF-04]", () => {
           });
         await expect(rail).toHaveAttribute("data-title-out", "");
 
-        const cell = rail.locator("> div").first();
-        const title = cell.locator("p[aria-hidden='true']");
-        const folio = cell.locator("> div").first();
+        const title = rail.locator("p[aria-hidden='true']");
+        const folio = rail.locator("> div").first().locator("> div").first();
         await expect(title).toHaveCSS("opacity", "1");
-        await expect(folio).toHaveCSS("opacity", "0");
+        await expect(folio).toHaveCSS("opacity", "1");
+
+        const titleBox = await box(title);
+        const railBox = await box(rail);
+        expect(titleBox.y + titleBox.height).toBeLessThan(railBox.y);
 
         const after = await railMetrics(rail);
         expect(after).not.toBeNull();
         if (!after) return;
         expect(after.cellHeight).toBeCloseTo(before.cellHeight, 0);
         expect(after.metaTop).toBeCloseTo(before.metaTop, 0);
+        expect(after.railHeight).toBeCloseTo(before.railHeight, 0);
 
         await page.locator("article h1").evaluate((element) => {
           element.scrollIntoView();
@@ -269,11 +407,9 @@ test.describe("cabeçalho do post [RF-04]", () => {
         expect(response?.status()).toBe(200);
         const rail = page.locator("[data-post-rail]");
         await expect(rail).toHaveCount(1);
-        const cell = rail.locator("> div").first();
-        const title = cell.locator("p[aria-hidden='true']");
-        const folio = cell.locator("> div").first();
+        const title = rail.locator("p[aria-hidden='true']");
+        const folio = rail.locator("> div").first().locator("> div").first();
         await expect(title).toHaveCSS("transition-duration", "0s");
-        await expect(folio).toHaveCSS("transition-duration", "0s");
 
         await page
           .locator("article > .prose p")
@@ -283,7 +419,96 @@ test.describe("cabeçalho do post [RF-04]", () => {
           });
         await expect(rail).toHaveAttribute("data-title-out", "");
         await expect(title).toHaveCSS("opacity", "1");
-        await expect(folio).toHaveCSS("opacity", "0");
+        await expect(folio).toHaveCSS("opacity", "1");
+      });
+    }
+  });
+
+  test("H6 título de três linhas acima da lateral", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const posts = await publishedPosts(page);
+
+    for (const post of posts) {
+      await test.step(post.href, async () => {
+        const response = await page.goto(post.href);
+        expect(response?.status()).toBe(200);
+        const rail = page.locator("[data-post-rail]");
+        await expect(rail).toHaveCount(1);
+        await page.locator("article > .prose").evaluate((element) => {
+          const target = element.lastElementChild ?? element;
+          target.scrollIntoView({ block: "end" });
+        });
+        await expect(rail).toHaveAttribute("data-title-out", "");
+
+        const title = rail.locator("p[aria-hidden='true']");
+        const fitted = await title.evaluate((element) => {
+          const words = [
+            "para",
+            "com",
+            "que",
+            "por",
+            "uma",
+            "em",
+            "de",
+            "ou",
+            "na",
+            "no",
+            "um",
+            "os",
+            "as",
+            "e",
+            "a",
+            "o",
+          ];
+          const measure = () => {
+            const style = getComputedStyle(element);
+            const height = element.getBoundingClientRect().height;
+            const lineHeight = Number.parseFloat(style.lineHeight);
+            const value = (element.textContent ?? "")
+              .replace(/\s+/g, " ")
+              .trim();
+            return {
+              height,
+              lineHeight,
+              ratio: height / lineHeight,
+              text: value,
+            };
+          };
+          let state = measure();
+          for (
+            let step = 0;
+            step < 80 && Math.abs(state.ratio - 3) >= 0.05;
+            step += 1
+          ) {
+            const before = element.textContent ?? "";
+            let placed = false;
+            for (const word of words) {
+              element.textContent = `${before} ${word}`
+                .replace(/\s+/g, " ")
+                .trim();
+              const next = measure();
+              if (Math.abs(next.ratio - 3) < 0.05) return next;
+              if (next.ratio > 3) {
+                element.textContent = before;
+                continue;
+              }
+              state = next;
+              placed = true;
+              break;
+            }
+            if (!placed) break;
+          }
+          return state;
+        });
+        expect(
+          Math.abs(fitted.ratio - 3),
+          `altura ${fitted.height} entrelinha ${fitted.lineHeight} texto ${fitted.text}`,
+        ).toBeLessThan(0.05);
+
+        const titleBox = await box(title);
+        const railBox = await box(rail);
+        expect(titleBox.y).toBeGreaterThanOrEqual(0);
+        expect(titleBox.y + titleBox.height).toBeLessThan(railBox.y);
       });
     }
   });
@@ -309,12 +534,13 @@ test.describe("cabeçalho do post sem JavaScript [RF-04]", () => {
             element.scrollIntoView();
           });
         await expect(rail).not.toHaveAttribute("data-title-out");
-        const cell = rail.locator("> div").first();
-        await expect(cell.locator("p[aria-hidden='true']")).toHaveCSS(
+        await expect(rail.locator("p[aria-hidden='true']")).toHaveCSS(
           "opacity",
           "0",
         );
-        await expect(cell.locator("> div").first()).toHaveCSS("opacity", "1");
+        await expect(
+          rail.locator("> div").first().locator("> div").first(),
+        ).toHaveCSS("opacity", "1");
       });
     }
   });
