@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.14 · novembro de 2026 · pedroknoll.com
+Versão 1.15 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -43,7 +43,7 @@ public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-t
 
 **Grafias.** Certo: `pk.log`. Errado: `PK.LOG`, `PK Log`, `PK'log`, `Pk.Log`.
 
-**Significado.** "pk" são as iniciais de Pedro Knoll. "log" é ao mesmo tempo o log de treino de um modelo, o diário de bordo dos aviadores e o blog. Na assinatura, "pk" vem em serifa e "log" em mono (T-52: o itálico do pk pedia outro arquivo e entrava no LCP). O ponto é sempre azul-da-prússia e é o mesmo nó central do símbolo.
+**Significado.** "pk" são as iniciais de Pedro Knoll. "log" é ao mesmo tempo o log de treino de um modelo, o diário de bordo dos aviadores e o blog. Na assinatura, "pk" vem na fonte de display, IBM Plex Sans Condensed 600 (até a T-60, era a serifa Cormorant), e "log" em mono. O pk não usa itálico: o itálico pedia outro arquivo e entrava no LCP (T-52). O ponto é sempre azul-da-prússia e é o mesmo nó central do símbolo.
 
 **Vocabulário editorial.**
 - Cada post é um **fólio**, numerado em ordem de publicação com três dígitos: `Fól. 042`. O número nunca é reaproveitado.
@@ -180,24 +180,21 @@ As quatro famílias entram pela Fonts API do Astro (`fontProviders.fontsource()`
 
 | Papel | Fonte | Pesos | Regras |
 |---|---|---|---|
-| Títulos | **Cormorant Garamond** | 500 itálico, 600, 600 itálico | De 28 px para cima, com as exceções abaixo. Nas páginas, só 600 normal, até uma tarefa medir outra face (T-52, LCP). |
+| Títulos | **IBM Plex Sans Condensed** | 600 | Só 600 normal, sem itálico declarado, até uma tarefa medir outra face (T-52, T-60, LCP). |
 | Texto | **IBM Plex Sans** | 400, 400 itálico, 600 | 17 px, altura de linha 1,65, coluna de ~65 caracteres. |
 | Código, rótulos, fólio, cotas | **IBM Plex Mono** | 400 | Rótulos em maiúsculas com letter-spacing .08–.14em. Só o peso 400 (T-52, LCP). |
 | Anotação à mão | **Caveat** | 500, 600 | Fora das páginas do site até uma tarefa medir (T-52, LCP). Quando voltar: no máximo uma nota por seção, no máximo uma linha e meia, nunca em parágrafo, botão ou menu. |
 
-**Cormorant (decisão, 22/10/2026).**
+**Regras da display (decisão, 05/11/2026, T-60).**
 
-- Cormorant só a partir de 28 px.
-- Exceção: título de card, peso 600, a partir de 22 px. O ~1,45rem da seção 9.2 cabe nessa exceção (23 px com raiz de 16 px).
-- Exceção: número do fólio no card, peso 600, a partir de 22 px (T-56).
-- Exceção: a assinatura (Wordmark) também fica abaixo de 28 px, por ser desenho da marca e não texto.
-- Peso 500 nunca abaixo de 28 px.
+- IBM Plex Sans Condensed só no peso 600 normal. Um trecho em itálico num título (`## Um *exemplo*`) usa o itálico que o navegador sintetiza, sem arquivo a mais.
+- Sem tamanho mínimo próprio. A regra dos 28 px e as exceções de 22 px (título do card, número do fólio, assinatura) existiam porque a Cormorant ficava frágil em tamanho pequeno, e saíram com ela. Os tamanhos de hoje ficam; a escala nova é das T-64 e T-65.
 - O h3 a 22 px continua IBM Plex Sans 600.
 
 **Escala (px):** display 64 · h1 44 · h2 30 · h3 22 (Plex Sans 600) · texto 17 · rótulo 12. O h1 de página (post, tag e 404) fica em 36 px abaixo de `sm` (640 px) e em 44 px de `sm` em diante; a saudação da home tem tamanho próprio (§9.1). O rótulo usa letter-spacing de 0,1em (T-51).
 Títulos com `text-wrap: balance`.
 
-**Fonte de display (decisão, 04/11/2026, T-63).** A IBM Plex Sans Condensed 600 substitui a Cormorant Garamond em tudo que usa o token de display: assinatura, saudação, card, h1 de página, h2 da prosa e 404. É da mesma superfamília do texto e dos rótulos. O arquivo latin tem 19.816 bytes, contra 23.396 da Cormorant: a home e a tag caem de 60.692 para 57.112 bytes, sem mudar o teto de 61.000. A troca é a T-60, que atualiza esta seção e a seção 1; até lá, a tabela acima vale como está.
+**Fonte de display (decisão, 04/11/2026, T-63).** A IBM Plex Sans Condensed 600 substitui a Cormorant Garamond em tudo que usa o token de display: assinatura, saudação, card, h1 de página, h2 da prosa e 404. É da mesma superfamília do texto e dos rótulos. O arquivo latin tem 19.816 bytes, contra 23.396 da Cormorant: a home e a tag caem de 60.692 para 57.112 bytes, sem mudar o teto de 61.000. A troca entrou na T-60, com o arquivo de 19.816 bytes medido no build.
 
 **Escala do post (decisão, T-63).** O h1 do post fica em 36 px abaixo de `sm`, 44 px de `sm` em diante e 72 px de `lg` em diante, com entrelinha 1,02 no `lg`; a linha fina, em 18 px e 24 px de `lg` em diante. Os 72 px passam do display de 64 px e valem só para o h1 do post (seção 9.3, T-65).
 
@@ -212,7 +209,7 @@ Títulos com `text-wrap: balance`.
 | **Cotas** | Linha de medida do desenho técnico (traço com marcas nas pontas e valor em mono). Mostram formato de tensor `[batch, 512, 768]`, tempo, tamanho de modelo. Todo diagrama tem pelo menos uma. |
 | **Nota à margem** | IBM Plex Sans itálico, em prússia, com um traço ou seta curva, levemente inclinada (−1,5°). Uma por seção. A T-52 trocou a Caveat por esta face por causa do LCP. |
 | **Hachura de nível** | Traços inclinados para a direita (`\`), como hachurava Leonardo, que era canhoto: sempre três traços, com 1, 2 ou 3 marcados da esquerda para os três níveis. Os marcados ficam em tinta; os outros, na cor de `--linha` (T-46). |
-| **Fólio** | `Fól. 042 · 21.out.2026`, em mono, cor lápis. No card, o número em Cormorant 600 e tinta (seção 9.2). |
+| **Fólio** | `Fól. 042 · 21.out.2026`, em mono, cor lápis. No card, o número na fonte de display 600 e tinta (seção 9.2). |
 
 ---
 
@@ -276,15 +273,15 @@ A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `tags`, `referenc
 ## 9. Componentes
 
 ### 9.1 Saudação (home)
-- `<h1>` em Cormorant 600, `clamp(2.4rem, 4.4vw, 3.5rem)` (no máximo 56 px, abaixo do display de 64 px da seção 5; T-44), com `aceno.svg` inline antes do texto (48 px no desktop, 32 px abaixo de 560 px), `vertical-align: -.02em`, margem direita `.2em`.
-- O nome dentro da saudação usa a mesma marcação da assinatura (`<em>pk</em><span class="ponto">.</span><span class="ext">log</span>`), sem quebrar linha dentro do nome. Abaixo de 560 px o nome começa sempre na segunda linha (`Bem-vindo ao` / `pk.log`): a quebra não pode depender da fonte, senão a troca da fonte reserva pela Cormorant desloca a página (T-44, CLS).
+- `<h1>` na fonte de display 600, `clamp(2.4rem, 4.4vw, 3.5rem)` (no máximo 56 px, abaixo do display de 64 px da seção 5; T-44), com `aceno.svg` inline antes do texto (48 px no desktop, 32 px abaixo de 560 px), `vertical-align: -.02em`, margem direita `.2em`.
+- O nome dentro da saudação usa a mesma marcação da assinatura (`<em>pk</em><span class="ponto">.</span><span class="ext">log</span>`), sem quebrar linha dentro do nome. Abaixo de 560 px o nome começa sempre na segunda linha (`Bem-vindo ao` / `pk.log`): a quebra não pode depender da fonte, senão a troca da fonte reserva pela fonte de display desloca a página (T-44, CLS).
 - Abaixo, o texto de apresentação em Plex Sans 18 px, entrelinha 1,55, cor grafite, máximo ~46 caracteres por linha, para a saudação ficar sozinha no topo (T-63, T-64).
 - A newsletter está fora da v1 (SPEC §1). Não entra na home.
 
 ### 9.2 Card de fólio (listas)
 - Um `article` em grade. No mobile, a ordem é a do DOM: fólio e data, título, resumo, rodapé. No destaque, a capa fica depois do rótulo e do fólio com a data, e antes do título, do resumo e do rodapé.
 - De `sm` em diante, o card da lista tem duas colunas: a faixa do fólio (6,5rem) à esquerda, alinhada ao topo do título, e o texto à direita (T-63). O destaque com capa inverte: texto à esquerda, capa de 18rem à direita, centralizada na vertical.
-- Linha do fólio: `Fól.` em mono, lápis; o número em Cormorant 600, tinta, desde 22 px; data em mono, lápis (`09.out.2026`). No mobile e no destaque, ficam na mesma linha (`Fól. 001 · 09.out.2026`). Na lista, de `sm` em diante, a data desce para baixo do número.
+- Linha do fólio: `Fól.` em mono, lápis; o número na fonte de display 600, tinta, desde 22 px; data em mono, lápis (`09.out.2026`). No mobile e no destaque, ficam na mesma linha (`Fól. 001 · 09.out.2026`). Na lista, de `sm` em diante, a data desce para baixo do número.
 - Título na fonte de display 600 na lista: 28 px em todas as larguras, entrelinha 1,2. No destaque, 36 px abaixo de `sm` e 44 px de `sm` em diante. Sem sublinhado e sem troca de cor, em repouso, no hover e no foco (T-63).
 - Resumo em Plex Sans 16 px, entrelinha 1,6, grafite (T-63).
 - O card inteiro é tocável: o link do título se estica sobre o card (`after:absolute after:inset-0`, com o `article` em `relative`) e dá retorno em acento no toque (`active:text-accent`). O rodapé não intercepta o toque (`pointer-events-none`).
@@ -386,7 +383,7 @@ Um colega experiente puxando a cadeira ao lado, com uma pitada de inventor curio
 | Peça | Fundo | Regras |
 |---|---|---|
 | **Site** | velino (claro) / cianotipia (escuro) | Acompanha o tema do leitor. |
-| **Thumbnail YouTube** 16:9 | cianotipia fixa + grade | `Fól. 001 · Conceito` em latão no topo, símbolo com nó em latão, título grande em Cormorant (parte em itálico prússia clara), mini-diagrama, rodapé `pk.log · pedroknoll.com` em mono. |
+| **Thumbnail YouTube** 16:9 | cianotipia fixa + grade | `Fól. 001 · Conceito` em latão no topo, símbolo com nó em latão, título grande na fonte de display, IBM Plex Sans Condensed 600 (parte em itálico prússia clara), mini-diagrama, rodapé `pk.log · pedroknoll.com` em mono. |
 | **Imagem de link (OG)** 1200×630 | velino + grade | Sugestão: gerar por fólio no build (ex.: Satori). Fólio + tipo, título, nível, assinatura e `pedroknoll.com`. |
 | **Post de rede** 1:1 | pergaminho + grade | Tipo no topo, título, até 3 itens, assinatura e `pedroknoll.com` no rodapé. |
 | **Slide** 16:9 | pergaminho + grade | Coluna esquerda: tipo, título, frase, assinatura. Direita: Hipótese / Montagem / Resultado. |
@@ -440,7 +437,7 @@ Sugestão anterior à T-41. No site valem os nomes da seção 0, não `--papel` 
   --grade: rgba(31, 75, 122, .03);
   --grade-forte: rgba(31, 75, 122, .065);
 
-  --f-display: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+  --f-display: "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif;
   --f-texto: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
   --f-mao: "Caveat", "Segoe Print", cursive;
