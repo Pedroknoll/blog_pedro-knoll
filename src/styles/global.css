@@ -16,7 +16,7 @@
 }
 
 @theme inline {
-  --font-display: var(--font-cormorant);
+  --font-display: var(--font-plex-condensed);
   --font-sans: var(--font-plex-sans);
   --font-mono: var(--font-plex-mono);
   --font-hand: var(--font-caveat);
