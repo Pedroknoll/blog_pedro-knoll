@@ -1,0 +1,100 @@
+---
+import KindLabel from "~/components/ui/KindLabel.astro";
+import LevelLabel from "~/components/ui/LevelLabel.astro";
+import TagList from "~/components/ui/TagList.astro";
+import { formatPubDate } from "~/lib/format-date";
+import { folioDigits } from "~/lib/folio";
+import type { Kind } from "~/lib/kind";
+import { site } from "~/site.config";
+
+interface Props {
+  title: string;
+  folio: number;
+  pubDate: Date;
+  updatedDate?: Date;
+  minutesRead?: number;
+  kind: Kind;
+  level: number;
+  tags: string[];
+}
+
+const { title, folio, pubDate, updatedDate, minutesRead, kind, level, tags } =
+  Astro.props;
+
+const labelClass = "font-mono text-xs uppercase tracking-widest text-muted";
+const published = formatPubDate(pubDate);
+const updated = updatedDate ? formatPubDate(updatedDate) : undefined;
+---
+
+<div
+  class="group contents lg:sticky lg:top-8 lg:block lg:min-w-0 lg:mt-10 lg:self-start"
+  data-post-rail
+>
+  <div class="order-first grid lg:order-none">
+    <div class="col-start-1 row-start-1 font-mono text-xs text-pencil motion-safe:transition-[opacity,translate] group-data-[title-out]:-translate-y-2 group-data-[title-out]:opacity-0">
+      <span>Fól.</span>{" "}
+      <span class="lg:mt-1 lg:block lg:font-display lg:text-[2.75rem] lg:leading-none lg:font-semibold lg:text-ink">
+        {folioDigits(folio)}
+      </span>
+    </div>
+    <p
+      aria-hidden="true"
+      class="col-start-1 row-start-1 max-lg:hidden translate-y-2 font-display text-[1.75rem] leading-tight font-semibold text-balance text-ink opacity-0 motion-safe:transition-[opacity,translate] group-data-[title-out]:translate-y-0 group-data-[title-out]:opacity-100"
+    >
+      {title}
+    </p>
+  </div>
+  <div class="mt-8 grid grid-cols-2 gap-x-8 gap-y-6 border-y border-line py-6 lg:grid-cols-1">
+    <div class="min-w-0">
+      <p class={labelClass}>Data</p>
+      <p class="mt-2 text-sm text-ink">
+        <time datetime={published.datetime}>{published.text}</time>
+      </p>
+    </div>
+    {updated && (
+      <div class="min-w-0">
+        <p class={labelClass}>Atualizado em</p>
+        <p class="mt-2 text-sm text-ink">
+          <time datetime={updated.datetime}>{updated.text}</time>
+        </p>
+      </div>
+    )}
+    <div class="min-w-0">
+      <p class={labelClass}>Leitura</p>
+      {typeof minutesRead === "number" && (
+        <p class="mt-2 text-sm text-ink">{minutesRead} min de leitura</p>
+      )}
+    </div>
+    <div class="min-w-0">
+      <p class={labelClass}>Tipo</p>
+      <div class="mt-2">
+        <KindLabel kind={kind} animated={true} px={24} />
+      </div>
+    </div>
+    <div class="min-w-0">
+      <p class={labelClass}>Nível</p>
+      <div class="mt-2">
+        <LevelLabel level={level} />
+      </div>
+    </div>
+    <div class="min-w-0">
+      <p class={labelClass}>Autor</p>
+      <p class="mt-2 text-sm text-ink">{site.author.name}</p>
+    </div>
+    {tags.length > 0 && (
+      <div class="min-w-0">
+        <p class={labelClass}>Tags</p>
+        <TagList class="mt-2 flex flex-wrap gap-2" tags={tags} />
+      </div>
+    )}
+  </div>
+</div>
+<script>
+  const rail = document.querySelector("[data-post-rail]");
+  const heading = rail?.closest("article")?.querySelector("h1");
+  if (rail && heading) {
+    new IntersectionObserver(([entry]) => {
+      if (entry) rail.toggleAttribute("data-title-out", !entry.isIntersecting);
+    }).observe(heading);
+  }
+</script>

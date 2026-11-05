@@ -5,28 +5,21 @@ import type { CollectionEntry } from "astro:content";
 import "katex/dist/katex.min.css";
 
 import CodeCopy from "~/components/ui/CodeCopy.astro";
-import KindLabel from "~/components/ui/KindLabel.astro";
-import LevelLabel from "~/components/ui/LevelLabel.astro";
 import PostAppendix from "~/components/ui/PostAppendix.astro";
-import TagList from "~/components/ui/TagList.astro";
-import Toc from "~/components/ui/Toc.astro";
+import PostRail from "~/components/ui/PostRail.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
-import { formatPubDate } from "~/lib/format-date";
-import { formatFolio } from "~/lib/folio";
 import type { PostAppendixModel } from "~/lib/references";
 import { absoluteUrl, blogPostingJsonLd, pageTitle, postPath } from "~/lib/seo";
-import type { TocItem } from "~/lib/toc";
 import { site } from "~/site.config";
 
 interface Props {
   post: CollectionEntry<"posts">;
   minutesRead?: number;
   hasCode?: boolean;
-  toc: TocItem[];
   appendix?: PostAppendixModel;
 }
 
-const { post, minutesRead, hasCode, toc, appendix } = Astro.props;
+const { post, minutesRead, hasCode, appendix } = Astro.props;
 const {
   title,
   description,
@@ -39,9 +32,6 @@ const {
   kind,
   level,
 } = post.data;
-const labelClass = "font-mono text-xs uppercase tracking-widest text-muted";
-const published = formatPubDate(pubDate);
-const updated = updatedDate ? formatPubDate(updatedDate) : undefined;
 const canonical =
   post.data.canonical ?? absoluteUrl(postPath(post.id), Astro.site);
 
@@ -84,58 +74,28 @@ const jsonLd = blogPostingJsonLd({
   image={image}
   jsonLd={jsonLd}
 >
-  <article class="mx-auto w-full max-w-[72rem] px-4 py-10">
-    <header>
-      <p class="font-mono text-xs text-pencil">
-        <span>
-          {formatFolio(folio)}
-          {" · "}
-          <time datetime={published.datetime}>{published.text}</time>
-        </span>
-        {" · "}
-        <KindLabel kind={kind} animated={true} px={24} />
-        {" · "}
-        <LevelLabel level={level} />
-      </p>
-      <h1 class="font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem]">
+  <article class="mx-auto w-full max-w-[72rem] px-4 py-10 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-16">
+    <header class="flex flex-col lg:contents">
+      <h1 class="font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem] lg:col-span-2 lg:text-[4.5rem] lg:leading-[1.02]">
         {title}
       </h1>
-      <p class="mt-4 max-w-2xl text-lg leading-relaxed text-ink">
+      <p class="mt-4 max-w-[52ch] text-lg text-muted lg:col-span-2 lg:text-2xl">
         {description}
       </p>
-      <div class="mt-8 grid grid-cols-2 gap-x-8 gap-y-6 border-y border-line py-6 sm:grid-cols-4">
-        <div class="min-w-0">
-          <p class={labelClass}>Autor</p>
-          <p class="mt-2 text-sm text-ink">{site.author.name}</p>
-        </div>
-        {updated && (
-          <div class="min-w-0">
-            <p class="mt-2 text-sm text-muted">
-              <span>Atualizado em</span>{" "}
-              <time datetime={updated.datetime}>{updated.text}</time>
-            </p>
-          </div>
-        )}
-        <div class="min-w-0">
-          <p class={labelClass}>Leitura</p>
-          {typeof minutesRead === "number" && (
-            <p class="mt-2 text-sm text-ink">{minutesRead} min de leitura</p>
-          )}
-        </div>
-        {tags.length > 0 && (
-          <div class="min-w-0">
-            <p class={labelClass}>Tags</p>
-            <TagList class="mt-2 flex flex-wrap gap-2" tags={tags} />
-          </div>
-        )}
-      </div>
+      <PostRail
+        title={title}
+        folio={folio}
+        pubDate={pubDate}
+        updatedDate={updatedDate}
+        minutesRead={minutesRead}
+        kind={kind}
+        level={level}
+        tags={tags}
+      />
     </header>
-    <div class="mt-10 grid gap-10 lg:grid-cols-[minmax(0,1fr)_16rem]">
-      <Toc items={toc} />
-      <div class="prose prose-site min-w-0 lg:col-start-1 lg:row-start-1">
-        <slot />
-        {appendix && <PostAppendix appendix={appendix} />}
-      </div>
+    <div class="prose prose-site mt-10 min-w-0 lg:col-start-2">
+      <slot />
+      {appendix && <PostAppendix appendix={appendix} />}
     </div>
     {hasCode && <CodeCopy />}
   </article>

@@ -1,5 +1,3 @@
-import type { TocItem } from "./toc";
-
 export type CitationNode = {
   type: string;
   value?: string;
@@ -46,7 +44,6 @@ export type PostAppendixModel = {
     text: "Referências";
     items: ReferenceItem[];
   };
-  toc: TocItem[];
 };
 
 const skipped = new Set([
@@ -191,14 +188,7 @@ export function postAppendix(
     };
   });
 
-  const toc: TocItem[] = sections.map((section) => ({
-    depth: 2,
-    slug: section.id,
-    text: section.text,
-    children: [],
-  }));
-
-  if (refs.length === 0) return { appendices: sections, toc };
+  if (refs.length === 0) return { appendices: sections };
 
   const items = refs.map((reference) => ({
     id: `ref-${reference.key}`,
@@ -208,17 +198,9 @@ export function postAppendix(
     url: reference.url,
     venue: reference.venue,
   }));
-  toc.push({
-    depth: 2,
-    slug: "referencias",
-    text: "Referências",
-    children: [],
-  });
-
   return {
     appendices: sections,
     references: { id: "referencias", text: "Referências", items },
-    toc,
   };
 }
 
