@@ -161,9 +161,9 @@ test.describe("escala tipográfica [RNF-01]", () => {
       const response = await page.goto(post.href);
       expect(response?.status(), post.href).toBe(200);
       const sample = await headingSample(page);
-      expectHeading(sample, post.href, "72px", display);
+      expectHeading(sample, post.href, "80px", display);
       const lineHeight = Number.parseFloat(sample?.lineHeight ?? "");
-      expect(Math.abs(lineHeight - 73.44), post.href).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(lineHeight - 81.6), post.href).toBeLessThanOrEqual(0.5);
     }
 
     const tagResponse = await page.goto(tag);
@@ -270,13 +270,13 @@ test.describe("escala tipográfica [RNF-01]", () => {
       });
 
       const where = post.href;
-      expect(measured.fontSize, where).toBe("17px");
-      expect(Math.abs(measured.lineHeight - 28.05), where).toBeLessThanOrEqual(
+      expect(measured.fontSize, where).toBe("18px");
+      expect(Math.abs(measured.lineHeight - 29.7), where).toBeLessThanOrEqual(
         0.5,
       );
-      expect(measured.paragraphFontSize, where).toBe("17px");
+      expect(measured.paragraphFontSize, where).toBe("18px");
       expect(
-        Math.abs(measured.paragraphLineHeight - 28.05),
+        Math.abs(measured.paragraphLineHeight - 29.7),
         where,
       ).toBeLessThanOrEqual(0.5);
       expect(measured.column, where).toBeGreaterThanOrEqual(60);

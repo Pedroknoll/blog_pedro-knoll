@@ -64,8 +64,14 @@
 
 /* Escala da prosa, BRAND §5, T-51. Fora de @layer: vence o .prose do plugin. */
 .prose-site {
-  font-size: 1.0625rem;
+  font-size: 1.125rem;
   line-height: 1.65;
+}
+
+@media (width < 64rem) {
+  .prose-site > [data-prose-mark] + * {
+    margin-top: 0;
+  }
 }
 
 .prose-site :where(h2) {
