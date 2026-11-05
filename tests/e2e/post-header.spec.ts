@@ -364,6 +364,40 @@ test.describe("cabeçalho do post [RF-04]", () => {
         expect(before).not.toBeNull();
         if (!before) return;
 
+        await page.evaluate(() => {
+          const heading = document.querySelector("article h1");
+          if (!heading) return;
+          const bottom = heading.getBoundingClientRect().bottom;
+          window.scrollTo(0, bottom + window.scrollY + 1);
+        });
+        await page.evaluate(
+          () =>
+            new Promise<void>((resolve) => {
+              const heading = document.querySelector("article h1");
+              if (!heading) {
+                resolve();
+                return;
+              }
+              const observer = new IntersectionObserver(([entry]) => {
+                if (entry && !entry.isIntersecting) {
+                  observer.disconnect();
+                  resolve();
+                }
+              });
+              observer.observe(heading);
+            }),
+        );
+        const thin = await box(page.locator("article header > p"));
+        expect(thin.y + thin.height).toBeGreaterThan(0);
+        await expect(rail).not.toHaveAttribute("data-title-out");
+        await page.evaluate(() => {
+          const line = document.querySelector("article header > p");
+          if (!line) return;
+          const bottom = line.getBoundingClientRect().bottom;
+          window.scrollTo(0, bottom + window.scrollY + 1);
+        });
+        await expect(rail).toHaveAttribute("data-title-out", "");
+
         await page
           .locator("article > .prose p")
           .last()

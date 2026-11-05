@@ -74,12 +74,12 @@ const jsonLd = blogPostingJsonLd({
   image={image}
   jsonLd={jsonLd}
 >
-  <article class="mx-auto w-full max-w-[72rem] px-4 py-10 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-16">
+  <article class="mx-auto w-full max-w-[72rem] px-4 pt-14 pb-10 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-16">
     <header class="flex flex-col lg:contents">
-      <h1 class="font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem] lg:col-span-2 lg:text-[4.5rem] lg:leading-[1.02]">
+      <h1 class="font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem] lg:col-span-2 lg:text-[5rem] lg:leading-[1.02]">
         {title}
       </h1>
-      <p class="mt-4 max-w-[52ch] text-lg text-muted lg:col-span-2 lg:text-2xl">
+      <p class="mt-4 max-w-[52ch] text-lg text-muted lg:col-span-2 lg:text-xl">
         {description}
       </p>
       <PostRail
@@ -94,6 +94,13 @@ const jsonLd = blogPostingJsonLd({
       />
     </header>
     <div class="prose prose-site mt-10 min-w-0 lg:col-start-2">
+      <div
+        data-prose-mark
+        aria-hidden="true"
+        class="not-prose max-lg:hidden border-b border-ink pb-2 mb-[1.5em] font-mono text-xs uppercase tracking-widest text-ink"
+      >
+        / Artigo
+      </div>
       <slot />
       {appendix && <PostAppendix appendix={appendix} />}
     </div>
