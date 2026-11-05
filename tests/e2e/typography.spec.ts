@@ -45,6 +45,7 @@ async function variableFamily(page: Page, variable: string): Promise<string> {
 type HeadingSample = {
   text: string;
   fontSize: string;
+  lineHeight: string;
   fontFamily: string;
   fontWeight: string;
   fontStyle: string;
@@ -57,6 +58,7 @@ async function headingSample(page: Page): Promise<HeadingSample | null> {
     return {
       text: (element.textContent ?? "").replace(/\s+/g, " ").trim(),
       fontSize: style.fontSize,
+      lineHeight: style.lineHeight,
       fontFamily: style.fontFamily,
       fontWeight: style.fontWeight,
       fontStyle: style.fontStyle,
@@ -158,7 +160,10 @@ test.describe("escala tipográfica [RNF-01]", () => {
     for (const post of posts) {
       const response = await page.goto(post.href);
       expect(response?.status(), post.href).toBe(200);
-      expectHeading(await headingSample(page), post.href, "44px", display);
+      const sample = await headingSample(page);
+      expectHeading(sample, post.href, "72px", display);
+      const lineHeight = Number.parseFloat(sample?.lineHeight ?? "");
+      expect(Math.abs(lineHeight - 73.44), post.href).toBeLessThanOrEqual(0.5);
     }
 
     const tagResponse = await page.goto(tag);
@@ -168,6 +173,13 @@ test.describe("escala tipográfica [RNF-01]", () => {
     const again = await page.goto("/blog/nao-existe/");
     expect(again?.status()).toBe(404);
     expectHeading(await headingSample(page), "404", "44px", display);
+
+    await page.setViewportSize({ width: 800, height: 800 });
+    for (const post of posts) {
+      const response = await page.goto(post.href);
+      expect(response?.status(), post.href).toBe(200);
+      expectHeading(await headingSample(page), post.href, "44px", display);
+    }
 
     await page.setViewportSize({ width: 360, height: 800 });
     for (const post of posts) {

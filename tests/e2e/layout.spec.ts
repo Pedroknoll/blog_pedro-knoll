@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-import { publishedPosts } from "./published-posts";
+import { pagesForTheme } from "./published-posts";
 import { authorName, homeTitle, siteTitle, titled } from "./site-literals";
 
 const routes = ["/", "/blog/2026-10-como-o-blog-e-feito/"] as const;
@@ -121,26 +121,24 @@ for (const path of routes) {
   });
 }
 
-test("script só na página com bloco de código [RNF-02]", async ({ page }) => {
-  const home = await page.goto("/");
-  expect(home?.status()).toBe(200);
-  await expect(
-    page.locator('script:not([type="application/ld+json"])'),
-  ).toHaveCount(0);
-
-  const posts = await publishedPosts(page);
-  for (const post of posts) {
-    await test.step(post.href, async () => {
-      const response = await page.goto(post.href);
+test("home e tag sem script; post sem pre com um module e com pre com dois [RNF-02]", async ({
+  page,
+}) => {
+  for (const path of await pagesForTheme(page)) {
+    await test.step(path, async () => {
+      const response = await page.goto(path);
       expect(response?.status()).toBe(200);
 
       const extra = page.locator('script:not([type="application/ld+json"])');
-      const pres = await page.getByRole("article").locator("pre").count();
-      if (pres === 0) {
+      if (!path.startsWith("/blog/")) {
         await expect(extra).toHaveCount(0);
-      } else {
-        await expect(extra).toHaveCount(1);
-        await expect(extra).toHaveAttribute("type", "module");
+        return;
+      }
+      const pres = await page.getByRole("article").locator("pre").count();
+      const expected = pres === 0 ? 1 : 2;
+      await expect(extra).toHaveCount(expected);
+      for (let index = 0; index < expected; index += 1) {
+        await expect(extra.nth(index)).toHaveAttribute("type", "module");
       }
     });
   }

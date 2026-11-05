@@ -270,7 +270,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     }
   });
 
-  test("C4 fólio, tipo e nível no cabeçalho", async ({ page }) => {
+  test("C4 fólio, data, tipo e nível no cabeçalho", async ({ page }) => {
     for (const href of await publishedHrefs(page)) {
       await test.step(href, async () => {
         await open(page, href);
@@ -282,40 +282,31 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           .count();
         expect.soft(publication).toBe(0);
 
+        const rail = header.locator("[data-post-rail]");
+        await expect(rail).toHaveCount(1);
+        const folio = rail.locator("> div").first().locator("> div").first();
+        expect(textOf(await folio.textContent())).toMatch(/^Fól\. \d{3,}$/);
+
         const times = header.locator("time");
         const timeCount = await times.count();
-        expect.soft([1, 2]).toContain(timeCount);
+        expect([1, 2]).toContain(timeCount);
         for (let index = 0; index < timeCount; index += 1) {
           const time = times.nth(index);
           const datetime = (await time.getAttribute("datetime")) ?? "";
-          expect.soft(datetime).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-          await expect.soft(time).toHaveText(dateFromDatetime(datetime));
+          expect(datetime).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+          await expect(time).toHaveText(dateFromDatetime(datetime));
         }
 
-        const h1 = header.locator("h1");
-        await expect(h1).toHaveCount(1);
-        const previous = h1.locator("xpath=preceding-sibling::*[1]");
-        const previousCount = await previous.count();
-        expect(previousCount).toBe(1);
-        await expectFolioLine(previous);
-
-        const outside = timeCount - (await previous.locator("time").count());
-        expect([0, 1]).toContain(outside);
-        expect(
-          await header.getByText("Atualizado em", { exact: true }).count(),
-        ).toBe(outside);
-        if (outside === 1) {
-          const placed = await header.evaluate((headerEl) => {
-            const line = headerEl.querySelector("h1")?.previousElementSibling;
-            return [...headerEl.querySelectorAll("time")]
-              .filter((time) => !line?.contains(time))
-              .every((time) =>
-                (time.parentElement?.textContent ?? "").includes(
-                  "Atualizado em",
-                ),
-              );
-          });
-          expect(placed).toBe(true);
+        const items = rail.locator("> div").nth(1).locator("> div");
+        const item = (label: string) =>
+          items.filter({ has: page.getByText(label, { exact: true }) });
+        await expect(item("Data")).toHaveCount(1);
+        await expect(item("Data").locator("time")).toHaveCount(1);
+        await expect(item("Tipo").getByText(KIND)).toHaveText(KIND);
+        await expect(item("Nível").getByText(LEVEL)).toHaveText(LEVEL);
+        await expect(item("Atualizado em")).toHaveCount(timeCount - 1);
+        if (timeCount === 2) {
+          await expect(item("Atualizado em").locator("time")).toHaveCount(1);
         }
       });
     }
