@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.15 · novembro de 2026 · pedroknoll.com
+Versão 1.16 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -181,7 +181,7 @@ As quatro famílias entram pela Fonts API do Astro (`fontProviders.fontsource()`
 | Papel | Fonte | Pesos | Regras |
 |---|---|---|---|
 | Títulos | **IBM Plex Sans Condensed** | 600 | Só 600 normal, sem itálico declarado, até uma tarefa medir outra face (T-52, T-60, LCP). |
-| Texto | **IBM Plex Sans** | 400, 400 itálico, 600 | 17 px, altura de linha 1,65, coluna de ~65 caracteres. |
+| Texto | **IBM Plex Sans** | 400, 400 itálico, 600 | 18 px, altura de linha 1,65, coluna de ~65 caracteres. |
 | Código, rótulos, fólio, cotas | **IBM Plex Mono** | 400 | Rótulos em maiúsculas com letter-spacing .08–.14em. Só o peso 400 (T-52, LCP). |
 | Anotação à mão | **Caveat** | 500, 600 | Fora das páginas do site até uma tarefa medir (T-52, LCP). Quando voltar: no máximo uma nota por seção, no máximo uma linha e meia, nunca em parágrafo, botão ou menu. |
 
@@ -191,12 +191,12 @@ As quatro famílias entram pela Fonts API do Astro (`fontProviders.fontsource()`
 - Sem tamanho mínimo próprio. A regra dos 28 px e as exceções de 22 px (título do card, número do fólio, assinatura) existiam porque a Cormorant ficava frágil em tamanho pequeno, e saíram com ela. Os tamanhos de hoje ficam; a escala nova é das T-64 e T-65.
 - O h3 a 22 px continua IBM Plex Sans 600.
 
-**Escala (px):** display 64 · h1 44 · h2 30 · h3 22 (Plex Sans 600) · texto 17 · rótulo 12. O h1 de página (post, tag e 404) fica em 36 px abaixo de `sm` (640 px) e em 44 px de `sm` em diante; a saudação da home tem tamanho próprio (§9.1). O rótulo usa letter-spacing de 0,1em (T-51).
+**Escala (px):** display 64 · h1 44 · h2 30 · h3 22 (Plex Sans 600) · texto 18 · rótulo 12. O h1 de página (post, tag e 404) fica em 36 px abaixo de `sm` (640 px) e em 44 px de `sm` em diante; a saudação da home tem tamanho próprio (§9.1). O rótulo usa letter-spacing de 0,1em (T-51).
 Títulos com `text-wrap: balance`.
 
 **Fonte de display (decisão, 04/11/2026, T-63).** A IBM Plex Sans Condensed 600 substitui a Cormorant Garamond em tudo que usa o token de display: assinatura, saudação, card, h1 de página, h2 da prosa e 404. É da mesma superfamília do texto e dos rótulos. O arquivo latin tem 19.816 bytes, contra 23.396 da Cormorant: a home e a tag caem de 60.692 para 57.112 bytes, sem mudar o teto de 61.000. A troca entrou na T-60, com o arquivo de 19.816 bytes medido no build.
 
-**Escala do post (decisão, T-63).** O h1 do post fica em 36 px abaixo de `sm`, 44 px de `sm` em diante e 72 px de `lg` em diante, com entrelinha 1,02 no `lg`; a linha fina, em 18 px e 24 px de `lg` em diante. Os 72 px passam do display de 64 px e valem só para o h1 do post (seção 9.3, T-65).
+**Escala do post (decisão, T-63; revista na T-67).** O h1 do post fica em 36 px abaixo de `sm`, 44 px de `sm` em diante e 80 px de `lg` em diante, com entrelinha 1,02 no `lg`, sem mudar o espaçamento das letras; a linha fina, em 18 px e 20 px de `lg` em diante. No topo do post, 56 px de respiro em todas as larguras. O texto do post fica em 18 px; o h2, em 30 px, e o h3, em 22 px. Os 80 px passam do display de 64 px e valem só para o h1 do post (seção 9.3, T-65 e T-67).
 
 ---
 
@@ -224,7 +224,7 @@ Títulos com `text-wrap: balance`.
   - Lab: duas bolhas sobem no frasco em 3 quadros (1,8 s).
   - Playbook: a lista se marca item por item e recomeça (4 s).
   - Aceno: dois quadros alternando 4 vezes, depois pausa (3,2 s, contínuo).
-- **Onde anima:** quando o ícone aparece sozinho e em destaque (cartões de tipo, página "sobre", cabeçalho do fólio, saudação). **Parado** em listas, etiquetas e cards de índice (`icone-*-parado.svg`).
+- **Onde anima:** quando o ícone aparece sozinho e em destaque (cartões de tipo, página "sobre", saudação). **Parado** (`icone-*-parado.svg`) em listas, etiquetas, cards de índice e no cabeçalho do fólio, onde fica em 12 px, no tamanho da grade (T-67).
 - **Relógio** (`icone-relogio.svg`): 12 × 12, só parado, sem versão animada. Entra no rodapé do card, antes do tempo de leitura (seção 9.2).
 - Todas as animações respeitam `prefers-reduced-motion: reduce` (ficam paradas).
 - Os SVGs animados têm classes com prefixo (`pkc-`, `pkt-`, `pkl-`, `pkp-`, `pka-`), então podem ser inseridos inline juntos sem conflito.
@@ -291,12 +291,12 @@ A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `tags`, `referenc
 - A lista separa os cards com divisória `divide-line`. Os cards da lista ficam sem borda de 1 px, sem sombra e sem hover de borda. O destaque tem borda de 1 px `--linha` só embaixo, sem raio e sem sombra. O respiro é só vertical: 1,25rem em cima e 2rem embaixo no mobile, 2rem em cima e embaixo de `sm` em diante. O texto e a capa alinham com os cards da lista. O espaço até o post seguinte é o mesmo que entre os cards da lista: 2rem de cada lado do filete.
 
 ### 9.3 Cabeçalho do fólio (página do post)
-Decisão da T-63, no modelo do Stripe (stripe.dev); entra nas T-65 e T-66.
+Decisão da T-63, no modelo do Stripe (stripe.dev); entra nas T-65, T-66 e T-67.
 
 - **Título em cima, sozinho:** h1 na escala do post (seção 5), na largura toda, com `text-wrap: balance`. Abaixo, a linha fina de introdução em grafite, até ~52 caracteres.
-- **Lateral, de `lg` em diante:** à esquerda, com 15rem, vão de 4rem até o texto, sticky. No topo, `Fól.` em mono e o número na fonte de display, em 44 px. Abaixo, entre filetes, os metadados, cada um com o rótulo em mono 12 px maiúsculo acima do valor: data, atualizado em (quando houver), leitura, tipo (ícone animado), nível, autor e tags.
-- **Título na lateral:** quando o h1 sai da tela, o número do fólio dá lugar ao título, em 28 px. Os dois dividem o mesmo espaço, então nada se desloca ao rolar. O título da lateral é texto com `aria-hidden`, não heading. A troca usa só opacidade e `transform`, sem transição com `prefers-reduced-motion`. Sem JavaScript, fica o fólio.
-- **Abaixo de `lg`:** sem lateral. `Fól. 006` em mono, o título, a linha fina e os metadados em duas colunas entre filetes, tudo rolando com o texto.
+- **Lateral, de `lg` em diante:** à esquerda, com 15rem, vão de 4rem até o texto, sticky a 7,5rem do topo. No topo, `/ FÓL. 002` em mono 12 px, maiúsculas, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete; a barra é decorativa (`aria-hidden`). A coluna do texto abre com `/ ARTIGO`, no mesmo estilo e na mesma altura, decorativo, com o filete alinhado ao da lateral. Abaixo do filete, os metadados numa tabela de chave e valor: o rótulo à esquerda, em mono 12 px maiúsculo e grafite, numa coluna de 7rem, e o valor à direita; linhas com 9 px de respiro e pontilhado em `line` entre elas, e filete sólido em `line` no fim. Data, atualizado em (quando houver), leitura, tipo (ícone parado em 12 px), nível, autor e tags; nas tags, o rótulo fica em cima, na largura toda.
+- **Título ao rolar:** quando o h1 e a linha fina saem da tela, o título aparece acima da lateral, em 28 px, a 0,75rem dela. Fica em posição absoluta: não reserva espaço, não desloca nada, e o fólio continua visível. Um título de três linhas cabe acima da lateral sticky a 7,5rem. O título é texto com `aria-hidden`, não heading. A troca usa só opacidade, sem transição com `prefers-reduced-motion`. Sem JavaScript, o título não aparece.
+- **Abaixo de `lg`:** sem lateral. `/ FÓL. 006` em mono, sem filete; o título; a linha fina; e a mesma tabela de metadados, com filete em cima e 32 px de respiro, tudo rolando com o texto. O `/ ARTIGO` não aparece.
 - **Sem sumário** (SPEC: o RF-05 saiu na T-63).
 
 **Apêndice, no modelo do Distill.** No fim do fólio, numa faixa própria depois do texto, com filete em cima e fundo `sheet`: os apêndices do autor e as referências numeradas (SPEC RF-04). De `lg` em diante, os títulos (`Apêndice A`, `Referências`) ficam como rótulo em mono 12 px maiúsculo na coluna da lateral, e o texto, em Plex Sans 15 px com entrelinha 1,6, na coluna do texto. Cada referência traz o número, o título com link numa linha e, abaixo, autores, ano e veículo em grafite. A ficha de bancada saiu na T-62.
@@ -524,7 +524,7 @@ Ordem que estava sugerida antes desse encaixe:
 3. **Marca no layout:** assinatura no cabeçalho, favicon (seção 12), `<title>` no padrão da seção 1, rodapé com assinatura espelhada opcional.
 4. **Home:** saudação com aceno animado, texto de apresentação, newsletter, lista de fólios.
 5. **Schema de conteúdo:** campos de fólio, tipo, nível, temas, links marimo/Colab.
-6. **Card e cabeçalho de fólio:** com ícones parados nas listas e animado no cabeçalho, hachura de nível.
+6. **Card e cabeçalho de fólio:** com ícones parados nas listas e no cabeçalho, hachura de nível.
 7. **Avisos em MDX:** componente com os três tipos da seção 9.4.
 8. **Código:** temas Shiki próprios + barra com nome do arquivo e Copiar/Copiado.
 9. **Barra do lab** e cabeçalho padrão dos notebooks marimo.
