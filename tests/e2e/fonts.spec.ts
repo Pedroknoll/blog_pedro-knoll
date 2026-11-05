@@ -5,24 +5,6 @@ import { pagesForTheme, publishedPosts } from "./published-posts";
 // Família, peso e estilo da T-42. Uma linha por combinação.
 const declared = [
   {
-    family: "Cormorant Garamond",
-    cssVariable: "--font-cormorant",
-    weight: 600,
-    style: "normal",
-  },
-  {
-    family: "Cormorant Garamond",
-    cssVariable: "--font-cormorant",
-    weight: 500,
-    style: "italic",
-  },
-  {
-    family: "Cormorant Garamond",
-    cssVariable: "--font-cormorant",
-    weight: 600,
-    style: "italic",
-  },
-  {
     family: "IBM Plex Sans",
     cssVariable: "--font-plex-sans",
     weight: 400,
@@ -58,12 +40,18 @@ const declared = [
     weight: 600,
     style: "normal",
   },
+  {
+    family: "IBM Plex Sans Condensed",
+    cssVariable: "--font-plex-condensed",
+    weight: 600,
+    style: "normal",
+  },
 ] as const;
 
 const adjustedStacks = [
-  "--font-plex-sans",
-  "--font-plex-mono",
-  "--font-cormorant",
+  { variable: "--font-plex-sans", generic: "sans-serif" },
+  { variable: "--font-plex-mono", generic: "monospace" },
+  { variable: "--font-plex-condensed", generic: "sans-serif" },
 ] as const;
 
 type Declared = (typeof declared)[number];
@@ -173,7 +161,7 @@ async function familyFromVariable(
   }, cssVariable);
   expect(value, cssVariable).not.toBe("");
   const first = familyNames(value)[0] ?? "";
-  expect(first.startsWith(name), `${cssVariable}: ${first}`).toBe(true);
+  expect(first.startsWith(`${name}-`), `${cssVariable}: ${first}`).toBe(true);
   return first;
 }
 
@@ -518,20 +506,26 @@ test.describe("fontes da marca [RNF-01]", () => {
     const response = await page.goto("/");
     expect(response?.status()).toBe(200);
 
-    const values = await page.evaluate((names) => {
-      const style = getComputedStyle(document.documentElement);
-      return Object.fromEntries(
-        names.map((name) => [name, style.getPropertyValue(name).trim()]),
-      );
-    }, adjustedStacks);
+    const values = await page.evaluate(
+      (names) => {
+        const style = getComputedStyle(document.documentElement);
+        return Object.fromEntries(
+          names.map((name) => [name, style.getPropertyValue(name).trim()]),
+        );
+      },
+      adjustedStacks.map((stack) => stack.variable),
+    );
     const rules = await fontFaceRules(page);
 
-    for (const name of adjustedStacks) {
+    for (const { variable: name, generic } of adjustedStacks) {
       const value = values[name] ?? "";
       expect.soft(value, name).not.toBe("");
       if (value === "") continue;
 
-      const second = familyNames(value)[1];
+      const families = familyNames(value);
+      expect.soft(families.at(-1), `${name}: genérica`).toBe(generic);
+
+      const second = families[1];
       expect.soft(second, name).toBeTruthy();
       if (!second) continue;
 

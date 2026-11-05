@@ -119,7 +119,7 @@ test.describe("saudação [RF-01, RNF-04]", () => {
           const h1 = document.querySelector("h1");
           const style = h1 ? getComputedStyle(h1) : null;
           const variable = getComputedStyle(document.documentElement)
-            .getPropertyValue("--font-cormorant")
+            .getPropertyValue("--font-plex-condensed")
             .trim();
           return {
             family: style?.fontFamily ?? "",

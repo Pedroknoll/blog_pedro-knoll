@@ -153,7 +153,7 @@ test.describe("escala tipográfica [RNF-01]", () => {
     expect(gate?.text, "404").toBe(notFoundHeading);
     expect(gate?.textWrapStyle, "404").toBe("balance");
 
-    const display = await variableFamily(page, "--font-cormorant");
+    const display = await variableFamily(page, "--font-plex-condensed");
 
     for (const post of posts) {
       const response = await page.goto(post.href);
@@ -213,7 +213,7 @@ test.describe("escala tipográfica [RNF-01]", () => {
   test("T3 prosa", async ({ page }) => {
     const posts = await publishedPosts(page);
     await page.setViewportSize({ width: 1280, height: 800 });
-    const display = await variableFamily(page, "--font-cormorant");
+    const display = await variableFamily(page, "--font-plex-condensed");
     const sans = await variableFamily(page, "--font-plex-sans");
     let h3Count = 0;
 

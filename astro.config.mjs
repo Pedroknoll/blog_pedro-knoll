@@ -27,24 +27,14 @@ export default defineConfig({
   output: "static",
   fonts: [
     {
-      name: "Cormorant Garamond",
-      cssVariable: "--font-cormorant",
+      name: "IBM Plex Sans Condensed",
+      cssVariable: "--font-plex-condensed",
       provider: fontProviders.fontsource(),
       weights: [600],
       styles: ["normal"],
       subsets: ["latin"],
       formats: ["woff2"],
-      fallbacks: ["serif"],
-    },
-    {
-      name: "Cormorant Garamond",
-      cssVariable: "--font-cormorant",
-      provider: fontProviders.fontsource(),
-      weights: [500, 600],
-      styles: ["italic"],
-      subsets: ["latin"],
-      formats: ["woff2"],
-      fallbacks: ["serif"],
+      fallbacks: ["sans-serif"],
     },
     {
       name: "IBM Plex Sans",
