@@ -49,6 +49,19 @@ type Stack = {
   names: string[];
 };
 
+type FontCeiling = {
+  files: number;
+  bytes: number;
+  katexFiles: number;
+  katexBytes: number;
+};
+
+type RequestedFonts = {
+  brand: string[];
+  katex: string[];
+  other: string[];
+};
+
 function unquote(name: string): string {
   const trimmed = name.trim();
   if (
@@ -85,19 +98,28 @@ function familyNames(stack: string): string[] {
   return names;
 }
 
-function brandFontBytes(): Map<string, number> {
-  const dir = join(process.cwd(), "dist/_astro/fonts");
+function distWoff2Bytes(): Map<string, number> {
   const sizes = new Map<string, number>();
-  for (const name of readdirSync(dir)) {
+  const fontsDir = join(process.cwd(), "dist/_astro/fonts");
+  for (const name of readdirSync(fontsDir)) {
     if (!name.endsWith(".woff2")) continue;
-    sizes.set(`/_astro/fonts/${name}`, statSync(join(dir, name)).size);
+    sizes.set(`/_astro/fonts/${name}`, statSync(join(fontsDir, name)).size);
+  }
+  const astroDir = join(process.cwd(), "dist/_astro");
+  for (const name of readdirSync(astroDir)) {
+    if (!name.startsWith("KaTeX_") || !name.endsWith(".woff2")) continue;
+    sizes.set(`/_astro/${name}`, statSync(join(astroDir, name)).size);
   }
   return sizes;
 }
 
-function ceilingFor(path: string): { files: number; bytes: number } {
-  if (path.startsWith("/blog/")) return { files: 5, bytes: 110_000 };
-  return { files: 3, bytes: 61_000 };
+function ceilingFor(path: string): FontCeiling {
+  const katexFiles = 3;
+  const katexBytes = 48_000;
+  if (path.startsWith("/blog/")) {
+    return { files: 5, bytes: 110_000, katexFiles, katexBytes };
+  }
+  return { files: 3, bytes: 61_000, katexFiles, katexBytes };
 }
 
 async function readStacks(page: Page): Promise<Stack[]> {
@@ -132,16 +154,33 @@ async function loadedFaces(page: Page): Promise<LiveFace[]> {
   });
 }
 
-async function requestedFonts(page: Page): Promise<string[]> {
+async function requestedFonts(page: Page): Promise<RequestedFonts> {
   return page.evaluate(() => {
-    const found = new Set<string>();
+    const brand = new Set<string>();
+    const katex = new Set<string>();
+    const other = new Set<string>();
     for (const entry of performance.getEntriesByType("resource")) {
       const url = new URL(entry.name);
-      if (!url.pathname.startsWith("/_astro/fonts/")) continue;
       if (!url.pathname.endsWith(".woff2")) continue;
-      found.add(url.pathname);
+      const file = url.pathname.slice(url.pathname.lastIndexOf("/") + 1);
+      const inAstroRoot =
+        url.pathname.startsWith("/_astro/") &&
+        !url.pathname.slice("/_astro/".length).includes("/");
+      if (url.pathname.startsWith("/_astro/fonts/")) {
+        brand.add(url.pathname);
+        continue;
+      }
+      if (inAstroRoot && file.startsWith("KaTeX_")) {
+        katex.add(url.pathname);
+        continue;
+      }
+      other.add(url.pathname);
     }
-    return [...found];
+    return {
+      brand: [...brand],
+      katex: [...katex],
+      other: [...other],
+    };
   });
 }
 
@@ -162,7 +201,7 @@ function classify(family: string, stacks: Stack[]) {
 test.describe("orçamento de fontes [RNF-01]", () => {
   test("faces e tetos por página", async ({ page }) => {
     const pages = await pagesForTheme(page);
-    const sizes = brandFontBytes();
+    const sizes = distWoff2Bytes();
 
     for (const path of pages) {
       await test.step(path, async () => {
@@ -224,7 +263,8 @@ test.describe("orçamento de fontes [RNF-01]", () => {
           expect.soft(permitted, `${label} fora do orçamento`).toBe(true);
         }
 
-        const pathnames = await requestedFonts(page);
+        const requested = await requestedFonts(page);
+        const pathnames = requested.brand;
         let bytes = 0;
         for (const pathname of pathnames) {
           const size = sizes.get(pathname);
@@ -249,6 +289,49 @@ test.describe("orçamento de fontes [RNF-01]", () => {
             `${path}: ${bytes} bytes, teto ${ceiling.bytes}`,
           )
           .toBe(true);
+
+        let katexBytes = 0;
+        for (const pathname of requested.katex) {
+          katexBytes += sizes.get(pathname) ?? 0;
+        }
+        console.log(
+          `${path} katex: ${requested.katex.length} arquivos ${katexBytes} bytes ${requested.katex.join(" ")}`,
+        );
+        expect
+          .soft(
+            requested.katex.length <= ceiling.katexFiles,
+            `${path}: ${requested.katex.length} arquivos do KaTeX, teto ${ceiling.katexFiles}`,
+          )
+          .toBe(true);
+        expect
+          .soft(
+            katexBytes <= ceiling.katexBytes,
+            `${path}: ${katexBytes} bytes do KaTeX, teto ${ceiling.katexBytes}`,
+          )
+          .toBe(true);
+        for (const pathname of requested.katex) {
+          expect
+            .soft(
+              sizes.get(pathname),
+              `${path}: ${pathname} sem arquivo do KaTeX em dist`,
+            )
+            .toBeDefined();
+        }
+        expect
+          .soft(
+            requested.other.length === 0,
+            `${path}: ${requested.other.join(" ")} fora do orçamento`,
+          )
+          .toBe(true);
+        const showsKatex = (await page.locator(".katex").count()) > 0;
+        if (showsKatex) {
+          expect
+            .soft(
+              requested.katex.length >= 1,
+              `${path}: .katex sem arquivo do KaTeX`,
+            )
+            .toBe(true);
+        }
       });
     }
   });
