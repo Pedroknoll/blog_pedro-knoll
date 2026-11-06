@@ -2,7 +2,7 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 06/11/2026
 
-**Revisão de 06/11/2026:** o RF-12 define o `<title>` da página de tipo, `Tipo: <rótulo> · {site.title} · {autor}`, e a §6, a descrição e o nome acessível da lista dela. O rascunho de teste passa a `kind: tutorial`, para o cenário de rascunhos provar que tipo só com rascunho não gera página nem entra na barra. A §9 acrescenta `/tipos/[tipo]` às rotas, a página de tipo e o `KindFilter` à árvore, e a primeira página de tipo à guarda de fontes, com o teto da home; a §10 acrescenta `/tipos/*` ao plano B (T-64).
+**Revisão de 06/11/2026:** o RF-12 define o `<title>` da página de tipo, `Tipo: <rótulo> · {site.title} · {autor}`, e a §6, a descrição e o nome acessível da lista dela, e tira da barra o ícone de cada tipo, que fica com o nome e a contagem. O rascunho de teste passa a `kind: tutorial`, para o cenário de rascunhos provar que tipo só com rascunho não gera página nem entra na barra. A §9 acrescenta `/tipos/[tipo]` às rotas, a página de tipo e o `KindFilter` à árvore, e a primeira página de tipo à guarda de fontes, com o teto da home; a §10 acrescenta `/tipos/*` ao plano B (T-64).
 
 **Revisão 5 de 05/11/2026:** a §9 dá às fontes do KaTeX um teto próprio na guarda de fontes, de 3 arquivos e 48.000 bytes por página, separado do teto das fontes da marca, que não muda. A URL de pior caso com fórmula no Lighthouse CI fica para a T-39 (T-61).
 
@@ -425,7 +425,7 @@ notebooks:
 - Tags são validadas pelo schema, com `^[a-z0-9-]+$` e até 6 por post, e o build falha fora disso; não há normalização. Um arquivo `src/data/tags.ts` opcional dá rótulo e descrição para as páginas de tag.
 - A página `/tags/<tag>/` existe para cada tag de post publicado e lista todos os posts publicados com a tag, na ordem de `getPublishedPosts()`, sem paginação, com h1 `Tag: <tag>`. Não há página `/tags/`. As tags aparecem como links na página do post; os cards não mostram tags (T-56). As páginas de tag não têm barra.
 - A página `/tipos/<tipo>/` existe para cada tipo com post publicado, com o slug em pt-BR (`conceito`, `tutorial`, `lab`, `playbook`) definido em `src/lib/kind.ts`, e lista todos os posts publicados do tipo, na ordem de `getPublishedPosts()`, sem paginação e sem destaque. Ela espelha a home: a saudação continua o h1, e o `<title>` (RF-12), a descrição (`Posts do tipo <rótulo>.`) e o nome acessível da lista (`Posts do tipo <rótulo>`) dizem o tipo. Não há página `/tipos/`.
-- `/`, `/page/n/` e as páginas de tipo têm a barra "Filtrar por tipo", só com links e sem JavaScript, com "Todos" e os tipos com post publicado, na ordem de `KINDS`, cada um com o ícone parado do tipo e o número de posts publicados. O filtro ativo leva `aria-current="true"`.
+- `/`, `/page/n/` e as páginas de tipo têm a barra "Filtrar por tipo", só com links e sem JavaScript, com "Todos" e os tipos com post publicado, na ordem de `KINDS`, cada um com o nome e o número de posts publicados, sem ícone. O filtro ativo leva `aria-current="true"`.
 - A home mostra como destaque o post mais recente com `featured: true`, só em `/`, e ele sai da lista paginada. Sem nenhum `featured`, não há destaque.
 - A página 1 da listagem é `/`; as seguintes são `/page/2/`, `/page/3/`…; `/page/1/` não é gerada.
 - Links internos usam barra final (`/blog/<slug>/`, `/page/2/`): sem ela, a Cloudflare responde 307 (T-05).
