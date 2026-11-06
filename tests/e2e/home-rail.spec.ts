@@ -8,8 +8,8 @@ const concept = kindPath("concept");
 type Rail = {
   columnWidth: number;
   gap: number;
-  barWidth: number;
-  rightWidth: number;
+  contentInset: number;
+  listInset: number;
   handTop: number;
   listTop: number;
   greetingTop: number;
@@ -82,8 +82,12 @@ async function readRail(page: Page): Promise<Rail> {
     return {
       columnWidth: greetingBox?.width ?? Number.NaN,
       gap: greetingBox && barBox ? barBox.left - greetingBox.right : Number.NaN,
-      barWidth: barBox?.width ?? Number.NaN,
-      rightWidth: rightBox?.width ?? Number.NaN,
+      contentInset:
+        (document.querySelector("h1")?.getBoundingClientRect().left ??
+          Number.NaN) - (greetingBox?.left ?? Number.NaN),
+      listInset:
+        (list?.getBoundingClientRect().left ?? Number.NaN) -
+        (rightBox?.left ?? Number.NaN),
       handTop: hand?.getBoundingClientRect().top ?? Number.NaN,
       listTop: list?.getBoundingClientRect().top ?? Number.NaN,
       greetingTop: greetingBox?.top ?? Number.NaN,
@@ -165,8 +169,9 @@ test.describe("lateral da home [RF-01]", () => {
     expect.soft(at1280.columnWidth, "1280 coluna").toBeCloseTo(240, 0);
     expect.soft(at1280.gap, "1280 vão").toBeCloseTo(96, 0);
     expect
-      .soft(at1280.barWidth, "1280 barra")
-      .toBeCloseTo(at1280.rightWidth, 0);
+      .soft(at1280.contentInset, "1280 saudacao encostada")
+      .toBeCloseTo(0, 0);
+    expect.soft(at1280.listInset, "1280 barra encostada").toBeCloseTo(0, 0);
     expect
       .soft(Math.abs(at1280.handTop - at1280.listTop), "1280 mão")
       .toBeLessThanOrEqual(1);
