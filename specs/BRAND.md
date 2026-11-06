@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.16 · novembro de 2026 · pedroknoll.com
+Versão 1.17 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -299,7 +299,7 @@ Decisão da T-63, no modelo do Stripe (stripe.dev); entra nas T-65, T-66 e T-67.
 - **Abaixo de `lg`:** sem lateral. `/ FÓL. 006` em mono, sem filete; o título; a linha fina; e a mesma tabela de metadados, com filete em cima e 32 px de respiro, tudo rolando com o texto. O `/ ARTIGO` não aparece.
 - **Sem sumário** (SPEC: o RF-05 saiu na T-63).
 
-**Apêndice, no modelo do Distill.** No fim do fólio, numa faixa própria depois do texto, com filete em cima e fundo `sheet`: os apêndices do autor e as referências numeradas (SPEC RF-04). De `lg` em diante, os títulos (`Apêndice A`, `Referências`) ficam como rótulo em mono 12 px maiúsculo na coluna da lateral, e o texto, em Plex Sans 15 px com entrelinha 1,6, na coluna do texto. Cada referência traz o número, o título com link numa linha e, abaixo, autores, ano e veículo em grafite. A ficha de bancada saiu na T-62.
+**Apêndice, no modelo do Distill (T-66).** No fim do fólio, numa faixa própria depois do artigo, na largura toda, com filete de 1 px em `line` em cima e fundo `sheet`: os apêndices do autor e as referências numeradas (SPEC RF-04). Os títulos (`Apêndice A · <título>`, `Referências`) são rótulos em mono 12 px maiúsculo e grafite, nunca lápis (seção 4: lápis sobre folha clara dá 4,2). De `lg` em diante, o rótulo fica na coluna da lateral (15rem, vão de 4rem) e o texto, em Plex Sans 15 px com entrelinha 1,6, na coluna do texto; abaixo de `lg`, o rótulo fica em cima do texto. Cada referência traz o número da lista em grafite, o título com link numa linha e, abaixo, autores, ano e veículo em grafite; só o título é link. A ficha de bancada saiu na T-62.
 
 ### 9.4 Avisos dentro do texto (decisão: forma, não cor)
 Todos em tinta; nenhum usa as cores dos tipos.
