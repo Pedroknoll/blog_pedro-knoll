@@ -163,7 +163,7 @@ test.describe("lateral da home [RF-01]", () => {
     await open(page, "/", 1280);
     const at1280 = await readRail(page);
     expect.soft(at1280.columnWidth, "1280 coluna").toBeCloseTo(240, 0);
-    expect.soft(at1280.gap, "1280 vão").toBeCloseTo(64, 0);
+    expect.soft(at1280.gap, "1280 vão").toBeCloseTo(96, 0);
     expect
       .soft(at1280.barWidth, "1280 barra")
       .toBeCloseTo(at1280.rightWidth, 0);
@@ -287,6 +287,6 @@ test.describe("lateral da home [RF-01]", () => {
       .getByRole("region", { name: "Apêndice", exact: true })
       .locator(":scope > div");
     await expect(inner).toHaveCount(1);
-    await expect(inner).toHaveCSS("max-width", "1280px");
+    await expect(inner).toHaveCSS("max-width", "1152px");
   });
 });
