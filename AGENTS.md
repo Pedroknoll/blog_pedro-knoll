@@ -73,7 +73,7 @@ Sem `icon-192.png` e sem `icon-512.png`. `src/components/marimo/pk.css` não vem
 - **Componentes:** `.astro` para tudo que é estático; `.svelte` só quando houver estado no cliente. Hidratação padrão `client:visible`; `client:load` exige justificativa no PR.
 - **Conteúdo:** as páginas acessam posts só por `getPublishedPosts()`, nunca por `getCollection('posts')` direto (é o que esconde rascunhos quando `SHOW_DRAFTS` não é `true`).
 - **Slug:** é o `id` da entrada, gerado pelo `generateId` do loader (nome da pasta). Não recalcule slug nas páginas.
-- **Nomes:** identificadores de código em inglês; texto visível e rotas em pt-BR (`/sobre`, `/tags/[tag]`). Exceções fixadas na SPEC: `/blog/[slug]` e `/page/[n]`.
+- **Nomes:** identificadores de código em inglês; texto visível e rotas em pt-BR (`/sobre`, `/tags/[tag]`, `/tipos/[tipo]`). Exceções fixadas na SPEC: `/blog/[slug]` e `/page/[n]`.
 - **Alias:** `~/` aponta para `src/`.
 - **Dados de gráfico:** importados no MDX a partir de JSON/CSV da pasta do post; nada de `fetch` em runtime. Datas chegam como string ISO e o componente converte.
 - **Notebooks:** `{ mode: iframe, src, compute }`. Detalhes na SPEC §6 e §7.
