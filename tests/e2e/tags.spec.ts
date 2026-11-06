@@ -110,23 +110,46 @@ test("E2 nenhum card lista tags [RF-02]", async ({ page }) => {
     paths.push(href ?? "");
   }
 
-  await page.goto("/");
+  const posts = await publishedPosts(page);
+  const tags: string[] = [];
+  const seen = new Set<string>();
+  for (const post of posts) {
+    const response = await page.goto(post.href);
+    expect(response?.status(), post.href).toBe(200);
+    const links = page
+      .getByRole("list", { name: "Tags", exact: true })
+      .getByRole("link");
+    const count = await links.count();
+    for (let index = 0; index < count; index += 1) {
+      const href = await links.nth(index).getAttribute("href");
+      if (!href || !/^\/tags\/[a-z0-9-]+\/$/.test(href) || seen.has(href)) {
+        continue;
+      }
+      seen.add(href);
+      tags.push(href);
+    }
+  }
+  expect(tags.length).toBeGreaterThan(0);
+
+  const back = await page.goto("/");
+  expect(back?.status()).toBe(200);
   const nav = page.getByRole("navigation", {
-    name: "Filtrar por tag",
+    name: "Filtrar por tipo",
     exact: true,
   });
   await expect(nav).toHaveCount(1);
   const hrefs = await nav
     .getByRole("link")
     .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
-  const tags = hrefs.filter((href): href is string =>
-    Boolean(href?.startsWith("/tags/")),
+  const tipos = hrefs.filter(
+    (href): href is string =>
+      typeof href === "string" && /^\/tipos\/[a-z0-9-]+\/$/.test(href),
   );
-  expect(tags.length).toBeGreaterThan(0);
+  expect(tipos.length).toBeGreaterThan(0);
 
-  for (const path of [...paths, ...tags]) {
+  for (const path of [...paths, ...tags, ...tipos]) {
     await test.step(path, async () => {
-      const response = await page.goto(path ?? "");
+      const response = await page.goto(path);
       expect(response?.status()).toBe(200);
       await expect(
         page
@@ -238,47 +261,18 @@ test("E6 página de tag sem script e com um h1 fora do banner [RF-02]", async ({
   }
 });
 
-test("E7 barra de filtro por tag [RF-02]", async ({ page }) => {
+test("E7 páginas de tag sem barra [RF-02]", async ({ page }) => {
   const tagged = await publishedPostsWithTags(page);
-  const expected = [...uniqueTags(tagged)].sort(byName);
 
-  const home = await page.goto("/");
-  expect(home?.status()).toBe(200);
-  const homeNav = page.getByRole("navigation", {
-    name: "Filtrar por tag",
-    exact: true,
-  });
-  await expect(homeNav).toHaveCount(1);
-
-  const homeLinks = homeNav.getByRole("link");
-  await expect(homeLinks.first()).toHaveText("Todos");
-  await expect(homeLinks.first()).toHaveAttribute("href", "/");
-  await expect(homeLinks.first()).toHaveAttribute("aria-current", "true");
-
-  const homeCount = await homeLinks.count();
-  expect(homeCount).toBe(expected.length + 1);
-  const names: string[] = [];
-  for (let index = 1; index < homeCount; index += 1) {
-    const link = homeLinks.nth(index);
-    const text = normalize(await link.textContent());
-    names.push(text);
-    await expect(link).toHaveAttribute("href", `/tags/${text}/`);
-    await expect(link).not.toHaveAttribute("aria-current");
-  }
-  expect(names).toEqual(expected);
-
-  for (const tag of expected) {
+  for (const tag of uniqueTags(tagged)) {
     const response = await page.goto(`/tags/${tag}/`);
     expect(response?.status()).toBe(200);
-    const nav = page.getByRole("navigation", {
-      name: "Filtrar por tag",
-      exact: true,
-    });
-    await expect(nav).toHaveCount(1);
-    const current = nav.locator('a[aria-current="true"]');
-    await expect(current).toHaveCount(1);
-    await expect(current).toHaveText(tag);
-    await expect(current).toHaveAttribute("href", `/tags/${tag}/`);
+    await expect(
+      page.getByRole("navigation", { name: "Filtrar por tag", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("navigation", { name: "Filtrar por tipo", exact: true }),
+    ).toHaveCount(0);
   }
 
   for (const post of tagged) {
@@ -287,6 +281,9 @@ test("E7 barra de filtro por tag [RF-02]", async ({ page }) => {
     await expect(page.getByRole("article")).toHaveCount(1);
     await expect(
       page.getByRole("navigation", { name: "Filtrar por tag", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("navigation", { name: "Filtrar por tipo", exact: true }),
     ).toHaveCount(0);
   }
 });

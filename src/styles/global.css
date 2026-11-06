@@ -507,3 +507,19 @@
     opacity: 0;
   }
 }
+
+@media (hover: hover) and (pointer: fine) {
+  [data-listing]:has(article:hover) article:not(:hover) {
+    opacity: 0.35;
+  }
+}
+
+[data-listing]:has(article :focus-visible) article:not(:has(:focus-visible)) {
+  opacity: 0.35;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-listing] article {
+    transition: opacity 150ms;
+  }
+}

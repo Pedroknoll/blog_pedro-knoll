@@ -12,6 +12,7 @@ interface Props {
   featured?: CollectionEntry<"posts"> | null;
   prev: string | null;
   next: string | null;
+  listLabel?: string;
 }
 
 const {
@@ -21,6 +22,7 @@ const {
   featured = null,
   prev,
   next,
+  listLabel = "Posts",
 } = Astro.props;
 const featuredMinutes = featured ? await minutesReadOf(featured) : null;
 const items = await Promise.all(
@@ -31,20 +33,26 @@ const items = await Promise.all(
 );
 ---
 
-<div class="mx-auto w-full max-w-[52rem] px-4 py-10">
+<div
+  class:list={[
+    "mx-auto w-full max-w-[52rem] px-4 pb-10",
+    showHeading && "pt-10",
+  ]}
+  data-listing
+>
   {showHeading && (
     <h1 class="font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem]">
       {heading}
     </h1>
   )}
   {featured && featuredMinutes !== null && (
-    <section class="mt-12" aria-label="Destaque">
+    <section class:list={[showHeading && "mt-12"]} aria-label="Destaque">
       <Card post={featured} featured minutesRead={featuredMinutes} />
     </section>
   )}
   <ul
-    class:list={["divide-y divide-line", !featured && "mt-10"]}
-    aria-label="Posts"
+    class:list={["divide-y divide-line", !featured && showHeading && "mt-10"]}
+    aria-label={listLabel}
   >
     {items.map(({ post, minutesRead }) => (
       <li class="py-8">

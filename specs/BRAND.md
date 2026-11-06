@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.17 · novembro de 2026 · pedroknoll.com
+Versão 1.18 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -344,7 +344,7 @@ Foco visível: contorno 2 px prússia com afastamento 3 px. Links em prússia, s
 O "Voltar ao início" da página 404 parece um botão, mas continua um link (`<a>`) para `/`. Fundo tinta, texto papel, IBM Plex Mono 400 em 14 px, 44 px de altura, 20 px de respiro nas laterais. Cantos retos e sem sombra, como os botões da seção 9.6. Sem sublinhado em repouso; no hover e no foco, sublinhado com afastamento de 3 px, sem troca de cor. O foco é o da seção 9.10. No tema escuro, os mesmos tokens invertem o par: fundo claro, texto escuro.
 
 ### 9.12 Filtro por tipo (listas)
-Decisão da T-63, na disposição do claude.dev; entra na T-64. Uma linha de links acima da lista, com filete embaixo: `Todos` e os tipos com post publicado, na ordem de `KINDS` (SPEC §6). Cada item em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, lápis. Cada tipo leva o ícone parado de 12 px na cor do tipo, apagado (opacidade .55) fora do tipo ativo, e o número de posts publicados em sobrescrito. O ativo vai para tinta, com sublinhado de 2 px na cor do texto e o ícone inteiro. No celular, a linha rola na horizontal. Só links, sem JavaScript.
+Decisão da T-63, na disposição do claude.dev, revista na T-64. Uma linha de links acima da lista, com filete embaixo: `Todos` e os tipos com post publicado, na ordem de `KINDS` (SPEC §6). Cada item em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, lápis. Cada tipo leva só o nome e o número de posts publicados em sobrescrito, sem ícone (T-64). O ativo vai para tinta, com sublinhado de 2 px na cor do texto. Na home e nas páginas de tipo, o primeiro card começa logo abaixo do filete, só com o respiro do próprio card (seção 9.2): 2rem, e 1,25rem no destaque abaixo de `sm` (T-64). No celular, a linha rola na horizontal. Só links, sem JavaScript.
 
 ---
 

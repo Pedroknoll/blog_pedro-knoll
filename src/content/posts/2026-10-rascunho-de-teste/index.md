@@ -6,7 +6,7 @@ description: "Rascunho usado nos testes para garantir que a produção não publ
 pubDate: 2026-10-23
 
 folio: 999
-kind: concept
+kind: tutorial
 level: 1
 
 tags: [meta, so-rascunho]

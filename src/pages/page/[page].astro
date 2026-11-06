@@ -1,12 +1,12 @@
 ---
+import KindFilter from "~/components/ui/KindFilter.astro";
 import Listing from "~/components/ui/Listing.astro";
-import TagFilter from "~/components/ui/TagFilter.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { splitFeatured } from "~/lib/featured";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
+import { kindCounts } from "~/lib/kind";
 import { PAGE_SIZE, paginatePosts } from "~/lib/pagination";
 import { absoluteUrl, pageTitle } from "~/lib/seo";
-import { collectTags } from "~/lib/tags";
 import { site } from "~/site.config";
 
 export async function getStaticPaths() {
@@ -39,7 +39,7 @@ if (!page || !current) {
   ogTitle={`Blog — página ${page}`}
   ogType="website"
 >
-  <TagFilter tags={collectTags(posts)} current={null} />
+  <KindFilter kinds={kindCounts(posts)} current={null} />
   <Listing
     heading={`Blog — página ${page}`}
     posts={current.items}

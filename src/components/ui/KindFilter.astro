@@ -1,0 +1,58 @@
+---
+import { KIND_LABELS, kindCountWord, kindPath, type Kind } from "~/lib/kind";
+
+interface Props {
+  kinds: { kind: Kind; count: number }[];
+  current: Kind | null;
+}
+
+const { kinds, current } = Astro.props;
+
+const itemClass =
+  "font-mono text-xs uppercase tracking-[0.12em] whitespace-nowrap";
+const linkClass = `${itemClass} text-pencil hover:text-accent focus-visible:text-accent`;
+const currentClass = `${itemClass} text-ink`;
+const currentLabelClass =
+  "underline decoration-2 decoration-current underline-offset-3";
+---
+
+<nav
+  class="mx-auto w-full min-w-0 max-w-[52rem] px-4 pt-10"
+  aria-label="Filtrar por tipo"
+>
+  <div class="border-b border-line">
+    <div class="-mx-2 overflow-x-auto px-2 pb-2">
+      <ul class="flex w-max gap-4">
+        <li>
+          <a
+            class={current === null ? currentClass : linkClass}
+            href="/"
+            aria-current={current === null ? "true" : undefined}
+          >
+            <span class={current === null ? currentLabelClass : undefined}>
+              Todos
+            </span>
+          </a>
+        </li>
+        {kinds.map(({ kind, count }) => {
+          const active = current === kind;
+          return (
+            <li>
+              <a
+                class={active ? currentClass : linkClass}
+                href={kindPath(kind)}
+                aria-current={active ? "true" : undefined}
+              >
+                <span class={active ? currentLabelClass : undefined}>
+                  {KIND_LABELS[kind]}
+                </span>{" "}
+                <sup>{count}</sup>{" "}
+                <span class="sr-only">{kindCountWord(count)}</span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  </div>
+</nav>

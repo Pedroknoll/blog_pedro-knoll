@@ -8,12 +8,6 @@ const h1Sizes = {
   360: 38.4,
 } as const;
 
-const introSizes = {
-  1280: 22.4,
-  1000: 21,
-  360: 18.88,
-} as const;
-
 const waveSizes = {
   1280: 48,
   560: 48,
@@ -264,6 +258,21 @@ test.describe("saudação [RF-01, RNF-04]", () => {
           const muted = getComputedStyle(mutedProbe).color;
           inkProbe.remove();
           mutedProbe.remove();
+          let expectedMaxWidth = Number.NaN;
+          if (style) {
+            const probe = document.createElement("div");
+            probe.style.position = "absolute";
+            probe.style.visibility = "hidden";
+            probe.style.width = "46ch";
+            probe.style.fontFamily = style.fontFamily;
+            probe.style.fontSize = style.fontSize;
+            probe.style.fontWeight = style.fontWeight;
+            probe.style.fontStyle = style.fontStyle;
+            probe.style.fontStretch = style.fontStretch;
+            document.body.append(probe);
+            expectedMaxWidth = probe.getBoundingClientRect().width;
+            probe.remove();
+          }
           return {
             tag: next?.tagName.toLowerCase() ?? "",
             text: (next?.textContent ?? "").replace(/\s+/g, " ").trim(),
@@ -271,6 +280,11 @@ test.describe("saudação [RF-01, RNF-04]", () => {
             variable,
             weight: style?.fontWeight ?? "",
             fontSize: style?.fontSize ?? "",
+            lineHeight: style
+              ? Number.parseFloat(style.lineHeight)
+              : Number.NaN,
+            maxWidth: style ? Number.parseFloat(style.maxWidth) : Number.NaN,
+            expectedMaxWidth,
             color: style?.color ?? "",
             ink,
             muted,
@@ -283,10 +297,14 @@ test.describe("saudação [RF-01, RNF-04]", () => {
           .soft(familyPrefix(measured.family, measured.variable), where)
           .toBe(normalizeFamily(measured.variable));
         expect.soft(measured.weight, where).toBe("400");
+        expect.soft(closeTo(measured.fontSize, 18), where).toBe(18);
         expect
-          .soft(closeTo(measured.fontSize, introSizes[width]), where)
-          .toBe(introSizes[width]);
-        expect.soft(measured.color, where).toBe(measured.ink);
+          .soft(Math.abs(measured.lineHeight - 27.9), where)
+          .toBeLessThanOrEqual(0.5);
+        expect.soft(measured.color, where).toBe(measured.muted);
+        expect
+          .soft(Math.abs(measured.maxWidth - measured.expectedMaxWidth), where)
+          .toBeLessThanOrEqual(1);
         expect
           .soft(
             measured.ink === measured.muted ? measured.ink : "diferentes",
