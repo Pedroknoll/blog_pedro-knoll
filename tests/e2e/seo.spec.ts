@@ -1,7 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { KIND_LABELS, KINDS } from "../../src/lib/kind";
 import { nextPageLink, publishedPosts } from "./published-posts";
-import { authorName, homeTitle, titled } from "./site-literals";
+import { authorName, homeTitle, kindSlugs, titled } from "./site-literals";
 
 function normalize(text: string | null) {
   return (text ?? "").replace(/\s+/g, " ").trim();
@@ -12,22 +13,28 @@ async function visit(page: Page, path: string) {
   expect(response?.status(), path).toBe(200);
 }
 
-async function tagNames(page: Page) {
-  const nav = page.getByRole("navigation", {
-    name: "Filtrar por tag",
-    exact: true,
-  });
-  await expect(nav).toHaveCount(1);
-  const links = nav.getByRole("link");
+async function tagPathsFromPosts(
+  page: Page,
+  posts: readonly { href: string }[],
+) {
   const tags: string[] = [];
-  const count = await links.count();
-  for (let index = 0; index < count; index += 1) {
-    const link = links.nth(index);
-    const name = normalize(await link.textContent());
-    if (name === "Todos") continue;
-    await expect(link).toHaveAttribute("href", `/tags/${name}/`);
-    tags.push(name);
+  const seen = new Set<string>();
+  for (const post of posts) {
+    await visit(page, post.href);
+    const links = page
+      .getByRole("list", { name: "Tags", exact: true })
+      .getByRole("link");
+    const count = await links.count();
+    for (let index = 0; index < count; index += 1) {
+      const href = await links.nth(index).getAttribute("href");
+      if (!href || !/^\/tags\/[a-z0-9-]+\/$/.test(href) || seen.has(href)) {
+        continue;
+      }
+      seen.add(href);
+      tags.push(href);
+    }
   }
+  expect(tags.length).toBeGreaterThan(0);
   return tags;
 }
 
@@ -49,13 +56,27 @@ async function listingPagePaths(page: Page) {
 
 async function discover(page: Page) {
   const posts = await publishedPosts(page);
-  await page.goto("/");
-  const tags = await tagNames(page);
+  const tags = await tagPathsFromPosts(page, posts);
+  await visit(page, "/");
+  const nav = page.getByRole("navigation", {
+    name: "Filtrar por tipo",
+    exact: true,
+  });
+  await expect(nav).toHaveCount(1);
+  const hrefs = await nav
+    .getByRole("link")
+    .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
+  const tipos = hrefs.filter(
+    (href): href is string =>
+      typeof href === "string" && /^\/tipos\/[a-z0-9-]+\/$/.test(href),
+  );
+  expect(tipos.length).toBeGreaterThan(0);
   const pages = await listingPagePaths(page);
   const paths = [
     "/",
     ...posts.map((post) => post.href),
-    ...tags.map((tag) => `/tags/${tag}/`),
+    ...tags,
+    ...tipos,
     ...pages,
   ];
   return { posts, tags, pages, paths };
@@ -151,6 +172,14 @@ test("E1 title [RF-12]", async ({ page }) => {
     await visit(page, path);
     if (path === "/") {
       await expect(page).toHaveTitle(homeTitle);
+      continue;
+    }
+    if (path.startsWith("/tipos/")) {
+      const slug = /^\/tipos\/([a-z0-9-]+)\/$/.exec(path)?.[1];
+      const kind = KINDS.find((item) => kindSlugs[item] === slug);
+      expect(kind, path).toBeTruthy();
+      if (!kind) continue;
+      await expect(page).toHaveTitle(titled(`Tipo: ${KIND_LABELS[kind]}`));
       continue;
     }
     await expect(page.locator("h1")).toHaveCount(1);

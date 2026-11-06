@@ -56,16 +56,48 @@ export async function pagesForTheme(page: Page): Promise<string[]> {
   const home = await page.goto("/");
   expect(home?.status()).toBe(200);
 
+  let tag: string | undefined;
+  for (const post of posts) {
+    const response = await page.goto(post.href);
+    expect(response?.status(), post.href).toBe(200);
+    const links = page
+      .getByRole("list", { name: "Tags", exact: true })
+      .getByRole("link");
+    if ((await links.count()) === 0) continue;
+    const href = await links.first().getAttribute("href");
+    if (href && /^\/tags\/[a-z0-9-]+\/$/.test(href)) {
+      tag = href;
+      break;
+    }
+  }
+  if (!tag) {
+    throw new Error("nenhum post publicado tem lista Tags");
+  }
+
+  const back = await page.goto("/");
+  expect(back?.status()).toBe(200);
   const nav = page.getByRole("navigation", {
-    name: "Filtrar por tag",
+    name: "Filtrar por tipo",
     exact: true,
   });
   await expect(nav).toHaveCount(1);
   const hrefs = await nav
     .getByRole("link")
     .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
-  const tag = hrefs.find((href) => href?.startsWith("/tags/"));
-  expect(tag, "a TagFilter não tem link de tag").toBeTruthy();
+  const tipo = hrefs.find(
+    (href): href is string =>
+      typeof href === "string" && /^\/tipos\/[a-z0-9-]+\/$/.test(href),
+  );
+  if (!tipo) {
+    throw new Error("a barra não tem link de tipo");
+  }
 
-  return ["/", ...posts.map((post) => post.href), tag as string];
+  const paths = ["/", ...posts.map((post) => post.href), tag, tipo];
+  expect(paths[0]).toBe("/");
+  for (const post of posts) {
+    expect(post.href).toMatch(/^\/blog\/[a-z0-9-]+\/$/);
+  }
+  expect(tag).toMatch(/^\/tags\/[a-z0-9-]+\/$/);
+  expect(tipo).toMatch(/^\/tipos\/[a-z0-9-]+\/$/);
+  return paths;
 }

@@ -3,6 +3,9 @@ import path from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
+import { KIND_LABELS, KINDS } from "../../src/lib/kind";
+import { kindPath } from "./site-literals";
+
 test.describe("Notebook marimo inline [RF-08, RNF-03]", () => {
   test.fixme("leitor abre post com notebook", async () => {
     throw new Error("Cenário da SPEC §11 ainda não implementado.");
@@ -49,6 +52,7 @@ type DiskPost = {
   slug: string;
   draft: boolean;
   tags: string[];
+  kind: (typeof KINDS)[number];
 };
 
 function frontmatterOf(text: string) {
@@ -80,6 +84,13 @@ function tagsOf(frontmatter: string, file: string) {
     .filter((tag) => tag.length > 0);
 }
 
+function kindOf(frontmatter: string, file: string) {
+  const match = /^kind:\s*([a-z]+)\s*$/m.exec(frontmatter);
+  const kind = KINDS.find((item) => item === match?.[1]);
+  if (!kind) throw new Error(`${file}: kind ausente`);
+  return kind;
+}
+
 function diskPosts(): DiskPost[] {
   const root = path.resolve("src/content/posts");
   const posts: DiskPost[] = [];
@@ -95,6 +106,7 @@ function diskPosts(): DiskPost[] {
           .split("\n")
           .some((line) => line.trim() === "draft: true"),
         tags: tagsOf(frontmatter, path.relative(process.cwd(), file)),
+        kind: kindOf(frontmatter, path.relative(process.cwd(), file)),
       });
     }
   }
@@ -109,15 +121,26 @@ async function hrefsOf(page: Page) {
     );
 }
 
-async function filterNames(page: Page) {
-  const nav = page.getByRole("navigation", {
-    name: "Filtrar por tag",
-    exact: true,
-  });
-  await expect(nav).toHaveCount(1);
-  return (await nav.getByRole("link").allTextContents()).map((name) =>
-    name.trim(),
-  );
+async function publishedTagNames(page: Page, slugs: readonly string[]) {
+  const names: string[] = [];
+  const seen = new Set<string>();
+  for (const slug of slugs) {
+    const response = await page.goto(`/blog/${slug}/`);
+    expect(response?.status(), slug).toBe(200);
+    const links = page
+      .getByRole("list", { name: "Tags", exact: true })
+      .getByRole("link");
+    const count = await links.count();
+    for (let index = 0; index < count; index += 1) {
+      const name = ((await links.nth(index).textContent()) ?? "")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (!name || seen.has(name)) continue;
+      seen.add(name);
+      names.push(name);
+    }
+  }
+  return names;
 }
 
 test.describe("Rascunhos [RF-11]", () => {
@@ -156,8 +179,11 @@ test.describe("Rascunhos [RF-11]", () => {
       expect(destaqueHref ?? "").not.toContain(draft.slug);
     }
 
-    const tags = (await filterNames(page)).filter((name) => name !== "Todos");
-    for (const tag of tags) {
+    const names = await publishedTagNames(
+      page,
+      posts.filter((post) => !post.draft).map((post) => post.slug),
+    );
+    for (const tag of names) {
       const response = await page.goto(`/tags/${tag}/`);
       expect(response?.status()).toBe(200);
       const tagHrefs = await hrefsOf(page);
@@ -166,12 +192,47 @@ test.describe("Rascunhos [RF-11]", () => {
       }
     }
 
-    await page.goto("/");
-    const names = await filterNames(page);
     for (const tag of draftOnly) {
       expect(names).not.toContain(tag);
       const response = await page.goto(`/tags/${tag}/`);
       expect(response?.status()).toBe(404);
+    }
+
+    const homeAgain = await page.goto("/");
+    expect(homeAgain?.status()).toBe(200);
+    const nav = page.getByRole("navigation", {
+      name: "Filtrar por tipo",
+      exact: true,
+    });
+    await expect(nav).toHaveCount(1);
+
+    const publishedKinds = new Set(
+      posts.filter((post) => !post.draft).map((post) => post.kind),
+    );
+    const draftOnlyKinds = KINDS.filter(
+      (kind) =>
+        drafts.some((post) => post.kind === kind) && !publishedKinds.has(kind),
+    );
+    expect(draftOnlyKinds.length).toBeGreaterThan(0);
+    for (const kind of draftOnlyKinds) {
+      await expect(
+        nav.getByRole("link", { name: KIND_LABELS[kind] }),
+      ).toHaveCount(0);
+    }
+    for (const kind of draftOnlyKinds) {
+      const response = await page.goto(kindPath(kind));
+      expect(response?.status(), kindPath(kind)).toBe(404);
+    }
+
+    for (const kind of KINDS) {
+      if (!publishedKinds.has(kind)) continue;
+      const tipo = kindPath(kind);
+      const response = await page.goto(tipo);
+      expect(response?.status(), tipo).toBe(200);
+      const typeHrefs = await hrefsOf(page);
+      for (const draft of drafts) {
+        expect(typeHrefs.some((href) => href.includes(draft.slug))).toBe(false);
+      }
     }
 
     for (const draft of drafts) {

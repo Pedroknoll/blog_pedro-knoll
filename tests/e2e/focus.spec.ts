@@ -15,7 +15,7 @@ type FocusHit = {
   inPre: boolean;
   card: boolean;
   copyButton: boolean;
-  tagFilter: boolean;
+  kindFilter: boolean;
 };
 
 function channels(color: string): Channels {
@@ -153,7 +153,7 @@ async function walk(
           node.closest("h2") !== null &&
           node.closest("article") !== null,
         copyButton: node.matches("button.code-copy-button"),
-        tagFilter: node.closest('nav[aria-label="Filtrar por tag"]') !== null,
+        kindFilter: node.closest('nav[aria-label="Filtrar por tipo"]') !== null,
       };
     });
 
@@ -199,7 +199,7 @@ for (const viewport of [1280, 360]) {
         for (const hit of hits) {
           if (hit.card) sawCard = true;
           if (hit.copyButton) sawCopy = true;
-          if (hit.tagFilter) sawFilter = true;
+          if (hit.kindFilter) sawFilter = true;
           const where = `${path} @ ${viewport}px ${hit.label}`;
           if (hit.outlineStyle !== "solid") {
             errors.push(`${where} outline-style ${hit.outlineStyle}`);
@@ -224,7 +224,7 @@ for (const viewport of [1280, 360]) {
       if (!sawCard) errors.push("nenhum card no conjunto");
       if (!sawCopy)
         errors.push("botão de copiar do post B ausente no conjunto");
-      if (!sawFilter) errors.push("link da TagFilter ausente no conjunto");
+      if (!sawFilter) errors.push("link da barra de tipo ausente no conjunto");
       expect(errors).toEqual([]);
     });
   }

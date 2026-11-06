@@ -17,3 +17,14 @@ export const notFoundHeading = "Esta página foi arrancada do caderno.";
 
 export const notFoundIntro =
   "O endereço pode ter mudado, ou esta página ainda não foi escrita. O resto do caderno continua aqui.";
+
+export const kindSlugs = {
+  concept: "conceito",
+  tutorial: "tutorial",
+  lab: "lab",
+  playbook: "playbook",
+} as const;
+
+export function kindPath(kind: keyof typeof kindSlugs): string {
+  return `/tipos/${kindSlugs[kind]}/`;
+}

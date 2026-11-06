@@ -67,18 +67,31 @@ async function open(page: Page, path: string) {
   expect(response?.status(), path).toBe(200);
 }
 
+async function tagHrefsFromPosts(page: Page): Promise<string[]> {
+  const hrefs: string[] = [];
+  const seen = new Set<string>();
+  for (const post of await publishedHrefs(page)) {
+    await open(page, post);
+    const links = page
+      .getByRole("list", { name: "Tags", exact: true })
+      .getByRole("link");
+    const count = await links.count();
+    for (let index = 0; index < count; index += 1) {
+      const href = await links.nth(index).getAttribute("href");
+      if (!href || !/^\/tags\/[a-z0-9-]+\/$/.test(href) || seen.has(href)) {
+        continue;
+      }
+      seen.add(href);
+      hrefs.push(href);
+    }
+  }
+  expect(hrefs.length).toBeGreaterThan(0);
+  return hrefs;
+}
+
 async function tagPathFromNav(page: Page): Promise<string> {
-  const nav = page.getByRole("navigation", {
-    name: "Filtrar por tag",
-    exact: true,
-  });
-  await expect(nav).toHaveCount(1);
-  const hrefs = await nav
-    .getByRole("link")
-    .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
-  const tag = hrefs.find((href) => href?.startsWith("/tags/"));
-  expect(tag).toBeTruthy();
-  return tag ?? "";
+  const tags = await tagHrefsFromPosts(page);
+  return tags[0] ?? "";
 }
 
 async function listingPaths(page: Page): Promise<string[]> {
@@ -97,22 +110,30 @@ async function listingSurfaces(page: Page): Promise<string[]> {
     await open(page, href ?? "");
     paths.push(href ?? "");
   }
+  const tags = await tagHrefsFromPosts(page);
   await open(page, "/");
   const nav = page.getByRole("navigation", {
-    name: "Filtrar por tag",
+    name: "Filtrar por tipo",
     exact: true,
   });
   await expect(nav).toHaveCount(1);
   const hrefs = await nav
     .getByRole("link")
     .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
-  const tags = hrefs.filter((href) => href?.startsWith("/tags/"));
-  expect(tags.length).toBeGreaterThan(0);
-  return [...paths, ...tags.filter((href): href is string => !!href)];
+  const tipos = hrefs.filter(
+    (href): href is string =>
+      typeof href === "string" && /^\/tipos\/[a-z0-9-]+\/$/.test(href),
+  );
+  expect(tipos.length).toBeGreaterThan(0);
+  return [...paths, ...tags, ...tipos];
+}
+
+function postsList(page: Page) {
+  return page.getByRole("list", { name: /^Posts$|^Posts do tipo / });
 }
 
 async function listArticles(page: Page): Promise<Locator[]> {
-  const list = page.getByRole("list", { name: "Posts", exact: true });
+  const list = postsList(page);
   await expect(list).toHaveCount(1);
   const items = list.locator(":scope > li").locator("article");
   const count = await items.count();
@@ -144,7 +165,7 @@ async function cardsOn(page: Page, path: string): Promise<Locator[]> {
     await expect(featured).toHaveCount(1);
     articles.push(featured);
   }
-  const list = page.getByRole("list", { name: "Posts", exact: true });
+  const list = postsList(page);
   await expect(list).toHaveCount(1);
   const items = list.locator(":scope > li").locator("article");
   const count = await items.count();
@@ -436,19 +457,10 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await expect(article.locator("img")).toHaveCount(0);
     }
 
-    await open(page, "/");
-    const nav = page.getByRole("navigation", {
-      name: "Filtrar por tag",
-      exact: true,
-    });
-    const hrefs = await nav
-      .getByRole("link")
-      .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
-    const tags = hrefs.filter((href) => href?.startsWith("/tags/"));
-    expect(tags.length).toBeGreaterThan(0);
+    const tags = await tagHrefsFromPosts(page);
     for (const path of tags) {
-      await test.step(path ?? "", async () => {
-        await open(page, path ?? "");
+      await test.step(path, async () => {
+        await open(page, path);
         for (const article of await listArticles(page)) {
           await expect(article.locator("img")).toHaveCount(0);
         }
@@ -505,20 +517,32 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
             if (!folio || !heading) return null;
             const folioBox = folio.getBoundingClientRect();
             const headingBox = heading.getBoundingClientRect();
-            const articleBox = root.getBoundingClientRect();
+            const track = Number.parseFloat(
+              getComputedStyle(root)
+                .gridTemplateColumns.trim()
+                .split(/\s+/)[0] ?? "",
+            );
+            const fontSize = Number.parseFloat(
+              getComputedStyle(document.documentElement).fontSize,
+            );
             return {
               folioRight: folioBox.right,
               headingLeft: headingBox.left,
-              folioMid: (folioBox.top + folioBox.bottom) / 2,
-              articleMid: (articleBox.top + articleBox.bottom) / 2,
+              track,
+              expectedTrack: 6.5 * fontSize,
+              folioTop: folioBox.top,
+              headingTop: headingBox.top,
             };
           });
           expect(placed).not.toBeNull();
           if (!placed) continue;
           expect(placed.folioRight).toBeLessThanOrEqual(placed.headingLeft);
           expect(
-            Math.abs(placed.folioMid - placed.articleMid),
-          ).toBeLessThanOrEqual(2);
+            Math.abs(placed.track - placed.expectedTrack),
+          ).toBeLessThanOrEqual(1);
+          expect(
+            Math.abs(placed.folioTop - placed.headingTop),
+          ).toBeLessThanOrEqual(1);
 
           const fitted = await article
             .locator("time")
@@ -826,13 +850,19 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           expect(clock.ok, JSON.stringify(clock)).toBe(true);
           expect(clock.hidden).toBe("true");
 
-          const decoration = await article
-            .locator("h2")
-            .getByRole("link")
-            .evaluate(
-              (element) => getComputedStyle(element).textDecorationLine,
-            );
-          expect(decoration).toBe("none");
+          const link = article.locator("h2").getByRole("link");
+          const rest = await link.evaluate((element) => {
+            const style = getComputedStyle(element);
+            return {
+              color: style.color,
+              decoration: style.textDecorationLine,
+            };
+          });
+          expect(rest.decoration).toBe("none");
+          await link.hover();
+          await expect(link).toHaveCSS("color", rest.color);
+          await expect(link).toHaveCSS("text-decoration-line", "none");
+          await page.mouse.move(0, 0);
         }
       });
     }
@@ -1005,7 +1035,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     expect(Math.abs(after.gap - before.gap)).toBeLessThanOrEqual(1);
   });
 
-  test("C17 resumo em 17px com entrelinha de cerca de 28px", async ({
+  test("C17 resumo em 16px com entrelinha de cerca de 25,6px", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 360, height: 800 });
@@ -1023,35 +1053,29 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
         const style = getComputedStyle(element);
         return { fontSize: style.fontSize, lineHeight: style.lineHeight };
       });
-      expect(fontSizePx(measured.fontSize)).toBe(17);
+      expect(fontSizePx(measured.fontSize)).toBe(16);
       const lineHeight = fontSizePx(measured.lineHeight);
-      expect(lineHeight).toBeGreaterThanOrEqual(27.5);
-      expect(lineHeight).toBeLessThanOrEqual(28.5);
+      expect(Math.abs(lineHeight - 25.6)).toBeLessThanOrEqual(0.5);
     }
   });
 
-  test("C18 título da lista em 26px abaixo de sm", async ({ page }) => {
-    await page.setViewportSize({ width: 360, height: 800 });
+  test("C18 título da lista em 28px", async ({ page }) => {
     await open(page, "/");
-    const narrow = await listArticles(page);
-    expect(narrow.length).toBeGreaterThan(0);
-    for (const article of narrow) {
-      const size = fontSizePx(
-        await article
-          .locator("h2")
-          .evaluate((element) => getComputedStyle(element).fontSize),
-      );
-      expect(size).toBe(26);
-    }
-
-    await page.setViewportSize({ width: 1280, height: 800 });
-    for (const article of await listArticles(page)) {
-      const size = fontSizePx(
-        await article
-          .locator("h2")
-          .evaluate((element) => getComputedStyle(element).fontSize),
-      );
-      expect(size).toBeGreaterThanOrEqual(22);
+    for (const width of [360, 1280]) {
+      await page.setViewportSize({ width, height: 800 });
+      const articles = await listArticles(page);
+      expect(articles.length, String(width)).toBeGreaterThan(0);
+      for (const article of articles) {
+        const measured = await article.locator("h2").evaluate((element) => {
+          const style = getComputedStyle(element);
+          return { fontSize: style.fontSize, lineHeight: style.lineHeight };
+        });
+        expect(fontSizePx(measured.fontSize), String(width)).toBe(28);
+        const lineHeight = fontSizePx(measured.lineHeight);
+        expect(Math.abs(lineHeight - 33.6), String(width)).toBeLessThanOrEqual(
+          0.5,
+        );
+      }
     }
   });
 
@@ -1275,5 +1299,25 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     expect(beside).not.toBeNull();
     if (!beside) return;
     expect(beside.imageLeft).toBeGreaterThanOrEqual(beside.headingRight - 1);
+  });
+
+  test("C22 título do destaque", async ({ page }) => {
+    await open(page, "/");
+    const featured = await featuredArticle(page);
+    expect(featured).not.toBeNull();
+    if (!featured) return;
+    const heading = featured.locator("h2");
+    await expect(heading).toHaveCount(1);
+
+    for (const [width, size] of [
+      [360, 36],
+      [1280, 44],
+    ] as const) {
+      await page.setViewportSize({ width, height: 800 });
+      const actual = fontSizePx(
+        await heading.evaluate((element) => getComputedStyle(element).fontSize),
+      );
+      expect(actual, String(width)).toBe(size);
+    }
   });
 });
