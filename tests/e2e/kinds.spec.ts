@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 import { KIND_LABELS, KINDS, type Kind } from "../../src/lib/kind";
 import { nextPageLink } from "./published-posts";
@@ -107,18 +107,6 @@ async function tagWithTwoPosts(page: Page, rows: readonly CardRow[]) {
   return found?.[0] ?? "";
 }
 
-async function iconPaint(icon: Locator, kind: Kind) {
-  return icon.evaluate((element, token) => {
-    const probe = document.createElement("span");
-    probe.style.color = `var(--color-${token})`;
-    document.body.append(probe);
-    const expected = getComputedStyle(probe).color;
-    probe.remove();
-    const style = getComputedStyle(element);
-    return { color: style.color, expected, opacity: style.opacity };
-  }, `kind-${kind}`);
-}
-
 test("barra na home [RF-02]", async ({ page }) => {
   const rows = await publishedCards(page);
   const counts = countsOf(rows);
@@ -136,6 +124,7 @@ test("barra na home [RF-02]", async ({ page }) => {
 
   const links = nav.getByRole("link");
   await expect(links).toHaveCount(counts.length + 1);
+  await expect(nav.locator("svg")).toHaveCount(0);
   const todos = links.nth(0);
   await expect(todos).toHaveText("Todos");
   await expect(todos).toHaveAttribute("href", "/");
@@ -149,14 +138,6 @@ test("barra na home [RF-02]", async ({ page }) => {
     await expect(link).toHaveAttribute("href", kindPath(entry.kind));
     await expect(link).not.toHaveAttribute("aria-current");
     await expect(link.locator("sup")).toHaveText(String(entry.count));
-    const icon = link.locator("svg");
-    await expect(icon).toHaveCount(1);
-    await expect(icon).toHaveAttribute("aria-hidden", "true");
-    await expect(icon).toHaveAttribute("width", "12");
-    await expect(icon).toHaveAttribute("height", "12");
-    const paint = await iconPaint(icon, entry.kind);
-    expect(paint.color).toBe(paint.expected);
-    expect(paint.opacity).toBe("0.55");
   }
 });
 
@@ -371,4 +352,40 @@ test("movimento reduzido [RF-01]", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "no-preference" });
   await expect(articles.first()).toHaveCSS("transition-property", "opacity");
   await expect(articles.first()).toHaveCSS("transition-duration", "0.15s");
+});
+
+test("vão da barra ao primeiro card [RF-01]", async ({ page }) => {
+  const rows = await publishedCards(page);
+  const kind = countsOf(rows)[0]?.kind;
+  expect(kind).toBeTruthy();
+  if (!kind) return;
+  const cases = [
+    { path: "/", width: 1280, gap: 32 },
+    { path: "/", width: 360, gap: 20 },
+    { path: kindPath(kind), width: 1280, gap: 32 },
+    { path: kindPath(kind), width: 360, gap: 32 },
+  ];
+  for (const item of cases) {
+    await page.setViewportSize({ width: item.width, height: 800 });
+    await open(page, item.path);
+    const filete = page
+      .getByRole("navigation", { name: "Filtrar por tipo", exact: true })
+      .locator(":scope > div");
+    await expect(filete).toHaveCount(1);
+    const first = page
+      .locator("[data-listing] article")
+      .first()
+      .locator(":scope > *")
+      .first();
+    const fileteBottom = await filete.evaluate(
+      (node) => node.getBoundingClientRect().bottom,
+    );
+    const contentTop = await first.evaluate(
+      (node) => node.getBoundingClientRect().top,
+    );
+    expect(
+      Math.abs(contentTop - fileteBottom - item.gap),
+      `${item.path} @ ${item.width}px`,
+    ).toBeLessThanOrEqual(1);
+  }
 });
