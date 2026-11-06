@@ -2,6 +2,7 @@
 import type { CollectionEntry } from "astro:content";
 
 import Greeting from "~/components/ui/Greeting.astro";
+import HomeColumns from "~/components/ui/HomeColumns.astro";
 import KindFilter from "~/components/ui/KindFilter.astro";
 import Listing from "~/components/ui/Listing.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
@@ -47,14 +48,16 @@ const heading = `Tipo: ${label}`;
   ogTitle={heading}
   ogType="website"
 >
-  <Greeting />
-  <KindFilter kinds={kindCounts(allPosts)} current={kind} />
-  <Listing
-    heading={heading}
-    showHeading={false}
-    posts={posts}
-    prev={null}
-    next={null}
-    listLabel={`Posts do tipo ${label}`}
-  />
+  <HomeColumns>
+    <Greeting slot="greeting" />
+    <KindFilter kinds={kindCounts(allPosts)} current={kind} />
+    <Listing
+      heading={heading}
+      showHeading={false}
+      posts={posts}
+      prev={null}
+      next={null}
+      listLabel={`Posts do tipo ${label}`}
+    />
+  </HomeColumns>
 </BaseLayout>

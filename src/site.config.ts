@@ -6,7 +6,7 @@ export const site = {
     name: "Pedro Knoll",
     avatar: "/avatar.jpg",
     bio: "Aprendizados e experimentos em IA",
-    github: "usuario",
-    huggingface: "usuario",
+    github: "https://github.com/Pedroknoll",
+    linkedin: "https://www.linkedin.com/in/pedro-henrique-knoll-giacometo/",
   },
 } as const;

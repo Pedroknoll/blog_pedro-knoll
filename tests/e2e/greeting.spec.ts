@@ -348,6 +348,7 @@ test.describe("saudação [RF-01, RNF-04]", () => {
           return {
             nomeTop: nome?.getBoundingClientRect().top ?? Number.NaN,
             h1Top: h1?.getBoundingClientRect().top ?? Number.NaN,
+            nomeDisplay: nome ? getComputedStyle(nome).display : "",
             fontSize: h1 ? getComputedStyle(h1).fontSize : "",
           };
         });
@@ -369,6 +370,7 @@ test.describe("saudação [RF-01, RNF-04]", () => {
         expect.soft(lines, where).toBe(expected);
 
         if (width === 1280) {
+          expect.soft(measured.nomeDisplay, where).toBe("block");
           const bemVindo = page.locator("h1 span", {
             hasText: /^Bem-vindo ao$/,
           });

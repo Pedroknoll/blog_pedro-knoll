@@ -1,18 +1,37 @@
 ---
 import Aceno from "~/assets/brand/icones/aceno.svg";
 import Wordmark from "~/components/ui/Wordmark.astro";
+import { site } from "~/site.config";
+
+const linkClass =
+  "inline-flex min-h-11 items-center font-mono text-xs tracking-[0.12em] whitespace-nowrap text-muted uppercase hover:text-accent focus-visible:text-accent";
 ---
 
 <div class="mx-auto w-full max-w-[52rem] px-4 pt-10">
-  <h1 class="text-balance font-display text-[clamp(2.4rem,4.4vw,3.5rem)] leading-[1.1] font-semibold not-italic text-ink">
-    <Aceno
-      aria-hidden="true"
-      class="mr-[0.2em] inline-block size-12 align-[-0.02em] max-[560px]:size-8"
-    />
-    Bem-vindo ao <Wordmark class="max-[560px]:block" />
+  <Aceno aria-hidden="true" class="mb-4 block size-12 max-[560px]:size-8" />
+  <h1 class="text-balance font-display text-[clamp(2.4rem,4.4vw,3.5rem)] leading-[1.1] font-semibold not-italic text-ink lg:text-[2.25rem]">
+    <span class="lg:whitespace-nowrap">Bem-vindo ao</span>{" "}
+    <Wordmark class="max-[560px]:block lg:block" />
   </h1>
   <p class="mt-4 max-w-[46ch] font-sans text-[1.125rem] leading-[1.55] font-normal text-muted">
     Olá, eu sou o Pedro. Aqui documento meus aprendizados e experimentos sobre
     Inteligência Artificial.
   </p>
+  <ul aria-label="Links do autor" class="mt-6 flex flex-wrap gap-x-6">
+    <li>
+      <a class={linkClass} href="/rss.xml">
+        RSS
+      </a>
+    </li>
+    <li>
+      <a class={linkClass} href={site.author.github}>
+        GitHub
+      </a>
+    </li>
+    <li>
+      <a class={linkClass} href={site.author.linkedin}>
+        LinkedIn
+      </a>
+    </li>
+  </ul>
 </div>

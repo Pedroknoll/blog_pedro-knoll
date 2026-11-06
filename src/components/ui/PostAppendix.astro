@@ -9,7 +9,7 @@ const { appendix } = Astro.props;
 ---
 
 <section aria-label="Apêndice" class="mt-12 border-t border-line bg-sheet">
-  <div class="mx-auto w-full max-w-[72rem] px-4 pt-8 pb-12 grid gap-7 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-16 lg:gap-y-8">
+  <div class="mx-auto w-full max-w-site px-4 pt-8 pb-12 grid gap-7 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-16 lg:gap-y-8">
     {appendix.appendices.map((section) => (
       <section class="grid gap-y-2 lg:col-span-2 lg:grid-cols-subgrid">
         <h2
