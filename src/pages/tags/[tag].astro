@@ -2,7 +2,6 @@
 import type { CollectionEntry } from "astro:content";
 
 import Listing from "~/components/ui/Listing.astro";
-import TagFilter from "~/components/ui/TagFilter.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
 import { absoluteUrl, pageTitle } from "~/lib/seo";
@@ -28,7 +27,6 @@ if (!tag) {
   throw new Error("Tag ausente.");
 }
 
-const allPosts = await getPublishedPosts();
 const heading = `Tag: ${tag}`;
 ---
 
@@ -39,6 +37,5 @@ const heading = `Tag: ${tag}`;
   ogTitle={heading}
   ogType="website"
 >
-  <TagFilter tags={collectTags(allPosts)} current={tag} />
   <Listing heading={heading} posts={posts} prev={null} next={null} />
 </BaseLayout>

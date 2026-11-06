@@ -301,6 +301,26 @@ test.describe("toque [RF-01]", () => {
     }));
     expect(media.fine).toBe(false);
     expect(media.none).toBe(true);
+    const placement = await page.evaluate(() => {
+      const selector = "[data-listing]:has(article:hover) article:not(:hover)";
+      const found: string[] = [];
+      const visit = (rules: CSSRuleList, condition: string) => {
+        for (const rule of Array.from(rules)) {
+          if (rule instanceof CSSStyleRule && rule.selectorText === selector) {
+            found.push(condition);
+          } else if (rule instanceof CSSMediaRule) {
+            visit(rule.cssRules, rule.conditionText);
+          } else if (rule instanceof CSSGroupingRule) {
+            visit(rule.cssRules, condition);
+          }
+        }
+      };
+      for (const sheet of Array.from(document.styleSheets)) {
+        visit(sheet.cssRules, "");
+      }
+      return found;
+    });
+    expect(placement).toEqual(["(hover: hover) and (pointer: fine)"]);
     await articles.first().hover();
     const count = await articles.count();
     for (let index = 0; index < count; index += 1) {
@@ -315,6 +335,10 @@ test("foco do teclado [RF-01]", async ({ page }) => {
   const articles = page.locator("article");
   expect(await articles.count()).toBeGreaterThanOrEqual(2);
   const link = articles.nth(0).locator("h2 a");
+  const rest = await link.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { color: style.color, decoration: style.textDecorationLine };
+  });
   for (let step = 0; step < 40; step += 1) {
     const focused = await link.evaluate(
       (element) => element === document.activeElement,
@@ -323,10 +347,6 @@ test("foco do teclado [RF-01]", async ({ page }) => {
     await page.keyboard.press("Tab");
   }
   await expect(link).toBeFocused();
-  const rest = await link.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return { color: style.color, decoration: style.textDecorationLine };
-  });
   const count = await articles.count();
   for (let index = 0; index < count; index += 1) {
     const ownsFocus = await articles

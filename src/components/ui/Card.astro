@@ -19,7 +19,7 @@ const { title, description, pubDate, cover, folio, kind, level } = post.data;
 const { text, datetime } = formatPubDate(pubDate);
 const href = `/blog/${post.id}/`;
 const linkClass =
-  "text-ink no-underline hover:text-accent hover:underline hover:decoration-accent focus-visible:text-accent focus-visible:underline focus-visible:decoration-accent active:text-accent after:absolute after:inset-0";
+  "text-ink no-underline active:text-accent after:absolute after:inset-0";
 const showCover = Boolean(featured && cover);
 ---
 
@@ -30,7 +30,7 @@ const showCover = Boolean(featured && cover);
     featured
       ? showCover &&
         "sm:grid-cols-[minmax(0,1fr)_18rem] sm:grid-rows-[1fr_auto_auto_auto_1fr] sm:gap-x-8"
-      : "sm:grid-cols-[8rem_minmax(0,1fr)] sm:items-center sm:gap-x-8",
+      : "sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:items-start sm:gap-x-8",
   ]}
 >
   {featured && (
@@ -70,15 +70,17 @@ const showCover = Boolean(featured && cover);
   >
     <h2
       class:list={[
-        "font-display font-semibold not-italic leading-snug text-ink",
-        featured ? "text-3xl sm:text-4xl" : "text-[1.625rem] sm:text-[1.45rem]",
+        "font-display font-semibold not-italic text-ink",
+        featured
+          ? "text-4xl leading-snug sm:text-[2.75rem]"
+          : "text-[1.75rem] leading-[1.2]",
       ]}
     >
       <a class={linkClass} href={href}>
         {title}
       </a>
     </h2>
-    <p class="mt-2 text-[1.0625rem] leading-[1.65] text-muted">{description}</p>
+    <p class="mt-2 text-[1rem] leading-[1.6] text-muted">{description}</p>
     <p class="footer pointer-events-none mt-3 flex flex-wrap items-baseline gap-x-5 gap-y-1.5 overflow-x-clip font-mono text-xs uppercase tracking-widest">
       <span class="whitespace-nowrap">
         <KindLabel kind={kind} animated={false} px={12} />

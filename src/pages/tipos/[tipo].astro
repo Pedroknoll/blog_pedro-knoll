@@ -1,0 +1,60 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+import Greeting from "~/components/ui/Greeting.astro";
+import KindFilter from "~/components/ui/KindFilter.astro";
+import Listing from "~/components/ui/Listing.astro";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { getPublishedPosts } from "~/lib/getPublishedPosts";
+import {
+  KIND_LABELS,
+  KIND_SLUGS,
+  kindCounts,
+  kindFromSlug,
+  postsWithKind,
+} from "~/lib/kind";
+import { absoluteUrl, pageTitle } from "~/lib/seo";
+import { site } from "~/site.config";
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return kindCounts(posts).map(({ kind }) => ({
+    params: { tipo: KIND_SLUGS[kind] },
+    props: { posts: postsWithKind(posts, kind) },
+  }));
+}
+
+interface Props {
+  posts: CollectionEntry<"posts">[];
+}
+
+const { posts } = Astro.props;
+const kind = kindFromSlug(Astro.params.tipo ?? "");
+
+if (!kind) {
+  throw new Error(`Tipo inválido: /tipos/${Astro.params.tipo}/`);
+}
+
+const allPosts = await getPublishedPosts();
+const label = KIND_LABELS[kind];
+const heading = `Tipo: ${label}`;
+---
+
+<BaseLayout
+  title={pageTitle({ page: heading }, site)}
+  description={`Posts do tipo ${label}.`}
+  canonical={absoluteUrl(Astro.url.pathname, Astro.site)}
+  ogTitle={heading}
+  ogType="website"
+>
+  <Greeting />
+  <KindFilter kinds={kindCounts(allPosts)} current={kind} />
+  <Listing
+    heading={heading}
+    showHeading={false}
+    posts={posts}
+    prev={null}
+    next={null}
+    listLabel={`Posts do tipo ${label}`}
+  />
+</BaseLayout>
