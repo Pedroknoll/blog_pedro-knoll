@@ -1,8 +1,4 @@
 ---
-import ConceptStill from "~/assets/brand/icones/icone-conceito-parado.svg";
-import LabStill from "~/assets/brand/icones/icone-lab-parado.svg";
-import PlaybookStill from "~/assets/brand/icones/icone-playbook-parado.svg";
-import TutorialStill from "~/assets/brand/icones/icone-tutorial-parado.svg";
 import { KIND_LABELS, kindCountWord, kindPath, type Kind } from "~/lib/kind";
 
 interface Props {
@@ -11,20 +7,6 @@ interface Props {
 }
 
 const { kinds, current } = Astro.props;
-
-const stillIcons: Record<Kind, typeof ConceptStill> = {
-  concept: ConceptStill,
-  tutorial: TutorialStill,
-  lab: LabStill,
-  playbook: PlaybookStill,
-};
-
-const kindClass: Record<Kind, string> = {
-  concept: "text-kind-concept",
-  tutorial: "text-kind-tutorial",
-  lab: "text-kind-lab",
-  playbook: "text-kind-playbook",
-};
 
 const itemClass =
   "font-mono text-xs uppercase tracking-[0.12em] whitespace-nowrap";
@@ -53,7 +35,6 @@ const currentLabelClass =
           </a>
         </li>
         {kinds.map(({ kind, count }) => {
-          const Icon = stillIcons[kind];
           const active = current === kind;
           return (
             <li>
@@ -62,12 +43,6 @@ const currentLabelClass =
                 href={kindPath(kind)}
                 aria-current={active ? "true" : undefined}
               >
-                <Icon
-                  aria-hidden="true"
-                  width={12}
-                  height={12}
-                  class={`inline-block ${kindClass[kind]} ${active ? "opacity-100" : "opacity-55"}`}
-                />{" "}
                 <span class={active ? currentLabelClass : undefined}>
                   {KIND_LABELS[kind]}
                 </span>{" "}
