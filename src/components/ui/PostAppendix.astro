@@ -8,26 +8,45 @@ interface Props {
 const { appendix } = Astro.props;
 ---
 
-<hr />
-{appendix.appendices.map((section) => (
-  <section>
-    <h2 id={section.id}>{section.text}</h2>
-    {section.paragraphs.map((paragraph) => (
-      <p>{paragraph}</p>
+<section aria-label="Apêndice" class="mt-12 border-t border-line bg-sheet">
+  <div class="mx-auto w-full max-w-[72rem] px-4 pt-8 pb-12 grid gap-7 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-16 lg:gap-y-8">
+    {appendix.appendices.map((section) => (
+      <section class="grid gap-y-2 lg:col-span-2 lg:grid-cols-subgrid">
+        <h2
+          id={section.id}
+          class="font-mono text-xs uppercase tracking-widest text-muted lg:pt-[0.15rem]"
+        >
+          {section.text}
+        </h2>
+        <div class="max-w-[68ch] space-y-3 text-[0.9375rem] leading-[1.6] text-ink">
+          {section.paragraphs.map((paragraph) => (
+            <p>{paragraph}</p>
+          ))}
+        </div>
+      </section>
     ))}
-  </section>
-))}
-{appendix.references && (
-  <section>
-    <h2 id={appendix.references.id}>{appendix.references.text}</h2>
-    <ol>
-      {appendix.references.items.map((item) => (
-        <li id={item.id}>
-          {`${item.authors}, ${item.year}. `}
-          <a href={item.url}>{item.title}</a>
-          {`. ${item.venue}.`}
-        </li>
-      ))}
-    </ol>
-  </section>
-)}
+    {appendix.references && (
+      <section class="grid gap-y-2 lg:col-span-2 lg:grid-cols-subgrid">
+        <h2
+          id={appendix.references.id}
+          class="font-mono text-xs uppercase tracking-widest text-muted lg:pt-[0.15rem]"
+        >
+          {appendix.references.text}
+        </h2>
+        <ol class="max-w-[68ch] list-decimal space-y-3 pl-8 text-[0.9375rem] leading-[1.6] text-ink marker:text-muted">
+          {appendix.references.items.map((item) => (
+            <li id={item.id}>
+              <a
+                href={item.url}
+                class="text-accent underline decoration-1 underline-offset-3"
+              >
+                {item.title}
+              </a>
+              <p class="text-muted">{`${item.authors}, ${item.year}. ${item.venue}.`}</p>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
+  </div>
+</section>

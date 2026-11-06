@@ -102,8 +102,8 @@ const jsonLd = blogPostingJsonLd({
         / Artigo
       </div>
       <slot />
-      {appendix && <PostAppendix appendix={appendix} />}
     </div>
     {hasCode && <CodeCopy />}
   </article>
+  {appendix && <PostAppendix appendix={appendix} />}
 </BaseLayout>

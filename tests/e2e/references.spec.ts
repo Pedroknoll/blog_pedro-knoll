@@ -4,13 +4,77 @@ import { publishedPosts } from "./published-posts";
 
 const postB = "/blog/2026-10-como-o-blog-e-feito/";
 
-const distill =
-  "Gabriel Goh, Nick Cammarata, Chelsea Voss, Shan Carter, Michael Petrov, Ludwig Schubert, Alec Radford e Chris Olah, 2021. Multimodal Neurons in Artificial Neural Networks. Distill.";
+const distillTitle = "Multimodal Neurons in Artificial Neural Networks";
 
-const astroDoc = "Astro, 2026. Unified API Reference. Documentação do Astro.";
+const distillByline =
+  "Gabriel Goh, Nick Cammarata, Chelsea Voss, Shan Carter, Michael Petrov, Ludwig Schubert, Alec Radford e Chris Olah, 2021. Distill.";
+
+const astroTitle = "Unified API Reference";
+
+const astroByline = "Astro, 2026. Documentação do Astro.";
+
+function familyNames(stack: string): string[] {
+  const names: string[] = [];
+  let current = "";
+  let quote: string | null = null;
+  for (const char of stack) {
+    if (quote) {
+      if (char === quote) quote = null;
+      else current += char;
+      continue;
+    }
+    if (char === '"' || char === "'") {
+      quote = char;
+      continue;
+    }
+    if (char === ",") {
+      names.push(current.trim());
+      current = "";
+      continue;
+    }
+    current += char;
+  }
+  if (current.trim()) names.push(current.trim());
+  return names;
+}
+
+function firstFamily(stack: string): string {
+  return familyNames(stack)[0] ?? "";
+}
+
+async function variableFamily(page: Page, variable: string): Promise<string> {
+  const value = await page.evaluate((name) => {
+    return getComputedStyle(document.documentElement)
+      .getPropertyValue(name)
+      .trim();
+  }, variable);
+  expect(value, variable).not.toBe("");
+  return firstFamily(value);
+}
 
 function referenceItems(page: Page) {
   return page.locator("section:has(> h2#referencias) > ol > li");
+}
+
+function appendixRegion(page: Page) {
+  return page.getByRole("region", { name: "Apêndice", exact: true });
+}
+
+async function box(locator: Locator) {
+  const value = await locator.boundingBox();
+  expect(value).not.toBeNull();
+  if (!value) throw new Error("sem caixa");
+  return value;
+}
+
+async function expectCopy(locator: Locator) {
+  const count = await locator.count();
+  expect(count).toBeGreaterThan(0);
+  for (let index = 0; index < count; index += 1) {
+    const item = locator.nth(index);
+    await expect(item).toHaveCSS("font-size", "15px");
+    await expect(item).toHaveCSS("line-height", "24px");
+  }
 }
 
 async function citationLinks(prose: Locator) {
@@ -76,10 +140,20 @@ test.describe("referências e apêndices [RF-04]", () => {
           ),
         );
 
+        const region = appendixRegion(page);
         if (citations.length === 0 && appendixIds.length === 0) {
           await expect(page.locator("#referencias")).toHaveCount(0);
           await expect(page.locator('[id^="apendice-"]')).toHaveCount(0);
           await expect(page.locator('[id^="ref-"]')).toHaveCount(0);
+          await expect(region).toHaveCount(0);
+        } else {
+          await expect(region).toHaveCount(1);
+          for (const id of appendixIds) {
+            await expect(region.locator(`h2#${id}`)).toHaveCount(1);
+          }
+          if ((await page.locator("#referencias").count()) > 0) {
+            await expect(region.locator("#referencias")).toHaveCount(1);
+          }
         }
       });
     }
@@ -107,11 +181,67 @@ test.describe("referências e apêndices [RF-04]", () => {
 
     const items = referenceItems(page);
     await expect(items).toHaveCount(2);
-    await expect(items.nth(0)).toHaveText(distill);
-    await expect(items.nth(1)).toHaveText(astroDoc);
+    await expect(items.nth(0).locator("a")).toHaveText(distillTitle);
+    await expect(items.nth(0).locator("> p")).toHaveText(distillByline);
+    await expect(items.nth(1).locator("a")).toHaveText(astroTitle);
+    await expect(items.nth(1).locator("> p")).toHaveText(astroByline);
     await expect(page.locator("h2#apendice-a")).toHaveText(
       "Apêndice A · Como as referências funcionam",
     );
+
+    const region = appendixRegion(page);
+    await expect(region).toHaveCount(1);
+    await expect(region.locator("#referencias")).toHaveCount(1);
+    await expect(region.locator("#apendice-a")).toHaveCount(1);
+    await expect(page.locator("article #referencias")).toHaveCount(0);
+    await expect(page.locator("article .prose > hr")).toHaveCount(0);
+  });
+
+  test("faixa a 1280", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const response = await page.goto(postB);
+    expect(response?.status()).toBe(200);
+
+    const heading = page.locator("h2#referencias");
+    await expect(heading).toHaveCSS("font-size", "12px");
+
+    const mono = await variableFamily(page, "--font-plex-mono");
+    const family = await heading.evaluate(
+      (element) => getComputedStyle(element).fontFamily,
+    );
+    expect(firstFamily(family)).toBe(mono);
+    await expect(heading).toHaveCSS("text-transform", "uppercase");
+
+    const headingBox = await box(heading);
+    expect(headingBox.width).toBeLessThanOrEqual(240);
+
+    const railBox = await box(page.locator("[data-post-rail]"));
+    expect(headingBox.x).toBeCloseTo(railBox.x, 0);
+
+    const listBox = await box(
+      page.locator("section:has(> h2#referencias) > ol"),
+    );
+    const proseBox = await box(page.locator("article > .prose"));
+    expect(listBox.x).toBeCloseTo(proseBox.x, 0);
+
+    await expectCopy(page.locator("section:has(> h2#apendice-a) p"));
+    await expectCopy(referenceItems(page).locator("> p"));
+  });
+
+  test("faixa a 360", async ({ page }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    const response = await page.goto(postB);
+    expect(response?.status()).toBe(200);
+
+    const heading = page.locator("h2#referencias");
+    await expect(heading).toHaveCSS("font-size", "12px");
+
+    const headingBox = await box(heading);
+    const listBox = await box(
+      page.locator("section:has(> h2#referencias) > ol"),
+    );
+    expect(headingBox.y + headingBox.height).toBeLessThanOrEqual(listBox.y);
+    expect(headingBox.x).toBeCloseTo(listBox.x, 0);
   });
 });
 

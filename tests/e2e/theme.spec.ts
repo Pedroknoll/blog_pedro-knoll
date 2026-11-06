@@ -236,6 +236,78 @@ for (const theme of ["light", "dark"] as const) {
             softRole(paint.border, colors.line, lineWhere);
           }
         }
+
+        const region = page.getByRole("region", {
+          name: "Apêndice",
+          exact: true,
+        });
+        await expect(region, `${path} region Apêndice`).toHaveCount(1);
+
+        const band = await region.evaluate((node) => {
+          const style = getComputedStyle(node);
+          return {
+            background: style.backgroundColor,
+            border: style.borderTopColor,
+          };
+        });
+        const bandSheetWhere = `${path} fundo da faixa`;
+        const bandLineWhere = `${path} filete da faixa`;
+        if (requireToken(colors.sheet, "sheet", bandSheetWhere)) {
+          softRole(band.background, colors.sheet, bandSheetWhere);
+        }
+        if (requireToken(colors.line, "line", bandLineWhere)) {
+          softRole(band.border, colors.line, bandLineWhere);
+        }
+
+        const labelWhere = `${path} h2#referencias`;
+        const label = await page
+          .locator("h2#referencias")
+          .evaluate((node) => getComputedStyle(node).color);
+        if (requireToken(colors.muted, "muted", labelWhere)) {
+          softRole(label, colors.muted, labelWhere);
+        }
+
+        const metas = region.locator("ol > li > p");
+        const metaCount = await metas.count();
+        expect(metaCount, `${path} li > p`).toBeGreaterThan(0);
+        for (let index = 0; index < metaCount; index += 1) {
+          const color = await metas
+            .nth(index)
+            .evaluate((node) => getComputedStyle(node).color);
+          const where = `${path} li > p[${index}]`;
+          if (requireToken(colors.muted, "muted", where)) {
+            softRole(color, colors.muted, where);
+          }
+        }
+
+        const bandItems = region.locator("ol > li");
+        const bandItemCount = await bandItems.count();
+        expect(bandItemCount, `${path} li`).toBeGreaterThan(0);
+        for (let index = 0; index < bandItemCount; index += 1) {
+          const marker = await bandItems
+            .nth(index)
+            .evaluate((node) => getComputedStyle(node, "::marker").color);
+          const where = `${path} li ::marker[${index}]`;
+          if (requireToken(colors.muted, "muted", where)) {
+            softRole(marker, colors.muted, where);
+          }
+        }
+
+        const bandLinks = region.locator("a");
+        const bandCount = await bandLinks.count();
+        expect(bandCount, `${path} faixa`).toBeGreaterThan(0);
+        linkTotal += bandCount;
+        for (let index = 0; index < bandCount; index += 1) {
+          await expect(bandLinks.nth(index)).toBeAttached();
+          const color = await bandLinks
+            .nth(index)
+            .evaluate((node) => getComputedStyle(node).color);
+          const where = `${path} faixa a[${index}]`;
+          if (requireToken(colors.accent, "accent", where)) {
+            if (colorsMatch(color, colors.accent)) passed.push(where);
+            softRole(color, colors.accent, where);
+          }
+        }
       }
 
       if (!path.startsWith("/blog/")) continue;
