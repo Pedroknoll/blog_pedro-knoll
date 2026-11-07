@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.19 · novembro de 2026 · pedroknoll.com
+Versão 1.20 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -277,12 +277,12 @@ A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `tags`, `referenc
 - O nome dentro da saudação usa a mesma marcação da assinatura (`<em>pk</em><span class="ponto">.</span><span class="ext">log</span>`), sem quebrar linha dentro do nome. Abaixo de 560 px e de `lg` em diante, o nome começa sempre na segunda linha (`Bem-vindo ao` / `pk.log`): a quebra não pode depender da fonte, senão a troca da fonte reserva pela fonte de display desloca a página (T-44, CLS).
 - Abaixo, o texto de apresentação em Plex Sans 18 px, entrelinha 1,55, cor grafite, máximo ~46 caracteres por linha, para a saudação ficar sozinha no topo (T-63, T-64).
 - Links do autor, logo abaixo do texto: `RSS`, `GitHub` e `LinkedIn`, em texto e sem ícone, no estilo da barra da seção 9.12 (IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em), em grafite, indo para prússia no hover e no foco, com 44 px de altura para o toque e na mesma aba (T-69).
-- Lateral, de `lg` em diante, na home e nas páginas de tipo: a saudação vira uma coluna de 15rem à esquerda, sticky no topo da tela, com 6rem de vão até a barra e a lista. O conteúdo do site fica em 72rem (token `--container-site`, utilidade `max-w-site`), e o header e o footer alinham a essa largura, na mesma margem das laterais da home e do post. Abaixo de `lg`, a saudação e os links ficam em cima da barra e rolam com a página (T-69).
+- Lateral, de `lg` em diante, na home e nas páginas de tipo: a saudação vira uma coluna de 15rem à esquerda, sticky no topo da tela, com 6rem de vão até a barra e a lista. O conteúdo do site fica em 72rem (token `--container-site`, utilidade `max-w-site`), e o header e o footer alinham a essa largura, na mesma margem das laterais da home e do post. Abaixo de `lg`, a saudação e os links ficam em cima da barra e rolam com a página (T-69). De `lg` em diante, o contêiner da lateral e da lista ganha 56 px de respiro em cima, somados aos 40 px da saudação e da barra; as tags e `/page/n/` não mudam (T-70).
 - A newsletter está fora da v1 (SPEC §1). Não entra na home.
 
 ### 9.2 Card de fólio (listas)
 - Um `article` em grade. No mobile, a ordem é a do DOM: fólio e data, título, resumo, rodapé. No destaque, a capa fica depois do rótulo e do fólio com a data, e antes do título, do resumo e do rodapé.
-- De `sm` em diante, o card da lista tem duas colunas: a faixa do fólio (6,5rem) à esquerda, alinhada ao topo do título, e o texto à direita (T-63). O destaque com capa inverte: texto à esquerda, capa de 18rem à direita, centralizada na vertical.
+- De `sm` em diante, o card da lista tem duas colunas: a faixa do fólio (6,5rem) à esquerda, centrada na vertical em relação ao texto (T-70), e o texto à direita (T-63). O destaque com capa inverte: texto à esquerda, capa de 18rem à direita, centralizada na vertical.
 - Linha do fólio: `Fól.` em mono, lápis; o número na fonte de display 600, tinta, desde 22 px; data em mono, lápis (`09.out.2026`). No mobile e no destaque, ficam na mesma linha (`Fól. 001 · 09.out.2026`). Na lista, de `sm` em diante, a data desce para baixo do número.
 - Título na fonte de display 600 na lista: 28 px em todas as larguras, entrelinha 1,2. No destaque, 36 px abaixo de `sm` e 44 px de `sm` em diante. Sem sublinhado e sem troca de cor, em repouso, no hover e no foco (T-63).
 - Resumo em Plex Sans 16 px, entrelinha 1,6, grafite (T-63).
