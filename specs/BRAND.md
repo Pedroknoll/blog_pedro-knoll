@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.18 · novembro de 2026 · pedroknoll.com
+Versão 1.19 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -273,9 +273,11 @@ A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `tags`, `referenc
 ## 9. Componentes
 
 ### 9.1 Saudação (home)
-- `<h1>` na fonte de display 600, `clamp(2.4rem, 4.4vw, 3.5rem)` (no máximo 56 px, abaixo do display de 64 px da seção 5; T-44), com `aceno.svg` inline antes do texto (48 px no desktop, 32 px abaixo de 560 px), `vertical-align: -.02em`, margem direita `.2em`.
-- O nome dentro da saudação usa a mesma marcação da assinatura (`<em>pk</em><span class="ponto">.</span><span class="ext">log</span>`), sem quebrar linha dentro do nome. Abaixo de 560 px o nome começa sempre na segunda linha (`Bem-vindo ao` / `pk.log`): a quebra não pode depender da fonte, senão a troca da fonte reserva pela fonte de display desloca a página (T-44, CLS).
+- `<h1>` na fonte de display 600, `clamp(2.4rem, 4.4vw, 3.5rem)` abaixo de `lg` (no máximo 56 px, abaixo do display de 64 px da seção 5; T-44) e 36 px de `lg` em diante (T-69). A mão (`aceno.svg`) fica fora do `h1`, sozinha numa linha acima dele, decorativa (`aria-hidden`): 48 px, e 32 px abaixo de 560 px, com 1rem até o título (T-69).
+- O nome dentro da saudação usa a mesma marcação da assinatura (`<em>pk</em><span class="ponto">.</span><span class="ext">log</span>`), sem quebrar linha dentro do nome. Abaixo de 560 px e de `lg` em diante, o nome começa sempre na segunda linha (`Bem-vindo ao` / `pk.log`): a quebra não pode depender da fonte, senão a troca da fonte reserva pela fonte de display desloca a página (T-44, CLS).
 - Abaixo, o texto de apresentação em Plex Sans 18 px, entrelinha 1,55, cor grafite, máximo ~46 caracteres por linha, para a saudação ficar sozinha no topo (T-63, T-64).
+- Links do autor, logo abaixo do texto: `RSS`, `GitHub` e `LinkedIn`, em texto e sem ícone, no estilo da barra da seção 9.12 (IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em), em grafite, indo para prússia no hover e no foco, com 44 px de altura para o toque e na mesma aba (T-69).
+- Lateral, de `lg` em diante, na home e nas páginas de tipo: a saudação vira uma coluna de 15rem à esquerda, sticky no topo da tela, com 6rem de vão até a barra e a lista. O conteúdo do site fica em 72rem (token `--container-site`, utilidade `max-w-site`), e o header e o footer alinham a essa largura, na mesma margem das laterais da home e do post. Abaixo de `lg`, a saudação e os links ficam em cima da barra e rolam com a página (T-69).
 - A newsletter está fora da v1 (SPEC §1). Não entra na home.
 
 ### 9.2 Card de fólio (listas)

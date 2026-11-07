@@ -4,7 +4,9 @@ import { site } from "~/site.config";
 const year = new Date().getFullYear();
 ---
 
-<footer class="flex items-center gap-4 border-t border-line px-4 py-3 text-muted">
-  <p>{site.author.name}</p>
-  <p>{year}</p>
+<footer class="border-t border-line py-3 text-muted">
+  <div class="mx-auto flex w-full max-w-site items-center gap-4 px-4">
+    <p>{site.author.name}</p>
+    <p>{year}</p>
+  </div>
 </footer>

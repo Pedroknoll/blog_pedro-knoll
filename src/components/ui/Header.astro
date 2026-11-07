@@ -3,12 +3,14 @@ import BrandSymbol from "~/assets/brand/pklog-simbolo-currentcolor.svg";
 import Wordmark from "~/components/ui/Wordmark.astro";
 ---
 
-<header class="flex items-center gap-4 border-b border-line bg-surface px-4 py-3">
-  <a
-    class="inline-flex items-center gap-[0.42em] text-[1.25rem] leading-none text-ink"
-    href="/"
-  >
-    <BrandSymbol aria-hidden="true" class="size-[1.55em] flex-none" />
-    <Wordmark />
-  </a>
+<header class="border-b border-line bg-surface py-3">
+  <div class="mx-auto flex w-full max-w-site items-center gap-4 px-4">
+    <a
+      class="inline-flex items-center gap-[0.42em] text-[1.25rem] leading-none text-ink"
+      href="/"
+    >
+      <BrandSymbol aria-hidden="true" class="size-[1.55em] flex-none" />
+      <Wordmark />
+    </a>
+  </div>
 </header>

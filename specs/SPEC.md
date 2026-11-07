@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 06/11/2026
 
+**Revisão 2 de 06/11/2026:** o RF-01 ganha a lateral da home: de `lg` em diante, na home e nas páginas de tipo, a saudação fica numa coluna sticky de 15rem à esquerda, com a mão acima do `h1` e os links do autor em texto (RSS, GitHub e LinkedIn); abaixo de `lg`, fica em cima da barra. A §6 troca os placeholders `github` e `huggingface` de `src/site.config.ts` pelas URLs do GitHub e do LinkedIn (T-69).
+
 **Revisão de 06/11/2026:** o RF-12 define o `<title>` da página de tipo, `Tipo: <rótulo> · {site.title} · {autor}`, e a §6, a descrição e o nome acessível da lista dela, e tira da barra o ícone de cada tipo, que fica com o nome e a contagem. O rascunho de teste passa a `kind: tutorial`, para o cenário de rascunhos provar que tipo só com rascunho não gera página nem entra na barra. A §9 acrescenta `/tipos/[tipo]` às rotas, a página de tipo e o `KindFilter` à árvore, e a primeira página de tipo à guarda de fontes, com o teto da home; a §10 acrescenta `/tipos/*` ao plano B (T-64).
 
 **Revisão 5 de 05/11/2026:** a §9 dá às fontes do KaTeX um teto próprio na guarda de fontes, de 3 arquivos e 48.000 bytes por página, separado do teto das fontes da marca, que não muda. A URL de pior caso com fórmula no Lighthouse CI fica para a T-39 (T-61).
@@ -156,7 +158,7 @@ A v1 entrega 11 requisitos Must; o restante entra por ordem de prioridade sem bl
 
 | ID    | Requisito                                                                             | Prioridade | Critério de aceite                                                                                                      |
 | ----- | ------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
-| RF-01 | Home com saudação, post em destaque e lista de cards (fólio, data, título, resumo, tipo, nível, tempo de leitura) | Must       | Saudação na home; cards ordenados por data desc; destaque via `featured: true`; o card mostra fólio, data, título, resumo, tipo, nível e tempo de leitura com ícone de relógio parado, sem tags; só o destaque mostra capa; título do card e número do fólio na fonte de display, peso 600 (BRAND §5); o tempo de leitura do card é o mesmo `minutesRead` da página do post |
+| RF-01 | Home com saudação, post em destaque e lista de cards (fólio, data, título, resumo, tipo, nível, tempo de leitura) | Must       | Saudação na home e nas páginas de tipo, com a mão acima do `h1` e os links do autor em texto (RSS, GitHub e LinkedIn); de `lg` em diante a saudação vira uma lateral sticky à esquerda, e abaixo de `lg` fica em cima da barra (BRAND §9.1); cards ordenados por data desc; destaque via `featured: true`; o card mostra fólio, data, título, resumo, tipo, nível e tempo de leitura com ícone de relógio parado, sem tags; só o destaque mostra capa; título do card e número do fólio na fonte de display, peso 600 (BRAND §5); o tempo de leitura do card é o mesmo `minutesRead` da página do post |
 | RF-02 | Filtro por tipo e páginas `/tipos/[tipo]` e `/tags/[tag]`                             | Must       | Cada tipo com post publicado e cada tag usada geram uma página; tipo ou tag inexistente é 404; a barra de tipos funciona sem JavaScript |
 | RF-03 | Paginação da listagem                                                                 | Must       | 12 posts por página; a página 1 é `/` e as seguintes são `/page/2`, `/page/3`… (exceção à regra de rotas em pt-BR, Q10) |
 | RF-04 | Página do post com título, autor, fólio, data `21.out.2026`, tipo, nível, datas e tempo de leitura | Must       | O cabeçalho traz fólio, data visível, tipo e nível; o tempo de leitura permanece; os campos vêm do frontmatter validado. O título fica em cima; de `lg` em diante, o fólio e os metadados ficam numa lateral fixa ao lado do texto, e o título aparece acima dela quando o `h1` e a linha fina saem da tela, como melhoria progressiva, sem deslocar a página; sem JavaScript, a lateral mostra o fólio. Quando o post tem `references` ou `appendices`, o fim do post tem a área de apêndice, com os apêndices do autor (Apêndice A, B…) e a lista numerada de referências. No texto, a citação `[@chave]` vira `[n]`, com link para a referência e nome acessível `Referência n`, sem JavaScript. Chave citada sem referência, referência não citada, citação dentro de link e chave repetida quebram o build. Post sem os dois campos não muda |
@@ -374,14 +376,14 @@ export const site = {
     name: 'Pedro Knoll',
     avatar: '/avatar.jpg',
     bio: 'Aprendizados e experimentos em IA',
-    github: 'usuario',
-    huggingface: 'usuario',
+    github: 'https://github.com/Pedroknoll',
+    linkedin: 'https://www.linkedin.com/in/pedro-henrique-knoll-giacometo/',
   },
 } as const;
 
 ```
 
-Os literais `pk.log`, `Pedro Knoll` e a descrição curta entraram na T-43. `github` e `huggingface` seguem placeholder.
+Os literais `pk.log`, `Pedro Knoll` e a descrição curta entraram na T-43. `github` e `linkedin` são as URLs completas dos perfis, usadas nos links da saudação; o `huggingface` saiu (T-69).
 
 ### Exemplo de frontmatter
 

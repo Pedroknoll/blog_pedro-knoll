@@ -16,6 +16,7 @@ type FocusHit = {
   card: boolean;
   copyButton: boolean;
   kindFilter: boolean;
+  authorLink: boolean;
 };
 
 function channels(color: string): Channels {
@@ -154,6 +155,7 @@ async function walk(
           node.closest("article") !== null,
         copyButton: node.matches("button.code-copy-button"),
         kindFilter: node.closest('nav[aria-label="Filtrar por tipo"]') !== null,
+        authorLink: node.closest('ul[aria-label="Links do autor"]') !== null,
       };
     });
 
@@ -178,6 +180,7 @@ for (const viewport of [1280, 360]) {
       let sawCard = false;
       let sawCopy = false;
       let sawFilter = false;
+      let sawAuthorLink = false;
 
       for (const path of pages) {
         await open(page, path);
@@ -200,6 +203,7 @@ for (const viewport of [1280, 360]) {
           if (hit.card) sawCard = true;
           if (hit.copyButton) sawCopy = true;
           if (hit.kindFilter) sawFilter = true;
+          if (hit.authorLink) sawAuthorLink = true;
           const where = `${path} @ ${viewport}px ${hit.label}`;
           if (hit.outlineStyle !== "solid") {
             errors.push(`${where} outline-style ${hit.outlineStyle}`);
@@ -225,6 +229,7 @@ for (const viewport of [1280, 360]) {
       if (!sawCopy)
         errors.push("botão de copiar do post B ausente no conjunto");
       if (!sawFilter) errors.push("link da barra de tipo ausente no conjunto");
+      if (!sawAuthorLink) errors.push("link do autor ausente no conjunto");
       expect(errors).toEqual([]);
     });
   }

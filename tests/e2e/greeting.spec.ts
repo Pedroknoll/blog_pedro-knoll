@@ -3,7 +3,9 @@ import { expect, test, type Page } from "@playwright/test";
 import { homeGreeting, homeIntro } from "./site-literals";
 
 const h1Sizes = {
-  1280: 56,
+  1280: 36,
+  1024: 36,
+  1023: 45.012,
   1000: 44,
   360: 38.4,
 } as const;
@@ -80,22 +82,24 @@ test.describe("saudação [RF-01, RNF-04]", () => {
     ).toHaveCount(1);
   });
 
-  test("G2 aceno é o primeiro filho do h1", async ({ page }) => {
+  test("G2 aceno fora do h1", async ({ page }) => {
     await open(page, "/", 1280);
-    await expect(page.locator("h1 svg")).toHaveCount(1);
+    await expect(page.locator("h1 svg")).toHaveCount(0);
 
     const observed = await page.evaluate(() => {
-      const first = document.querySelector("h1")?.firstElementChild;
+      const h1 = document.querySelector("h1");
+      const sibling = h1?.previousElementSibling;
+      const hand = document.querySelector("svg:has(.pka-a)");
       return {
-        firstTag: first?.tagName.toLowerCase() ?? "",
-        ariaHidden: first?.getAttribute("aria-hidden") ?? "null",
-        role: first?.getAttribute("role") ?? "null",
-        ariaLabel: first?.getAttribute("aria-label") ?? "null",
-        styleCount: first?.querySelectorAll("style").length ?? -1,
+        siblingTag: sibling?.tagName.toLowerCase() ?? "",
+        ariaHidden: hand?.getAttribute("aria-hidden") ?? "null",
+        role: hand?.getAttribute("role") ?? "null",
+        ariaLabel: hand?.getAttribute("aria-label") ?? "null",
+        styleCount: hand?.querySelectorAll("style").length ?? -1,
       };
     });
 
-    expect.soft(observed.firstTag).toBe("svg");
+    expect.soft(observed.siblingTag).toBe("svg");
     expect.soft(observed.ariaHidden).toBe("true");
     expect.soft(observed.role).toBe("null");
     expect.soft(observed.ariaLabel).toBe("null");
@@ -106,7 +110,7 @@ test.describe("saudação [RF-01, RNF-04]", () => {
     await open(page, "/", 1280);
     await expect(page.locator("h1")).toHaveCount(1);
 
-    for (const width of [1280, 1000, 360] as const) {
+    for (const width of [1280, 1024, 1023, 1000, 360] as const) {
       await test.step(String(width), async () => {
         await page.setViewportSize({ width, height: 800 });
         const measured = await page.evaluate(() => {
@@ -138,38 +142,29 @@ test.describe("saudação [RF-01, RNF-04]", () => {
 
   test("G4 tamanho e alinhamento do aceno", async ({ page }) => {
     await open(page, "/", 1280);
-    await expect(page.locator("h1 svg")).toHaveCount(1);
+    await expect(page.locator("svg:has(.pka-a)")).toHaveCount(1);
 
     for (const width of [1280, 560, 559, 360] as const) {
       await test.step(String(width), async () => {
         await page.setViewportSize({ width, height: 800 });
         const measured = await page.evaluate(() => {
-          const h1 = document.querySelector("h1");
-          const svg = h1?.querySelector("svg");
-          const h1Size = h1 ? getComputedStyle(h1).fontSize : "";
+          const svg = document.querySelector("svg:has(.pka-a)");
           const style = svg ? getComputedStyle(svg) : null;
           return {
             width: style?.width ?? "",
             height: style?.height ?? "",
-            verticalAlign: style?.verticalAlign ?? "",
-            marginRight: style?.marginRight ?? "",
-            h1FontSize: h1Size,
+            display: style?.display ?? "",
+            marginBottom: style?.marginBottom ?? "",
           };
         });
         const where = String(width);
         const size = waveSizes[width];
-        const fontSize = /^(-?\d+(?:\.\d+)?)px$/.exec(
-          measured.h1FontSize.trim(),
-        );
-        const h1Number = fontSize?.[1] ? Number(fontSize[1]) : Number.NaN;
         expect.soft(closeTo(measured.width, size), where).toBe(size);
         expect.soft(closeTo(measured.height, size), where).toBe(size);
-        expect
-          .soft(closeTo(measured.verticalAlign, -0.02 * h1Number), where)
-          .toBe(-0.02 * h1Number);
-        expect
-          .soft(closeTo(measured.marginRight, 0.2 * h1Number), where)
-          .toBe(0.2 * h1Number);
+        if (width === 1280) {
+          expect.soft(measured.display, where).toBe("block");
+          expect.soft(closeTo(measured.marginBottom, 16), where).toBe(16);
+        }
       });
     }
   });
@@ -184,7 +179,7 @@ test.describe("saudação [RF-01, RNF-04]", () => {
       const lowered = document.querySelector(".pka-b");
       const raisedStyle = raised ? getComputedStyle(raised) : null;
       const loweredStyle = lowered ? getComputedStyle(lowered) : null;
-      const svg = document.querySelector("h1 svg");
+      const svg = document.querySelector("svg:has(.pka-a)");
       return {
         nameA: raisedStyle?.animationName ?? "",
         nameB: loweredStyle?.animationName ?? "",
@@ -218,7 +213,7 @@ test.describe("saudação [RF-01, RNF-04]", () => {
       const lowered = document.querySelector(".pka-b");
       const raisedStyle = raised ? getComputedStyle(raised) : null;
       const loweredStyle = lowered ? getComputedStyle(lowered) : null;
-      const svg = document.querySelector("h1 svg");
+      const svg = document.querySelector("svg:has(.pka-a)");
       return {
         nameA: raisedStyle?.animationName ?? "",
         nameB: loweredStyle?.animationName ?? "",
@@ -332,10 +327,11 @@ test.describe("saudação [RF-01, RNF-04]", () => {
     expect.soft(greetingHeadings).toBe(0);
   });
 
-  test("G9 quebra antes de pk.log só no celular", async ({ page }) => {
+  test("G9 quebra de lg em diante", async ({ page }) => {
     await open(page, "/", 1280);
+    let linesAt1280 = "";
 
-    for (const width of [1280, 560, 559, 412, 360] as const) {
+    for (const width of [1280, 1024, 1023, 560, 559, 412, 360] as const) {
       await test.step(String(width), async () => {
         await page.setViewportSize({ width, height: 800 });
         await expect(
@@ -348,26 +344,42 @@ test.describe("saudação [RF-01, RNF-04]", () => {
 
         const measured = await page.evaluate(() => {
           const h1 = document.querySelector("h1");
-          const center = (element: Element | null | undefined) => {
-            const rect = element?.getBoundingClientRect();
-            return rect ? rect.y + rect.height / 2 : Number.NaN;
-          };
+          const nome = h1?.querySelector(".nome");
           return {
-            svgCenter: center(h1?.querySelector("svg")),
-            nomeCenter: center(h1?.querySelector(".nome")),
+            nomeTop: nome?.getBoundingClientRect().top ?? Number.NaN,
+            h1Top: h1?.getBoundingClientRect().top ?? Number.NaN,
+            nomeDisplay: nome ? getComputedStyle(nome).display : "",
             fontSize: h1 ? getComputedStyle(h1).fontSize : "",
           };
         });
 
         const fontSize = /^(-?\d+(?:\.\d+)?)px$/.exec(measured.fontSize.trim());
         const h1Number = fontSize?.[1] ? Number(fontSize[1]) : Number.NaN;
-        const limit = 0.5 * h1Number;
-        const delta = measured.nomeCenter - measured.svgCenter;
+        const lines =
+          measured.nomeTop - measured.h1Top >= 0.5 * h1Number ? "duas" : "uma";
         const where = String(width);
-        if (width === 1280 || width === 560) {
-          expect.soft(Math.abs(delta), where).toBeLessThan(limit);
-        } else {
-          expect.soft(delta, where).toBeGreaterThanOrEqual(limit);
+        if (width === 1280) linesAt1280 = lines;
+        const expected =
+          width === 1280
+            ? "duas"
+            : width === 1024
+              ? linesAt1280
+              : width === 1023 || width === 560
+                ? "uma"
+                : "duas";
+        expect.soft(lines, where).toBe(expected);
+
+        if (width === 1280) {
+          expect.soft(measured.nomeDisplay, where).toBe("block");
+          const bemVindo = page.locator("h1 span", {
+            hasText: /^Bem-vindo ao$/,
+          });
+          await expect.soft(bemVindo, where).toHaveCount(1);
+          if ((await bemVindo.count()) === 1) {
+            await expect
+              .soft(bemVindo, where)
+              .toHaveCSS("white-space", "nowrap");
+          }
         }
       });
     }
