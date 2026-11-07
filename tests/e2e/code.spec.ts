@@ -327,4 +327,38 @@ test.describe("código e fórmulas sem JavaScript [RF-06, RF-07]", () => {
     // (markdown.processor) passa pelo KaTeX.
     expect(postsWithKatex).toBeGreaterThanOrEqual(2);
   });
+
+  test("marcação e CSS do KaTeX da mesma versão [RF-07]", async ({ page }) => {
+    const posts = await publishedPosts(page);
+    let postsWithKatex = 0;
+
+    for (const post of posts) {
+      await test.step(post.href, async () => {
+        const response = await page.goto(post.href);
+        expect(response?.status()).toBe(200);
+
+        const sample = await page.evaluate(() => {
+          const htmls = [...document.querySelectorAll(".katex .katex-html")];
+          return {
+            katex: document.querySelectorAll(".katex").length,
+            htmls: htmls.length,
+            positions: htmls.map((html) => {
+              const child = html.firstElementChild;
+              return child ? getComputedStyle(child).position : "";
+            }),
+          };
+        });
+
+        if (sample.katex === 0) return;
+
+        postsWithKatex += 1;
+        expect(sample.htmls, post.href).toBeGreaterThan(0);
+        expect
+          .soft(sample.positions, post.href)
+          .toEqual(sample.positions.map(() => "relative"));
+      });
+    }
+
+    expect(postsWithKatex).toBeGreaterThanOrEqual(2);
+  });
 });
