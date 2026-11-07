@@ -97,6 +97,8 @@ A stack é recente e a sintaxe antiga ainda domina o que os modelos viram. Antes
   - Collections em `src/content.config.ts` com `loader: glob({ ..., generateId })`, não em `src/content/config.ts`.
   - `z` vem de `astro/zod`, não de `zod`. Para renderizar, `render(entry)` importado de `astro:content`, não `entry.render()`.
   - A Fonts API é `fonts` no topo do `defineConfig` e `<Font>` de `astro:assets`. `experimental.fonts` é do Astro 5.
+  - O content layer guarda o HTML renderizado dos `.md` e só renderiza de novo quando o arquivo muda; o `.mdx` passa pelo Vite e é recompilado. Depois de mudar uma dependência do pipeline de Markdown (`remark-*`, `rehype-*`, `katex`), rode `pnpm build --force` antes de testar ou medir (T-68). O CI não guarda cache.
+- **pnpm 12:** a configuração do pnpm (`overrides`, `allowBuilds`) fica no `pnpm-workspace.yaml`; o campo `pnpm` do `package.json` não é lido desde o pnpm 11. O `overrides` do `katex` alinha o `rehype-katex` e o `remark-math` à versão direta: ao subir o `katex`, suba o override junto (T-68).
 - **Zod 4:** `z.url()`, não `z.string().url()`; `{ error: '...' }`, não `{ message: '...' }`; `z.strictObject()` em vez de `.strict()`.
 - **TypeScript:** fica em 6.x. O 7 ainda quebra `astro check` e `typescript-eslint` (peers `^5 || ^6`). Só subir quando os dois suportarem; confira os peers antes.
 - **Svelte 5:** runes (`$props()`, `$state`, `$derived`, `$effect`). Eventos como atributo (`onclick`), não `on:click`. Nada de `export let`, `createEventDispatcher` ou stores para estado local.
