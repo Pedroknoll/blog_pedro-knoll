@@ -372,17 +372,19 @@ test("vão da barra ao primeiro card [RF-01]", async ({ page }) => {
       .getByRole("navigation", { name: "Filtrar por tipo", exact: true })
       .locator(":scope > div");
     await expect(filete).toHaveCount(1);
-    const first = page
-      .locator("[data-listing] article")
-      .first()
-      .locator(":scope > *")
-      .first();
+    const first = page.locator("[data-listing] article").first();
     const fileteBottom = await filete.evaluate(
       (node) => node.getBoundingClientRect().bottom,
     );
-    const contentTop = await first.evaluate(
-      (node) => node.getBoundingClientRect().top,
-    );
+    const contentTop = await first.evaluate((node) => {
+      const tops = [
+        node.firstElementChild,
+        node.querySelector("h2")?.parentElement,
+      ]
+        .filter((el): el is Element => el != null)
+        .map((el) => el.getBoundingClientRect().top);
+      return Math.min(...tops);
+    });
     expect(
       Math.abs(contentTop - fileteBottom - item.gap),
       `${item.path} @ ${item.width}px`,
