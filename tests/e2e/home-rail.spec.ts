@@ -102,6 +102,17 @@ async function readRail(page: Page): Promise<Rail> {
   });
 }
 
+async function handBelowHeader(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const header = document.querySelector("header");
+    const hand = document.querySelector("svg:has(.pka-a)");
+    if (!header || !hand) throw new Error("sem header ou mão");
+    return (
+      hand.getBoundingClientRect().top - header.getBoundingClientRect().bottom
+    );
+  });
+}
+
 async function greetingLeft(page: Page): Promise<number> {
   return page.evaluate(() => {
     const greeting = document.querySelector("h1")?.parentElement;
@@ -233,6 +244,18 @@ test.describe("lateral da home [RF-01]", () => {
             true,
           );
         }
+      });
+    }
+  });
+
+  test("H11 respiro acima da lateral", async ({ page }) => {
+    for (const path of ["/", concept]) {
+      await test.step(path, async () => {
+        await open(page, path, 1023);
+        const below = await handBelowHeader(page);
+        await page.setViewportSize({ width: 1280, height: 800 });
+        const above = await handBelowHeader(page);
+        expect.soft(above - below, `${path} mão`).toBeCloseTo(56, 0);
       });
     }
   });

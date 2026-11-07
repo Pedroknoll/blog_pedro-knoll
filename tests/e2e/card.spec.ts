@@ -530,8 +530,12 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
               headingLeft: headingBox.left,
               track,
               expectedTrack: 6.5 * fontSize,
-              folioTop: folioBox.top,
-              headingTop: headingBox.top,
+              folioCenter: (folioBox.top + folioBox.bottom) / 2,
+              textCenter: heading.parentElement
+                ? (heading.parentElement.getBoundingClientRect().top +
+                    heading.parentElement.getBoundingClientRect().bottom) /
+                  2
+                : Number.NaN,
             };
           });
           expect(placed).not.toBeNull();
@@ -541,7 +545,8 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
             Math.abs(placed.track - placed.expectedTrack),
           ).toBeLessThanOrEqual(1);
           expect(
-            Math.abs(placed.folioTop - placed.headingTop),
+            Math.abs(placed.folioCenter - placed.textCenter),
+            "fólio centrado no texto",
           ).toBeLessThanOrEqual(1);
 
           const fitted = await article
