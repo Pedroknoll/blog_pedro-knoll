@@ -142,17 +142,17 @@ test("explorável hidrata ao ficar visível [RF-09, RNF-02]", async ({
     exact: true,
   });
   const stillBefore = await still.evaluate((element) => element.outerHTML);
-  const pending = page.waitForRequest(
-    (request) => new URL(request.url()).pathname === componentPath,
-  );
-  await island.scrollIntoViewIfNeeded();
-  await pending;
-  await expect(next).toBeEnabled();
-
   const live = island.getByRole("img", {
     name: vizExplorableSummary,
     exact: true,
   });
+  const pending = page.waitForRequest(
+    (request) => new URL(request.url()).pathname === componentPath,
+  );
+  await live.scrollIntoViewIfNeeded();
+  await pending;
+  await expect(next).toBeEnabled();
+
   await next.click();
   await expect
     .poll(() => activeFlags(live))

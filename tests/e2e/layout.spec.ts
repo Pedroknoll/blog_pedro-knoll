@@ -135,10 +135,16 @@ test("home e tag sem script; post sem pre com um module e com pre com dois [RNF-
         return;
       }
       const pres = await page.getByRole("article").locator("pre").count();
-      const expected = pres === 0 ? 1 : 2;
-      await expect(extra).toHaveCount(expected);
-      for (let index = 0; index < expected; index += 1) {
-        await expect(extra.nth(index)).toHaveAttribute("type", "module");
+      const modules = pres === 0 ? 1 : 2;
+      await expect(page.locator('script[type="module"]')).toHaveCount(modules);
+
+      const plain = page.locator("script:not([type])");
+      const plainCount =
+        (await page.locator("astro-island").count()) === 0 ? 0 : 2;
+      await expect(plain).toHaveCount(plainCount);
+      await expect(extra).toHaveCount(modules + plainCount);
+      for (let index = 0; index < plainCount; index += 1) {
+        await expect(plain.nth(index)).not.toHaveAttribute("src");
       }
     });
   }

@@ -2,6 +2,7 @@ import { fileURLToPath } from "node:url";
 import mdx from "@astrojs/mdx";
 import { unified } from "@astrojs/markdown-remark";
 import sitemap from "@astrojs/sitemap";
+import svelte from "@astrojs/svelte";
 import tailwindcss from "@tailwindcss/vite";
 import { defineConfig, fontProviders } from "astro/config";
 import rehypeKatex from "rehype-katex";
@@ -90,6 +91,7 @@ export default defineConfig({
       processor: unified({ remarkPlugins, rehypePlugins }),
     }),
     sitemap(),
+    svelte(),
   ],
   vite: {
     plugins: [tailwindcss()],

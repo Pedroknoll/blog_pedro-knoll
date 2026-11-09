@@ -43,6 +43,7 @@ appendices:
 ---
 
 import Callout from "~/components/ui/Callout.astro";
+import IslandProof from "~/components/viz/IslandProof.svelte";
 
 O blog é um site estático — o motivo está em [por que este blog existe](/blog/2026-10-por-que-este-blog/). O HTML sai pronto no build.
 
@@ -103,3 +104,23 @@ Não edite `dist/_headers` à mão: o arquivo é gerado no build.
 Efeito das fontes da assinatura na T-43, mediana de 3 no Lighthouse local.
 
 </Callout>
+
+## Uma figura em dois modos
+
+O mesmo componente sai como figura estática, sem JavaScript, e como explorável, que só carrega quando chega à tela.
+
+<IslandProof
+  rows={5}
+  cols={5}
+  title="Grade 5 por 5, estática"
+  summary="Grade de 5 por 5 células com a primeira em destaque."
+/>
+
+<IslandProof
+  client:visible
+  controls
+  rows={5}
+  cols={5}
+  title="Grade 5 por 5, explorável"
+  summary="Grade de 5 por 5 células; Anterior e Próximo movem o destaque."
+/>

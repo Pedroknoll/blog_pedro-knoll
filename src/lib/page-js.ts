@@ -6,15 +6,19 @@ export type PageJsItem = {
   gzipBytes: number;
 };
 
-export type PageJsResult = {
+export type PageJsIsland = {
+  component: string;
   items: PageJsItem[];
   total: number;
 };
 
-export type ReadDist = (path: string) => string | undefined;
+export type PageJsResult = {
+  items: PageJsItem[];
+  total: number;
+  islands: PageJsIsland[];
+};
 
-const islandMessage =
-  "página com astro-island: o budget de RNF-02 vale para páginas sem island; a T-19 decide como contar";
+export type ReadDist = (path: string) => string | undefined;
 
 const executableTypes = new Set([
   "module",
@@ -23,6 +27,7 @@ const executableTypes = new Set([
 ]);
 
 const tagPattern = /<script\b([^>]*)>([\s\S]*?)<\/script>|<link\b([^>]*)\/?>/gi;
+const islandPattern = /<astro-island\b([^>]*)>/gi;
 
 // import() dinâmico carrega depois e não entra neste budget.
 const sideEffectImport = /\bimport\s*(['"])([^'"]+)\1/g;
@@ -102,20 +107,20 @@ function shouldFollow(spec: string): boolean {
   return spec.startsWith(".") || spec.startsWith("/") || isExternal(spec);
 }
 
+function sumBytes(items: PageJsItem[]): number {
+  return items.reduce((sum, item) => sum + item.gzipBytes, 0);
+}
+
 export function countPageJs(
   html: string,
   pagePath: string,
   readFile: ReadDist,
 ): PageJsResult {
-  if (/<astro-island\b/i.test(html)) {
-    throw new Error(islandMessage);
-  }
-
-  const items: PageJsItem[] = [];
-  const seen = new Set<string>();
-  let inlineIndex = 0;
-
-  function addFile(resolved: string): void {
+  function walkFile(
+    resolved: string,
+    items: PageJsItem[],
+    seen: Set<string>,
+  ): void {
     if (seen.has(resolved)) return;
     const content = readFile(resolved);
     if (content === undefined) {
@@ -125,8 +130,40 @@ export function countPageJs(
     items.push({ origin: resolved, gzipBytes: gzipSize(content) });
     for (const spec of staticSpecifiers(content)) {
       if (!shouldFollow(spec)) continue;
-      addFile(resolveDist(resolved, spec));
+      walkFile(resolveDist(resolved, spec), items, seen);
     }
+  }
+
+  const islands: PageJsIsland[] = [];
+  const seenComponents = new Set<string>();
+
+  for (const match of html.matchAll(islandPattern)) {
+    const attrs = match[1] ?? "";
+    const componentUrl = attr(attrs, "component-url");
+    const rendererUrl = attr(attrs, "renderer-url");
+    if (!componentUrl) throw new Error("astro-island sem component-url");
+    if (!rendererUrl) throw new Error("astro-island sem renderer-url");
+    if (seenComponents.has(componentUrl)) continue;
+    seenComponents.add(componentUrl);
+
+    const items: PageJsItem[] = [];
+    const seen = new Set<string>();
+    const addUrl = (url: string) => {
+      walkFile(resolveDist(pagePath, url), items, seen);
+    };
+    addUrl(componentUrl);
+    addUrl(rendererUrl);
+    const before = attr(attrs, "before-hydration-url");
+    if (before) addUrl(before);
+    islands.push({ component: componentUrl, items, total: sumBytes(items) });
+  }
+
+  const items: PageJsItem[] = [];
+  const seen = new Set<string>();
+  let inlineIndex = 0;
+
+  function addFile(resolved: string): void {
+    walkFile(resolved, items, seen);
   }
 
   function follow(baseFile: string, spec: string): void {
@@ -163,6 +200,5 @@ export function countPageJs(
     addFile(resolveDist(pagePath, href));
   }
 
-  const total = items.reduce((sum, item) => sum + item.gzipBytes, 0);
-  return { items, total };
+  return { items, total: sumBytes(items), islands };
 }
