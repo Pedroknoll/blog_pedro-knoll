@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 06/11/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 09/11/2026
+
+**Revisão de 09/11/2026:** a escada de interatividade usa o degrau mais baixo que explica o conceito. No artigo: 0 texto e fórmula, 1 figura estática (SVG no build, 0 JS), 2 figura em passos (Anterior/Próximo, no lugar de GIF) e 3 explorável (island Svelte com `client:visible` e dados pré-calculados). Fora do artigo: 4 notebook marimo e 5 GPU (`gpuUrl`). O mesmo componente de `src/components/viz/` sem `client:*` é figura estática e com `client:visible` é explorável. A Fase 2 se divide em 2a (storytelling visual) e 2b (lab marimo). O notebook sai do artigo e vira a página inteira em `/notebooks/<slug>/<nome>/`, aberta pela barra do lab; sem iframe, sem pôster e sem "Ativar interatividade" no post. O RF-08 continua Must só para `compute: browser`; os pesados ficam para depois do lançamento (T-17, T-33). O ADR-02 foi substituído; o texto anterior está em `specs/adr/ADR-02-v2-iframe.md`. A implementação é das tarefas da Fase 2a e 2b; até elas, o site segue o comportamento anterior (T-71).
 
 **Revisão 3 de 06/11/2026:** a §9 fixa um só `katex` no lock: um `overrides` no `pnpm-workspace.yaml` leva o `rehype-katex` e o `remark-math` à versão do `katex` direto, a mesma do CSS e das fontes do KaTeX (T-68).
 
@@ -82,8 +84,8 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 ### Objetivos
 
 - Publicar posts em Markdown/MDX com a mesma ergonomia de leitura do HF Blog: listagem em cards, página de post com os metadados ao lado do texto, autor, tags e data.
-- Permitir que um post embuta um notebook marimo interativo em iframe (Python no browser via WebAssembly), sem servidor Python em produção.
-- Permitir gráficos D3 interativos encapsulados em componentes Svelte, hidratados só quando visíveis.
+- Permitir que um post leve a um notebook marimo executável no navegador, numa página própria, sem servidor Python em produção.
+- Permitir figuras estáticas e visualizações D3 em componentes Svelte: sem `client:*` a figura sai no HTML sem JavaScript; com `client:visible`, hidrata só quando visível.
 - Deploy automático a cada push, com preview por pull request.
 
 ### Não-objetivos (v1)
@@ -113,7 +115,7 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 
 ## 2. Premissas e decisões em aberto
 
-A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10 e 22/10 já estão incorporadas e só o domínio segue em aberto, então a Fase 0 pode começar já.
+A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10 e 09/11 já estão incorporadas e só o domínio segue em aberto, então a Fase 0 pode começar já.
 
 ### Premissas assumidas
 
@@ -147,11 +149,17 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10 e 22/10 já 
 
 ### Decisões de 14/10/2026
 
-- [x] **Q11 — Notebook inline adiado:** o modo inline fica adiado por custo de manutenção (T-03, `specs/spikes/T-03-mdx-marimo.md`). O blog segue só com notebooks marimo em iframe (`marimo export html-wasm`). Reavaliar quando o mdx-marimo chegar a 0.1, ou quando houver uma opção pública para controlar Python e projeto no build (T-32).
+- [x] **Q11 — Notebook inline adiado:** o modo inline fica adiado por custo de manutenção (T-03, `specs/spikes/T-03-mdx-marimo.md`). O blog segue só com notebooks marimo em iframe (`marimo export html-wasm`). Reavaliar quando o mdx-marimo chegar a 0.1, ou quando houver uma opção pública para controlar Python e projeto no build (T-32). Substituída em 09/11/2026 pela Q14.
 
 ### Decisões de 22/10/2026
 
 - [x] **Q12 — Identidade:** a identidade visual e verbal está em `specs/BRAND.md`. Em conflito de comportamento, a SPEC ganha. Tags no lugar de temas; o tempo do post é só o `minutesRead` (o `benchMinutes` saiu na T-62); imagem OG só quando não há capa; newsletter fora da v1; sem `dark:` nos componentes; chaves de frontmatter em inglês; `kind` no enum inglês (`concept`, `tutorial`, `lab`, `playbook`).
+
+### Decisões de 09/11/2026
+
+- [x] **Q13 — Escada e primitivas em dois modos:** no artigo, o degrau mais baixo que explica o conceito: 0 texto e fórmula, 1 figura estática (SVG no build, 0 JS), 2 figura em passos (Anterior/Próximo, no lugar de GIF), 3 explorável (island Svelte com `client:visible` e dados pré-calculados). Fora do artigo: 4 notebook marimo e 5 GPU (`gpuUrl`). O mesmo componente de `src/components/viz/` sem `client:*` é a figura estática e com `client:visible` é o explorável.
+- [x] **Q14 — Notebook em página própria:** `marimo export html-wasm` é a página inteira em `/notebooks/<slug>/<nome>/`. A barra do lab do post leva a ela ("Abrir no marimo"); "Abrir no Colab" só com `gpuUrl`. Sem iframe, sem pôster e sem "Ativar interatividade" no post. Substitui a Q11.
+- [x] **Q15 — RF-08 só para leves no lançamento:** o RF-08 continua Must, só para `compute: browser`. Notebooks pesados (T-17, T-33) ficam para depois do lançamento; até lá, treino pesado só pelo `gpuUrl`.
 
 ## 3. Requisitos funcionais
 
@@ -167,8 +175,8 @@ A v1 entrega 11 requisitos Must; o restante entra por ordem de prioridade sem bl
 | RF-05 | ~~TOC lateral fixa (h2–h3) com seção ativa destacada~~                                | Removido   | Saiu na T-63: o post não tem sumário; a lateral do cabeçalho é parte do RF-04                                           |
 | RF-06 | Syntax highlighting com botão copiar                                                  | Must       | Shiki em build time, temas `pk-claro` e `pk-escuro`. Uma cerca com a meta `title=<arquivo>` depois da linguagem (```` ```py title=fol-001_embeddings.py ````) mostra o nome do arquivo na barra do bloco; sem `title=`, a barra não mostra nome. O botão diz Copiar e vira Copiado por 1,5 s; o `aria-label` é `Copiar código` e vira `Código copiado` junto com o texto, para o nome acessível conter o rótulo visível (WCAG 2.5.3). A barra existe com ou sem `title=` e com ou sem JavaScript; o nome do arquivo sai do build |
 | RF-07 | Matemática LaTeX inline e em bloco                                                    | Must       | `remark-math` + `rehype-katex` no processador `unified()`, render no build                                              |
-| RF-08 | Notebook marimo interativo no post, em iframe                                         | Must       | Iframe via `marimo export html-wasm`; pôster estático até "Executar"; Python só dentro do export (seção 7)             |
-| RF-09 | Visualizações Svelte + D3 usadas dentro do MDX                                        | Must       | Hidratam com `client:visible`; têm fallback estático (seção 8)                                                          |
+| RF-08 | Notebook marimo do post numa página própria                                           | Must       | Export `html-wasm` em `/notebooks/<slug>/<nome>/`, página inteira, com barra final; a barra do lab do post leva a ela; a página do post não carrega Pyodide nem o runtime do marimo; no lançamento, só `compute: browser` (seção 7) |
+| RF-09 | Figuras e visualizações Svelte + D3 no MDX                                            | Must       | Sem `client:*`, a figura sai como SVG no HTML, sem JavaScript; com `client:visible`, vira explorável; nos dois casos o SVG está no HTML desde o build (seção 8) |
 | RF-10 | Feed RSS e sitemap                                                                    | Must       | `/rss.xml` válido no W3C Validator; `sitemap-index.xml` gerado                                                          |
 | RF-11 | Rascunhos (`draft: true`) visíveis só em preview                                      | Must       | Build de produção exclui drafts de páginas, feed e sitemap                                                              |
 | RF-12 | SEO por post: title, description, canonical, Open Graph, JSON-LD `BlogPosting`        | Must       | O `<title>` do post é o título do post. Home `{site.title} · {autor}`, post `{título} · {site.title} · {autor}`, `/page/n/` `Blog — página N · {site.title} · {autor}`, tag `Tag: <tag> · {site.title} · {autor}`, tipo `Tipo: <rótulo> · {site.title} · {autor}`, 404 `Página não encontrada · {site.title} · {autor}`. A 404 não tem canonical nem `og:url` e leva `noindex`, porque a Cloudflare serve `/404` com status 200. `og:image` e `image` do JSON-LD só existem quando há capa, até a T-23. Validado no Rich Results Test; URLs absolutas montadas a partir de `SITE_URL` |
@@ -192,17 +200,18 @@ Cada RNF tem um número verificável no CI; o que não dá para medir automatica
 | ID     | Área             | Requisito                                                                                                                                                               | Como verificar                                                                                                                                                                                                                             |
 | ------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | RNF-01 | Performance      | LCP < 2,0 s e CLS < 0,05 em 4G simulado (home e post sem notebook)                                                                                                      | Lighthouse CI no job `lighthouse`, contra o `dist/` do build servido localmente (`staticDistDir`), na home e nos dois posts publicados. Perfil mobile padrão do Lighthouse, com throttling simulado "Slow 4G" (150 ms de RTT, 1,6 Mbps, CPU 4×), mediana de 3 execuções. As quatro categorias ≥ 95 também são asserção `error` desde a T-13                                                                                                                                                                                                             |
-| RNF-02 | Performance      | JS inicial ≤ 50 KB gzip **por página** sem islands; cada island D3 ≤ 40 KB gzip. O runtime marimo fica fora desse budget e só existe em páginas com notebook            | `pnpm check:js` (`scripts/check-page-js.mjs` sobre a função pura `src/lib/page-js.ts`) soma, por página de `dist/` fora de `notebooks/`, o JS que o HTML referencia: `<script src>`, script inline executável, `modulepreload` e os imports estáticos transitivos; `import()` dinâmico não conta. Limite de 50.000 bytes gzip. Página com `astro-island`, JS externo ou referência inexistente falha a verificação. O `size-limit` com uma entrada por island entra com a primeira island (T-19), que também decide como contar páginas com island. Um glob único sobre `dist/_astro/*.js` não serve: somaria chunks de páginas diferentes |
-| RNF-03 | Performance      | Pyodide e runtime marimo carregam só em páginas que usam notebook e só após o primeiro paint                                                                            | Teste E2E: home e post sem notebook não requisitam `/pyodide                                                                                                                                                                               |
+| RNF-02 | Performance      | JS inicial ≤ 50 KB gzip **por página** sem islands; cada island D3 ≤ 40 KB gzip. O runtime marimo fica fora desse budget e só existe em `/notebooks/*`            | `pnpm check:js` (`scripts/check-page-js.mjs` sobre a função pura `src/lib/page-js.ts`) soma, por página de `dist/` fora de `notebooks/`, o JS que o HTML referencia: `<script src>`, script inline executável, `modulepreload` e os imports estáticos transitivos; `import()` dinâmico não conta. Limite de 50.000 bytes gzip. Página com `astro-island`, JS externo ou referência inexistente falha a verificação. O `size-limit` com uma entrada por island entra com a primeira island (T-19), que também decide como contar páginas com island. Um glob único sobre `dist/_astro/*.js` não serve: somaria chunks de páginas diferentes |
+| RNF-03 | Performance      | Pyodide e runtime do marimo só em `/notebooks/*`; nenhuma página fora de `/notebooks/` os requisita                                                                      | Teste E2E da §11: home, post sem notebook e post com notebook não requisitam `/pyodide|marimo/`                                                                                                                                            |
 | RNF-04 | Acessibilidade   | WCAG 2.2 AA; gráficos D3 com `role="img"`, `aria-label` e tabela de dados alternativa. Animações da marca respeitam `prefers-reduced-motion`. Lápis não é texto menor que 24 px sobre folha clara | axe-core no Playwright, zero violações serious/critical; E2E com `prefers-reduced-motion: reduce` nas animações da marca |
 | RNF-05 | SEO              | HTML semântico, um `h1` por página, URLs estáveis `/blog/[slug]`                                                                                                        | Teste de build + Lighthouse SEO ≥ 95                                                                                                                                                                                                       |
 | RNF-06 | Segurança        | Headers: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`                                                                                                         | `dist/_headers` gerado no build e conferido por teste de artefato; securityheaders.com em produção                                                                                                                                         |
-| RNF-07 | Segurança        | CSP com `wasm-unsafe-eval` e as origens do Pyodide só em `/notebooks/*` (o iframe), não na página do post; o `dist/_headers` gerado tem no máximo 100 regras (limite da Cloudflare) | Teste de artefato: rotas sem notebook não têm `wasm-unsafe-eval`; o build falha acima de 100 regras                                                                                                                                        |
+| RNF-07 | Segurança        | CSP com `wasm-unsafe-eval` e as origens do Pyodide só em `/notebooks/*`, não na página do post; o `dist/_headers` gerado tem no máximo 100 regras (limite da Cloudflare) | Teste de artefato: rotas sem notebook não têm `wasm-unsafe-eval`; o build falha acima de 100 regras                                                                                                                                        |
 | RNF-08 | Build            | Build completo < 5 min com 200 posts e 20 notebooks                                                                                                                     | Medido no CI; cache de exports marimo por hash do `.py` + `uv.lock`                                                                                                                                                                        |
 | RNF-09 | Confiabilidade   | Build falha se frontmatter for inválido, link interno quebrar ou notebook falhar no `marimo check`                                                                                   | Zod + `astro check` + verificador de links + `marimo check`                                                                                                                                                                                |
 | RNF-10 | Custo            | US$ 0/mês até o limite do plano free (static assets não são cobrados)                                                                                                   | Revisão mensal no dashboard Cloudflare                                                                                                                                                                                                     |
 | RNF-11 | Privacidade      | Analytics sem cookies                                                                                                                                                   | Cloudflare Web Analytics                                                                                                                                                                                                                   |
 | RNF-12 | Manutenibilidade | TypeScript strict, ESLint + Prettier, Ruff para Python                                                                                                                  | Gates no CI                                                                                                                                                                                                                                |
+| RNF-13 | Performance      | INP p75 ≤ 200 ms em campo                                                                                                                                               | Cloudflare Web Analytics (RNF-11), que reporta LCP, INP e CLS, revisado depois da T-27. O Lighthouse não mede INP                                                                                                                          |
 
 
 ## 5. Arquitetura e decisões de stack
@@ -230,13 +239,13 @@ flowchart LR
   dist -- "wrangler deploy" --> cf["Cloudflare Workers<br/>Static Assets"]
   cf --> br["Navegador"]
   r2 --> br
-  cdn["CDN do Pyodide"] -. "só em posts com notebook" .-> br
+  cdn["CDN do Pyodide"] -. "só em /notebooks/*" .-> br
 
 ```
 
 
 
-Python só existe no build; em produção, o único código que executa é o do navegador, e o Pyodide só baixa em posts que declaram notebook.
+Python só existe no build; em produção, o único código que executa é o do navegador, e o Pyodide só baixa em `/notebooks/*`.
 
 ### ADRs
 
@@ -244,8 +253,8 @@ Python só existe no build; em produção, o único código que executa é o do 
 | ADR    | Decisão                                                                                                                                                                                | Alternativas descartadas                                                                                          | Motivo                                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ADR-01 | **Astro 7**, `output: 'static'`, content collections com loader `glob` e schemas Zod 4 (`astro/zod`). Markdown e MDX passam pelo processador `unified()` de `@astrojs/markdown-remark` | Next.js, Hugo, Docusaurus; Astro 6 (ver `specs/adr/ADR-01-v1-astro-6.md`); processador Sätteri, padrão do Astro 7 | Islands nativos, zero JS por padrão, MDX de primeira classe. O [Astro 7](https://docs.astro.build/en/guides/upgrade-to/v7/) saiu em 22/06/2026 e a doc do Astro 6 virou snapshot sem manutenção. O `unified()` mantém `remark-math`, `rehype-katex` e o tempo de leitura sem precisar portá-los para o Sätteri. Revisado em 09/10/2026 (Q8) |
-| ADR-02 | **marimo só via `marimo export html-wasm` em iframe**                                                                                                                          | Jupyter + nbconvert estático; Thebe/Binder; mdx-marimo no meio do texto (adiado, ver `specs/adr/ADR-02-v1-mdx-marimo.md` e `specs/spikes/T-03-mdx-marimo.md`) | O export WASM isola o runtime e o marimo fica travado no `uv.lock` ([docs](https://docs.marimo.io/guides/exporting/webassembly_html/)). O modo inline foi adiado em 14/10/2026 por custo de manutenção (T-03): o build do mdx-marimo ignora o `uv.lock` |
-| ADR-03 | **Svelte 5** para islands interativos; **D3 v7** só para cálculo (escalas, eixos, layouts), com o Svelte dono do DOM                                                                   | React + D3; Observable Plot puro                                                                                  | Svelte compila para bundles pequenos; D3 manipulando DOM brigaria com a reatividade. Content collections ficam no Astro, não no Svelte. Não há segundo framework de UI                                                                                                                                                      |
+| ADR-02 | **marimo só via `marimo export html-wasm`, numa página própria aberta pela barra do lab; sem iframe no post**                                                                 | Jupyter + nbconvert estático; Thebe/Binder; mdx-marimo no meio do texto (adiado, ver `specs/adr/ADR-02-v1-mdx-marimo.md` e `specs/spikes/T-03-mdx-marimo.md`); iframe no post (substituído em 09/11/2026, ver `specs/adr/ADR-02-v2-iframe.md`) | O artigo explica e o notebook é onde se pratica, como nas referências da Q13. O iframe pedia pôster, carga condicional, botão de execução e um layout dentro da prosa; a página própria dispensa tudo isso e deixa o Pyodide só em `/notebooks/*` (RNF-03). O export WASM isola o runtime e o marimo fica travado no `uv.lock` ([docs](https://docs.marimo.io/guides/exporting/webassembly_html/)). Revisado em 09/11/2026 (Q14, T-71) |
+| ADR-03 | **Svelte 5** para islands interativos; **D3 v7** só para cálculo (escalas, eixos, layouts), com o Svelte dono do DOM                                                                   | React + D3; Observable Plot puro                                                                                  | Svelte compila para bundles pequenos; D3 manipulando DOM brigaria com a reatividade. Content collections ficam no Astro, não no Svelte. Não há segundo framework de UI. Componente Svelte sem `client:*` é renderizado no build e não envia JavaScript.                                                                                                                                                      |
 | ADR-04 | **Cloudflare Workers com Static Assets** (`wrangler.jsonc` com `assets.directory: ./dist`)                                                                                             | Cloudflare Pages, Vercel, Netlify                                                                                 | [Recomendação atual](https://docs.astro.build/en/guides/deploy/cloudflare) para projetos novos; static assets não são cobrados; caminho direto para D1/KV no futuro. Confirmado em 06/10 (Q5)                                                                                                                                                                                                            |
 | ADR-05 | Sem SSR na v1                                                                                                                                                                          | `@astrojs/cloudflare` desde o início                                                                              | YAGNI. Se vierem upvotes/comentários próprios, adiciona-se o adapter `@astrojs/cloudflare` compatível com a versão do Astro em uso, e D1                                                                                                                                                                                                                                                                 |
 | ADR-06 | **Pagefind** para busca                                                                                                                                                                | Algolia, Orama                                                                                                    | Indexa o `dist/` no pós-build, roda 100% no cliente, sem custo                                                                                                                                                                                                                                                                                                                                           |
@@ -254,8 +263,8 @@ Python só existe no build; em produção, o único código que executa é o do 
 
 ### Riscos técnicos
 
-- **Modo inline adiado** na T-03, por custo de manutenção. O blog usa só iframe. Reavaliação na T-32 (`specs/spikes/T-03-mdx-marimo.md`).
-- **Pyodide pesa** dezenas de MB no primeiro acesso. Mitigação: saída estática pré-renderizada e botão "Ativar interatividade" quando o notebook for grande.
+- **Modo inline adiado** na T-03, por custo de manutenção. Reavaliação na T-32 (`specs/spikes/T-03-mdx-marimo.md`). O iframe no post saiu em 09/11/2026 (Q14): o notebook é uma página própria.
+- **Pyodide pesa** dezenas de MB no primeiro acesso. Mitigação: a página própria em `/notebooks/<slug>/<nome>/`; nenhuma página fora de `/notebooks/` o requisita.
 - **Pacotes sem wheel WASM** não rodam no browser. Mitigação: `marimo check --select MW` no CI (regras `MW001` import incompatível, `MW002` chamada de sistema insegura, `MW003` dependência sem wheel WASM) e cache de execução (seção 7).
 - **Astro 7 é estrito com HTML.** O compilador Rust recusa tags não fechadas e não corrige aninhamento inválido; o padrão `compressHTML: 'jsx'` remove espaço entre elementos inline. Mitigação: `astro check` no CI e revisão visual do preview.
 - **Cache de células com `torch`** não funciona no marimo 0.25.1, ver T-04. Mitigação: `precomputed`, a validar na T-33, ou `onnx` e `static`.
@@ -278,7 +287,7 @@ src/
         ├── figs/
         ├── data/              # JSON/CSV dos gráficos
         └── notebooks/
-            └── treino.py      # notebook iframe
+            └── treino.py      # notebook da página própria
 
 ```
 
@@ -292,9 +301,8 @@ import { KINDS } from './lib/kind';
 import { postIdFromEntry } from './lib/post-id';
 import { duplicateReferenceKeys } from './lib/references';
 
-// Iframe: notebook inteiro num .py da pasta do post, exportado com html-wasm.
+// Página própria: notebook inteiro num .py da pasta do post, exportado com html-wasm.
 const notebook = z.strictObject({
-  mode: z.literal('iframe'),
   src: z.string(),
   // estratégia de execução, ver seção 7
   compute: z.enum(['browser', 'cache', 'precomputed', 'onnx', 'static']).default('browser'),
@@ -347,7 +355,7 @@ const posts = defineCollection({
           })
           .default([]),
         appendices: z.array(appendix).max(26).default([]),
-        // declara os iframes do post
+        // declara os notebooks do post
         notebooks: z.array(notebook).default([]),
         canonical: z.url().optional(),
       })
@@ -364,6 +372,8 @@ const posts = defineCollection({
 export const collections = { posts };
 
 ```
+
+O `src/content.config.ts` ainda tem `mode: z.literal("iframe")`. O campo sai na T-14; esta tarefa não altera o arquivo.
 
 Notas de Zod 4: `z.url()` substitui `z.string().url()`, e o parâmetro `error` substitui `message`. As formas antigas ainda funcionam, mas estão depreciadas.
 
@@ -401,7 +411,7 @@ tags: [nlp, embeddings]
 cover: ./cover.png
 coverAlt: "Pontos coloridos agrupados num plano 2D"
 notebooks:
-  - { mode: iframe, src: ./notebooks/treino.py, compute: precomputed, gpuUrl: "https://colab.research.google.com/..." } # a validar na T-33
+  - { src: ./notebooks/treino.py, compute: browser, gpuUrl: "https://colab.research.google.com/..." }
 ---
 
 ```
@@ -436,9 +446,9 @@ notebooks:
 
 ## 7. Pipeline marimo
 
-O blog embute notebooks marimo em iframe. O Python roda no navegador via Pyodide, dentro do export; a página do post não executa o kernel. Nenhum notebook precisa de servidor.
+O notebook do post é uma página própria em `/notebooks/<slug>/<nome>/`, gerada com `marimo export html-wasm`. O Python roda no navegador via Pyodide, dentro dessa página; a página do post não carrega Pyodide nem o runtime do marimo. Nenhum notebook precisa de servidor.
 
-O modo inline foi adiado em 14/10/2026 por custo de manutenção (T-03). Ver `specs/spikes/T-03-mdx-marimo.md`.
+O modo inline foi adiado em 14/10/2026 (T-03, `specs/spikes/T-03-mdx-marimo.md`). O iframe no post foi substituído em 09/11/2026 (Q14); o texto anterior do ADR-02 está em `specs/adr/ADR-02-v2-iframe.md`.
 
 ### Processador Markdown e MDX
 
@@ -484,16 +494,20 @@ export default defineConfig({
 
 As opções `markdown.remarkPlugins` e `markdown.rehypePlugins` estão depreciadas no Astro 7; os plugins vão dentro de `unified()`. O Shiki fica em `markdown.shikiConfig`, fora do `unified()`; o MDX herda essa opção (`extendMarkdownConfig` tem default `true`) e não repete `shikiConfig`. Temas próprios entram como objeto importado do JSON, não pelo nome. `themes` aceita o JSON importado, sem `with { type: "json" }` (confirmado na T-41). A T-41 trocou os temas embutidos por esses arquivos, porque o `github-light` ficava abaixo de 4,5 sobre `sheet`. Com `defaultColor: false`, cada token sai só com `--shiki-light` e `--shiki-dark`. `shikiConfig.transformers` tem um transformer próprio, `shikiCodeFrame()` de `src/lib/shiki-code-frame.mjs` (T-48), que envolve o `pre` numa moldura com a barra do nome do arquivo; o MDX herda o transformer sem repetir. A meta da cerca chega ao transformer em `this.options.meta.__raw`, e a regra do `title=` é a função pura `codeTitle` de `src/lib/code-title.ts`. `markdown.syntaxHighlight` permanece no padrão. O CSS do KaTeX entra por import de `katex/dist/katex.min.css` no `PostLayout`, sem CDN, e a home não o recebe.
 
-### Modo iframe
+### Página do notebook
 
-1. `scripts/build-notebooks.py` percorre os posts e, para cada notebook `iframe` com `compute: browser`, roda `marimo check --select MW` e depois `marimo export html-wasm <nb>.py -o public/notebooks/<slug>/<nome>/ --mode run --no-show-code`.
+1. `scripts/build-notebooks.py` percorre os posts e, para cada notebook com `compute: browser`, roda `marimo check --select MW` e depois `marimo export html-wasm <nb>.py -o public/notebooks/<slug>/<nome>/ --mode run --no-show-code`.
 2. O resultado é cacheado pelo SHA-256 do `.py` + `uv.lock`; notebook sem mudança não é reexportado (RNF-08). `public/notebooks/` é gerado e fica no `.gitignore`.
-3. O componente `<MarimoFrame>` aponta para `/notebooks/<slug>/<nome>/`, com barra final, e define largura e altura. Sem dimensões, o iframe sai com 300 × 150 px. Renderiza com `loading="lazy"` e um pôster estático até o usuário clicar em "Executar".
+3. A barra do lab, `LabBar.astro`, fica logo após o cabeçalho de todo post `kind: lab`. "Abrir no marimo" aponta para `/notebooks/<slug>/<nome>/`, com barra final. "Abrir no Colab" só existe com `gpuUrl`. Sem iframe, sem pôster e sem "Ativar interatividade".
 4. Dados do notebook são lidos via `mo.notebook_location()`, para funcionar local e no WASM. Módulos `.py` locais importados pelo notebook entram no export como wheel em `public/wheels` (exige uv).
+
+A escolha entre `--mode run` e `edit`, e entre `--show-code` e `--no-show-code`, fica com a T-14. A primeira célula do lab é convenção no `AGENTS.md` de `src/components/marimo/` (antes da T-14) e no post da T-74, com `src/components/marimo/pk.css`. O `pk.css` não vem no pacote da marca.
 
 A v1 não tem interrupts. O marimo em WASM usa `SharedArrayBuffer`, que exige isolamento de origem (`Cross-Origin-Opener-Policy: same-origin` e `Cross-Origin-Embedder-Policy: require-corp` ou `credentialless`). Sem isso, o leitor não consegue parar uma célula em execução. Ver `specs/spikes/T-05-headers.md`.
 
 ### Notebooks pesados (torch, GPU, dados grandes)
+
+Depois do lançamento (T-17 e T-33). Até lá, treino pesado só pelo `gpuUrl`.
 
 Notebook pesado nunca roda inteiro no navegador do leitor: o Pyodide só instala pacotes com wheel WebAssembly, o `torch` não tem, e não há GPU disponível para ele. Então a parte pesada roda **antes**, na sua máquina, e o leitor recebe os resultados prontos, com as partes leves ainda interativas.
 
@@ -503,9 +517,9 @@ Notebook pesado nunca roda inteiro no navegador do leitor: o Pyodide só instala
 - **Interatividade parcial.** Células que dependem de `torch` não podem ser reexecutadas pelo leitor. No export, um valor que o navegador não consegue restaurar vira um stub, e usar o stub tenta recomputar a célula (e falha sem `torch`). O que reage a sliders precisa operar sobre resultados já calculados (arrays numpy, tabelas).
 - **É um snapshot.** Mudou uma célula cacheada ou um dado de entrada, o cache invalida: é preciso reexecutar e reexportar.
 - **Limites de arquivo.** A Cloudflare serve até 25 MiB por arquivo e 20.000 arquivos por versão no plano free ([limites](https://developers.cloudflare.com/workers/platform/limits/)). Pesos de modelo e datasets maiores vão para um bucket R2 com domínio próprio e CORS liberado.
-- **Peso para o leitor.** Pyodide mais numpy/pandas somam dezenas de MB no primeiro acesso; post pesado abre com a saída estática e um botão "Ativar interatividade".
+- **Peso para o leitor.** Pyodide mais numpy/pandas somam dezenas de MB no primeiro acesso. O custo fica na página do notebook, não no post.
 
-#### Estratégias (campo `compute` de notebooks `iframe`)
+#### Estratégias (campo `compute`)
 
 
 | `compute`          | Como funciona                                                                                                                                                                                                                 | O leitor pode                                             | Quando usar                                                 |
@@ -519,11 +533,9 @@ Notebook pesado nunca roda inteiro no navegador do leitor: o Pyodide só instala
 
 Complemento para qualquer estratégia: um botão "Rodar com GPU" apontando para molab, Colab ou um HF Space, para quem quiser reproduzir o treino completo fora do blog.
 
-A barra do lab (T-18) é a pele em cima de `notebooks` e `gpuUrl`: sem campo `marimo` nem `colab`, e "Abrir no Colab" só com `gpuUrl`. A primeira célula do lab é convenção no `AGENTS.md` de `src/components/marimo/` (antes da T-14) e no post da T-21, com `src/components/marimo/pk.css`.
-
 #### Fluxo de um post pesado
 
-1. Declarar no frontmatter `notebooks: [{ mode: iframe, src: ./notebooks/treino.py, compute: precomputed }]`.
+1. Declarar no frontmatter `notebooks: [{ src: ./notebooks/treino.py, compute: precomputed }]`.
 2. Marcar dependências nativas no bloco PEP 723 para que o export WASM as ignore:
 
 ```python
@@ -552,21 +564,41 @@ pnpm build   # = uv run scripts/build-notebooks.py && astro build && pagefind --
 
 ```
 
-`pnpm dev` não gera notebooks. Para ver um notebook iframe no servidor de dev, rode antes `uv run scripts/build-notebooks.py` (só leves, com cache) ou `pnpm build && npx wrangler dev`.
+`pnpm dev` não gera as páginas de notebook. Para ver uma, rode antes `uv run scripts/build-notebooks.py` (só leves, com cache) ou `pnpm build && npx wrangler dev`.
 
 ## 8. Visualizações interativas (Svelte + D3)
 
-Cada gráfico é um componente Svelte 5 que usa módulos D3 só para cálculo e desenha o SVG no próprio template. Assim o Astro renderiza o SVG no build (o leitor vê o gráfico sem JS) e o island só adiciona interatividade ao ficar visível.
+Cada figura usa o degrau mais baixo que explica o conceito. Os degraus 0 a 3 ficam no artigo; 4 e 5 ficam fora.
+
+
+| Degrau | O que é                                                                 | Onde            |
+| ------ | ----------------------------------------------------------------------- | --------------- |
+| 0      | Texto e fórmula                                                         | Artigo          |
+| 1      | Figura estática: SVG gerado no build, 0 JS                             | Artigo          |
+| 2      | Figura em passos: botões Anterior/Próximo, no lugar de GIF             | Artigo          |
+| 3      | Explorável: island Svelte com `client:visible` e dados pré-calculados  | Artigo          |
+| 4      | Notebook marimo, página própria                                         | Fora do artigo  |
+| 5      | GPU, `gpuUrl`                                                           | Fora do artigo  |
+
+
+O mesmo componente de `src/components/viz/` sem `client:*` é figura estática (zero JS) e com `client:visible` é explorável. Nos dois, o SVG está no HTML desde o build. Cada gráfico é um componente Svelte 5 que usa módulos D3 só para cálculo e desenha o SVG no próprio template.
 
 ### Regras
 
 - Importar módulos D3 avulsos (`d3-scale`, `d3-shape`, `d3-array`, `d3-format`), nunca o pacote `d3` inteiro (RNF-02).
 - Proibido `d3-selection` para criar ou mudar elementos; o DOM é do Svelte. Exceção documentada: `d3-zoom`/`d3-drag` via action do Svelte.
-- Dados vêm por props, importados no MDX a partir de JSON/CSV na pasta do post; nada de `fetch` em runtime.
+- Dados vêm por props, importados no MDX a partir de JSON/CSV na pasta do post; nada de `fetch` em runtime. Se o dado não cabe nas props, a figura está no degrau errado.
 - Datas chegam como string ISO (é o que JSON e CSV entregam); o componente converte para `Date`. O autor não converte nada no MDX.
 - Todo gráfico recebe `title` e `summary` (vira `aria-label`) e oferece "Ver dados" com a tabela (RNF-04).
-- Hidratação padrão `client:visible`; `client:load` só com justificativa no PR.
+- No degrau 3, a hidratação padrão é `client:visible`; `client:load` só com justificativa no PR.
 - Cores via variáveis CSS do tema, para respeitar modo escuro.
+- `.svelte` sem `client:*` em `src/components/viz/` é permitido: é o modo estático.
+- A geometria (posição de células, setas e cotas) fica em funções puras de `src/lib/viz/`, testadas no Vitest.
+- Teto de nós SVG por figura, ponto de partida 1.000; o número final e a verificação são da T-19. Acima do teto, os dados são reduzidos no Python.
+- O controle lê uma tabela pré-calculada e não recalcula modelo no navegador (INP, RNF-13).
+- Passo a passo com botões Anterior/Próximo. Animação ligada à rolagem só em CSS, como melhoria progressiva, com `@supports` e `prefers-reduced-motion`. Sem GIF.
+- Toda figura dentro de um `Figure.astro`, com legenda, "Ver dados" e proporção reservada (CLS).
+- Rótulos em IBM Plex Mono 400 e notas em IBM Plex Sans itálico, sem face nova (orçamento de fontes da §9).
 
 ### Contrato do componente
 
@@ -613,16 +645,22 @@ import serie from './data/latencia.json'; // [{ "date": "2026-10-01", "value": 1
 
 ```
 
-### Biblioteca inicial (Fase 2)
+### Biblioteca inicial (Fase 2a)
+
+O contrato do `LineChart` acima permanece como exemplo do padrão. `LineChart`, `BarChart` e `Scatter` entram quando um post pedir.
 
 
 | Componente   | Uso típico                                      | Módulos D3             |
 | ------------ | ----------------------------------------------- | ---------------------- |
-| `LineChart`  | Séries temporais, curvas de treino              | scale, shape, array    |
-| `BarChart`   | Comparação entre modelos ou benchmarks          | scale, array, format   |
-| `Scatter`    | Embeddings 2D, correlações                      | scale, array, zoom     |
-| `Heatmap`    | Matrizes de atenção e confusão                  | scale, scale-chromatic |
-| `Explorable` | Wrapper com sliders que alimentam outro gráfico | —                      |
+| `Vector`     | Primitiva estática, só desenho                  | geometria em `src/lib/viz/` |
+| `Matrix`     | Primitiva estática, só desenho                  | geometria em `src/lib/viz/` |
+| `Tensor`     | Primitiva estática, com cota                   | geometria em `src/lib/viz/` |
+| `Arrow`      | Primitiva estática, só desenho                  | geometria em `src/lib/viz/` |
+| `Grid`       | Primitiva estática, só desenho                  | geometria em `src/lib/viz/` |
+| `Figure`     | Moldura Astro: legenda numerada, "Ver dados" e proporção reservada | —            |
+| `Heatmap`    | Explorável: matrizes de atenção e confusão     | scale, scale-chromatic |
+| `Explorable` | Explorável: controles que alimentam uma primitiva | —                    |
+| `Stepper`    | Explorável: Anterior/Próximo                    | —                      |
 
 
 Antes da T-19, crie `src/components/viz/AGENTS.md` a partir desta seção e da seção 9.8 de `specs/BRAND.md`. Isso não cria dependência da T-19 com a Fase 1b.
@@ -652,8 +690,8 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   ├── assets/brand/         # símbolo e ícones; ver a árvore da marca abaixo
 │   ├── components/
 │   │   ├── ui/               # .astro: Card, TagList, PostRail, AuthorBadge, KindFilter
-│   │   ├── viz/              # .svelte: gráficos D3 (AGENTS.md próprio, criado antes da T-19)
-│   │   └── marimo/           # MarimoFrame, RunOnGpu (AGENTS.md próprio, criado antes da T-14)
+│   │   ├── viz/              # .svelte: primitivas e exploráveis; Figure.astro (AGENTS.md próprio, criado antes da T-19)
+│   │   └── marimo/           # LabBar (AGENTS.md próprio, criado antes da T-14)
 │   ├── integrations/
 │   │   └── headers.ts        # gera dist/_headers no astro:build:done (CSP por rota)
 │   ├── layouts/              # BaseLayout, PostLayout
@@ -666,12 +704,13 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   │   ├── sobre.astro
 │   │   ├── rss.xml.ts
 │   │   └── robots.txt.ts
-│   ├── lib/                  # getPublishedPosts, readingTime, seo; unicidade de folio
+│   ├── lib/                  # getPublishedPosts, readingTime, seo; unicidade de folio; viz/ (geometria pura)
 │   └── styles/
 │       ├── global.css
 │       └── shiki/            # pk-claro.json, pk-escuro.json
 ├── scripts/
-│   └── build-notebooks.py    # leves no CI; --heavy <slug> para export local
+│   ├── build-notebooks.py    # leves no CI; --heavy <slug> para export local
+│   └── build-data.py         # na máquina do autor; o CI só confere o lock (T-73)
 ├── exports/                  # pesados, commitados: <slug>/<nome>/ + export.lock
 ├── public/
 │   ├── favicon.svg
@@ -706,10 +745,10 @@ public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-t
 
 - **Commits:** Conventional Commits citando o requisito, ex.: `feat(post): lateral do cabeçalho com o título ao rolar [RF-04]`.
 - **Branches:** `main` = produção; toda mudança via PR com preview. Nome de branch: `t-XX-descricao-curta`.
-- **Componentes:** `.astro` para tudo que é estático; `.svelte` só quando houver estado no cliente.
+- **Componentes:** `.astro` para tudo que é estático; `.svelte` só quando houver estado no cliente. Exceção: em `src/components/viz/`, o mesmo `.svelte` sem `client:*` é figura estática (0 JS) e com `client:visible` é explorável.
 - **Rotas:** em pt-BR (`/sobre`, `/tags/[tag]`, `/tipos/[tipo]`), com `/blog/[slug]` e a exceção `/page/[n]` (Q10).
 - **Alias:** `~/` aponta para `src/`.
-- **Versões:** Node LTS fixado em `.node-version`; Python fixado em `.python-version`; marimo travado no `uv.lock`. O iframe usa os assets do próprio export, então já sai alinhado.
+- **Versões:** Node LTS fixado em `.node-version`; Python fixado em `.python-version`; marimo travado no `uv.lock`. A página do notebook usa os assets do próprio export, então já sai alinhada.
 - **Mudança de spec:** PR que altera comportamento atualiza `specs/SPEC.md` no mesmo commit; o template de PR tem o campo "Requisitos afetados".
 
 ### Dependências pré-aprovadas
@@ -767,7 +806,7 @@ A [doc da Cloudflare](https://developers.cloudflare.com/workers/static-assets/he
 
 Por isso o `_headers` é **gerado no build** pela integração `src/integrations/headers.ts`, no hook `astro:build:done`, escrevendo em `dist/_headers`:
 
-1. Regra `/*` com a CSP estrita (sem `wasm-unsafe-eval`), HSTS, `X-Content-Type-Options`, `Referrer-Policy` e `frame-ancestors 'self'`. Não usar `X-Frame-Options: DENY`: os iframes de notebook são do mesmo domínio.
+1. Regra `/*` com a CSP estrita (sem `wasm-unsafe-eval`), HSTS, `X-Content-Type-Options`, `Referrer-Policy` e `frame-ancestors 'self'`. Não usar `X-Frame-Options: DENY`.
 2. A CSP de notebook medida na T-05 vai numa regra por export, `/notebooks/<slug>/<nome>/*`, cada uma com `! Content-Security-Policy` e os hashes do próprio export. A página do post não executa Pyodide e não recebe essa CSP. Diretivas: `default-src 'none'`; `script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net` mais os hashes `sha256` dos scripts inline; `style-src 'self' 'unsafe-inline'`; `img-src 'self' data:`; `font-src 'self' data:`; `connect-src 'self' https://wasm.marimo.app https://cdn.jsdelivr.net https://files.pythonhosted.org`; `worker-src 'self'`; `frame-ancestors 'self'`; `base-uri 'none'`; `form-action 'none'`. Os hashes dependem do `index.html` de cada export. Cada linha do `_headers` tem limite de 2.000 caracteres: a linha medida tem 577 com 4 hashes, cerca de 55 por hash. A T-16 implementa essas regras, calcula os hashes no build e confere o limite de 100 regras e de 2.000 caracteres por linha. Hash em `style-src` não entra: com um hash na diretiva, o navegador ignora `'unsafe-inline'`. `'unsafe-inline'` em `style-src` não contradiz o RNF-07; `script-src` não tem `'unsafe-inline'` nem `'unsafe-eval'`.
 3. Regras de cache (abaixo) e `X-Robots-Tag: noindex` para `https://:version.:subdomain.workers.dev/*` depois que o domínio próprio existir.
 4. O build falha se o arquivo passar de 100 regras (RNF-07).
@@ -810,13 +849,24 @@ Uma tarefa só fecha quando seus cenários passam no CI. Os cenários abaixo cob
 ### Cenários (Given/When/Then)
 
 ```gherkin
-Funcionalidade: Notebook marimo em iframe [RF-08, RNF-03]
+Funcionalidade: Notebook em página própria [RF-08, RNF-03]
   Cenário: post sem notebook não carrega runtime
     Dado um post sem o campo notebooks
     Quando a página carrega
     Então nenhuma requisição casa com /pyodide|marimo/
 
-Funcionalidade: Notebook pesado [RF-08, RNF-09]
+  Cenário: post com notebook não carrega runtime
+    Dado um post com notebooks
+    Quando a página do post carrega
+    Então nenhuma requisição casa com /pyodide|marimo/
+
+  Cenário: a barra do lab aponta para a página do notebook
+    Dado um post com notebooks
+    Quando a página do post carrega
+    Então "Abrir no marimo" aponta para /notebooks/<slug>/<nome>/, com barra final
+    E /notebooks/<slug>/<nome>/ responde 200
+
+Funcionalidade: Notebook pesado (depois do lançamento, T-17 e T-33) [RF-08, RNF-09]
   Cenário: export desatualizado
     Dado um notebook com compute: precomputed
     E o .py mudou depois do último export local
@@ -835,7 +885,7 @@ Funcionalidade: CSP por rota [RNF-06, RNF-07]
     Então a CSP não contém wasm-unsafe-eval
 
   Cenário: rota com notebook
-    Dado um post com { mode: iframe } e o export em /notebooks/
+    Dado um post com notebooks e o export em /notebooks/
     Quando inspeciono os headers efetivos da página do post e de /notebooks/
     Então a página do post não contém wasm-unsafe-eval
     E /notebooks/ tem uma única CSP, com wasm-unsafe-eval
@@ -851,6 +901,13 @@ Funcionalidade: Gráfico acessível [RF-09, RNF-04]
     Dado um post com <LineChart client:visible>
     Quando JavaScript está desabilitado
     Então o SVG está presente no HTML com aria-label igual ao summary
+
+Funcionalidade: Figura estática [RF-09, RNF-02]
+  Cenário: figura sem island
+    Dado um post com uma figura sem client:*
+    Quando a página carrega
+    Então o SVG está no HTML
+    E a página não tem astro-island
 
 ```
 
@@ -879,7 +936,7 @@ Funcionalidade: Gráfico acessível [RF-09, RNF-04]
 
 As tarefas, dependências, gates e o status de cada uma estão em `specs/ROADMAP.md`. Cada tarefa é uma unidade de PR e cita os IDs de requisito desta spec que entrega; esta spec define o quê, o roadmap define a ordem.
 
-O lançamento leva cerca de 6 a 7 semanas para uma pessoa, em quatro fases com um gate cada. A Fase 0 existe para matar o maior risco (integração do marimo) antes de escrever features. O modo inline foi adiado na T-03 e a Fase 2 segue só com iframe.
+O lançamento leva cerca de 6 a 7 semanas para uma pessoa. A Fase 0 mata o maior risco (integração do marimo) antes das features. A Fase 2 se divide em 2a (storytelling visual) e 2b (lab marimo), cada uma com o seu gate. O notebook é uma página própria, aberta pela barra do lab. O modo inline foi adiado na T-03 e o iframe no post saiu na T-71. Notebooks pesados ficam para depois do lançamento.
 
 ## Fontes
 
