@@ -21,6 +21,7 @@
     "@astrojs/mdx": "^8.0.3",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
+    "@astrojs/svelte": "^9.1.2",
     "@tailwindcss/typography": "^0.5.20",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.8",
@@ -28,6 +29,7 @@
     "rehype-katex": "^7.0.1",
     "remark-math": "^6.0.0",
     "sharp": "^0.35.5",
+    "svelte": "^5.57.3",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3"
   },
@@ -38,9 +40,11 @@
     "@types/node": "^24.19.2",
     "eslint": "^10.12.0",
     "eslint-plugin-astro": "^3.2.1",
+    "eslint-plugin-svelte": "^3.24.1",
     "linkinator": "^8.1.0",
     "prettier": "^3.9.10",
     "prettier-plugin-astro": "^1.1.1",
+    "prettier-plugin-svelte": "^4.1.1",
     "typescript-eslint": "^8.71.2",
     "vitest": "^5.0.4",
     "wrangler": "^4.150.0"
