@@ -26,7 +26,7 @@ Uma tarefa = um PR, num branch `t-XX-descricao-curta`. Trabalho descoberto no ca
 
 | Para                   | Comando                                                                        |
 | ---------------------- | ------------------------------------------------------------------------------ |
-| Servidor de dev        | `pnpm dev` (localhost:4321). Não gera notebooks iframe                         |
+| Servidor de dev        | `pnpm dev` (localhost:4321). Não gera as páginas de notebook                   |
 | Gerar notebooks leves  | `uv run scripts/build-notebooks.py` (com cache por hash)                       |
 | Rodar como em produção | `pnpm build && npx wrangler dev` (localhost:8787)                              |
 | Build completo         | `pnpm build` (notebooks → Astro → Pagefind)                                    |
@@ -50,19 +50,21 @@ src/content/posts/<slug>/index.mdx   cada post é uma pasta: texto, capa, figs/,
 src/assets/brand/       pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel,-404}.svg
 src/assets/brand/icones/  aceno.svg; icone-{conceito,tutorial,lab,playbook}.svg e -parado; icone-relogio.svg
 src/components/ui/      .astro estáticos
-src/components/viz/     .svelte com D3 (AGENTS.md próprio, criado antes da T-19; seção 9.8 do BRAND)
-src/components/marimo/  MarimoFrame, RunOnGpu (AGENTS.md próprio, criado antes da T-14; seções 9.6–9.7)
+src/components/viz/     primitivas e exploráveis Svelte; sem client:* é figura estática (AGENTS.md próprio, criado antes da T-19; seção 9.8 do BRAND)
+src/lib/viz/            geometria pura
+src/components/marimo/  LabBar (AGENTS.md próprio, criado antes da T-14; seções 9.6–9.7)
 src/integrations/headers.ts   gera dist/_headers no build (CSP por rota)
 src/lib/                getPublishedPosts, readingTime, seo
 src/styles/shiki/       pk-claro.json, pk-escuro.json
 scripts/build-notebooks.py
+scripts/build-data.py   JSON reduzido na pasta data/ do post; o CI confere o lock (T-73)
 exports/<slug>/<nome>/  exports pesados commitados + export.lock (não editar à mão)
 public/                 favicon.svg, favicon.ico, favicon-16.png, favicon-32.png, apple-touch-icon.png
 public/notebooks/       gerado no build; fica no .gitignore
 tests/                  vitest (unit) e playwright (e2e)
 ```
 
-Sem `icon-192.png` e sem `icon-512.png`. `src/components/marimo/pk.css` não vem no pacote da marca: nasce na convenção da T-14/T-21.
+Sem `icon-192.png` e sem `icon-512.png`. `src/components/marimo/pk.css` não vem no pacote da marca: nasce na convenção da T-14/T-74.
 
 
 
@@ -70,13 +72,13 @@ Sem `icon-192.png` e sem `icon-512.png`. `src/components/marimo/pk.css` não vem
 
 - **Commits:** Conventional Commits citando o requisito, ex.: `feat(post): lateral do cabeçalho com o título ao rolar [RF-04]`.
 - **Branches:** `main` é produção; toda mudança entra por PR com preview.
-- **Componentes:** `.astro` para tudo que é estático; `.svelte` só quando houver estado no cliente. Hidratação padrão `client:visible`; `client:load` exige justificativa no PR.
+- **Componentes:** `.astro` para tudo que é estático; `.svelte` só quando houver estado no cliente. Hidratação padrão `client:visible`; `client:load` exige justificativa no PR. Exceção: em `src/components/viz/`, sem `client:*` é figura estática (0 JS); com `client:visible` é explorável.
 - **Conteúdo:** as páginas acessam posts só por `getPublishedPosts()`, nunca por `getCollection('posts')` direto (é o que esconde rascunhos quando `SHOW_DRAFTS` não é `true`).
 - **Slug:** é o `id` da entrada, gerado pelo `generateId` do loader (nome da pasta). Não recalcule slug nas páginas.
 - **Nomes:** identificadores de código em inglês; texto visível e rotas em pt-BR (`/sobre`, `/tags/[tag]`, `/tipos/[tipo]`). Exceções fixadas na SPEC: `/blog/[slug]` e `/page/[n]`.
 - **Alias:** `~/` aponta para `src/`.
 - **Dados de gráfico:** importados no MDX a partir de JSON/CSV da pasta do post; nada de `fetch` em runtime. Datas chegam como string ISO e o componente converte.
-- **Notebooks:** `{ mode: iframe, src, compute }`. Detalhes na SPEC §6 e §7.
+- **Notebooks:** o notebook do post é uma página própria em `/notebooks/<slug>/<nome>/`, aberta pela barra do lab; nunca iframe no post. O campo `mode` sai do schema na T-14. Detalhes na SPEC §6 e §7.
 - **Cores:** só a lista fechada do CSS global: `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `kind-concept`, `kind-tutorial`, `kind-lab`, `kind-playbook`. Sem nome paralelo `--papel` / `--prussia`. Sem `dark:` e sem `@custom-variant dark`. Hex de desenho só em `src/assets/brand/`. As variáveis de `src/styles/global.css` e os JSON do Shiki também carregam hex, porque são a definição da paleta e o tema não lê variável CSS; componente, página e layout não.
 - **Fontes:** Fonts API do Astro, `fontProviders.fontsource`, quatro famílias (IBM Plex Sans Condensed, IBM Plex Sans, IBM Plex Mono, Caveat). Tokens `--font-display`, `--font-sans`, `--font-mono` e `--font-hand`. As variáveis de família (`--font-plex-condensed`, `--font-plex-sans`, `--font-plex-mono`, `--font-caveat`) só aparecem no `astro.config.mjs`, no `BaseLayout.astro`, no bloco `@theme inline` do `global.css` e nos testes E2E, que leem a família pela variável. Componente e página usam o token; a IBM Plex Sans entra no texto e a IBM Plex Mono no código pela troca de `--font-sans` e `--font-mono`. Sem pacote `@fontsource` instalado à mão e sem Google Fonts. O Astro acrescenta um sufixo de hash ao nome da família; use sempre o token ou a variável do `cssVariable`, nunca o nome da família escrito à mão. A IBM Plex Mono entra só no peso 400. Tarefa que acrescenta face de fonte numa página mede antes e depois com o Lighthouse. Mudar a lista ou os tetos do `font-budget.spec.ts` é decisão de escopo.
 - **Ícones:** import default do `.svg` como componente Astro. Animação no CSS global. Versão parada em lista. `prefers-reduced-motion`. O aceno da saudação fica fora do `h1`, acima dele, e leva `aria-hidden` (T-69).
@@ -107,7 +109,7 @@ A stack é recente e a sintaxe antiga ainda domina o que os modelos viram. Antes
 - **Cloudflare:** o site roda em **Workers com Static Assets** (`wrangler.jsonc`, `assets.directory: ./dist`). Não é Pages: nada de `wrangler pages deploy` nem `@astrojs/cloudflare` (o site é estático, sem adapter).
 - **Modo inline:** adiado na T-03; não instale `@marimo-team/mdx-marimo`.
 - **marimo:** versão travada no `uv.lock`. Dados de notebook são lidos com `mo.notebook_location()`. Cache e pré-cômputo usam `cache_cells = true`, `--execute` e `@mo.persistent_cache(method="lazy")`; `method="pickle"` não empacota bem para WASM. Célula que treina com `torch` não entra no cache com `cache_cells` no marimo 0.25.1, ver `specs/spikes/T-04-html-wasm.md`.
-- **CSP e** `_headers`**:** o arquivo é gerado no build (`src/integrations/headers.ts`); não edite `dist/_headers` nem crie `public/_headers`. Na Cloudflare, header repetido em regras que casam com a mesma URL chega em linhas separadas (a doc descreve união por vírgula; para a CSP, as duas formas são duas políticas). Os testes de headers usam GET: HEAD falhou no preview da T-05. Para trocar a CSP de uma rota, a regra precisa de `! Content-Security-Policy` antes da nova. Limite de 100 regras. Só cabe um splat por regra; use `:placeholder` por segmento (ex.: `/notebooks/:slug/:nome/assets/*`). `wasm-unsafe-eval` só nas rotas com notebook. Iframes de notebook são do mesmo domínio: use `frame-ancestors 'self'`, não `X-Frame-Options: DENY`.
+- **CSP e** `_headers`**:** o arquivo é gerado no build (`src/integrations/headers.ts`); não edite `dist/_headers` nem crie `public/_headers`. Na Cloudflare, header repetido em regras que casam com a mesma URL chega em linhas separadas (a doc descreve união por vírgula; para a CSP, as duas formas são duas políticas). Os testes de headers usam GET: HEAD falhou no preview da T-05. Para trocar a CSP de uma rota, a regra precisa de `! Content-Security-Policy` antes da nova. Limite de 100 regras. Só cabe um splat por regra; use `:placeholder` por segmento (ex.: `/notebooks/:slug/:nome/assets/*`). `wasm-unsafe-eval` só nas rotas com notebook. Use `frame-ancestors 'self'`, não `X-Frame-Options: DENY`.
 
 
 
