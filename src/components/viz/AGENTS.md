@@ -6,6 +6,7 @@ Complementa o `AGENTS.md` da raiz e prevalece no que for mais específico. Fonte
 
 - O mesmo `.svelte` sem `client:*` é figura estática (degrau 1, 0 JS); com `client:visible` é explorável (degrau 3). Nos dois, o SVG sai no HTML do build.
 - `client:load` só com justificativa no PR. Nada de `client:only`: ele tira o SVG do HTML.
+- O `astro-island` tem `display: contents` e não tem caixa. Em teste, role até a figura ou meça a figura, nunca o island.
 - Os controles de um explorável saem `disabled` no HTML do build e habilitam quando o componente hidrata. A figura não muda de tamanho (CLS) e não há botão que não faz nada.
 - Dados por props, importados no MDX de JSON ou CSV da pasta do post; nada de `fetch`. Datas chegam como string ISO e o componente converte. O controle lê uma tabela pré-calculada e não recalcula modelo no navegador (RNF-13).
 
@@ -14,7 +15,7 @@ Complementa o `AGENTS.md` da raiz e prevalece no que for mais específico. Fonte
 - Svelte 5 com runes (`$props()`, `$state`, `$derived`, `$effect`) e eventos como atributo (`onclick`). `lang="ts"` só com recursos de tipo, sem `enum`; o projeto não tem `svelte.config.js`.
 - O `svg` raiz leva `data-viz="<nome>"`, `role="img"`, `aria-label={summary}` e, como primeiro filho, `<title>{title}</title>`. Todo gráfico recebe `title` e `summary` (RNF-04).
 - Teto de 1.000 elementos por figura, contando o `svg` e todos os descendentes, verificado em `tests/e2e/viz.spec.ts`. Acima disso, os dados são reduzidos no Python.
-- A geometria fica em funções puras de `src/lib/viz/`, testadas no Vitest; o `.svelte` só desenha.
+- A geometria fica em funções puras de `src/lib/viz/`, testadas no Vitest; o `.svelte` só desenha. O `astro check` não confere tipos dentro do `.svelte` (T-75).
 - D3 só em módulos avulsos da SPEC §9 e só para cálculo. O DOM é do Svelte: `d3-selection` não cria nem altera elemento (exceção: `d3-zoom` e `d3-drag` por action).
 - O JS de cada island cabe em 40.000 bytes gzip, medidos pelo `pnpm check:js` (componente, renderer e imports estáticos). Página sem island fica sem JS de island.
 

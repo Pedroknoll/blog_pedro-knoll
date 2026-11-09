@@ -103,7 +103,7 @@ A stack é recente e a sintaxe antiga ainda domina o que os modelos viram. Antes
 - **pnpm 12:** a configuração do pnpm (`overrides`, `allowBuilds`) fica no `pnpm-workspace.yaml`; o campo `pnpm` do `package.json` não é lido desde o pnpm 11. O `overrides` do `katex` alinha o `rehype-katex` e o `remark-math` à versão direta: ao subir o `katex`, suba o override junto (T-68).
 - **Zod 4:** `z.url()`, não `z.string().url()`; `{ error: '...' }`, não `{ message: '...' }`; `z.strictObject()` em vez de `.strict()`.
 - **TypeScript:** fica em 6.x. O 7 ainda quebra `astro check` e `typescript-eslint` (peers `^5 || ^6`). Só subir quando os dois suportarem; confira os peers antes.
-- **Svelte 5:** runes (`$props()`, `$state`, `$derived`, `$effect`). Eventos como atributo (`onclick`), não `on:click`. Nada de `export let`, `createEventDispatcher` ou stores para estado local.
+- **Svelte 5:** runes (`$props()`, `$state`, `$derived`, `$effect`). Eventos como atributo (`onclick`), não `on:click`. Nada de `export let`, `createEventDispatcher` ou stores para estado local. `lang="ts"` só com recursos de tipo, sem `enum`; o projeto não tem `svelte.config.js`. O `astro check` não confere tipos dentro do `.svelte` (T-75). O `astro-island` tem `display: contents` e não tem caixa: em teste, role até a figura ou meça a figura, nunca o island (T-19).
 - **Tailwind v4:** configuração no CSS (`@import "tailwindcss" source("..")`, `@theme`, `@plugin "@tailwindcss/typography"`), integrada pelo plugin `@tailwindcss/vite`. O `source("..")` limita a detecção de classes a `src/` (T-50): texto em `specs/`, em `tests/` e na raiz não gera CSS, e classe escrita só fora de `src/` não é gerada. Não existe `tailwind.config.js` e não se usa `@astrojs/tailwind`.
 - **D3 v7:** importe módulos avulsos (`d3-scale`, `d3-shape`, `d3-array`, `d3-format`), nunca o pacote `d3`. O DOM é do Svelte: `d3-selection` não cria nem altera elementos (exceção: `d3-zoom`/`d3-drag` via action).
 - **Cloudflare:** o site roda em **Workers com Static Assets** (`wrangler.jsonc`, `assets.directory: ./dist`). Não é Pages: nada de `wrangler pages deploy` nem `@astrojs/cloudflare` (o site é estático, sem adapter).
@@ -118,7 +118,7 @@ A stack é recente e a sintaxe antiga ainda domina o que os modelos viram. Antes
 Não faça sem pedido explícito:
 
 - Mudar uma decisão da SPEC §5 (ADRs) ou um requisito. Proponha a mudança no PR e espere.
-- Relaxar um budget (Lighthouse, size-limit), a CSP ou um teste. Teste errado é motivo para parar, não para editar o teste.
+- Relaxar um budget (Lighthouse, `check:js`), a CSP ou um teste. Teste errado é motivo para parar, não para editar o teste.
 - Adicionar dependência (npm ou Python) **fora da lista pré-aprovada da SPEC §9**. As da lista podem ser instaladas na versão estável atual.
 - Subir a versão maior de Astro, Svelte, Tailwind, Zod ou marimo.
 - Fazer deploy de produção. Produção só sai pelo CI, no merge em `main`.

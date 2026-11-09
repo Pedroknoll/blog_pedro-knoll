@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 09/11/2026
 
+**Revisão 2 de 09/11/2026:** o RNF-02 troca o `size-limit` pela conta por island no `check:js`: cada `astro-island` soma o componente, o renderer e os imports estáticos, até 40.000 bytes gzip, e os scripts inline do island contam no JS inicial da página. A §8 fixa o teto de 1.000 elementos por figura, com `data-viz` no `svg` raiz e verificação no E2E, e troca no contrato o `var(--viz-1)`, que não existe na lista fechada de cores, pela classe do token. O cenário "Figura estática" da §11 passa a exigir a figura fora de um `astro-island`, e não a página inteira sem island, porque o post da T-21 tem figura estática e explorável. A §9 tira o `size-limit` da lista pré-aprovada (T-19).
+
 **Revisão de 09/11/2026:** a escada de interatividade usa o degrau mais baixo que explica o conceito. No artigo: 0 texto e fórmula, 1 figura estática (SVG no build, 0 JS), 2 figura em passos (Anterior/Próximo, no lugar de GIF) e 3 explorável (island Svelte com `client:visible` e dados pré-calculados). Fora do artigo: 4 notebook marimo e 5 GPU (`gpuUrl`). O mesmo componente de `src/components/viz/` sem `client:*` é figura estática e com `client:visible` é explorável. A Fase 2 se divide em 2a (storytelling visual) e 2b (lab marimo). O notebook sai do artigo e vira a página inteira em `/notebooks/<slug>/<nome>/`, aberta pela barra do lab; sem iframe, sem pôster e sem "Ativar interatividade" no post. O RF-08 continua Must só para `compute: browser`; os pesados ficam para depois do lançamento (T-17, T-33). O ADR-02 foi substituído; o texto anterior está em `specs/adr/ADR-02-v2-iframe.md`. A implementação é das tarefas da Fase 2a e 2b; até elas, o site segue o comportamento anterior (T-71).
 
 **Revisão 3 de 06/11/2026:** a §9 fixa um só `katex` no lock: um `overrides` no `pnpm-workspace.yaml` leva o `rehype-katex` e o `remark-math` à versão do `katex` direto, a mesma do CSS e das fontes do KaTeX (T-68).
@@ -200,7 +202,7 @@ Cada RNF tem um número verificável no CI; o que não dá para medir automatica
 | ID     | Área             | Requisito                                                                                                                                                               | Como verificar                                                                                                                                                                                                                             |
 | ------ | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | RNF-01 | Performance      | LCP < 2,0 s e CLS < 0,05 em 4G simulado (home e post sem notebook)                                                                                                      | Lighthouse CI no job `lighthouse`, contra o `dist/` do build servido localmente (`staticDistDir`), na home e nos dois posts publicados. Perfil mobile padrão do Lighthouse, com throttling simulado "Slow 4G" (150 ms de RTT, 1,6 Mbps, CPU 4×), mediana de 3 execuções. As quatro categorias ≥ 95 também são asserção `error` desde a T-13                                                                                                                                                                                                             |
-| RNF-02 | Performance      | JS inicial ≤ 50 KB gzip **por página** sem islands; cada island D3 ≤ 40 KB gzip. O runtime marimo fica fora desse budget e só existe em `/notebooks/*`            | `pnpm check:js` (`scripts/check-page-js.mjs` sobre a função pura `src/lib/page-js.ts`) soma, por página de `dist/` fora de `notebooks/`, o JS que o HTML referencia: `<script src>`, script inline executável, `modulepreload` e os imports estáticos transitivos; `import()` dinâmico não conta. Limite de 50.000 bytes gzip. Página com `astro-island`, JS externo ou referência inexistente falha a verificação. O `size-limit` com uma entrada por island entra com a primeira island (T-19), que também decide como contar páginas com island. Um glob único sobre `dist/_astro/*.js` não serve: somaria chunks de páginas diferentes |
+| RNF-02 | Performance      | JS inicial ≤ 50 KB gzip **por página** sem islands; cada island D3 ≤ 40 KB gzip. O runtime marimo fica fora desse budget e só existe em `/notebooks/*`            | `pnpm check:js` (`scripts/check-page-js.mjs` sobre a função pura `src/lib/page-js.ts`) soma, por página de `dist/` fora de `notebooks/`, o JS que o HTML referencia: `<script src>`, script inline executável, `modulepreload` e os imports estáticos transitivos; `import()` dinâmico não conta. Limite de 50.000 bytes gzip. Página com JS externo ou referência inexistente falha a verificação. Cada `astro-island` conta à parte: o `component-url`, o `renderer-url` e o `before-hydration-url`, quando há, com os imports estáticos de cada um, até 40.000 bytes gzip por island; os scripts inline que o island acrescenta contam no JS inicial da página (T-19). Um glob único sobre `dist/_astro/*.js` não serve: somaria chunks de páginas diferentes |
 | RNF-03 | Performance      | Pyodide e runtime do marimo só em `/notebooks/*`; nenhuma página fora de `/notebooks/` os requisita                                                                      | Teste E2E da §11: home, post sem notebook e post com notebook não requisitam `/pyodide|marimo/`                                                                                                                                            |
 | RNF-04 | Acessibilidade   | WCAG 2.2 AA; gráficos D3 com `role="img"`, `aria-label` e tabela de dados alternativa. Animações da marca respeitam `prefers-reduced-motion`. Lápis não é texto menor que 24 px sobre folha clara | axe-core no Playwright, zero violações serious/critical; E2E com `prefers-reduced-motion: reduce` nas animações da marca |
 | RNF-05 | SEO              | HTML semântico, um `h1` por página, URLs estáveis `/blog/[slug]`                                                                                                        | Teste de build + Lighthouse SEO ≥ 95                                                                                                                                                                                                       |
@@ -591,10 +593,10 @@ O mesmo componente de `src/components/viz/` sem `client:*` é figura estática (
 - Datas chegam como string ISO (é o que JSON e CSV entregam); o componente converte para `Date`. O autor não converte nada no MDX.
 - Todo gráfico recebe `title` e `summary` (vira `aria-label`) e oferece "Ver dados" com a tabela (RNF-04).
 - No degrau 3, a hidratação padrão é `client:visible`; `client:load` só com justificativa no PR.
-- Cores via variáveis CSS do tema, para respeitar modo escuro.
+- Cores pelos tokens da lista fechada, com as classes do Tailwind (`fill-ink`, `stroke-accent`…), que acompanham o tema.
 - `.svelte` sem `client:*` em `src/components/viz/` é permitido: é o modo estático.
 - A geometria (posição de células, setas e cotas) fica em funções puras de `src/lib/viz/`, testadas no Vitest.
-- Teto de nós SVG por figura, ponto de partida 1.000; o número final e a verificação são da T-19. Acima do teto, os dados são reduzidos no Python.
+- Teto de 1.000 elementos SVG por figura, contando o `svg` e os descendentes. O `svg` raiz leva `data-viz`, e a verificação é `tests/e2e/viz.spec.ts`, sobre os posts publicados (T-19). Acima do teto, os dados são reduzidos no Python.
 - O controle lê uma tabela pré-calculada e não recalcula modelo no navegador (INP, RNF-13).
 - Passo a passo com botões Anterior/Próximo. Animação ligada à rolagem só em CSS, como melhoria progressiva, com `@supports` e `prefers-reduced-motion`. Sem GIF.
 - Toda figura dentro de um `Figure.astro`, com legenda, "Ver dados" e proporção reservada (CLS).
@@ -625,9 +627,9 @@ O mesmo componente de `src/components/viz/` sem `client:*` é figura estática (
 </script>
 
 <figure>
-  <svg viewBox="0 0 {width} {height}" role="img" aria-label={summary}>
+  <svg data-viz="line-chart" viewBox="0 0 {width} {height}" role="img" aria-label={summary}>
     <title>{title}</title>
-    <path d={path} fill="none" stroke="var(--viz-1)" stroke-width="2" />
+    <path d={path} fill="none" class="stroke-accent" stroke-width="2" />
     <!-- eixos, pontos e tooltip controlados por `hover` -->
   </svg>
   <figcaption>{title}</figcaption>
@@ -763,7 +765,7 @@ Um agente pode instalar, sem perguntar, as dependências abaixo, na versão est�
 | Conteúdo       | `remark-math`, `rehype-katex`, `katex`                                                                                                                                       | —                                                                 |
 | Gráficos       | `d3-scale`, `d3-shape`, `d3-array`, `d3-format`, `d3-zoom`, `d3-scale-chromatic`                                                                                             | —                                                                 |
 | Busca e deploy | `pagefind`, `wrangler`                                                                                                                                                       | —                                                                 |
-| Qualidade      | `eslint`, `prettier` (e os plugins oficiais para Astro e Svelte), `vitest`, `@testing-library/svelte`, `@playwright/test`, `@axe-core/playwright`, `size-limit`, `@lhci/cli`, `linkinator`, `@types/node` | `ruff`                                                            |
+| Qualidade      | `eslint`, `prettier` (e os plugins oficiais para Astro e Svelte), `vitest`, `@testing-library/svelte`, `@playwright/test`, `@axe-core/playwright`, `@lhci/cli`, `linkinator`, `@types/node` | `ruff`                                                            |
 | Notebooks      | —                                                                                                                                                                            | `moutils` (só em notebooks com `compute: onnx`, no bloco PEP 723) |
 
 
@@ -829,7 +831,7 @@ A T-05 confirmou o detach: `! Content-Security-Policy` seguido de nova CSP no me
 2. **Lint e tipos:** `pnpm lint`, que começa pela guarda de codificação (`pnpm check:utf8`: todo arquivo de texto em `src/` é UTF-8 válido e sem BOM), `astro check`, `ruff check`, `marimo check --select MW` em todos os notebooks.
 3. **Testes unitários:** `vitest` em `src/lib`.
 4. **Build de produção:** `pnpm build` sem `SHOW_DRAFTS` (notebooks leves → Astro → Pagefind; notebooks pesados não executam, só têm o `export.lock` conferido e são copiados).
-5. **Verificações do artefato:** dois jobs sobre o `dist/` do passo 4 (artifact), em paralelo ao E2E. `artifact-checks` roda os links internos (`pnpm check:links`, linkinator com fragmentos) e o JS por página (`pnpm check:js`); o segundo roda mesmo se o primeiro falhar. `lighthouse` roda o Lighthouse CI com budgets e guarda o relatório no artifact `lighthouse-report` (14 dias). As regras do `dist/_headers` entram com a T-16 e o `size-limit` com a T-19 (RNF-01/02/05/06/07).
+5. **Verificações do artefato:** dois jobs sobre o `dist/` do passo 4 (artifact), em paralelo ao E2E. `artifact-checks` roda os links internos (`pnpm check:links`, linkinator com fragmentos) e o JS por página (`pnpm check:js`); o segundo roda mesmo se o primeiro falhar. `lighthouse` roda o Lighthouse CI com budgets e guarda o relatório no artifact `lighthouse-report` (14 dias). As regras do `dist/_headers` entram com a T-16; o `check:js` também conta cada island (T-19) (RNF-01/02/05/06/07).
 6. **E2E:** Playwright + axe, só no Chromium, contra `astro preview` do `dist/` do passo 4 (artifact), o que inclui o cenário de rascunhos.
 7. **Deploy:** em PR, um segundo `astro build` com `SHOW_DRAFTS=true` (reaproveita os notebooks do passo 4) seguido de `wrangler versions upload`, que gera a URL de preview. Em `main`, o deploy espera o E2E, o `lighthouse` e o `artifact-checks` e faz `wrangler deploy` do build do passo 4. O preview do PR não espera nenhum dos três.
 
@@ -907,7 +909,7 @@ Funcionalidade: Figura estática [RF-09, RNF-02]
     Dado um post com uma figura sem client:*
     Quando a página carrega
     Então o SVG está no HTML
-    E a página não tem astro-island
+    E a figura não está dentro de um astro-island
 
 ```
 
@@ -920,7 +922,7 @@ Funcionalidade: Figura estática [RF-09, RNF-02]
 | Componente | Vitest + `@testing-library/svelte`                                           | Props e estados dos gráficos                                                                                                                     |
 | Notebook   | `marimo check` + export nativo                                               | Notebook executa e é compatível com WASM                                                                                                         |
 | E2E        | Playwright + axe-core                                                        | Cenários acima, navegação, busca, tema                                                                                                           |
-| Artefato   | Lighthouse CI, size-limit, JS por página, link checker, regras do `_headers` | RNF-01, 02, 05, 06, 07                                                                                                                           |
+| Artefato   | Lighthouse CI, JS por página e por island, link checker, regras do `_headers` | RNF-01, 02, 05, 06, 07                                                                                                                           |
 
 
 ### Definition of Done
