@@ -8,13 +8,14 @@ Complementa o `AGENTS.md` da raiz e prevalece no que for mais específico. Fonte
 - `client:load` só com justificativa no PR. Nada de `client:only`: ele tira o SVG do HTML.
 - O `astro-island` tem `display: contents` e não tem caixa. Em teste, role até a figura ou meça a figura, nunca o island.
 - Os controles de um explorável saem `disabled` no HTML do build e habilitam quando o componente hidrata. A figura não muda de tamanho (CLS) e não há botão que não faz nada.
-- Dados por props, importados no MDX de JSON ou CSV da pasta do post; nada de `fetch`. Datas chegam como string ISO e o componente converte. O controle lê uma tabela pré-calculada e não recalcula modelo no navegador (RNF-13). A tabela sai do `scripts/build-data.py` para `data/` do post, conferida pelo `data.lock` (SPEC §8); a prova da T-73 é o `data/attention.json` do post B, `{ tokens, weights }`, uma matriz 5 × 5 com formato provisório até a T-20.
+- Dados por props, importados no MDX de JSON ou CSV da pasta do post; nada de `fetch`. Datas chegam como string ISO e o componente converte. O controle lê uma tabela pré-calculada e não recalcula modelo no navegador (RNF-13). A tabela sai do `scripts/build-data.py` para `data/` do post, conferida pelo `data.lock` (SPEC §8); a prova da T-73 é o `data/attention.json` do post B, `{ tokens, weights }`, uma matriz 5 × 5, formato fixado na T-20 e lido pelo `Explorable`.
 
 ## Contrato
 
 - Svelte 5 com runes (`$props()`, `$state`, `$derived`, `$effect`) e eventos como atributo (`onclick`). `lang="ts"` só com recursos de tipo, sem `enum`; o projeto não tem `svelte.config.js`.
 - O `svg` raiz leva `data-viz="<nome>"`, `role="img"`, `aria-label={summary}` e, como primeiro filho, `<title>{title}</title>`. Todo gráfico recebe `title` e `summary` (RNF-04).
-- Na figura estática, o dono do `svg` raiz é o `Figure.astro`; num explorável, o próprio `.svelte`. Como o `Figure` emoldura um island que traz o próprio `svg` é da T-20.
+- Na figura estática, o dono do `svg` raiz é o `Figure.astro`; num explorável, o próprio `.svelte`, e o `Figure` vai no modo island (T-20).
+- `Stepper` (Anterior e Próximo sobre uma `Matrix`, com os passos por props) e `Explorable` (controle deslizante que escolhe a linha do `Heatmap`) são donos do `svg` e só existem com `client:visible`; a figura estática é a primitiva dentro do `Figure`. A lógica fica em `src/lib/viz/steps.ts` e `src/lib/viz/heatmap.ts`.
 - Primitivas (`Vector`, `Matrix`, `Tensor`, `Arrow`, `Grid`): `.svelte` com `<svelte:options namespace="svg" />`, sem estado, que desenham um `<g>` no sistema da raiz. No MDX, entram autocontidas no slot do `Figure`: filhos do MDX para um `.svelte` chegam embrulhados em `astro-static-slot`, que não desenha dentro de um `svg`. Id de `<pattern>` com `$props.id()` e prefixo `grade-`.
 - Teto de 1.000 elementos por figura, contando o `svg` e todos os descendentes, verificado em `tests/e2e/viz.spec.ts`. Acima disso, os dados são reduzidos no Python.
 - A geometria fica em funções puras de `src/lib/viz/`, testadas no Vitest; o `.svelte` só desenha. O `astro check` não confere tipos dentro do `.svelte` (T-75).
@@ -28,9 +29,12 @@ Complementa o `AGENTS.md` da raiz e prevalece no que for mais específico. Fonte
 - Rótulos em IBM Plex Mono 400; no máximo duas notas em IBM Plex Sans itálico; nenhuma face nova.
 - Sem sombra, gradiente ou 3D. Prefira classes do Tailwind a `<style>` no componente.
 - A grade usa `stroke-grid` e `stroke-grid-strong`; a cota vem de `dimension()` em `src/lib/viz/geometry.ts`. Medidas e vocabulário na BRAND §9.8.
+- `Heatmap`: células `fill-ink` com `fill-opacity` pelos cinco degraus de `HEAT_OPACITY` (`src/lib/viz/heatmap.ts`); o destaque é o contorno da linha em `stroke-accent`. Sem `d3-scale-chromatic`, que devolve hex. Medidas e contraste na BRAND §9.8.
+- A troca de cor usa `transition-colors motion-reduce:transition-none`.
 - A guarda de cores (`tests/unit/color-tokens.test.ts`) varre os `.astro` e `.svelte` desta pasta.
 
 ## Moldura
 
 - `Figure.astro`: props `number`, `caption`, `title`, `summary`, `name`, `width`, `height` e `data` (`columns` e `rows`). Desenha o `svg` raiz com a grade, a `<figcaption>` como último filho da `<figure>` e, logo depois da `<figure>`, o `<details>` "Ver dados" com a tabela de `data`. A `<figcaption>` dá o nome acessível da figura, por isso o "Ver dados" fica fora dela. Sem `<style>` nem atributo `style` (CSP).
-- `IslandProof.svelte` é a prova da T-19, usada no post B sem moldura; sai na T-21.
+- Modo island: `<Figure island number={…} caption="…" data={…}>`, sem `title`, `summary`, `name`, `width` nem `height`. Não desenha `svg` nem grade; o slot vai direto na `<figure>`, antes da `<figcaption>`, e o island leva tudo isso no próprio `.svelte`.
+- `IslandProof.svelte` é a prova da T-19, usada no post B sem moldura; sai na T-21. A prova da T-20, a seção "Passos e exploráveis" do post B, também sai na T-21.

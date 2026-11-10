@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 10/11/2026
 
+**Revisão 3 de 10/11/2026:** a §8 fixa os primeiros exploráveis (T-20). O `Figure.astro` ganha o modo island (prop `island`): não desenha `svg` nem grade, e o island entra direto na `<figure>`, antes da `<figcaption>`, que segue como último filho; o `svg` raiz, a grade e os controles são do `.svelte`. O `Stepper` e o `Explorable` só existem com `client:visible`, com os controles `disabled` no HTML do build. O `Heatmap` pinta a intensidade em tinta, com `fill-opacity` em cinco degraus, e destaca a linha com um contorno em `accent`; o `d3-scale-chromatic`, que devolve cores fora dos tokens, sai da tabela da biblioteca. A troca de cor tem transição curta, desligada com `prefers-reduced-motion`. O cenário "Gráfico acessível" da §11 troca o `<LineChart>` por um explorável.
+
 **Revisão 2 de 10/11/2026:** a §8 fixa os dados pré-calculados (T-73). O `scripts/build-data.py` roda na máquina do autor, lê as entradas de `data/raw/`, grava o JSON reduzido em `data/` e o `data/data.lock` com o SHA-256 de cada entrada e de cada saída; o `pnpm check:data`, dentro do `pnpm lint`, refaz os hashes e falha com dado desatualizado, sem rodar Python no CI. O RNF-09 passa a cobrir o dado desatualizado; a §6 descreve a pasta `data/`; a §7 alinha o `export.lock` ao formato do `data.lock`; a §9 diz como o script trava dependência; a §10 põe o `check:data` no lint.
 
 **Revisão de 10/11/2026:** a §8 fixa a moldura da figura estática (T-72). O `Figure.astro` é dono do `svg` raiz: `data-viz`, `role="img"`, `aria-label`, `<title>` e a grade milimetrada. A legenda, numerada pela prop `number`, é o último filho da `<figure>`; o "Ver dados" vem num `<details>` logo depois dela, fora da legenda, que dá o nome acessível da figura. A proporção fica reservada pelo `viewBox` e pelos atributos `width` e `height`, e a figura só encolhe. As primitivas `Vector`, `Matrix`, `Tensor`, `Arrow` e `Grid` são `.svelte` que desenham um `<g>` no sistema de coordenadas da raiz e entram autocontidas no slot do `Figure`: filhos do MDX para um `.svelte` chegam embrulhados em `astro-static-slot`, que não desenha dentro de um `svg`. O exemplo do `LineChart` perde o `<figure>` e a `<figcaption>`, que agora são do `Figure`. A figura de prova da T-19 segue sem moldura até a T-21; como o `Figure` emoldura um island que traz o próprio `svg` fica para a T-20.
@@ -597,14 +599,15 @@ O mesmo componente de `src/components/viz/` sem `client:*` é figura estática (
 - Dado que pede cálculo sai do `scripts/build-data.py`, rodado na máquina do autor com `uv run`. Ele lê as entradas de `data/raw/` e grava em `data/` o JSON reduzido (floats com 3 casas, chaves ordenadas, `indent=2`, UTF-8 e LF) e o `data/data.lock`, um JSON com `format` (1), `generator`, `inputs` e `outputs` (caminho a partir da raiz → SHA-256 dos bytes; o próprio script entra nas entradas, e o `scripts/build-data.py.lock`, quando existir) e `python`, só informativo. O CI não executa o script: o `pnpm check:data`, dentro do `pnpm lint`, refaz os hashes e falha com lock ausente ou inválido, gerador fora das entradas, caminho fora do lugar, lock sem saída, arquivo listado ausente, hash que não bate ou arquivo de `data/` fora do lock. Saída e lock são gerados: não se editam à mão e ficam fora do Prettier. Mudou a entrada ou a conta, rode o script de novo (T-73).
 - Datas chegam como string ISO (é o que JSON e CSV entregam); o componente converte para `Date`. O autor não converte nada no MDX.
 - Todo gráfico recebe `title` e `summary` (vira `aria-label`) e oferece "Ver dados" com a tabela (RNF-04).
-- No degrau 3, a hidratação padrão é `client:visible`; `client:load` só com justificativa no PR.
-- Cores pelos tokens da lista fechada, com as classes do Tailwind (`fill-ink`, `stroke-accent`…), que acompanham o tema.
+- No degrau 3, a hidratação padrão é `client:visible`; `client:load` só com justificativa no PR. O `Stepper` e o `Explorable` só existem como island, com `client:visible`; a figura estática do mesmo desenho é a primitiva dentro do `Figure` (T-20).
+- Cores pelos tokens da lista fechada, com as classes do Tailwind (`fill-ink`, `stroke-accent`…), que acompanham o tema. No `Heatmap`, a intensidade é tinta (`fill-ink`) com `fill-opacity` em cinco degraus (0,15, 0,3, 0,45, 0,6 e 0,75), tirados de uma tabela pelo valor entre o menor e o maior peso da matriz; o destaque único é o contorno da linha escolhida, em `accent`. Sem número dentro das células: os valores ficam no "Ver dados" e no texto ao vivo. Sem `d3-scale-chromatic`, que devolve cores fora dos tokens (T-20).
 - `.svelte` sem `client:*` em `src/components/viz/` é permitido: é o modo estático.
 - A geometria (posição de células, setas e cotas) fica em funções puras de `src/lib/viz/`, testadas no Vitest.
 - Teto de 1.000 elementos SVG por figura, contando o `svg` e os descendentes. O `svg` raiz leva `data-viz`, e a verificação é `tests/e2e/viz.spec.ts`, sobre os posts publicados (T-19). Acima do teto, os dados são reduzidos no Python.
 - O controle lê uma tabela pré-calculada e não recalcula modelo no navegador (INP, RNF-13).
 - Passo a passo com botões Anterior/Próximo. Animação ligada à rolagem só em CSS, como melhoria progressiva, com `@supports` e `prefers-reduced-motion`. Sem GIF.
-- Toda figura dentro de um `Figure.astro`, com legenda numerada, "Ver dados" e proporção reservada (CLS). Na figura estática, o `Figure` é dono do `svg` raiz e da grade; a `<figcaption>` é o último filho da `<figure>`, e o "Ver dados" vem num `<details>` logo depois dela. A proporção vem do `viewBox` e dos atributos `width` e `height`; a figura só encolhe. A prova da T-19 fica sem moldura até a T-21; emoldurar um island que traz o próprio `svg` é da T-20.
+- Os controles de um explorável saem `disabled` no HTML do build e habilitam ao hidratar, sem mudar a altura da figura. A troca de cor usa `transition-colors`, e `motion-reduce:transition-none` a desliga com `prefers-reduced-motion` (T-20).
+- Toda figura dentro de um `Figure.astro`, com legenda numerada, "Ver dados" e proporção reservada (CLS). Na figura estática, o `Figure` é dono do `svg` raiz e da grade; a `<figcaption>` é o último filho da `<figure>`, e o "Ver dados" vem num `<details>` logo depois dela. A proporção vem do `viewBox` e dos atributos `width` e `height`; a figura só encolhe. No explorável, o `Figure` vai no modo island (prop `island`, com `number`, `caption` e `data`): não desenha `svg` nem grade, e o island entra direto na `<figure>`, antes da `<figcaption>`, que segue como último filho. O `svg` raiz, a grade e os controles são do `.svelte`, com a proporção pelo `viewBox` e pelos atributos `width` e `height` dele (T-20). A prova da T-19 fica sem moldura até a T-21.
 - As primitivas são `.svelte` que desenham um `<g>` no sistema de coordenadas da raiz e entram autocontidas no slot do `Figure`. Um `.svelte` não recebe filhos do MDX dentro de um `svg`: o renderer os embrulha em `astro-static-slot` (T-72).
 - Rótulos em IBM Plex Mono 400 e notas em IBM Plex Sans itálico, sem face nova (orçamento de fontes da §9).
 
@@ -662,10 +665,10 @@ O contrato do `LineChart` acima permanece como exemplo do padrão. `LineChart`, 
 | `Tensor`     | Primitiva estática, com cota                   | geometria em `src/lib/viz/` |
 | `Arrow`      | Primitiva estática, só desenho                  | geometria em `src/lib/viz/` |
 | `Grid`       | Primitiva estática, só desenho                  | geometria em `src/lib/viz/` |
-| `Figure`     | Moldura Astro e `svg` raiz da figura estática: legenda numerada, "Ver dados" e proporção reservada | —            |
-| `Heatmap`    | Explorável: matrizes de atenção e confusão     | scale, scale-chromatic |
-| `Explorable` | Explorável: controles que alimentam uma primitiva | —                    |
-| `Stepper`    | Explorável: Anterior/Próximo                    | —                      |
+| `Figure`     | Moldura Astro e `svg` raiz da figura estática: legenda numerada, "Ver dados" e proporção reservada; no modo island, só a moldura | —            |
+| `Heatmap`    | Primitiva: matriz de intensidade (atenção, confusão), em tinta com opacidade por degrau | geometria em `src/lib/viz/` |
+| `Explorable` | Explorável: um controle deslizante escolhe a linha de uma tabela pré-calculada e alimenta o `Heatmap` | —                    |
+| `Stepper`    | Passo a passo: Anterior/Próximo percorrem os passos de uma `Matrix` | —                      |
 
 
 Antes da T-19, crie `src/components/viz/AGENTS.md` a partir desta seção e da seção 9.8 de `specs/BRAND.md`. Isso não cria dependência da T-19 com a Fase 1b.
@@ -903,9 +906,10 @@ Funcionalidade: Rascunhos [RF-11]
 
 Funcionalidade: Gráfico acessível [RF-09, RNF-04]
   Cenário: leitor sem JavaScript
-    Dado um post com <LineChart client:visible>
+    Dado um post com um explorável com client:visible
     Quando JavaScript está desabilitado
     Então o SVG está presente no HTML com aria-label igual ao summary
+    E os controles do explorável estão desabilitados
 
 Funcionalidade: Figura estática [RF-09, RNF-02]
   Cenário: figura sem island
