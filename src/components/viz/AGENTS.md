@@ -8,7 +8,7 @@ Complementa o `AGENTS.md` da raiz e prevalece no que for mais específico. Fonte
 - `client:load` só com justificativa no PR. Nada de `client:only`: ele tira o SVG do HTML.
 - O `astro-island` tem `display: contents` e não tem caixa. Em teste, role até a figura ou meça a figura, nunca o island.
 - Os controles de um explorável saem `disabled` no HTML do build e habilitam quando o componente hidrata. A figura não muda de tamanho (CLS) e não há botão que não faz nada.
-- Dados por props, importados no MDX de JSON ou CSV da pasta do post; nada de `fetch`. Datas chegam como string ISO e o componente converte. O controle lê uma tabela pré-calculada e não recalcula modelo no navegador (RNF-13).
+- Dados por props, importados no MDX de JSON ou CSV da pasta do post; nada de `fetch`. Datas chegam como string ISO e o componente converte. O controle lê uma tabela pré-calculada e não recalcula modelo no navegador (RNF-13). A tabela sai do `scripts/build-data.py` para `data/` do post, conferida pelo `data.lock` (SPEC §8); a prova da T-73 é o `data/attention.json` do post B, `{ tokens, weights }`, uma matriz 5 × 5 com formato provisório até a T-20.
 
 ## Contrato
 

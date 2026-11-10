@@ -36,6 +36,8 @@ Uma tarefa = um PR, num branch `t-XX-descricao-curta`. Trabalho descoberto no ca
 | Testes unitários       | `pnpm vitest run`                                                              |
 | Testes E2E             | `pnpm playwright test` (contra `astro preview` do build de produção)           |
 | Notebook pesado        | `uv run scripts/build-notebooks.py --heavy <slug>` (ver "Pare e pergunte")     |
+| Dados pré-calculados   | `uv run scripts/build-data.py` (na máquina do autor; grava `data/` e o lock)   |
+| Frescor dos dados      | `pnpm check:data` (também no `pnpm lint`; confere o `data.lock` sem Python)    |
 
 
 Sempre `pnpm`, nunca `npm` ou `yarn`. Sempre `uv run`, nunca `python` ou `pip` direto: o export WASM do marimo depende das dependências que o uv resolve.
@@ -57,7 +59,7 @@ src/integrations/headers.ts   gera dist/_headers no build (CSP por rota)
 src/lib/                getPublishedPosts, readingTime, seo
 src/styles/shiki/       pk-claro.json, pk-escuro.json
 scripts/build-notebooks.py
-scripts/build-data.py   JSON reduzido na pasta data/ do post; o CI confere o lock (T-73)
+scripts/build-data.py   JSON reduzido em data/ do post e data.lock; o pnpm check:data confere o lock (T-73)
 exports/<slug>/<nome>/  exports pesados commitados + export.lock (não editar à mão)
 public/                 favicon.svg, favicon.ico, favicon-16.png, favicon-32.png, apple-touch-icon.png
 public/notebooks/       gerado no build; fica no .gitignore
@@ -77,7 +79,7 @@ Sem `icon-192.png` e sem `icon-512.png`. `src/components/marimo/pk.css` não vem
 - **Slug:** é o `id` da entrada, gerado pelo `generateId` do loader (nome da pasta). Não recalcule slug nas páginas.
 - **Nomes:** identificadores de código em inglês; texto visível e rotas em pt-BR (`/sobre`, `/tags/[tag]`, `/tipos/[tipo]`). Exceções fixadas na SPEC: `/blog/[slug]` e `/page/[n]`.
 - **Alias:** `~/` aponta para `src/`.
-- **Dados de gráfico:** importados no MDX a partir de JSON/CSV da pasta do post; nada de `fetch` em runtime. Datas chegam como string ISO e o componente converte.
+- **Dados de gráfico:** importados no MDX a partir de JSON/CSV da pasta do post; nada de `fetch` em runtime. Datas chegam como string ISO e o componente converte. Dado que pede cálculo sai do `scripts/build-data.py`: entradas em `data/raw/`, saída e `data.lock` em `data/`; mudou a entrada ou a conta, rode o script de novo (SPEC §8).
 - **Notebooks:** o notebook do post é uma página própria em `/notebooks/<slug>/<nome>/`, aberta pela barra do lab; nunca iframe no post. O campo `mode` sai do schema na T-14. Detalhes na SPEC §6 e §7.
 - **Cores:** só a lista fechada do CSS global: `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `kind-concept`, `kind-tutorial`, `kind-lab`, `kind-playbook`, `grid`, `grid-strong`. Sem nome paralelo `--papel` / `--prussia`. Sem `dark:` e sem `@custom-variant dark`. Hex de desenho só em `src/assets/brand/`. As variáveis de `src/styles/global.css` e os JSON do Shiki também carregam hex, porque são a definição da paleta e o tema não lê variável CSS; componente, página e layout não.
 - **Fontes:** Fonts API do Astro, `fontProviders.fontsource`, quatro famílias (IBM Plex Sans Condensed, IBM Plex Sans, IBM Plex Mono, Caveat). Tokens `--font-display`, `--font-sans`, `--font-mono` e `--font-hand`. As variáveis de família (`--font-plex-condensed`, `--font-plex-sans`, `--font-plex-mono`, `--font-caveat`) só aparecem no `astro.config.mjs`, no `BaseLayout.astro`, no bloco `@theme inline` do `global.css` e nos testes E2E, que leem a família pela variável. Componente e página usam o token; a IBM Plex Sans entra no texto e a IBM Plex Mono no código pela troca de `--font-sans` e `--font-mono`. Sem pacote `@fontsource` instalado à mão e sem Google Fonts. O Astro acrescenta um sufixo de hash ao nome da família; use sempre o token ou a variável do `cssVariable`, nunca o nome da família escrito à mão. A IBM Plex Mono entra só no peso 400. Tarefa que acrescenta face de fonte numa página mede antes e depois com o Lighthouse. Mudar a lista ou os tetos do `font-budget.spec.ts` é decisão de escopo.
@@ -123,7 +125,7 @@ Não faça sem pedido explícito:
 - Subir a versão maior de Astro, Svelte, Tailwind, Zod ou marimo.
 - Fazer deploy de produção. Produção só sai pelo CI, no merge em `main`.
 - Rodar `build-notebooks.py --heavy`: executa treino e pode levar muito tempo.
-- Editar à mão `export.lock`, `exports/`, `public/notebooks/` ou `dist/`: são gerados.
+- Editar à mão `export.lock`, `exports/`, `public/notebooks/`, `dist/`, o `data.lock` ou as saídas em `data/` de um post: são gerados. As entradas em `data/raw/` são do autor.
 - Dar push direto em `main` ou force-push.
 
 

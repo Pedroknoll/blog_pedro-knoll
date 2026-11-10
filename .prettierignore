@@ -12,3 +12,4 @@ playwright-report
 test-results
 .lighthouseci
 lhci-report
+src/content/posts/*/data/
