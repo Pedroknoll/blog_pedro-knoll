@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.20 · novembro de 2026 · pedroknoll.com
+Versão 1.21 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -10,7 +10,7 @@ Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele 
 - **Sugestão** é um ponto de partida. Ajuste ao código, ao schema e à SPEC.
 - Este arquivo é a identidade. Em conflito de comportamento com a SPEC, vale a SPEC; avise no PR.
 - A seção 14 é sugestão. A ordem das tarefas está na Fase 1b do ROADMAP. Onde a seção 14 discordar da SPEC ou do ROADMAP, valem a SPEC e o ROADMAP.
-- Não crie nomes paralelos `--papel` / `--prussia` no CSS de componente, página ou layout. A T-41 grava a lista fechada: `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `kind-concept`, `kind-tutorial`, `kind-lab`, `kind-playbook`. Sem `@custom-variant dark` e sem `dark:` nos componentes.
+- Não crie nomes paralelos `--papel` / `--prussia` no CSS de componente, página ou layout. A T-41 grava a lista fechada: `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `kind-concept`, `kind-tutorial`, `kind-lab`, `kind-playbook`; a T-72 acrescenta `grid` e `grid-strong`, da grade milimetrada. Sem `@custom-variant dark` e sem `dark:` nos componentes.
 - A stack é Astro 7 + Tailwind v4. A seção 13 é sugestão de tokens; confirme a SPEC §9 antes de aplicá-la.
 - SVGs, favicons e temas do Shiki estão na árvore abaixo, com os nomes originais. O apêndice repete o código dos SVGs principais e usa esses caminhos.
 
@@ -147,7 +147,7 @@ Fundo **sempre liso**, sem textura, sem vinheta.
 | `--verdete` | `#2E6B5A` | `#7CC7AE` | Tipo **Playbook**. |
 | `--ouro` | `#F5B82E` | `#F5B82E` | **Exceção:** só a mão da saudação. |
 | `--contorno-px` | `#2A2118` | `#2A2118` | Contorno da mão em pixel, nos dois modos. |
-| `--grade` / `--grade-forte` | `rgba(31,75,122,.03)` / `.065` | `rgba(200,225,255,.025)` / `.055` | Grade milimetrada. |
+| `--grade` / `--grade-forte` | `rgba(31,75,122,.03)` / `.065` | `rgba(200,225,255,.025)` / `.055` | Grade milimetrada. No CSS, `grid` e `grid-strong` (T-72). |
 | `--grade-px` | `rgba(42,33,24,.07)` | `rgba(232,238,243,.07)` | Grade de exibição dos ícones em pixel (só em documentação). |
 
 ### Regras de cor (decisões)
@@ -335,6 +335,18 @@ Primeira célula de todo lab: cabeçalho renderizado com a assinatura, `Fól. 00
 - Sempre uma cota com medida real.
 - Fundo com grade milimetrada; sem sombra, sem gradiente, sem 3D.
 - Funcionam nos dois modos (cores sempre por token).
+
+**Vocabulário (decisão, 10/11/2026, T-72).** Medidas em unidades do `viewBox`; a figura sai no tamanho natural e só encolhe.
+
+- Célula: quadrado de 24 com vão de 4, em folha (`sheet`), com traço de 1 em tinta. O destaque único é a célula em prússia (`accent`), com o mesmo traço.
+- Tensor: só a camada da frente tem células; as de trás são placas lisas, deslocadas (8, −8) a cada camada.
+- Seta: haste de 1 em tinta e ponta aberta de dois traços de 8, a ±30°.
+- Cota: linha de 1 em tinta, afastada 12 da forma, com marcas perpendiculares de 6 nas pontas; o valor em Plex Mono 12, a 8 além da linha.
+- Grade: linhas de 1 a cada 8 em `grid` e reforço a cada 40 em `grid-strong`, num `<pattern>`; o reforço vai nas duas bordas do ladrilho, para não sair com metade da espessura.
+- Rótulo: nunca abaixo de 10 px renderizados a 360 px.
+- Legenda: "Figura N" no rótulo da seção 5 (Plex Mono 12, maiúsculas, 0,1em, tinta), seguido do texto em Plex Sans 16 px, grafite.
+- "Ver dados": no mesmo rótulo, em grafite, com alvo de pelo menos 24 px de altura; tabela com o cabeçalho no rótulo e as células em Plex Sans 14 px, tinta, com linhas na cor `line`.
+- Nota em itálico: fora das figuras do post B, que não pode ganhar a Plex Sans itálico (LCP). Um post novo com nota mede antes.
 
 ### 9.9 Botão de tema
 Dois estados, **Claro** e **Escuro**, num controle segmentado em mono 12 px. Grava a escolha (localStorage) e aplica `data-theme` na raiz.
