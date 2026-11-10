@@ -5,6 +5,7 @@ import { countPageJs } from "../src/lib/page-js.ts";
 
 const distDir = path.resolve("dist");
 const limit = 50_000;
+const islandLimit = 40_000;
 
 function exists(file) {
   try {
@@ -70,10 +71,10 @@ const rows = files.map((file) => {
   try {
     const html = readFileSync(file, "utf8");
     const result = countPageJs(html, pagePath, readDist);
-    return { url, total: result.total, error: null };
+    return { url, total: result.total, islands: result.islands, error: null };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { url, total: null, error: message };
+    return { url, total: null, islands: [], error: message };
   }
 });
 
@@ -89,6 +90,39 @@ for (const row of rows) {
   console.log(`${row.url.padEnd(width)}  ${bytes.padStart(5)}  ${limit}`);
 }
 
+const islandRows = [];
+for (const row of rows) {
+  for (const island of row.islands) {
+    islandRows.push({
+      url: row.url,
+      component: island.component,
+      total: island.total,
+    });
+  }
+}
+
+if (islandRows.length > 0) {
+  console.log("");
+  const pageLabel = "página";
+  const componentLabel = "component-url";
+  const pageWidth = Math.max(
+    pageLabel.length,
+    ...islandRows.map((row) => row.url.length),
+  );
+  const componentWidth = Math.max(
+    componentLabel.length,
+    ...islandRows.map((row) => row.component.length),
+  );
+  console.log(
+    `${pageLabel.padEnd(pageWidth)}  ${componentLabel.padEnd(componentWidth)}  bytes  limite`,
+  );
+  for (const row of islandRows) {
+    console.log(
+      `${row.url.padEnd(pageWidth)}  ${row.component.padEnd(componentWidth)}  ${String(row.total).padStart(5)}  ${islandLimit}`,
+    );
+  }
+}
+
 let failed = false;
 for (const row of rows) {
   if (row.error) {
@@ -96,6 +130,14 @@ for (const row of rows) {
     failed = true;
   } else if (row.total > limit) {
     console.error(`${row.url}: ${row.total} bytes gzip, limite ${limit}`);
+    failed = true;
+  }
+}
+for (const row of islandRows) {
+  if (row.total > islandLimit) {
+    console.error(
+      `${row.url} island ${row.component}: ${row.total} bytes gzip, limite ${islandLimit}`,
+    );
     failed = true;
   }
 }

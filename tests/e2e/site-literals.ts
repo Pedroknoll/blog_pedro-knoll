@@ -31,3 +31,14 @@ export const kindSlugs = {
 export function kindPath(kind: keyof typeof kindSlugs): string {
   return `/tipos/${kindSlugs[kind]}/`;
 }
+
+export const vizStaticTitle = "Grade 5 por 5, estática";
+export const vizStaticSummary =
+  "Grade de 5 por 5 células com a primeira em destaque.";
+export const vizExplorableTitle = "Grade 5 por 5, explorável";
+export const vizExplorableSummary =
+  "Grade de 5 por 5 células; Anterior e Próximo movem o destaque.";
+export const vizPrevious = "Anterior";
+export const vizNext = "Próximo";
+export const vizCellIdle = "Célula 1 de 25";
+export const vizCellNext = "Célula 2 de 25";

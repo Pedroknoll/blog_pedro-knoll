@@ -469,8 +469,7 @@ test.describe("cabeçalho do post [RF-04]", () => {
         const rail = page.locator("[data-post-rail]");
         await expect(rail).toHaveCount(1);
         await page.locator("article > .prose").evaluate((element) => {
-          const target = element.lastElementChild ?? element;
-          target.scrollIntoView({ block: "end" });
+          element.scrollIntoView({ block: "end" });
         });
         await expect(rail).toHaveAttribute("data-title-out", "");
 
