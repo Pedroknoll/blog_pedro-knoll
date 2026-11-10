@@ -17,7 +17,7 @@ const patterns = [
   colorClass,
   /\bdark:/g,
   /\[#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})\]/g,
-  /(?:^|[^#\w])#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})(?![0-9a-fA-F])/g,
+  /(?:^|[^#\w{])#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})(?![0-9a-fA-F])/g,
 ];
 
 function forbiddenColorUses(source: string): string[] {
@@ -31,19 +31,29 @@ function forbiddenColorUses(source: string): string[] {
   return hits;
 }
 
-function astroFiles(): string[] {
+const scanRoots = [
+  { dir: "src/layouts", extensions: [".astro"] },
+  { dir: "src/components/ui", extensions: [".astro"] },
+  { dir: "src/components/viz", extensions: [".astro", ".svelte"] },
+] as const;
+
+function filesIn(dir: string, extensions: readonly string[]): string[] {
+  const absolute = join(root, dir);
+  if (!existsSync(absolute)) return [];
   const files: string[] = [];
-  for (const dir of ["src/layouts", "src/components/ui"]) {
-    const absolute = join(root, dir);
-    if (!existsSync(absolute)) continue;
-    for (const entry of readdirSync(absolute, {
-      encoding: "utf8",
-      recursive: true,
-    })) {
-      if (entry.endsWith(".astro")) files.push(join(absolute, entry));
+  for (const entry of readdirSync(absolute, {
+    encoding: "utf8",
+    recursive: true,
+  })) {
+    if (extensions.some((extension) => entry.endsWith(extension))) {
+      files.push(join(absolute, entry));
     }
   }
   return files;
+}
+
+function colorFiles(): string[] {
+  return scanRoots.flatMap((entry) => filesIn(entry.dir, entry.extensions));
 }
 
 describe("detector de cor", () => {
@@ -53,21 +63,25 @@ describe("detector de cor", () => {
     "hover:border-red-500",
     "dark:bg-surface",
     "bg-[#fff]",
+    'fill="#1f4b7a"',
   ])("casa %s", (sample) => {
     expect(forbiddenColorUses(sample).length).toBeGreaterThan(0);
   });
 
-  it.each(["bg-surface", "text-ink", "font-black", 'href="#conteudo"'])(
-    "não casa %s",
-    (sample) => {
-      expect(forbiddenColorUses(sample)).toEqual([]);
-    },
-  );
+  it.each([
+    "bg-surface",
+    "text-ink",
+    "font-black",
+    'href="#conteudo"',
+    "{#each cells as cell, index (index)}",
+  ])("não casa %s", (sample) => {
+    expect(forbiddenColorUses(sample)).toEqual([]);
+  });
 });
 
-describe("arquivos de layout e ui", () => {
+describe("arquivos de layout, ui e viz", () => {
   it("há pelo menos um .astro e nenhum usa cor fora dos tokens", () => {
-    const files = astroFiles();
+    const files = colorFiles();
     expect(files.length).toBeGreaterThan(0);
     const violations = files.flatMap((file) =>
       forbiddenColorUses(readFileSync(file, "utf8")).map(
@@ -75,5 +89,10 @@ describe("arquivos de layout e ui", () => {
       ),
     );
     expect(violations).toEqual([]);
+  });
+
+  it("há ao menos um svelte em viz", () => {
+    const svelte = filesIn("src/components/viz", [".svelte"]);
+    expect(svelte.length).toBeGreaterThan(0);
   });
 });
