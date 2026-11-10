@@ -69,9 +69,13 @@ test.describe("figura sem JavaScript", () => {
     ).toBe(false);
     await expectGrid(still, vizStaticTitle);
 
-    const island = page.locator("astro-island");
+    const island = page.locator("astro-island").filter({
+      has: page.getByRole("img", {
+        name: vizExplorableSummary,
+        exact: true,
+      }),
+    });
     await expect(island).toHaveCount(1);
-    await expect(page.getByRole("button")).toHaveCount(2);
     await expect(island.getByRole("button")).toHaveCount(2);
     await expect(island).toHaveAttribute("client", "visible");
     const live = island.getByRole("img", {
@@ -123,7 +127,12 @@ test("explorável hidrata ao ficar visível [RF-09, RNF-02]", async ({
   });
   await open(page, href);
 
-  const island = page.locator("astro-island");
+  const island = page.locator("astro-island").filter({
+    has: page.getByRole("img", {
+      name: vizExplorableSummary,
+      exact: true,
+    }),
+  });
   await expect(island).toHaveCount(1);
   const componentUrl = await island.getAttribute("component-url");
   expect(componentUrl).toBeTruthy();
