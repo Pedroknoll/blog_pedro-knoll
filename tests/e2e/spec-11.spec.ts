@@ -263,9 +263,3 @@ test.describe("Rascunhos [RF-11]", () => {
     }
   });
 });
-
-test.describe("Gráfico acessível [RF-09, RNF-04]", () => {
-  test.fixme("leitor sem JavaScript", async () => {
-    throw new Error("Cenário da SPEC §11 ainda não implementado.");
-  });
-});
