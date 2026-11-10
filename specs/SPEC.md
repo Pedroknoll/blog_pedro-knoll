@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 10/11/2026
 
+**Revisão 2 de 10/11/2026:** a §8 fixa os dados pré-calculados (T-73). O `scripts/build-data.py` roda na máquina do autor, lê as entradas de `data/raw/`, grava o JSON reduzido em `data/` e o `data/data.lock` com o SHA-256 de cada entrada e de cada saída; o `pnpm check:data`, dentro do `pnpm lint`, refaz os hashes e falha com dado desatualizado, sem rodar Python no CI. O RNF-09 passa a cobrir o dado desatualizado; a §6 descreve a pasta `data/`; a §7 alinha o `export.lock` ao formato do `data.lock`; a §9 diz como o script trava dependência; a §10 põe o `check:data` no lint.
+
 **Revisão de 10/11/2026:** a §8 fixa a moldura da figura estática (T-72). O `Figure.astro` é dono do `svg` raiz: `data-viz`, `role="img"`, `aria-label`, `<title>` e a grade milimetrada. A legenda, numerada pela prop `number`, é o último filho da `<figure>`; o "Ver dados" vem num `<details>` logo depois dela, fora da legenda, que dá o nome acessível da figura. A proporção fica reservada pelo `viewBox` e pelos atributos `width` e `height`, e a figura só encolhe. As primitivas `Vector`, `Matrix`, `Tensor`, `Arrow` e `Grid` são `.svelte` que desenham um `<g>` no sistema de coordenadas da raiz e entram autocontidas no slot do `Figure`: filhos do MDX para um `.svelte` chegam embrulhados em `astro-static-slot`, que não desenha dentro de um `svg`. O exemplo do `LineChart` perde o `<figure>` e a `<figcaption>`, que agora são do `Figure`. A figura de prova da T-19 segue sem moldura até a T-21; como o `Figure` emoldura um island que traz o próprio `svg` fica para a T-20.
 
 **Revisão 2 de 09/11/2026:** o RNF-02 troca o `size-limit` pela conta por island no `check:js`: cada `astro-island` soma o componente, o renderer e os imports estáticos, até 40.000 bytes gzip, e os scripts inline do island contam no JS inicial da página. A §8 fixa o teto de 1.000 elementos por figura, com `data-viz` no `svg` raiz e verificação no E2E, e troca no contrato o `var(--viz-1)`, que não existe na lista fechada de cores, pela classe do token. O cenário "Figura estática" da §11 passa a exigir a figura fora de um `astro-island`, e não a página inteira sem island, porque o post da T-21 tem figura estática e explorável. A §9 tira o `size-limit` da lista pré-aprovada (T-19).
@@ -211,7 +213,7 @@ Cada RNF tem um número verificável no CI; o que não dá para medir automatica
 | RNF-06 | Segurança        | Headers: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`                                                                                                         | `dist/_headers` gerado no build e conferido por teste de artefato; securityheaders.com em produção                                                                                                                                         |
 | RNF-07 | Segurança        | CSP com `wasm-unsafe-eval` e as origens do Pyodide só em `/notebooks/*`, não na página do post; o `dist/_headers` gerado tem no máximo 100 regras (limite da Cloudflare) | Teste de artefato: rotas sem notebook não têm `wasm-unsafe-eval`; o build falha acima de 100 regras                                                                                                                                        |
 | RNF-08 | Build            | Build completo < 5 min com 200 posts e 20 notebooks                                                                                                                     | Medido no CI; cache de exports marimo por hash do `.py` + `uv.lock`                                                                                                                                                                        |
-| RNF-09 | Confiabilidade   | Build falha se frontmatter for inválido, link interno quebrar ou notebook falhar no `marimo check`                                                                                   | Zod + `astro check` + verificador de links + `marimo check`                                                                                                                                                                                |
+| RNF-09 | Confiabilidade   | Build falha se frontmatter for inválido, link interno quebrar, notebook falhar no `marimo check` ou dado pré-calculado não bater com o `data.lock`                                   | Zod + `astro check` + verificador de links + `marimo check` + `pnpm check:data`                                                                                                                                                            |
 | RNF-10 | Custo            | US$ 0/mês até o limite do plano free (static assets não são cobrados)                                                                                                   | Revisão mensal no dashboard Cloudflare                                                                                                                                                                                                     |
 | RNF-11 | Privacidade      | Analytics sem cookies                                                                                                                                                   | Cloudflare Web Analytics                                                                                                                                                                                                                   |
 | RNF-12 | Manutenibilidade | TypeScript strict, ESLint + Prettier, Ruff para Python                                                                                                                  | Gates no CI                                                                                                                                                                                                                                |
@@ -289,7 +291,7 @@ src/
         ├── index.mdx
         ├── cover.png
         ├── figs/
-        ├── data/              # JSON/CSV dos gráficos
+        ├── data/              # JSON gerado pelo build-data.py e data.lock; raw/ com as entradas (T-73)
         └── notebooks/
             └── treino.py      # notebook da página própria
 
@@ -555,7 +557,7 @@ Complemento para qualquer estratégia: um botão "Rodar com GPU" apontando para 
 
 ```
 
-1. Rodar localmente `uv run scripts/build-notebooks.py --heavy <slug>`: executa com torch (CPU ou GPU), exporta para `exports/<slug>/<nome>/` e grava `exports/<slug>/<nome>/export.lock` com o SHA-256 do `.py`, do `uv.lock` e a versão do marimo.
+1. Rodar localmente `uv run scripts/build-notebooks.py --heavy <slug>`: executa com torch (CPU ou GPU), exporta para `exports/<slug>/<nome>/` e grava `exports/<slug>/<nome>/export.lock` com o SHA-256 do `.py`, do `uv.lock` e a versão do marimo, no formato do `data.lock` da §8; a T-17 fixa os campos de versão.
 2. Commitar `exports/<slug>/`; arquivos acima de 25 MiB são enviados ao R2 pelo mesmo script e substituídos por referência.
 3. No CI, notebooks com `compute` diferente de `browser` não são executados. O CI confere se o `export.lock` bate com os hashes atuais (falha se o export estiver desatualizado) e o `build-notebooks.py` copia `exports/<slug>/<nome>/` para `public/notebooks/<slug>/<nome>/`, onde fica junto dos exports leves.
 
@@ -592,6 +594,7 @@ O mesmo componente de `src/components/viz/` sem `client:*` é figura estática (
 - Importar módulos D3 avulsos (`d3-scale`, `d3-shape`, `d3-array`, `d3-format`), nunca o pacote `d3` inteiro (RNF-02).
 - Proibido `d3-selection` para criar ou mudar elementos; o DOM é do Svelte. Exceção documentada: `d3-zoom`/`d3-drag` via action do Svelte.
 - Dados vêm por props, importados no MDX a partir de JSON/CSV na pasta do post; nada de `fetch` em runtime. Se o dado não cabe nas props, a figura está no degrau errado.
+- Dado que pede cálculo sai do `scripts/build-data.py`, rodado na máquina do autor com `uv run`. Ele lê as entradas de `data/raw/` e grava em `data/` o JSON reduzido (floats com 3 casas, chaves ordenadas, `indent=2`, UTF-8 e LF) e o `data/data.lock`, um JSON com `format` (1), `generator`, `inputs` e `outputs` (caminho a partir da raiz → SHA-256 dos bytes; o próprio script entra nas entradas, e o `scripts/build-data.py.lock`, quando existir) e `python`, só informativo. O CI não executa o script: o `pnpm check:data`, dentro do `pnpm lint`, refaz os hashes e falha com lock ausente ou inválido, gerador fora das entradas, caminho fora do lugar, lock sem saída, arquivo listado ausente, hash que não bate ou arquivo de `data/` fora do lock. Saída e lock são gerados: não se editam à mão e ficam fora do Prettier. Mudou a entrada ou a conta, rode o script de novo (T-73).
 - Datas chegam como string ISO (é o que JSON e CSV entregam); o componente converte para `Date`. O autor não converte nada no MDX.
 - Todo gráfico recebe `title` e `summary` (vira `aria-label`) e oferece "Ver dados" com a tabela (RNF-04).
 - No degrau 3, a hidratação padrão é `client:visible`; `client:load` só com justificativa no PR.
@@ -769,7 +772,7 @@ Um agente pode instalar, sem perguntar, as dependências abaixo, na versão est�
 | Notebooks      | —                                                                                                                                                                            | `moutils` (só em notebooks com `compute: onnx`, no bloco PEP 723) |
 
 
-Dependências de notebook (numpy, torch etc.) ficam no bloco PEP 723 de cada `.py`, não no `pyproject.toml`.
+Dependências de notebook (numpy, torch etc.) ficam no bloco PEP 723 de cada `.py`, não no `pyproject.toml`. O `scripts/build-data.py` segue a mesma regra e hoje usa só a stdlib; dependência nova nele é pergunta, e com ela o `uv lock --script scripts/build-data.py` grava o `scripts/build-data.py.lock`, que entra nas entradas do `data.lock` (T-73).
 
 O `katex` é um só no `pnpm-lock.yaml`. O `rehype-katex` 7.0.1 e o `micromark-extension-math`, do `remark-math`, pedem `^0.16.0`; um `overrides` no `pnpm-workspace.yaml` os leva à versão do `katex` direto, de onde saem o CSS e as fontes do `PostLayout`. Desde o 0.18.0, que prefixou as classes internas, marcação e CSS de versões diferentes quebram as fórmulas. Ao subir o `katex`, o override sobe junto (T-68).
 
@@ -828,7 +831,7 @@ A T-05 confirmou o detach: `! Content-Security-Policy` seguido de nova CSP no me
 ### Pipeline (`.github/workflows/ci.yml`)
 
 1. **Setup:** pnpm, Node LTS, uv; cache de `~/.cache/uv`, `node_modules` e `public/notebooks` (chave = hash dos `.py` + `uv.lock`).
-2. **Lint e tipos:** `pnpm lint`, que começa pela guarda de codificação (`pnpm check:utf8`: todo arquivo de texto em `src/` é UTF-8 válido e sem BOM), `astro check`, `ruff check`, `marimo check --select MW` em todos os notebooks.
+2. **Lint e tipos:** `pnpm lint`, que começa pela guarda de codificação (`pnpm check:utf8`: todo arquivo de texto em `src/` é UTF-8 válido e sem BOM) e segue pelo frescor dos dados pré-calculados (`pnpm check:data`: o `data.lock` de cada pasta `data/` bate com os arquivos, sem rodar Python), `astro check`, `ruff check`, `marimo check --select MW` em todos os notebooks.
 3. **Testes unitários:** `vitest` em `src/lib`.
 4. **Build de produção:** `pnpm build` sem `SHOW_DRAFTS` (notebooks leves → Astro → Pagefind; notebooks pesados não executam, só têm o `export.lock` conferido e são copiados).
 5. **Verificações do artefato:** dois jobs sobre o `dist/` do passo 4 (artifact), em paralelo ao E2E. `artifact-checks` roda os links internos (`pnpm check:links`, linkinator com fragmentos) e o JS por página (`pnpm check:js`); o segundo roda mesmo se o primeiro falhar. `lighthouse` roda o Lighthouse CI com budgets e guarda o relatório no artifact `lighthouse-report` (14 dias). As regras do `dist/_headers` entram com a T-16; o `check:js` também conta cada island (T-19) (RNF-01/02/05/06/07).
