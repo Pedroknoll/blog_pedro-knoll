@@ -42,3 +42,32 @@ export const vizPrevious = "Anterior";
 export const vizNext = "Próximo";
 export const vizCellIdle = "Célula 1 de 25";
 export const vizCellNext = "Célula 2 de 25";
+
+export const vizDataLabel = "Ver dados";
+export const figureWidth = 280;
+
+export const figureMatrixVector = {
+  name: "t72-matrix-vector",
+  title: "Matriz 4 por 4 que vira um vetor de 4",
+  summary:
+    "Uma matriz de 4 por 4 células, uma seta e um vetor coluna de 4 células, com a cota [4].",
+  caption: "Uma matriz 4 × 4 vira um vetor de 4 elementos.",
+  columns: ["Elemento", "Formato"],
+  rows: [
+    ["Matriz", "4 × 4"],
+    ["Vetor", "4"],
+  ],
+};
+
+export const figureTensor = {
+  name: "t72-tensor",
+  title: "Tensor 3 por 4 por 4",
+  summary: "Três camadas de 4 por 4 células empilhadas, com a cota [3, 4, 4].",
+  caption: "Um tensor de formato [3, 4, 4]: três matrizes 4 × 4 empilhadas.",
+  columns: ["Eixo", "Tamanho"],
+  rows: [
+    ["camadas", "3"],
+    ["linhas", "4"],
+    ["colunas", "4"],
+  ],
+};

@@ -17,6 +17,8 @@ const tokens = [
   "kind-tutorial",
   "kind-lab",
   "kind-playbook",
+  "grid",
+  "grid-strong",
 ] as const;
 
 type Token = (typeof tokens)[number];
@@ -34,6 +36,8 @@ const light: Record<Token, Channels> = {
   "kind-tutorial": { r: 132, g: 96, b: 26, a: 1 },
   "kind-lab": { r: 163, g: 57, b: 42, a: 1 },
   "kind-playbook": { r: 46, g: 107, b: 90, a: 1 },
+  grid: { r: 31, g: 75, b: 122, a: 0.03 },
+  "grid-strong": { r: 31, g: 75, b: 122, a: 0.065 },
 };
 
 const dark: Record<Token, Channels> = {
@@ -48,6 +52,8 @@ const dark: Record<Token, Channels> = {
   "kind-tutorial": { r: 217, g: 184, b: 92, a: 1 },
   "kind-lab": { r: 238, g: 138, b: 116, a: 1 },
   "kind-playbook": { r: 124, g: 199, b: 174, a: 1 },
+  grid: { r: 200, g: 225, b: 255, a: 0.025 },
+  "grid-strong": { r: 200, g: 225, b: 255, a: 0.055 },
 };
 
 function channels(color: string): Channels {
@@ -147,7 +153,10 @@ for (const theme of ["light", "dark"] as const) {
       expect.soft(got.r, token).toBe(want.r);
       expect.soft(got.g, token).toBe(want.g);
       expect.soft(got.b, token).toBe(want.b);
-      expect.soft(Math.abs(got.a - want.a), token).toBeLessThanOrEqual(0.001);
+      // Chrome guarda o alfa em 8 bits: 0.065 vira 17/255 e sai como 0.067.
+      expect
+        .soft(Math.round(got.a * 255), token)
+        .toBe(Math.round(want.a * 255));
     }
 
     if (!isMissing(colors["kind-concept"]) && !isMissing(colors.accent)) {

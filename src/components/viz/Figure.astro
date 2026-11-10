@@ -1,0 +1,70 @@
+---
+import Grid from "./Grid.svelte";
+
+interface Props {
+  number: number;
+  caption: string;
+  title: string;
+  summary: string;
+  name: string;
+  width: number;
+  height: number;
+  data: {
+    columns: string[];
+    rows: (string | number)[][];
+  };
+}
+
+const { number, caption, title, summary, name, width, height, data } =
+  Astro.props;
+---
+
+<div class="not-prose my-8">
+  <figure>
+    <svg
+      data-viz={name}
+      viewBox={`0 0 ${width} ${height}`}
+      width={width}
+      height={height}
+      role="img"
+      aria-label={summary}
+      class="block h-auto max-w-full"
+    >
+      <title>{title}</title>
+      <Grid width={width} height={height} />
+      <slot />
+    </svg>
+    <figcaption class="mt-3 text-base text-muted">
+      <span class="font-mono text-xs uppercase tracking-widest text-ink">
+        Figura {number}
+      </span>{" "}
+      {caption}
+    </figcaption>
+  </figure>
+  <details class="mt-2">
+    <summary class="cursor-pointer py-1.5 font-mono text-xs uppercase tracking-widest text-muted">
+      Ver dados
+    </summary>
+    <div class="overflow-x-auto">
+      <table class="mt-2 border-collapse text-sm">
+        <tr>
+          {data.columns.map((column) => (
+            <th
+              scope="col"
+              class="border-b border-line py-1.5 pr-4 text-left font-mono text-xs font-normal uppercase tracking-widest text-muted"
+            >
+              {column}
+            </th>
+          ))}
+        </tr>
+        {data.rows.map((row) => (
+          <tr>
+            {row.map((cell) => (
+              <td class="border-b border-line py-1.5 pr-4 text-ink">{cell}</td>
+            ))}
+          </tr>
+        ))}
+      </table>
+    </div>
+  </details>
+</div>

@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 09/11/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 10/11/2026
+
+**Revisão de 10/11/2026:** a §8 fixa a moldura da figura estática (T-72). O `Figure.astro` é dono do `svg` raiz: `data-viz`, `role="img"`, `aria-label`, `<title>` e a grade milimetrada. A legenda, numerada pela prop `number`, é o último filho da `<figure>`; o "Ver dados" vem num `<details>` logo depois dela, fora da legenda, que dá o nome acessível da figura. A proporção fica reservada pelo `viewBox` e pelos atributos `width` e `height`, e a figura só encolhe. As primitivas `Vector`, `Matrix`, `Tensor`, `Arrow` e `Grid` são `.svelte` que desenham um `<g>` no sistema de coordenadas da raiz e entram autocontidas no slot do `Figure`: filhos do MDX para um `.svelte` chegam embrulhados em `astro-static-slot`, que não desenha dentro de um `svg`. O exemplo do `LineChart` perde o `<figure>` e a `<figcaption>`, que agora são do `Figure`. A figura de prova da T-19 segue sem moldura até a T-21; como o `Figure` emoldura um island que traz o próprio `svg` fica para a T-20.
 
 **Revisão 2 de 09/11/2026:** o RNF-02 troca o `size-limit` pela conta por island no `check:js`: cada `astro-island` soma o componente, o renderer e os imports estáticos, até 40.000 bytes gzip, e os scripts inline do island contam no JS inicial da página. A §8 fixa o teto de 1.000 elementos por figura, com `data-viz` no `svg` raiz e verificação no E2E, e troca no contrato o `var(--viz-1)`, que não existe na lista fechada de cores, pela classe do token. O cenário "Figura estática" da §11 passa a exigir a figura fora de um `astro-island`, e não a página inteira sem island, porque o post da T-21 tem figura estática e explorável. A §9 tira o `size-limit` da lista pré-aprovada (T-19).
 
@@ -599,7 +601,8 @@ O mesmo componente de `src/components/viz/` sem `client:*` é figura estática (
 - Teto de 1.000 elementos SVG por figura, contando o `svg` e os descendentes. O `svg` raiz leva `data-viz`, e a verificação é `tests/e2e/viz.spec.ts`, sobre os posts publicados (T-19). Acima do teto, os dados são reduzidos no Python.
 - O controle lê uma tabela pré-calculada e não recalcula modelo no navegador (INP, RNF-13).
 - Passo a passo com botões Anterior/Próximo. Animação ligada à rolagem só em CSS, como melhoria progressiva, com `@supports` e `prefers-reduced-motion`. Sem GIF.
-- Toda figura dentro de um `Figure.astro`, com legenda, "Ver dados" e proporção reservada (CLS).
+- Toda figura dentro de um `Figure.astro`, com legenda numerada, "Ver dados" e proporção reservada (CLS). Na figura estática, o `Figure` é dono do `svg` raiz e da grade; a `<figcaption>` é o último filho da `<figure>`, e o "Ver dados" vem num `<details>` logo depois dela. A proporção vem do `viewBox` e dos atributos `width` e `height`; a figura só encolhe. A prova da T-19 fica sem moldura até a T-21; emoldurar um island que traz o próprio `svg` é da T-20.
+- As primitivas são `.svelte` que desenham um `<g>` no sistema de coordenadas da raiz e entram autocontidas no slot do `Figure`. Um `.svelte` não recebe filhos do MDX dentro de um `svg`: o renderer os embrulha em `astro-static-slot` (T-72).
 - Rótulos em IBM Plex Mono 400 e notas em IBM Plex Sans itálico, sem face nova (orçamento de fontes da §9).
 
 ### Contrato do componente
@@ -626,14 +629,11 @@ O mesmo componente de `src/components/viz/` sem `client:*` é figura estática (
   const path = $derived(line<Point>((d) => x(d.date), (d) => y(d.value))(points));
 </script>
 
-<figure>
-  <svg data-viz="line-chart" viewBox="0 0 {width} {height}" role="img" aria-label={summary}>
-    <title>{title}</title>
-    <path d={path} fill="none" class="stroke-accent" stroke-width="2" />
-    <!-- eixos, pontos e tooltip controlados por `hover` -->
-  </svg>
-  <figcaption>{title}</figcaption>
-</figure>
+<svg data-viz="line-chart" viewBox="0 0 {width} {height}" role="img" aria-label={summary}>
+  <title>{title}</title>
+  <path d={path} fill="none" class="stroke-accent" stroke-width="2" />
+  <!-- eixos, pontos e tooltip controlados por `hover`; legenda e "Ver dados" são do Figure.astro -->
+</svg>
 
 ```
 
@@ -659,7 +659,7 @@ O contrato do `LineChart` acima permanece como exemplo do padrão. `LineChart`, 
 | `Tensor`     | Primitiva estática, com cota                   | geometria em `src/lib/viz/` |
 | `Arrow`      | Primitiva estática, só desenho                  | geometria em `src/lib/viz/` |
 | `Grid`       | Primitiva estática, só desenho                  | geometria em `src/lib/viz/` |
-| `Figure`     | Moldura Astro: legenda numerada, "Ver dados" e proporção reservada | —            |
+| `Figure`     | Moldura Astro e `svg` raiz da figura estática: legenda numerada, "Ver dados" e proporção reservada | —            |
 | `Heatmap`    | Explorável: matrizes de atenção e confusão     | scale, scale-chromatic |
 | `Explorable` | Explorável: controles que alimentam uma primitiva | —                    |
 | `Stepper`    | Explorável: Anterior/Próximo                    | —                      |
