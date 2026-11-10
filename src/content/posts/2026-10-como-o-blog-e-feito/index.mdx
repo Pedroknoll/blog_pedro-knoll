@@ -44,11 +44,22 @@ appendices:
 
 import Callout from "~/components/ui/Callout.astro";
 import Arrow from "~/components/viz/Arrow.svelte";
+import Explorable from "~/components/viz/Explorable.svelte";
 import Figure from "~/components/viz/Figure.astro";
 import IslandProof from "~/components/viz/IslandProof.svelte";
 import Matrix from "~/components/viz/Matrix.svelte";
+import Stepper from "~/components/viz/Stepper.svelte";
 import Tensor from "~/components/viz/Tensor.svelte";
 import Vector from "~/components/viz/Vector.svelte";
+import { heatmapTable } from "~/lib/viz/heatmap";
+import { stepTable } from "~/lib/viz/steps";
+import attention from "./data/attention.json";
+
+export const stepperSteps = [
+  { label: "O destaque começa na primeira casa.", highlight: [0, 0] },
+  { label: "O destaque anda uma coluna.", highlight: [0, 1] },
+  { label: "O destaque desce uma linha.", highlight: [1, 1] },
+];
 
 O blog é um site estático — o motivo está em [por que este blog existe](/blog/2026-10-por-que-este-blog/). O HTML sai pronto no build.
 
@@ -180,3 +191,41 @@ O mesmo componente sai como figura estática, sem JavaScript, e como explorável
   title="Grade 5 por 5, explorável"
   summary="Grade de 5 por 5 células; Anterior e Próximo movem o destaque."
 />
+
+## Passos e exploráveis
+
+Um passo a passo troca o destaque com Anterior e Próximo. O mapa não recalcula o modelo: o controle só escolhe uma linha da tabela que já veio pronta.
+
+<Figure
+  island
+  number={3}
+  caption="Três passos movem o destaque numa matriz 4 × 4."
+  data={stepTable(stepperSteps)}
+>
+  <Stepper
+    client:visible
+    name="t20-stepper"
+    title="Matriz 4 por 4 em três passos"
+    summary="Matriz de 4 por 4 células; Anterior e Próximo movem o destaque."
+    rows={4}
+    cols={4}
+    dimension="[4, 4]"
+    steps={stepperSteps}
+  />
+</Figure>
+
+<Figure
+  island
+  number={4}
+  caption="A consulta escolhe a linha; o maior peso de cada linha está no texto ao vivo."
+  data={heatmapTable(attention.tokens, attention.weights)}
+>
+  <Explorable
+    client:visible
+    name="t20-heatmap"
+    title="Atenção dos cinco tokens"
+    summary="Mapa de atenção de 5 por 5; a consulta escolhe a linha contornada."
+    tokens={attention.tokens}
+    weights={attention.weights}
+  />
+</Figure>

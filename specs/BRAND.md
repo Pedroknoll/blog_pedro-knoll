@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.21 · novembro de 2026 · pedroknoll.com
+Versão 1.22 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -347,6 +347,13 @@ Primeira célula de todo lab: cabeçalho renderizado com a assinatura, `Fól. 00
 - Legenda: "Figura N" no rótulo da seção 5 (Plex Mono 12, maiúsculas, 0,1em, tinta), seguido do texto em Plex Sans 16 px, grafite.
 - "Ver dados": no mesmo rótulo, em grafite, com alvo de pelo menos 24 px de altura; tabela com o cabeçalho no rótulo e as células em Plex Sans 14 px, tinta, com linhas na cor `line`.
 - Nota em itálico: fora das figuras do post B, que não pode ganhar a Plex Sans itálico (LCP). Um post novo com nota mede antes.
+
+**Exploráveis (decisão, 10/11/2026, T-20).**
+
+- Mapa de calor: células como no vocabulário acima, mas em tinta com transparência por degrau (0,15, 0,3, 0,45, 0,6 e 0,75, do menor ao maior valor da matriz), com o traço de 1 em tinta. O destaque único é o contorno da linha escolhida, em prússia, com traço de 2, por fora das células, sobre o papel (8,5 de contraste no claro e 7,8 no escuro). Sem número dentro das células: os degraus entre si não chegam a 3:1, por isso os valores vão também em texto, no "Ver dados" e no texto ao vivo.
+- Rótulos do mapa: os nomes em Plex Mono 12, tinta, à esquerda das linhas e acima das colunas, estes girados −90°; a cota `[linhas, colunas]` embaixo.
+- Controles: abaixo do desenho. Botão em Plex Mono 12, tinta, com borda de 1 em tinta, cantos retos e pelo menos 32 px de altura; desabilitado, com 60% de opacidade. Controle deslizante na cor prússia, com pelo menos 24 px de altura e o rótulo visível. Texto ao vivo em Plex Mono 12, grafite.
+- Movimento: a troca de cor da célula tem transição curta, desligada com `prefers-reduced-motion`; o contorno do mapa muda de linha sem transição.
 
 ### 9.9 Botão de tema
 Dois estados, **Claro** e **Escuro**, num controle segmentado em mono 12 px. Grava a escolha (localStorage) e aplica `data-theme` na raiz.

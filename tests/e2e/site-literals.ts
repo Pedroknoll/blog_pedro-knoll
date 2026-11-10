@@ -71,3 +71,51 @@ export const figureTensor = {
     ["colunas", "4"],
   ],
 };
+
+const stepLabels = [
+  "O destaque começa na primeira casa.",
+  "O destaque anda uma coluna.",
+  "O destaque desce uma linha.",
+];
+
+export const stepFigure = {
+  name: "t20-stepper",
+  title: "Matriz 4 por 4 em três passos",
+  summary: "Matriz de 4 por 4 células; Anterior e Próximo movem o destaque.",
+  caption: "Três passos movem o destaque numa matriz 4 × 4.",
+  columns: ["Passo", "Descrição"],
+  rows: stepLabels.map((label, index) => [String(index + 1), label]),
+  live: stepLabels.map(
+    (label, index) => `Passo ${index + 1} de ${stepLabels.length}: ${label}`,
+  ),
+  width: 124,
+  height: 156,
+};
+
+export const heatFigure = {
+  name: "t20-heatmap",
+  title: "Atenção dos cinco tokens",
+  summary: "Mapa de atenção de 5 por 5; a consulta escolhe a linha contornada.",
+  caption:
+    "A consulta escolhe a linha; o maior peso de cada linha está no texto ao vivo.",
+  queryLabel: "Consulta",
+  columns: ["Consulta", "o", "gato", "subiu", "no", "telhado"],
+  rows: [
+    ["o", "0,251", "0,173", "0,162", "0,236", "0,178"],
+    ["gato", "0,148", "0,252", "0,244", "0,141", "0,215"],
+    ["subiu", "0,132", "0,233", "0,268", "0,138", "0,228"],
+    ["no", "0,240", "0,168", "0,173", "0,237", "0,182"],
+    ["telhado", "0,142", "0,200", "0,222", "0,143", "0,293"],
+  ],
+  liveFirst: "Consulta: o · maior peso: o (0,251)",
+  liveSecond: "Consulta: gato · maior peso: gato (0,252)",
+  opacities: [
+    ["0.6", "0.3", "0.15", "0.6", "0.3"],
+    ["0.15", "0.6", "0.6", "0.15", "0.45"],
+    ["0.15", "0.6", "0.75", "0.15", "0.45"],
+    ["0.6", "0.3", "0.3", "0.6", "0.3"],
+    ["0.15", "0.45", "0.45", "0.15", "0.75"],
+  ].flat(),
+  width: 216,
+  height: 248,
+};

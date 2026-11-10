@@ -1,44 +1,58 @@
 ---
 import Grid from "./Grid.svelte";
 
-interface Props {
-  number: number;
-  caption: string;
-  title: string;
-  summary: string;
-  name: string;
-  width: number;
-  height: number;
-  data: {
-    columns: string[];
-    rows: (string | number)[][];
-  };
-}
+type Data = {
+  columns: string[];
+  rows: (string | number)[][];
+};
 
-const { number, caption, title, summary, name, width, height, data } =
-  Astro.props;
+type Props =
+  | {
+      island?: false;
+      number: number;
+      caption: string;
+      title: string;
+      summary: string;
+      name: string;
+      width: number;
+      height: number;
+      data: Data;
+    }
+  | {
+      island: true;
+      number: number;
+      caption: string;
+      data: Data;
+    };
+
+const props = Astro.props;
+const staticProps = props.island === true ? null : props;
 ---
 
 <div class="not-prose my-8">
   <figure>
-    <svg
-      data-viz={name}
-      viewBox={`0 0 ${width} ${height}`}
-      width={width}
-      height={height}
-      role="img"
-      aria-label={summary}
-      class="block h-auto max-w-full"
-    >
-      <title>{title}</title>
-      <Grid width={width} height={height} />
+    {staticProps ? (
+      <svg
+        data-viz={staticProps.name}
+        viewBox={`0 0 ${staticProps.width} ${staticProps.height}`}
+        width={staticProps.width}
+        height={staticProps.height}
+        role="img"
+        aria-label={staticProps.summary}
+        class="block h-auto max-w-full"
+      >
+        <title>{staticProps.title}</title>
+        <Grid width={staticProps.width} height={staticProps.height} />
+        <slot />
+      </svg>
+    ) : (
       <slot />
-    </svg>
+    )}
     <figcaption class="mt-3 text-base text-muted">
       <span class="font-mono text-xs uppercase tracking-widest text-ink">
-        Figura {number}
+        Figura {props.number}
       </span>{" "}
-      {caption}
+      {props.caption}
     </figcaption>
   </figure>
   <details class="mt-2">
@@ -48,7 +62,7 @@ const { number, caption, title, summary, name, width, height, data } =
     <div class="overflow-x-auto">
       <table class="mt-2 border-collapse text-sm">
         <tr>
-          {data.columns.map((column) => (
+          {props.data.columns.map((column) => (
             <th
               scope="col"
               class="border-b border-line py-1.5 pr-4 text-left font-mono text-xs font-normal uppercase tracking-widest text-muted"
@@ -57,7 +71,7 @@ const { number, caption, title, summary, name, width, height, data } =
             </th>
           ))}
         </tr>
-        {data.rows.map((row) => (
+        {props.data.rows.map((row) => (
           <tr>
             {row.map((cell) => (
               <td class="border-b border-line py-1.5 pr-4 text-ink">{cell}</td>

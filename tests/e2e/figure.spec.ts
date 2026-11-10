@@ -61,7 +61,7 @@ test.describe("figuras com moldura sem JavaScript", () => {
     }
 
     const captions = page.locator("figure:has(svg[data-viz]) > figcaption");
-    await expect(captions).toHaveCount(2);
+    await expect(captions).toHaveCount(4);
     await expect(captions.nth(0).locator("span")).toHaveText("Figura 1");
     await expect(captions.nth(1).locator("span")).toHaveText("Figura 2");
     for (const [index, figure] of figures.entries()) {
@@ -71,7 +71,7 @@ test.describe("figuras com moldura sem JavaScript", () => {
     }
 
     const details = page.locator("figure:has(svg[data-viz]) + details");
-    await expect(details).toHaveCount(2);
+    await expect(details).toHaveCount(4);
     for (const [index, figure] of figures.entries()) {
       const item = details.nth(index);
       await expect(item).not.toHaveAttribute("open");
@@ -126,7 +126,7 @@ test.describe("figuras com moldura sem JavaScript", () => {
     }
 
     const summaries = page.locator("figure + details > summary");
-    await expect(summaries).toHaveCount(2);
+    await expect(summaries).toHaveCount(4);
     await expect(summaries.nth(0)).toHaveText(vizDataLabel);
     for (const index of [0, 1]) {
       const summary = await box(summaries.nth(index));
