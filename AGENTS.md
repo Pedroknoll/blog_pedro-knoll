@@ -9,17 +9,29 @@ Blog técnico estático no estilo do Hugging Face Blog: Astro 7 gera o HTML, Pyt
 
 
 
-## Como trabalhar uma tarefa
+## Trilhas
 
-1. Leia a linha da tarefa no `ROADMAP.md` e o registro de handoff das tarefas de que ela depende.
+Toda mudança entra por uma de três trilhas. Na dúvida, a completa.
+
+| Trilha | Quando | Branch | Prova | ROADMAP |
+| --- | --- | --- | --- | --- |
+| **Post** | Só arquivos dentro de `src/content/posts/<slug>/` | `post/<slug>` | CI verde e preview olhado a 360 px e no desktop | Não entra: sem ID e sem handoff |
+| **Tarefa leve** | Docs, dependência da lista da SPEC §9, correção sem mudança de comportamento | `t-XX-descricao-curta` | CI verde; plano de uma linha e a saída que prova, no PR | Tarefa `concluída` e handoff de 1 linha |
+| **Tarefa completa** | Comportamento novo (RF ou RNF), infraestrutura, budget, CSP, schema | `t-XX-descricao-curta` | Os passos abaixo | Tarefa `concluída` e handoff de até 3 linhas |
+
+Um post que precisa mudar algo fora da pasta dele não é post: a mudança vira tarefa, e o post espera (RNF-14). O detalhe de uma tarefa (o que foi medido, tentado e descartado) fica na descrição do PR; o handoff guarda só o que a próxima tarefa precisa saber.
+
+## Como trabalhar uma tarefa completa
+
+1. Leia a linha da tarefa no `ROADMAP.md` e o registro de handoff das tarefas de que ela depende. O das tarefas fechadas até 10/11/2026 está em `specs/arquivo/handoff-ate-2026-11-10.md`.
 2. Leia só as seções da SPEC ligadas aos requisitos citados. Não leia a spec inteira por hábito. Se a tarefa citar o BRAND, leia só essa seção.
 3. **Antes de editar código**, apresente um plano curto e espere confirmação: arquivos a criar ou mudar, o que fica fora, como vai provar. O mesmo plano vai para a descrição do PR.
 4. Testes primeiro, nas tarefas que entregam comportamento (RF ou RNF). Tire o `test.fixme` dos cenários da tarefa, ou escreva os testes a partir dos critérios de aceite da SPEC §3, §4 e §11. **Rode-os e mostre que falham antes de implementar**: um teste que já passa sem o código não prova nada.
   - Exceções: spikes (T-03, T-04, T-05) provam com o doc em `specs/spikes/`; tarefas de infraestrutura (T-01, T-02, T-13, T-36, T-50, T-59) provam com o comando ou o pipeline rodando e com a saída colada no PR. Não invente testes artificiais para elas.
 5. Implemente até os testes e os gates ficarem verdes.
-6. Feche: tarefa `concluída` e linha de handoff no `ROADMAP.md`; `SPEC.md` atualizado se o comportamento mudou; tudo no mesmo PR.
+6. Feche: tarefa `concluída` e entrada de handoff de até 3 linhas no `ROADMAP.md`; `SPEC.md` atualizado se o comportamento mudou; tudo no mesmo PR.
 
-Uma tarefa = um PR, num branch `t-XX-descricao-curta`. Trabalho descoberto no caminho vira tarefa nova no roadmap, não escopo extra.
+Uma tarefa = um PR, num branch `t-XX-descricao-curta`. Trabalho descoberto no caminho vira tarefa nova no roadmap, não escopo extra. Na tarefa leve, o passo 3 vira uma linha de plano na descrição do PR, e os passos 4 e 5 viram o CI verde.
 
 ## Comandos
 
@@ -45,7 +57,7 @@ Sempre `pnpm`, nunca `npm` ou `yarn`. Sempre `uv run`, nunca `python` ou `pip` d
 ## Mapa
 
 ```text
-specs/                  SPEC, ROADMAP, BRAND.md, spikes/, adr/ (só ADRs substituídos)
+specs/                  SPEC, ROADMAP, BRAND.md, spikes/, adr/ (só ADRs substituídos), arquivo/ (handoffs e revisões antigas; não leia por hábito)
 src/site.config.ts      título, URL (SITE_URL) e autor (não existe collection de autores)
 src/content.config.ts   collection `posts` com schema Zod 4
 src/content/posts/<slug>/index.mdx   cada post é uma pasta: texto, capa, figs/, data/, notebooks/
@@ -132,9 +144,22 @@ Não faça sem pedido explícito:
 
 ## Definition of Done
 
-- [ ] Requisitos citados no PR e na mensagem de commit.
-- [ ] Testes do nível adequado escritos, vistos falhando antes e passando depois (spikes e infra: prova pelo doc de spike ou pela saída do pipeline).
+Todas as trilhas:
+
 - [ ] Lint, tipos, testes e budgets verdes no CI.
 - [ ] Preview revisado em mobile (360 px) e desktop.
-- [ ] `ROADMAP.md`: tarefa `concluída`, linha de handoff e, se for o caso, status do gate.
+
+Post, além disso:
+
+- [ ] Nenhum arquivo fora de `src/content/posts/<slug>/` no diff.
+
+Tarefa leve, além do comum:
+
+- [ ] Requisitos citados no PR e na mensagem de commit.
+- [ ] `ROADMAP.md`: tarefa `concluída` e handoff de 1 linha.
+
+Tarefa completa, além da leve:
+
+- [ ] Testes do nível adequado escritos, vistos falhando antes e passando depois (spikes e infra: prova pelo doc de spike ou pela saída do pipeline).
+- [ ] Handoff de até 3 linhas no lugar da linha única e, se for o caso, status do gate.
 - [ ] `SPEC.md` atualizado se o comportamento mudou.
