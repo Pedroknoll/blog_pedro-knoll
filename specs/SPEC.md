@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 10/11/2026
 
+**Revisão 4 de 10/11/2026:** a T-21 foi cancelada. O blog não foi lançado, e o post B é a fixture provisória das figuras: os cenários "Gráfico acessível" e "Figura estática" da §11 já são testados nas provas da T-72, da T-19 e da T-20 que estão nele, e o Gate 2a foi aprovado contra elas. A §8 passa a dizer que a prova da T-19 fica sem moldura até a T-39, que tira as provas do post B; a §11 diz onde cada um dos dois cenários é testado.
+
 **Revisão 3 de 10/11/2026:** a §8 fixa os primeiros exploráveis (T-20). O `Figure.astro` ganha o modo island (prop `island`): não desenha `svg` nem grade, e o island entra direto na `<figure>`, antes da `<figcaption>`, que segue como último filho; o `svg` raiz, a grade e os controles são do `.svelte`. O `Stepper` e o `Explorable` só existem com `client:visible`, com os controles `disabled` no HTML do build. O `Heatmap` pinta a intensidade em tinta, com `fill-opacity` em cinco degraus, e destaca a linha com um contorno em `accent`; o `d3-scale-chromatic`, que devolve cores fora dos tokens, sai da tabela da biblioteca. A troca de cor tem transição curta, desligada com `prefers-reduced-motion`. O cenário "Gráfico acessível" da §11 troca o `<LineChart>` por um explorável.
 
 **Revisão 2 de 10/11/2026:** a §8 fixa os dados pré-calculados (T-73). O `scripts/build-data.py` roda na máquina do autor, lê as entradas de `data/raw/`, grava o JSON reduzido em `data/` e o `data/data.lock` com o SHA-256 de cada entrada e de cada saída; o `pnpm check:data`, dentro do `pnpm lint`, refaz os hashes e falha com dado desatualizado, sem rodar Python no CI. O RNF-09 passa a cobrir o dado desatualizado; a §6 descreve a pasta `data/`; a §7 alinha o `export.lock` ao formato do `data.lock`; a §9 diz como o script trava dependência; a §10 põe o `check:data` no lint.
@@ -607,7 +609,7 @@ O mesmo componente de `src/components/viz/` sem `client:*` é figura estática (
 - O controle lê uma tabela pré-calculada e não recalcula modelo no navegador (INP, RNF-13).
 - Passo a passo com botões Anterior/Próximo. Animação ligada à rolagem só em CSS, como melhoria progressiva, com `@supports` e `prefers-reduced-motion`. Sem GIF.
 - Os controles de um explorável saem `disabled` no HTML do build e habilitam ao hidratar, sem mudar a altura da figura. A troca de cor usa `transition-colors`, e `motion-reduce:transition-none` a desliga com `prefers-reduced-motion` (T-20).
-- Toda figura dentro de um `Figure.astro`, com legenda numerada, "Ver dados" e proporção reservada (CLS). Na figura estática, o `Figure` é dono do `svg` raiz e da grade; a `<figcaption>` é o último filho da `<figure>`, e o "Ver dados" vem num `<details>` logo depois dela. A proporção vem do `viewBox` e dos atributos `width` e `height`; a figura só encolhe. No explorável, o `Figure` vai no modo island (prop `island`, com `number`, `caption` e `data`): não desenha `svg` nem grade, e o island entra direto na `<figure>`, antes da `<figcaption>`, que segue como último filho. O `svg` raiz, a grade e os controles são do `.svelte`, com a proporção pelo `viewBox` e pelos atributos `width` e `height` dele (T-20). A prova da T-19 fica sem moldura até a T-21.
+- Toda figura dentro de um `Figure.astro`, com legenda numerada, "Ver dados" e proporção reservada (CLS). Na figura estática, o `Figure` é dono do `svg` raiz e da grade; a `<figcaption>` é o último filho da `<figure>`, e o "Ver dados" vem num `<details>` logo depois dela. A proporção vem do `viewBox` e dos atributos `width` e `height`; a figura só encolhe. No explorável, o `Figure` vai no modo island (prop `island`, com `number`, `caption` e `data`): não desenha `svg` nem grade, e o island entra direto na `<figure>`, antes da `<figcaption>`, que segue como último filho. O `svg` raiz, a grade e os controles são do `.svelte`, com a proporção pelo `viewBox` e pelos atributos `width` e `height` dele (T-20). A prova da T-19 fica sem moldura até a T-39, que tira do post B as figuras de prova (T-21, cancelada).
 - As primitivas são `.svelte` que desenham um `<g>` no sistema de coordenadas da raiz e entram autocontidas no slot do `Figure`. Um `.svelte` não recebe filhos do MDX dentro de um `svg`: o renderer os embrulha em `astro-static-slot` (T-72).
 - Rótulos em IBM Plex Mono 400 e notas em IBM Plex Sans itálico, sem face nova (orçamento de fontes da §9).
 
@@ -919,6 +921,8 @@ Funcionalidade: Figura estática [RF-09, RNF-02]
     E a figura não está dentro de um astro-island
 
 ```
+
+Os cenários "Gráfico acessível" e "Figura estática" são testados nas figuras de prova do post B, fixture provisória até a T-39: o primeiro em `tests/e2e/explorable.spec.ts` ("moldura, dados e controles no HTML") e em `tests/e2e/viz.spec.ts` ("figura nos dois modos no HTML, sem JavaScript"); o segundo em `tests/e2e/figure.spec.ts` ("moldura com legenda e dados") e no mesmo teste do `viz.spec.ts`. Na T-39, os testes passam para a fixture (T-21, cancelada).
 
 ### Pirâmide de testes
 
