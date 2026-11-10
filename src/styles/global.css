@@ -13,6 +13,8 @@
   --color-kind-tutorial: #84601a;
   --color-kind-lab: #a3392a;
   --color-kind-playbook: #2e6b5a;
+  --color-grid: rgba(31, 75, 122, 0.03);
+  --color-grid-strong: rgba(31, 75, 122, 0.065);
   --container-site: 72rem;
 }
 
@@ -35,6 +37,8 @@
     --color-kind-tutorial: #d9b85c;
     --color-kind-lab: #ee8a74;
     --color-kind-playbook: #7cc7ae;
+    --color-grid: rgba(200, 225, 255, 0.025);
+    --color-grid-strong: rgba(200, 225, 255, 0.055);
     color-scheme: dark;
   }
 

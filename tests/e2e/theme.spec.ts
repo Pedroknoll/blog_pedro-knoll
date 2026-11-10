@@ -153,7 +153,10 @@ for (const theme of ["light", "dark"] as const) {
       expect.soft(got.r, token).toBe(want.r);
       expect.soft(got.g, token).toBe(want.g);
       expect.soft(got.b, token).toBe(want.b);
-      expect.soft(Math.abs(got.a - want.a), token).toBeLessThanOrEqual(0.001);
+      // Chrome guarda o alfa em 8 bits: 0.065 vira 17/255 e sai como 0.067.
+      expect
+        .soft(Math.round(got.a * 255), token)
+        .toBe(Math.round(want.a * 255));
     }
 
     if (!isMissing(colors["kind-concept"]) && !isMissing(colors.accent)) {

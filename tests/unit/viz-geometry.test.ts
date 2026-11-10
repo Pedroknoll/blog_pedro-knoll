@@ -93,7 +93,7 @@ describe("dimension", () => {
       { x: 0, y: 0 },
       { x: 40, y: 0 },
       { x: 0, y: -12 },
-      { x: 20, y: -8 },
+      { x: 20, y: -20 },
       "middle",
       "auto",
     );
@@ -101,7 +101,7 @@ describe("dimension", () => {
       { x: 0, y: 10 },
       { x: 0, y: 50 },
       { x: -12, y: 0 },
-      { x: -8, y: 30 },
+      { x: -20, y: 30 },
       "end",
       "middle",
     );
