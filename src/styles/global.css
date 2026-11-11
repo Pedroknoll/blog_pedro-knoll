@@ -528,3 +528,16 @@
     transition: opacity 150ms;
   }
 }
+
+@font-face {
+  font-family: "Metric Sans";
+  src:
+    local("Liberation Sans"), local("LiberationSans"), local("Arimo Regular"),
+    local("Arimo-Regular");
+  font-weight: 600;
+  font-style: normal;
+  size-adjust: 94.6611%;
+  ascent-override: 108.281%;
+  descent-override: 29.051%;
+  line-gap-override: 0%;
+}

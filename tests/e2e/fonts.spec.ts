@@ -165,6 +165,82 @@ async function familyFromVariable(
   return first;
 }
 
+const METRIC_LOCALS = [
+  "Liberation Sans",
+  "LiberationSans",
+  "Arimo Regular",
+  "Arimo-Regular",
+] as const;
+
+type MetricRule = {
+  family: string;
+  weight: string;
+  style: string;
+  src: string;
+  sizeAdjust: string;
+  ascentOverride: string;
+  descentOverride: string;
+  lineGapOverride: string;
+};
+
+function localSourcesInOrder(src: string): boolean {
+  if (/url\s*\(/i.test(src)) return false;
+  if (!/local\s*\(/i.test(src)) return false;
+  let from = 0;
+  for (const name of METRIC_LOCALS) {
+    const at = src.indexOf(name, from);
+    if (at < 0) return false;
+    from = at + name.length;
+  }
+  return true;
+}
+
+function isLocalArial(src: string): boolean {
+  return /local\(\s*(?:"Arial"|'Arial'|Arial)\s*\)/.test(src);
+}
+
+function sameWeight(actual: string, expected: string): boolean {
+  const text = expected.trim();
+  if (/^\d+$/.test(text)) return weightMatches(actual, Number(text));
+  return actual.trim() === text;
+}
+
+async function metricRules(page: Page): Promise<MetricRule[]> {
+  return page.evaluate(() => {
+    const found: MetricRule[] = [];
+    const walk = (rules: CSSRuleList) => {
+      for (const rule of rules) {
+        if (rule instanceof CSSFontFaceRule) {
+          const style = rule.style;
+          found.push({
+            family: style.getPropertyValue("font-family"),
+            weight: style.getPropertyValue("font-weight"),
+            style: style.getPropertyValue("font-style"),
+            src: style.getPropertyValue("src"),
+            sizeAdjust: style.getPropertyValue("size-adjust"),
+            ascentOverride: style.getPropertyValue("ascent-override"),
+            descentOverride: style.getPropertyValue("descent-override"),
+            lineGapOverride: style.getPropertyValue("line-gap-override"),
+          });
+        } else if (rule instanceof CSSGroupingRule) {
+          walk(rule.cssRules);
+        }
+      }
+    };
+
+    for (const sheet of document.styleSheets) {
+      let rules: CSSRuleList;
+      try {
+        rules = sheet.cssRules;
+      } catch {
+        throw new Error(`folha ilegível: ${sheet.href ?? "<style>"}`);
+      }
+      walk(rules);
+    }
+    return found;
+  });
+}
+
 function inFontDir(url: string, origin: string): boolean {
   if (url.startsWith("data:")) return false;
   const parsed = new URL(url);
@@ -536,6 +612,75 @@ test.describe("fontes da marca [RNF-01]", () => {
           rule.sizeAdjust.trim() !== "",
       );
       expect.soft(fallback, `${name}: ${second}`).toBe(true);
+    }
+  });
+
+  test("F8 fallback métrico da Plex Condensed", async ({ page }) => {
+    const response = await page.goto("/");
+    expect(response?.status()).toBe(200);
+
+    const values = await page.evaluate(
+      (names) => {
+        const style = getComputedStyle(document.documentElement);
+        return Object.fromEntries(
+          names.map((name) => [name, style.getPropertyValue(name).trim()]),
+        );
+      },
+      adjustedStacks.map((stack) => stack.variable),
+    );
+    const rules = await metricRules(page);
+    const condensed = values["--font-plex-condensed"] ?? "";
+    const metricSrc = rules
+      .filter((rule) => unquote(rule.family) === "Metric Sans")
+      .map((rule) => rule.src);
+
+    expect
+      .soft(familyNames(condensed), "--font-plex-condensed")
+      .toContain("Metric Sans");
+    expect
+      .soft(
+        metricSrc.some((src) => localSourcesInOrder(src)),
+        `Metric Sans: ${metricSrc.join(" | ") || "nenhuma @font-face"}`,
+      )
+      .toBe(true);
+
+    for (const { variable } of adjustedStacks) {
+      const value = values[variable] ?? "";
+      if (!familyNames(value).includes("Metric Sans")) continue;
+
+      const families = new Set(familyNames(value));
+      const arial = rules.find(
+        (rule) =>
+          families.has(unquote(rule.family)) &&
+          isLocalArial(rule.src) &&
+          rule.sizeAdjust.trim() !== "",
+      );
+      expect.soft(arial, `${variable}: face Arial`).toBeTruthy();
+      if (!arial) continue;
+
+      const metric = rules.find(
+        (rule) =>
+          unquote(rule.family) === "Metric Sans" &&
+          sameWeight(rule.weight, arial.weight) &&
+          rule.style.trim() === arial.style.trim(),
+      );
+      expect
+        .soft(metric, `${variable}: Metric Sans ${arial.weight} ${arial.style}`)
+        .toBeTruthy();
+      if (!metric) continue;
+
+      expect
+        .soft(metric.sizeAdjust.trim(), `${variable}: size-adjust`)
+        .toBe(arial.sizeAdjust.trim());
+      expect
+        .soft(metric.ascentOverride.trim(), `${variable}: ascent-override`)
+        .toBe(arial.ascentOverride.trim());
+      expect
+        .soft(metric.descentOverride.trim(), `${variable}: descent-override`)
+        .toBe(arial.descentOverride.trim());
+      expect
+        .soft(metric.lineGapOverride.trim(), `${variable}: line-gap-override`)
+        .toBe(arial.lineGapOverride.trim());
     }
   });
 });
