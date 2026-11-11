@@ -32,6 +32,9 @@ jobs:
       - name: Astro check
         run: pnpm astro check
 
+      - name: Svelte check
+        run: pnpm check:svelte
+
       - name: Ruff
         run: uv sync --locked && uv run ruff check
 
