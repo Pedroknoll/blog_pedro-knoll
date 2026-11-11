@@ -35,7 +35,7 @@ export default defineConfig({
       styles: ["normal"],
       subsets: ["latin"],
       formats: ["woff2"],
-      fallbacks: ["sans-serif"],
+      fallbacks: ["Metric Sans", "sans-serif"],
     },
     {
       name: "IBM Plex Sans",
@@ -65,7 +65,7 @@ export default defineConfig({
       styles: ["normal"],
       subsets: ["latin"],
       formats: ["woff2"],
-      fallbacks: ["monospace"],
+      fallbacks: ["Metric Mono", "monospace"],
     },
     {
       name: "Caveat",
