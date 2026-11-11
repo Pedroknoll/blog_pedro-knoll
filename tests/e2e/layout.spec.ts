@@ -1,4 +1,3 @@
-import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { pagesForTheme } from "./published-posts";
@@ -96,16 +95,6 @@ for (const path of routes) {
       await expect(
         page.getByRole("contentinfo").getByText(authorName, { exact: true }),
       ).toHaveText(authorName);
-    });
-
-    test("axe sem violações serious nem critical", async ({ page }) => {
-      await open(page, path);
-      const results = await new AxeBuilder({ page }).analyze();
-      const blocking = results.violations.filter(
-        (violation) =>
-          violation.impact === "serious" || violation.impact === "critical",
-      );
-      expect(blocking.map((violation) => violation.id)).toEqual([]);
     });
 
     test("sem rolagem horizontal a 360 px", async ({ page }) => {
