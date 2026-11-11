@@ -18,7 +18,7 @@ Complementa o `AGENTS.md` da raiz e prevalece no que for mais específico. Fonte
 - `Stepper` (Anterior e Próximo sobre uma `Matrix`, com os passos por props) e `Explorable` (controle deslizante que escolhe a linha do `Heatmap`) são donos do `svg` e só existem com `client:visible`; a figura estática é a primitiva dentro do `Figure`. A lógica fica em `src/lib/viz/steps.ts` e `src/lib/viz/heatmap.ts`.
 - Primitivas (`Vector`, `Matrix`, `Tensor`, `Arrow`, `Grid`): `.svelte` com `<svelte:options namespace="svg" />`, sem estado, que desenham um `<g>` no sistema da raiz. No MDX, entram autocontidas no slot do `Figure`: filhos do MDX para um `.svelte` chegam embrulhados em `astro-static-slot`, que não desenha dentro de um `svg`. Id de `<pattern>` com `$props.id()` e prefixo `grade-`.
 - Teto de 1.000 elementos por figura, contando o `svg` e todos os descendentes, verificado em `tests/e2e/viz.spec.ts`. Acima disso, os dados são reduzidos no Python.
-- A geometria fica em funções puras de `src/lib/viz/`, testadas no Vitest; o `.svelte` só desenha. O `astro check` não confere tipos dentro do `.svelte` (T-75).
+- A geometria fica em funções puras de `src/lib/viz/`, testadas no Vitest; o `.svelte` só desenha. Os tipos dentro do `.svelte` são conferidos pelo `pnpm check:svelte`, não pelo `astro check` (T-75).
 - D3 só em módulos avulsos da SPEC §9 e só para cálculo. O DOM é do Svelte: `d3-selection` não cria nem altera elemento (exceção: `d3-zoom` e `d3-drag` por action).
 - O JS de cada island cabe em 40.000 bytes gzip, medidos pelo `pnpm check:js` (componente, renderer e imports estáticos). Página sem island fica sem JS de island.
 

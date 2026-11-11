@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 10/11/2026
 
+**Revisão 6 de 10/11/2026:** a T-75 fecha a lacuna da checagem de tipos dentro dos `.svelte`. O `svelte-check` entra na §9, aprovado fora da lista, e a §10 põe o `pnpm check:svelte` no passo 2, depois do `astro check`.
+
 **Revisão 5 de 10/11/2026:** reestruturação do roadmap para o fluxo de conteúdo. O RNF-14 entra na §4: publicar um post não exige mudar arquivo fora da pasta dele. A §2 ganha a Q16 (o lançamento exige o fluxo de conteúdo pronto) e a Q17 (Should e Could depois do lançamento). A §11 separa os testes de funcionalidade, na fixture, das checagens de qualidade, em todo post publicado, e a Definition of Done passa ao AGENTS.md, por trilha. A §12 descreve as fases 2b (base para conteúdo) e 2c (lab marimo). A §9 ganha `specs/arquivo/`.
 
 As revisões anteriores estão em `specs/arquivo/spec-revisoes-ate-2026-11-10.md`.
@@ -701,7 +703,7 @@ Um agente pode instalar, sem perguntar, as dependências abaixo, na versão est�
 | Conteúdo       | `remark-math`, `rehype-katex`, `katex`                                                                                                                                       | —                                                                 |
 | Gráficos       | `d3-scale`, `d3-shape`, `d3-array`, `d3-format`, `d3-zoom`, `d3-scale-chromatic`                                                                                             | —                                                                 |
 | Busca e deploy | `pagefind`, `wrangler`                                                                                                                                                       | —                                                                 |
-| Qualidade      | `eslint`, `prettier` (e os plugins oficiais para Astro e Svelte), `vitest`, `@testing-library/svelte`, `@playwright/test`, `@axe-core/playwright`, `@lhci/cli`, `linkinator`, `@types/node` | `ruff`                                                            |
+| Qualidade      | `eslint`, `prettier` (e os plugins oficiais para Astro e Svelte), `svelte-check`, `vitest`, `@testing-library/svelte`, `@playwright/test`, `@axe-core/playwright`, `@lhci/cli`, `linkinator`, `@types/node` | `ruff`                                                            |
 | Notebooks      | —                                                                                                                                                                            | `moutils` (só em notebooks com `compute: onnx`, no bloco PEP 723) |
 
 
@@ -764,7 +766,7 @@ A T-05 confirmou o detach: `! Content-Security-Policy` seguido de nova CSP no me
 ### Pipeline (`.github/workflows/ci.yml`)
 
 1. **Setup:** pnpm, Node LTS, uv; cache de `~/.cache/uv`, `node_modules` e `public/notebooks` (chave = hash dos `.py` + `uv.lock`).
-2. **Lint e tipos:** `pnpm lint`, que começa pela guarda de codificação (`pnpm check:utf8`: todo arquivo de texto em `src/` é UTF-8 válido e sem BOM) e segue pelo frescor dos dados pré-calculados (`pnpm check:data`: o `data.lock` de cada pasta `data/` bate com os arquivos, sem rodar Python), `astro check`, `ruff check`, `marimo check --select MW` em todos os notebooks.
+2. **Lint e tipos:** `pnpm lint`, que começa pela guarda de codificação (`pnpm check:utf8`: todo arquivo de texto em `src/` é UTF-8 válido e sem BOM) e segue pelo frescor dos dados pré-calculados (`pnpm check:data`: o `data.lock` de cada pasta `data/` bate com os arquivos, sem rodar Python), `astro check`, `pnpm check:svelte` (o `svelte-check`, que confere os tipos dentro dos `.svelte`; roda depois do `astro check` porque precisa do `.astro/types.d.ts` que ele gera), `ruff check`, `marimo check --select MW` em todos os notebooks.
 3. **Testes unitários:** `vitest` em `src/lib`.
 4. **Build de produção:** `pnpm build` sem `SHOW_DRAFTS` (notebooks leves → Astro → Pagefind; notebooks pesados não executam, só têm o `export.lock` conferido e são copiados).
 5. **Verificações do artefato:** dois jobs sobre o `dist/` do passo 4 (artifact), em paralelo ao E2E. `artifact-checks` roda os links internos (`pnpm check:links`, linkinator com fragmentos) e o JS por página (`pnpm check:js`); o segundo roda mesmo se o primeiro falhar. `lighthouse` roda o Lighthouse CI com budgets e guarda o relatório no artifact `lighthouse-report` (14 dias). As regras do `dist/_headers` entram com a T-16; o `check:js` também conta cada island (T-19) (RNF-01/02/05/06/07).
