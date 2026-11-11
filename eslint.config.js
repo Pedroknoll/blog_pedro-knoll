@@ -29,4 +29,10 @@ export default [
       },
     },
   },
+  {
+    files: ["lighthouserc.cjs"],
+    rules: {
+      "@typescript-eslint/no-require-imports": "off",
+    },
+  },
 ];
