@@ -1,8 +1,6 @@
 <svelte:options namespace="svg" />
 
 <script lang="ts">
-  const size: number = "24";
-  void size;
   import { gridPattern } from "~/lib/viz/geometry";
 
   type Props = {
