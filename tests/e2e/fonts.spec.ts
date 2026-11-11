@@ -165,11 +165,29 @@ async function familyFromVariable(
   return first;
 }
 
-const METRIC_LOCALS = [
-  "Liberation Sans",
-  "LiberationSans",
-  "Arimo Regular",
-  "Arimo-Regular",
+const metricFallbacks = [
+  {
+    variable: "--font-plex-condensed",
+    family: "Metric Sans",
+    base: "Arial",
+    locals: [
+      "Liberation Sans",
+      "LiberationSans",
+      "Arimo Regular",
+      "Arimo-Regular",
+    ],
+  },
+  {
+    variable: "--font-plex-mono",
+    family: "Metric Mono",
+    base: "Courier New",
+    locals: [
+      "Liberation Mono",
+      "LiberationMono",
+      "Cousine Regular",
+      "Cousine-Regular",
+    ],
+  },
 ] as const;
 
 type MetricRule = {
@@ -183,11 +201,11 @@ type MetricRule = {
   lineGapOverride: string;
 };
 
-function localSourcesInOrder(src: string): boolean {
+function localSourcesInOrder(src: string, locals: readonly string[]): boolean {
   if (/url\s*\(/i.test(src)) return false;
   if (!/local\s*\(/i.test(src)) return false;
   let from = 0;
-  for (const name of METRIC_LOCALS) {
+  for (const name of locals) {
     const at = src.indexOf(name, from);
     if (at < 0) return false;
     from = at + name.length;
@@ -195,8 +213,11 @@ function localSourcesInOrder(src: string): boolean {
   return true;
 }
 
-function isLocalArial(src: string): boolean {
-  return /local\(\s*(?:"Arial"|'Arial'|Arial)\s*\)/.test(src);
+function isLocalBase(src: string, name: string): boolean {
+  const escaped = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  return new RegExp(
+    `local\\(\\s*(?:"${escaped}"|'${escaped}'|${escaped})\\s*\\)`,
+  ).test(src);
 }
 
 function sameWeight(actual: string, expected: string): boolean {
@@ -615,7 +636,9 @@ test.describe("fontes da marca [RNF-01]", () => {
     }
   });
 
-  test("F8 fallback métrico da Plex Condensed", async ({ page }) => {
+  test("F8 fallback métrico da Plex Condensed e da Plex Mono", async ({
+    page,
+  }) => {
     const response = await page.goto("/");
     expect(response?.status()).toBe(200);
 
@@ -626,61 +649,71 @@ test.describe("fontes da marca [RNF-01]", () => {
           names.map((name) => [name, style.getPropertyValue(name).trim()]),
         );
       },
-      adjustedStacks.map((stack) => stack.variable),
+      metricFallbacks.map((entry) => entry.variable),
     );
     const rules = await metricRules(page);
-    const condensed = values["--font-plex-condensed"] ?? "";
-    const metricSrc = rules
-      .filter((rule) => unquote(rule.family) === "Metric Sans")
-      .map((rule) => rule.src);
 
-    expect
-      .soft(familyNames(condensed), "--font-plex-condensed")
-      .toContain("Metric Sans");
-    expect
-      .soft(
-        metricSrc.some((src) => localSourcesInOrder(src)),
-        `Metric Sans: ${metricSrc.join(" | ") || "nenhuma @font-face"}`,
-      )
-      .toBe(true);
+    for (const entry of metricFallbacks) {
+      const value = values[entry.variable] ?? "";
+      const metricSrc = rules
+        .filter((rule) => unquote(rule.family) === entry.family)
+        .map((rule) => rule.src);
 
-    for (const { variable } of adjustedStacks) {
-      const value = values[variable] ?? "";
-      if (!familyNames(value).includes("Metric Sans")) continue;
+      expect.soft(familyNames(value), entry.variable).toContain(entry.family);
+      expect
+        .soft(
+          metricSrc.some((src) => localSourcesInOrder(src, entry.locals)),
+          `${entry.family}: ${metricSrc.join(" | ") || "nenhuma @font-face"}`,
+        )
+        .toBe(true);
+
+      if (!familyNames(value).includes(entry.family)) continue;
 
       const families = new Set(familyNames(value));
-      const arial = rules.find(
+      const base = rules.find(
         (rule) =>
           families.has(unquote(rule.family)) &&
-          isLocalArial(rule.src) &&
+          isLocalBase(rule.src, entry.base) &&
           rule.sizeAdjust.trim() !== "",
       );
-      expect.soft(arial, `${variable}: face Arial`).toBeTruthy();
-      if (!arial) continue;
+      expect.soft(base, `${entry.variable}: face ${entry.base}`).toBeTruthy();
+      if (!base) continue;
 
       const metric = rules.find(
         (rule) =>
-          unquote(rule.family) === "Metric Sans" &&
-          sameWeight(rule.weight, arial.weight) &&
-          rule.style.trim() === arial.style.trim(),
+          unquote(rule.family) === entry.family &&
+          sameWeight(rule.weight, base.weight) &&
+          rule.style.trim() === base.style.trim(),
       );
       expect
-        .soft(metric, `${variable}: Metric Sans ${arial.weight} ${arial.style}`)
+        .soft(
+          metric,
+          `${entry.variable}: ${entry.family} ${base.weight} ${base.style}`,
+        )
         .toBeTruthy();
       if (!metric) continue;
 
       expect
-        .soft(metric.sizeAdjust.trim(), `${variable}: size-adjust`)
-        .toBe(arial.sizeAdjust.trim());
+        .soft(metric.sizeAdjust.trim(), `${entry.variable}: size-adjust`)
+        .toBe(base.sizeAdjust.trim());
       expect
-        .soft(metric.ascentOverride.trim(), `${variable}: ascent-override`)
-        .toBe(arial.ascentOverride.trim());
+        .soft(
+          metric.ascentOverride.trim(),
+          `${entry.variable}: ascent-override`,
+        )
+        .toBe(base.ascentOverride.trim());
       expect
-        .soft(metric.descentOverride.trim(), `${variable}: descent-override`)
-        .toBe(arial.descentOverride.trim());
+        .soft(
+          metric.descentOverride.trim(),
+          `${entry.variable}: descent-override`,
+        )
+        .toBe(base.descentOverride.trim());
       expect
-        .soft(metric.lineGapOverride.trim(), `${variable}: line-gap-override`)
-        .toBe(arial.lineGapOverride.trim());
+        .soft(
+          metric.lineGapOverride.trim(),
+          `${entry.variable}: line-gap-override`,
+        )
+        .toBe(base.lineGapOverride.trim());
     }
   });
 });

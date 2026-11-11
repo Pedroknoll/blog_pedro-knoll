@@ -541,3 +541,15 @@
   descent-override: 29.051%;
   line-gap-override: 0%;
 }
+
+@font-face {
+  font-family: "Metric Mono";
+  src:
+    local("Liberation Mono"), local("LiberationMono"), local("Cousine Regular"),
+    local("Cousine-Regular");
+  font-weight: 400;
+  font-style: normal;
+  size-adjust: 99.9837%;
+  ascent-override: 102.5167%;
+  descent-override: 27.5045%;
+}
