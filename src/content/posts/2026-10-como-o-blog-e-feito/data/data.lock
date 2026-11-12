@@ -1,8 +1,8 @@
 {
-  "format": 1,
-  "generator": "scripts/build-data.py",
+  "format": 2,
+  "generator": "src/content/posts/2026-10-como-o-blog-e-feito/data/build.py",
   "inputs": {
-    "scripts/build-data.py": "5b467020b682ed9a52cea0c540c439527a424139b87b8ff0f7a85521414a6950",
+    "src/content/posts/2026-10-como-o-blog-e-feito/data/build.py": "1025c508df3fc73df833010b323aba4f05ed273d3310d1b1da9634ee2682f0ee",
     "src/content/posts/2026-10-como-o-blog-e-feito/data/raw/tokens.json": "d174eefda672996274b9e1cc5b5e0c3277ff0a06cdf311313429d84d973bb1fb"
   },
   "outputs": {
