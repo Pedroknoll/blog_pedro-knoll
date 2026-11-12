@@ -8,13 +8,13 @@ const dataDir = "src/content/posts/2026-10-como-o-blog-e-feito/data";
 const postB = "src/content/posts/2026-10-como-o-blog-e-feito";
 const outro = "src/content/posts/2026-10-outro";
 
-const scriptPath = "scripts/build-data.py";
-const generatorLockPath = "scripts/build-data.py.lock";
+const buildPath = `${dataDir}/build.py`;
+const buildLockPath = `${dataDir}/build.py.lock`;
 const tokensPath = `${dataDir}/raw/tokens.json`;
 const attentionPath = `${dataDir}/attention.json`;
 const lockPath = `${dataDir}/data.lock`;
 
-const scriptBytes = new TextEncoder().encode("script\n");
+const buildBytes = new TextEncoder().encode("script\n");
 const rawBytes = new TextEncoder().encode("raw\n");
 const outBytes = new TextEncoder().encode("out\n");
 
@@ -22,7 +22,7 @@ function sha256(bytes: Uint8Array): string {
   return createHash("sha256").update(bytes).digest("hex");
 }
 
-const scriptHash = sha256(scriptBytes);
+const buildHash = sha256(buildBytes);
 const rawHash = sha256(rawBytes);
 const outHash = sha256(outBytes);
 
@@ -36,11 +36,11 @@ type LockFile = {
 
 function freshLock(): LockFile {
   return {
-    format: 1,
-    generator: scriptPath,
+    format: 2,
+    generator: buildPath,
     python: "3.14.x",
     inputs: {
-      [scriptPath]: scriptHash,
+      [buildPath]: buildHash,
       [tokensPath]: rawHash,
     },
     outputs: {
@@ -60,14 +60,14 @@ function readFrom(entries: Iterable<readonly [string, Uint8Array]>) {
 
 function freshEntries(lock: LockFile = freshLock()) {
   return [
-    [scriptPath, scriptBytes],
+    [buildPath, buildBytes],
     [tokensPath, rawBytes],
     [attentionPath, outBytes],
     [lockPath, lockBytes(lock)],
   ] as const;
 }
 
-const freshFiles = [lockPath, tokensPath, attentionPath];
+const freshFiles = [lockPath, buildPath, tokensPath, attentionPath];
 
 describe("data-lock", () => {
   it('sha256Hex("abc") é o vetor conhecido', () => {
@@ -103,9 +103,17 @@ describe("data-lock", () => {
     ).toEqual([{ file: lockPath, reason: "lock-missing" }]);
   });
 
-  it("lock-invalid", () => {
+  it("generator scripts/build-data.py é lock-invalid", () => {
     const lock = freshLock();
-    lock.format = 2;
+    lock.generator = "scripts/build-data.py";
+    expect(
+      checkDataDir(dataDir, freshFiles, readFrom(freshEntries(lock))),
+    ).toEqual([{ file: lockPath, reason: "lock-invalid" }]);
+  });
+
+  it("format 1 é lock-invalid", () => {
+    const lock = freshLock();
+    lock.format = 1;
     expect(
       checkDataDir(dataDir, freshFiles, readFrom(freshEntries(lock))),
     ).toEqual([{ file: lockPath, reason: "lock-invalid" }]);
@@ -116,49 +124,60 @@ describe("data-lock", () => {
     lock.inputs = { [tokensPath]: rawHash };
     expect(
       checkDataDir(dataDir, freshFiles, readFrom(freshEntries(lock))),
-    ).toEqual([{ file: scriptPath, reason: "generator-missing" }]);
+    ).toEqual([
+      { file: buildPath, reason: "generator-missing" },
+      { file: buildPath, reason: "unlisted" },
+    ]);
   });
 
   it("generator-lock-missing", () => {
+    const lockBytes = new TextEncoder().encode("lock\n");
     expect(
       checkDataDir(
         dataDir,
-        freshFiles,
-        readFrom([
-          ...freshEntries(),
-          [generatorLockPath, new TextEncoder().encode("lock\n")],
-        ]),
+        [...freshFiles, buildLockPath],
+        readFrom([...freshEntries(), [buildLockPath, lockBytes]]),
       ),
-    ).toEqual([{ file: generatorLockPath, reason: "generator-lock-missing" }]);
+    ).toEqual([
+      { file: buildLockPath, reason: "generator-lock-missing" },
+      { file: buildLockPath, reason: "unlisted" },
+    ]);
   });
 
   it("outside", () => {
     const readmePath = "README.md";
-    const vazadoPath = `${dataDir}/raw/vazado.json`;
+    const scriptPath = "scripts/build-data.py";
+    const leakedPath = `${dataDir}/raw/vazado.json`;
     const readmeBytes = new TextEncoder().encode("readme\n");
-    const vazadoBytes = new TextEncoder().encode("vazado\n");
+    const scriptBytes = new TextEncoder().encode("script\n");
+    const leakedBytes = new TextEncoder().encode("vazado\n");
     const lock = freshLock();
     lock.inputs = {
       ...lock.inputs,
       [readmePath]: sha256(readmeBytes),
+      [scriptPath]: sha256(scriptBytes),
     };
     lock.outputs = {
       ...lock.outputs,
-      [vazadoPath]: sha256(vazadoBytes),
+      [buildPath]: buildHash,
+      [leakedPath]: sha256(leakedBytes),
     };
     expect(
       checkDataDir(
         dataDir,
-        [...freshFiles, vazadoPath],
+        [...freshFiles, leakedPath],
         readFrom([
           ...freshEntries(lock),
           [readmePath, readmeBytes],
-          [vazadoPath, vazadoBytes],
+          [scriptPath, scriptBytes],
+          [leakedPath, leakedBytes],
         ]),
       ),
     ).toEqual([
       { file: readmePath, reason: "outside" },
-      { file: vazadoPath, reason: "outside" },
+      { file: scriptPath, reason: "outside" },
+      { file: buildPath, reason: "outside" },
+      { file: leakedPath, reason: "outside" },
     ]);
   });
 
@@ -168,9 +187,9 @@ describe("data-lock", () => {
     expect(
       checkDataDir(
         dataDir,
-        [lockPath, tokensPath],
+        [lockPath, buildPath, tokensPath],
         readFrom([
-          [scriptPath, scriptBytes],
+          [buildPath, buildBytes],
           [tokensPath, rawBytes],
           [lockPath, lockBytes(lock)],
         ]),
@@ -182,9 +201,9 @@ describe("data-lock", () => {
     expect(
       checkDataDir(
         dataDir,
-        [lockPath, tokensPath],
+        [lockPath, buildPath, tokensPath],
         readFrom([
-          [scriptPath, scriptBytes],
+          [buildPath, buildBytes],
           [tokensPath, rawBytes],
           [lockPath, lockBytes(freshLock())],
         ]),
@@ -196,7 +215,7 @@ describe("data-lock", () => {
     const bad = "ab".repeat(32);
     const lock = freshLock();
     lock.inputs = {
-      [scriptPath]: bad,
+      [buildPath]: bad,
       [tokensPath]: bad,
     };
     lock.outputs = {
@@ -205,7 +224,7 @@ describe("data-lock", () => {
     expect(
       checkDataDir(dataDir, freshFiles, readFrom(freshEntries(lock))),
     ).toEqual([
-      { file: scriptPath, reason: "hash-mismatch" },
+      { file: buildPath, reason: "hash-mismatch" },
       { file: tokensPath, reason: "hash-mismatch" },
       { file: attentionPath, reason: "hash-mismatch" },
     ]);
