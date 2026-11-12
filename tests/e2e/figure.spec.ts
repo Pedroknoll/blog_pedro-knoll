@@ -1,13 +1,12 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
+import { fixtureMdx } from "./fixtures";
 import {
   figureMatrixVector,
   figureTensor,
   figureWidth,
   vizDataLabel,
 } from "./site-literals";
-
-const postB = "/blog/2026-10-como-o-blog-e-feito/";
 
 const figures = [figureMatrixVector, figureTensor];
 
@@ -27,7 +26,7 @@ test.describe("figuras com moldura sem JavaScript", () => {
   test.use({ javaScriptEnabled: false });
 
   test("moldura com legenda e dados [RF-09, RNF-04]", async ({ page }) => {
-    await open(page, postB);
+    await open(page, fixtureMdx.href);
 
     const first = page.getByRole("img", {
       name: figureMatrixVector.summary,
@@ -83,7 +82,7 @@ test.describe("figuras com moldura sem JavaScript", () => {
 
   test("proporção e rótulo a 1280 e 360 [RF-09, RNF-02]", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    await open(page, postB);
+    await open(page, fixtureMdx.href);
 
     const first = page.getByRole("img", {
       name: figureMatrixVector.summary,

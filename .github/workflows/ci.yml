@@ -72,11 +72,25 @@ jobs:
         env:
           SITE_URL: ${{ vars.SITE_URL }}
 
+      - name: No fixtures in production dist
+        run: node scripts/check-no-fixtures.mjs
+
+      - name: Fixture build
+        run: SHOW_FIXTURES=true pnpm build --outDir dist-fixtures
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+
       - name: Upload dist
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: dist
           path: dist
+
+      - name: Upload dist-fixtures
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist-fixtures
+          path: dist-fixtures
 
   e2e:
     name: e2e
@@ -92,10 +106,10 @@ jobs:
       - name: Setup
         uses: ./.github/actions/setup
 
-      - name: Download dist
+      - name: Download dist-fixtures
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          name: dist
+          name: dist-fixtures
           path: dist
 
       - name: Install Chromium
@@ -132,8 +146,21 @@ jobs:
           name: dist
           path: dist
 
+      - name: Download dist-fixtures
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist-fixtures
+          path: dist-fixtures
+
       - name: Lighthouse
         run: pnpm exec lhci autorun
+
+      - name: Lighthouse fixtures
+        if: ${{ !cancelled() }}
+        run: pnpm exec lhci autorun
+        env:
+          LIGHTHOUSE_SCOPE: fixtures
+          LIGHTHOUSE_DIST: dist-fixtures
 
       - name: Upload Lighthouse report
         if: ${{ !cancelled() }}
@@ -163,12 +190,27 @@ jobs:
           name: dist
           path: dist
 
+      - name: Download dist-fixtures
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist-fixtures
+          path: dist-fixtures
+
       - name: Links
+        if: ${{ !cancelled() }}
         run: pnpm check:links
 
       - name: JavaScript per page
         if: ${{ !cancelled() }}
         run: pnpm check:js
+
+      - name: Links in dist-fixtures
+        if: ${{ !cancelled() }}
+        run: pnpm exec linkinator ./dist-fixtures
+
+      - name: JavaScript per page in dist-fixtures
+        if: ${{ !cancelled() }}
+        run: node scripts/check-page-js.mjs dist-fixtures
 
   preview:
     name: preview

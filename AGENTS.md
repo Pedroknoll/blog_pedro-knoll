@@ -19,7 +19,7 @@ Toda mudança entra por uma de três trilhas. Na dúvida, a completa.
 | **Tarefa leve** | Docs, dependência da lista da SPEC §9, correção sem mudança de comportamento | `t-XX-descricao-curta` | CI verde; plano de uma linha e a saída que prova, no PR | Tarefa `concluída` e handoff de 1 linha |
 | **Tarefa completa** | Comportamento novo (RF ou RNF), infraestrutura, budget, CSP, schema | `t-XX-descricao-curta` | Os passos abaixo | Tarefa `concluída` e handoff de até 3 linhas |
 
-Um post que precisa mudar algo fora da pasta dele não é post: a mudança vira tarefa, e o post espera (RNF-14). O detalhe de uma tarefa (o que foi medido, tentado e descartado) fica na descrição do PR; o handoff guarda só o que a próxima tarefa precisa saber.
+Um post que precisa mudar algo fora da pasta dele não é post: a mudança vira tarefa, e o post espera (RNF-14). As pastas `fixture-*` de `src/content/posts/` são fixtures de teste, não posts: mudar uma é tarefa (T-39). O detalhe de uma tarefa (o que foi medido, tentado e descartado) fica na descrição do PR; o handoff guarda só o que a próxima tarefa precisa saber.
 
 ## Como trabalhar uma tarefa completa
 
@@ -43,10 +43,11 @@ Uma tarefa = um PR, num branch `t-XX-descricao-curta`. Trabalho descoberto no ca
 | Rodar como em produção | `pnpm build && npx wrangler dev` (localhost:8787)                              |
 | Build completo         | `pnpm build` (notebooks → Astro → Pagefind)                                    |
 | Build com rascunhos    | `SHOW_DRAFTS=true pnpm build`                                                  |
+| Build de teste         | `SHOW_FIXTURES=true pnpm build` (o de produção mais as fixtures `fixture-*`; no CI, `--outDir dist-fixtures`) |
 | Lint e tipos           | `pnpm lint` · `pnpm astro check` · `pnpm check:svelte` · `uv run ruff check`   |
 | Notebooks              | `uv run marimo check --select MW <arquivo.py>`                                 |
 | Testes unitários       | `pnpm vitest run`                                                              |
-| Testes E2E             | `pnpm playwright test` (contra `astro preview` do build de produção)           |
+| Testes E2E             | `pnpm playwright test` (contra `astro preview` do build de teste; local, o webServer roda `SHOW_FIXTURES=true pnpm build`) |
 | Notebook pesado        | `uv run scripts/build-notebooks.py --heavy <slug>` (ver "Pare e pergunte")     |
 | Dados pré-calculados   | `uv run scripts/build-data.py <pasta do post>` (na máquina do autor; roda o `data/build.py` do post e grava o lock; sem argumento, todos) |
 | Frescor dos dados      | `pnpm check:data` (também no `pnpm lint`; confere o `data.lock` sem Python)    |
@@ -61,6 +62,7 @@ specs/                  SPEC, ROADMAP, BRAND.md, spikes/, adr/ (só ADRs substit
 src/site.config.ts      título, URL (SITE_URL) e autor (não existe collection de autores)
 src/content.config.ts   collection `posts` com schema Zod 4
 src/content/posts/<slug>/index.mdx   cada post é uma pasta: texto, capa, figs/, data/, notebooks/
+src/content/posts/fixture-*/         fixtures de teste, só no build com SHOW_FIXTURES=true (T-39)
 src/assets/brand/       pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel,-404}.svg
 src/assets/brand/icones/  aceno.svg; icone-{conceito,tutorial,lab,playbook}.svg e -parado; icone-relogio.svg
 src/components/ui/      .astro estáticos
@@ -75,7 +77,7 @@ scripts/build-data.py   acha e roda o data/build.py de cada post e grava o data.
 exports/<slug>/<nome>/  exports pesados commitados + export.lock (não editar à mão)
 public/                 favicon.svg, favicon.ico, favicon-16.png, favicon-32.png, apple-touch-icon.png
 public/notebooks/       gerado no build; fica no .gitignore
-tests/                  vitest (unit) e playwright (e2e)
+tests/                  vitest (unit) e playwright (e2e); literais das fixtures em tests/e2e/fixtures.ts
 ```
 
 Sem `icon-192.png` e sem `icon-512.png`. `src/components/marimo/pk.css` não vem no pacote da marca: nasce na convenção da T-14/T-74.
@@ -87,7 +89,7 @@ Sem `icon-192.png` e sem `icon-512.png`. `src/components/marimo/pk.css` não vem
 - **Commits:** Conventional Commits citando o requisito, ex.: `feat(post): lateral do cabeçalho com o título ao rolar [RF-04]`.
 - **Branches:** `main` é produção; toda mudança entra por PR com preview.
 - **Componentes:** `.astro` para tudo que é estático; `.svelte` só quando houver estado no cliente. Hidratação padrão `client:visible`; `client:load` exige justificativa no PR. Exceção: em `src/components/viz/`, sem `client:*` é figura estática (0 JS); com `client:visible` é explorável.
-- **Conteúdo:** as páginas acessam posts só por `getPublishedPosts()`, nunca por `getCollection('posts')` direto (é o que esconde rascunhos quando `SHOW_DRAFTS` não é `true`).
+- **Conteúdo:** as páginas acessam posts só por `getPublishedPosts()`, nunca por `getCollection('posts')` direto (é o que esconde rascunhos quando `SHOW_DRAFTS` não é `true`). Teste de funcionalidade abre uma fixture, pelos literais de `tests/e2e/fixtures.ts`, nunca um post publicado; um laço sobre os posts publicados só confere o que vale para qualquer post (RNF-14, T-39).
 - **Slug:** é o `id` da entrada, gerado pelo `generateId` do loader (nome da pasta). Não recalcule slug nas páginas.
 - **Nomes:** identificadores de código em inglês; texto visível e rotas em pt-BR (`/sobre`, `/tags/[tag]`, `/tipos/[tipo]`). Exceções fixadas na SPEC: `/blog/[slug]` e `/page/[n]`.
 - **Alias:** `~/` aponta para `src/`.

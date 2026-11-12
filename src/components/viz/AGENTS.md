@@ -8,7 +8,7 @@ Complementa o `AGENTS.md` da raiz e prevalece no que for mais específico. Fonte
 - `client:load` só com justificativa no PR. Nada de `client:only`: ele tira o SVG do HTML.
 - O `astro-island` tem `display: contents` e não tem caixa. Em teste, role até a figura ou meça a figura, nunca o island.
 - Os controles de um explorável saem `disabled` no HTML do build e habilitam quando o componente hidrata. A figura não muda de tamanho (CLS) e não há botão que não faz nada.
-- Dados por props, importados no MDX de JSON ou CSV da pasta do post; nada de `fetch`. Datas chegam como string ISO e o componente converte. O controle lê uma tabela pré-calculada e não recalcula modelo no navegador (RNF-13). A tabela sai do `data/build.py` do post, rodado pelo `scripts/build-data.py`, e fica em `data/`, conferida pelo `data.lock` (SPEC §8); a prova da T-73 é o `data/attention.json` do post B, `{ tokens, weights }`, uma matriz 5 × 5, formato fixado na T-20 e lido pelo `Explorable`.
+- Dados por props, importados no MDX de JSON ou CSV da pasta do post; nada de `fetch`. Datas chegam como string ISO e o componente converte. O controle lê uma tabela pré-calculada e não recalcula modelo no navegador (RNF-13). A tabela sai do `data/build.py` do post, rodado pelo `scripts/build-data.py`, e fica em `data/`, conferida pelo `data.lock` (SPEC §8); a prova da T-73 é o `data/attention.json` da `fixture-mdx`, `{ tokens, weights }`, uma matriz 5 × 5, formato fixado na T-20 e lido pelo `Explorable`.
 
 ## Contrato
 
@@ -37,4 +37,4 @@ Complementa o `AGENTS.md` da raiz e prevalece no que for mais específico. Fonte
 
 - `Figure.astro`: props `number`, `caption`, `title`, `summary`, `name`, `width`, `height` e `data` (`columns` e `rows`). Desenha o `svg` raiz com a grade, a `<figcaption>` como último filho da `<figure>` e, logo depois da `<figure>`, o `<details>` "Ver dados" com a tabela de `data`. A `<figcaption>` dá o nome acessível da figura, por isso o "Ver dados" fica fora dela. Sem `<style>` nem atributo `style` (CSP).
 - Modo island: `<Figure island number={…} caption="…" data={…}>`, sem `title`, `summary`, `name`, `width` nem `height`. Não desenha `svg` nem grade; o slot vai direto na `<figure>`, antes da `<figcaption>`, e o island leva tudo isso no próprio `.svelte`.
-- As figuras do post B são a fixture provisória até a T-39 (a T-21 foi cancelada): "Figuras com moldura", prova da T-72; "Uma figura em dois modos", com o `IslandProof.svelte`, prova da T-19, sem moldura; e "Passos e exploráveis", prova da T-20. A T-39 as tira do post B e leva os testes delas para a fixture.
+- As figuras de prova ficam na `fixture-mdx` (T-39): "Figuras com moldura", prova da T-72; "Uma figura em dois modos", com o `IslandProof.svelte`, prova da T-19, sem moldura; e "Passos e exploráveis", prova da T-20. O `IslandProof.svelte` só serve a ela. Os testes de figura abrem a `fixture-mdx` pelos literais de `tests/e2e/fixtures.ts`, nunca um post publicado.

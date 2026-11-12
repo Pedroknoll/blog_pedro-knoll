@@ -1,0 +1,197 @@
+---
+title: "Fixture de MDX"
+
+description: "Post de prova em MDX com as figuras, os exploráveis, as citações e os três callouts."
+
+pubDate: 2000-01-03
+
+folio: 902
+kind: concept
+level: 1
+
+tags: [fixture, mdx]
+
+references:
+  - key: distill-multimodal
+    authors:
+      - Gabriel Goh
+      - Nick Cammarata
+      - Chelsea Voss
+      - Shan Carter
+      - Michael Petrov
+      - Ludwig Schubert
+      - Alec Radford
+      - Chris Olah
+    title: Multimodal Neurons in Artificial Neural Networks
+    year: 2021
+    venue: Distill
+    url: https://distill.pub/2021/multimodal-neurons/
+  - key: astro-unified
+    authors:
+      - Astro
+    title: Unified API Reference
+    year: 2026
+    venue: Documentação do Astro
+    url: https://docs.astro.build/en/reference/markdown-processors/unified/
+
+appendices:
+  - title: Como as referências funcionam
+    paragraphs:
+      - A citação no texto é um número entre colchetes. O número é a posição da obra na lista de referências, e o link leva ao item correspondente no fim do post.
+---
+
+import Callout from "~/components/ui/Callout.astro";
+import Arrow from "~/components/viz/Arrow.svelte";
+import Explorable from "~/components/viz/Explorable.svelte";
+import Figure from "~/components/viz/Figure.astro";
+import IslandProof from "~/components/viz/IslandProof.svelte";
+import Matrix from "~/components/viz/Matrix.svelte";
+import Stepper from "~/components/viz/Stepper.svelte";
+import Tensor from "~/components/viz/Tensor.svelte";
+import Vector from "~/components/viz/Vector.svelte";
+import { heatmapTable } from "~/lib/viz/heatmap";
+import { stepTable } from "~/lib/viz/steps";
+import attention from "./data/attention.json";
+
+export const stepperSteps = [
+  { label: "O destaque começa na primeira casa.", highlight: [0, 0] },
+  { label: "O destaque anda uma coluna.", highlight: [0, 1] },
+  { label: "O destaque desce uma linha.", highlight: [1, 1] },
+];
+
+O processador `unified` trata o Markdown [@astro-unified].
+
+O fim do post segue o modelo do Distill [@distill-multimodal].
+
+<Callout variant="note">
+
+Para ver o site como em produção, rode `pnpm build && npx wrangler dev`.
+
+</Callout>
+
+<Callout variant="caution">
+
+Não edite `dist/_headers` à mão: o arquivo é gerado no build.
+
+</Callout>
+
+<Callout variant="result" value="LCP da home 1202 ms → 1352 ms">
+
+Efeito das fontes da assinatura na T-43, mediana de 3 no Lighthouse local.
+
+</Callout>
+
+A soma dos quadrados de $x_i$ é a norma ao quadrado:
+
+$$
+\sum_{i=1}^{n} x_i^2 = \lVert x \rVert^2
+$$
+
+## Figuras com moldura
+
+<Figure
+  number={1}
+  name="t72-matrix-vector"
+  width={280}
+  height={176}
+  title="Matriz 4 por 4 que vira um vetor de 4"
+  summary="Uma matriz de 4 por 4 células, uma seta e um vetor coluna de 4 células, com a cota [4]."
+  caption="Uma matriz 4 × 4 vira um vetor de 4 elementos."
+  data={{
+    columns: ["Elemento", "Formato"],
+    rows: [
+      ["Matriz", "4 × 4"],
+      ["Vetor", "4"],
+    ],
+  }}
+>
+  <Matrix x={24} y={32} rows={4} cols={4} highlight={[0, 0]} />
+  <Arrow from={[140, 86]} to={[172, 86]} />
+  <Vector x={180} y={32} length={4} orientation="column" dimension="[4]" />
+</Figure>
+
+<Figure
+  number={2}
+  name="t72-tensor"
+  width={280}
+  height={200}
+  title="Tensor 3 por 4 por 4"
+  summary="Três camadas de 4 por 4 células empilhadas, com a cota [3, 4, 4]."
+  caption="Um tensor de formato [3, 4, 4]: três matrizes 4 × 4 empilhadas."
+  data={{
+    columns: ["Eixo", "Tamanho"],
+    rows: [
+      ["camadas", "3"],
+      ["linhas", "4"],
+      ["colunas", "4"],
+    ],
+  }}
+>
+  <Tensor
+    x={80}
+    y={48}
+    depth={3}
+    rows={4}
+    cols={4}
+    shape="[3, 4, 4]"
+    highlight={[0, 0]}
+  />
+</Figure>
+
+## Uma figura em dois modos
+
+O mesmo componente sai como figura estática, sem JavaScript, e como explorável, que só carrega quando chega à tela.
+
+<IslandProof
+  rows={5}
+  cols={5}
+  title="Grade 5 por 5, estática"
+  summary="Grade de 5 por 5 células com a primeira em destaque."
+/>
+
+<IslandProof
+  client:visible
+  controls
+  rows={5}
+  cols={5}
+  title="Grade 5 por 5, explorável"
+  summary="Grade de 5 por 5 células; Anterior e Próximo movem o destaque."
+/>
+
+## Passos e exploráveis
+
+Um passo a passo troca o destaque com Anterior e Próximo. O mapa não recalcula o modelo: o controle só escolhe uma linha da tabela que já veio pronta.
+
+<Figure
+  island
+  number={3}
+  caption="Três passos movem o destaque numa matriz 4 × 4."
+  data={stepTable(stepperSteps)}
+>
+  <Stepper
+    client:visible
+    name="t20-stepper"
+    title="Matriz 4 por 4 em três passos"
+    summary="Matriz de 4 por 4 células; Anterior e Próximo movem o destaque."
+    rows={4}
+    cols={4}
+    dimension="[4, 4]"
+    steps={stepperSteps}
+  />
+</Figure>
+
+<Figure
+  island
+  number={4}
+  caption="A consulta escolhe a linha; o maior peso de cada linha está no texto ao vivo."
+  data={heatmapTable(attention.tokens, attention.weights)}
+>
+  <Explorable
+    client:visible
+    name="t20-heatmap"
+    title="Atenção dos cinco tokens"
+    summary="Mapa de atenção de 5 por 5; a consulta escolhe a linha contornada."
+    tokens={attention.tokens}
+    weights={attention.weights}
+  />
+</Figure>

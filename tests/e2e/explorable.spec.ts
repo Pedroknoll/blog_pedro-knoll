@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
+import { fixtureMdx } from "./fixtures";
 import {
   heatFigure,
   stepFigure,
@@ -7,8 +8,6 @@ import {
   vizNext,
   vizPrevious,
 } from "./site-literals";
-
-const postB = "/blog/2026-10-como-o-blog-e-feito/";
 
 type Framed = {
   name: string;
@@ -141,7 +140,7 @@ test.describe("exploráveis sem JavaScript", () => {
   test("moldura, dados e controles no HTML [RF-09, RNF-04, RNF-13]", async ({
     page,
   }) => {
-    await open(page, postB);
+    await open(page, fixtureMdx.href);
     await expectIslandFigure(page, stepFigure, "Figura 3");
     await expectIslandFigure(page, heatFigure, "Figura 4");
 
@@ -186,7 +185,7 @@ test.describe("exploráveis sem JavaScript", () => {
 
   test("rótulo a 360 [RF-09, RNF-02]", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
-    await open(page, postB);
+    await open(page, fixtureMdx.href);
     const stepImg = imgNamed(page, stepFigure.summary);
     await expect(stepImg).toHaveCount(1);
     const heatImg = imgNamed(page, heatFigure.summary);
@@ -196,7 +195,7 @@ test.describe("exploráveis sem JavaScript", () => {
   });
 
   test("movimento reduzido tira a transição [RNF-02]", async ({ page }) => {
-    await open(page, postB);
+    await open(page, fixtureMdx.href);
     const stepImg = imgNamed(page, stepFigure.summary);
     await expect(stepImg).toHaveCount(1);
     const index = await stepImg
@@ -221,7 +220,7 @@ test.describe("exploráveis sem JavaScript", () => {
 
   test("alvos dos controles [RF-09]", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
-    await open(page, postB);
+    await open(page, fixtureMdx.href);
     const stepImg = imgNamed(page, stepFigure.summary);
     await expect(stepImg).toHaveCount(1);
     const stepIsland = islandWith(page, stepFigure.summary);
@@ -245,7 +244,7 @@ test("hidrata ao rolar até a figura [RF-09, RNF-02]", async ({ page }) => {
   page.on("request", (request) => {
     requested.push(new URL(request.url()).pathname);
   });
-  await open(page, postB);
+  await open(page, fixtureMdx.href);
 
   const stepImg = imgNamed(page, stepFigure.summary);
   await expect(stepImg).toHaveCount(1);
@@ -331,7 +330,7 @@ test("altura estável ao hidratar [RNF-02]", async ({
   baseURL,
 }) => {
   await page.setViewportSize({ width: 360, height: 800 });
-  await open(page, postB);
+  await open(page, fixtureMdx.href);
   const stepImg = imgNamed(page, stepFigure.summary);
   await expect(stepImg).toHaveCount(1);
 
@@ -345,7 +344,7 @@ test("altura estável ao hidratar [RNF-02]", async ({
   });
   try {
     const plain = await noJs.newPage();
-    await open(plain, postB);
+    await open(plain, fixtureMdx.href);
 
     const cases = [
       {

@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
+import { fixtureMdx } from "./fixtures";
 import { publishedPosts } from "./published-posts";
 import {
   vizCellIdle,
@@ -15,21 +16,6 @@ import {
 async function open(page: Page, href: string) {
   const response = await page.goto(href);
   expect(response?.status(), href).toBe(200);
-}
-
-async function pageWithViz(page: Page): Promise<string> {
-  const posts = await publishedPosts(page);
-  const found: string[] = [];
-  for (const post of posts) {
-    await open(page, post.href);
-    if ((await page.locator("svg[data-viz]").count()) > 0) {
-      found.push(post.href);
-    }
-  }
-  expect(found).toHaveLength(1);
-  const href = found[0];
-  if (!href) throw new Error("nenhuma figura");
-  return href;
 }
 
 async function activeFlags(img: Locator): Promise<boolean[]> {
@@ -54,8 +40,7 @@ test.describe("figura sem JavaScript", () => {
   test("figura nos dois modos no HTML, sem JavaScript [RF-09, RNF-04]", async ({
     page,
   }) => {
-    const href = await pageWithViz(page);
-    await open(page, href);
+    await open(page, fixtureMdx.href);
 
     const still = page.getByRole("img", {
       name: vizStaticSummary,
@@ -120,12 +105,11 @@ test("explorável hidrata ao ficar visível [RF-09, RNF-02]", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1280, height: 800 });
-  const href = await pageWithViz(page);
   const requested: string[] = [];
   page.on("request", (request) => {
     requested.push(new URL(request.url()).pathname);
   });
-  await open(page, href);
+  await open(page, fixtureMdx.href);
 
   const island = page.locator("astro-island").filter({
     has: page.getByRole("img", {

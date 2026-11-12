@@ -3,4 +3,5 @@
 interface ImportMetaEnv {
   readonly SITE_URL?: string;
   readonly SHOW_DRAFTS?: string;
+  readonly SHOW_FIXTURES?: string;
 }

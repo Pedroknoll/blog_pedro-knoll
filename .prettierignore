@@ -2,6 +2,7 @@
 specs
 AGENTS.md
 dist
+dist-fixtures
 .astro
 node_modules
 pnpm-lock.yaml

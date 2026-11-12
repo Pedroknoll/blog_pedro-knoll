@@ -3,7 +3,8 @@ import path from "node:path";
 
 import { countPageJs } from "../src/lib/page-js.ts";
 
-const distDir = path.resolve("dist");
+const distName = process.argv[2] ?? "dist";
+const distDir = path.resolve(distName);
 const limit = 50_000;
 const islandLimit = 40_000;
 
@@ -17,7 +18,7 @@ function exists(file) {
 }
 
 if (!exists(path.join(distDir, "index.html"))) {
-  console.error("dist/index.html não existe");
+  console.error(`${distName}/index.html não existe`);
   process.exit(1);
 }
 
@@ -61,7 +62,7 @@ function readDist(relPath) {
 
 const files = htmlFiles(distDir);
 if (files.length === 0) {
-  console.error("nenhuma página HTML em dist/");
+  console.error(`nenhuma página HTML em ${distName}/`);
   process.exit(1);
 }
 

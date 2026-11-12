@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { fixtureTag } from "./fixtures";
 import { homeGreeting, homeIntro } from "./site-literals";
 
 const h1Sizes = {
@@ -311,10 +312,10 @@ test.describe("saudação [RF-01, RNF-04]", () => {
   });
 
   test("G8 h1 da tag permanece", async ({ page }) => {
-    await open(page, "/tags/astro/", 1280);
+    await open(page, `/tags/${fixtureTag}/`, 1280);
     await expect(page.locator("h1")).toHaveCount(1);
     await expect(
-      page.getByRole("heading", { name: "Tag: astro", exact: true }),
+      page.getByRole("heading", { name: "Tag: fixture", exact: true }),
     ).toHaveCount(1);
 
     const greetingHeadings = await page.evaluate((name) => {

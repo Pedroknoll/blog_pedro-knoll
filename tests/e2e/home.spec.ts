@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test";
 
+import { fixtureSemTitulos } from "./fixtures";
 import { notFoundHeading } from "./site-literals";
 
-const featuredHref = "/blog/2026-10-por-que-este-blog/";
+const featuredHref = fixtureSemTitulos.href;
 
 test.describe("home [RF-01, RF-03]", () => {
   test("destaque com um heading, capa eager e sem style", async ({ page }) => {

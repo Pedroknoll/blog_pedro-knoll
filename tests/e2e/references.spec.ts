@@ -1,8 +1,7 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
+import { fixtureMd, fixtureMdx } from "./fixtures";
 import { publishedPosts } from "./published-posts";
-
-const postB = "/blog/2026-10-como-o-blog-e-feito/";
 
 const distillTitle = "Multimodal Neurons in Artificial Neural Networks";
 
@@ -159,7 +158,7 @@ test.describe("referências e apêndices [RF-04]", () => {
     }
   });
 
-  test("conteúdo de teste no post B, anotado para a T-39", async ({ page }) => {
+  test("conteúdo de teste na fixture-mdx", async ({ page }) => {
     const posts = await publishedPosts(page);
     const covered: boolean[] = [];
 
@@ -176,7 +175,7 @@ test.describe("referências e apêndices [RF-04]", () => {
 
     expect(covered).toContain(true);
 
-    const response = await page.goto(postB);
+    const response = await page.goto(fixtureMdx.href);
     expect(response?.status()).toBe(200);
 
     const items = referenceItems(page);
@@ -199,7 +198,7 @@ test.describe("referências e apêndices [RF-04]", () => {
 
   test("faixa a 1280", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
-    const response = await page.goto(postB);
+    const response = await page.goto(fixtureMdx.href);
     expect(response?.status()).toBe(200);
 
     const heading = page.locator("h2#referencias");
@@ -230,7 +229,7 @@ test.describe("referências e apêndices [RF-04]", () => {
 
   test("faixa a 360", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
-    const response = await page.goto(postB);
+    const response = await page.goto(fixtureMdx.href);
     expect(response?.status()).toBe(200);
 
     const heading = page.locator("h2#referencias");
@@ -248,10 +247,10 @@ test.describe("referências e apêndices [RF-04]", () => {
 test.describe("referências sem JavaScript [RF-04]", () => {
   test.use({ javaScriptEnabled: false });
 
-  test("o primeiro [1] do post B leva a #ref-distill-multimodal", async ({
+  test("o primeiro [1] da fixture-mdx leva a #ref-distill-multimodal", async ({
     page,
   }) => {
-    const response = await page.goto(postB);
+    const response = await page.goto(fixtureMdx.href);
     expect(response?.status()).toBe(200);
 
     const citations = await citationLinks(page.locator("article .prose"));
@@ -262,5 +261,47 @@ test.describe("referências sem JavaScript [RF-04]", () => {
     await first.locator.click();
     await expect(page).toHaveURL(/#ref-distill-multimodal$/);
     await expect(page.locator("#ref-distill-multimodal")).toBeInViewport();
+  });
+
+  test("citação no Markdown da fixture-md", async ({ page }) => {
+    const response = await page.goto(fixtureMd.href);
+    expect(response?.status(), fixtureMd.href).toBe(200);
+
+    const items = referenceItems(page);
+    await expect(items).toHaveCount(2);
+    await expect(items.nth(0).locator("a")).toHaveText(
+      fixtureMd.referenceTitles[0],
+    );
+    await expect(items.nth(0).locator("> p")).toHaveText(
+      fixtureMd.authorLines[0],
+    );
+    await expect(items.nth(1).locator("a")).toHaveText(
+      fixtureMd.referenceTitles[1],
+    );
+    await expect(items.nth(1).locator("> p")).toHaveText(
+      fixtureMd.authorLines[1],
+    );
+    await expect(page.locator("h2#apendice-a")).toHaveText(
+      fixtureMd.appendixHeading,
+    );
+
+    const region = appendixRegion(page);
+    await expect(region).toHaveCount(1);
+    await expect(region.locator("#referencias")).toHaveCount(1);
+    await expect(region.locator("#apendice-a")).toHaveCount(1);
+    await expect(page.locator("article #referencias")).toHaveCount(0);
+    await expect(page.locator("article .prose > hr")).toHaveCount(0);
+
+    const citations = await citationLinks(page.locator("article .prose"));
+    const first = citations.find((citation) => citation.n === 1);
+    expect(first, fixtureMd.href).toBeDefined();
+    if (!first) return;
+
+    const target = `#ref-${fixtureMd.keys[0]}`;
+    await expect(first.locator).toHaveAccessibleName("Referência 1");
+    await expect(first.locator).toHaveAttribute("href", target);
+    await first.locator.click();
+    await expect(page).toHaveURL(new RegExp(`${target}$`));
+    await expect(page.locator(target)).toBeInViewport();
   });
 });

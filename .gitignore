@@ -3,6 +3,7 @@
 .dev.vars
 node_modules/
 dist/
+dist-fixtures/
 .astro/
 public/notebooks/
 .venv/

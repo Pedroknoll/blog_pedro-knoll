@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
+import { fixtureMd, fixtureSemTitulos } from "./fixtures";
 import { publishedPosts } from "./published-posts";
 
 const LABELS = [
@@ -80,6 +81,17 @@ async function box(locator: Locator) {
   expect(value).not.toBeNull();
   if (!value) throw new Error("sem caixa");
   return value;
+}
+
+async function readThinLine(page: Page) {
+  return page.evaluate(() => {
+    const line = document.querySelector("article header > p");
+    if (!(line instanceof HTMLElement)) return null;
+    return {
+      end: line.getBoundingClientRect().bottom + window.scrollY,
+      room: document.documentElement.scrollHeight - window.innerHeight,
+    };
+  });
 }
 
 async function railMetrics(rail: Locator) {
@@ -359,75 +371,86 @@ test.describe("cabeçalho do post [RF-04]", () => {
         const rail = page.locator("[data-post-rail]");
         await expect(rail).toHaveCount(1);
         await expect(rail).not.toHaveAttribute("data-title-out");
-
-        const before = await railMetrics(rail);
-        expect(before).not.toBeNull();
-        if (!before) return;
-
-        await page.evaluate(() => {
-          const heading = document.querySelector("article h1");
-          if (!heading) return;
-          const bottom = heading.getBoundingClientRect().bottom;
-          window.scrollTo(0, bottom + window.scrollY + 1);
-        });
-        await page.evaluate(
-          () =>
-            new Promise<void>((resolve) => {
-              const heading = document.querySelector("article h1");
-              if (!heading) {
-                resolve();
-                return;
-              }
-              const observer = new IntersectionObserver(([entry]) => {
-                if (entry && !entry.isIntersecting) {
-                  observer.disconnect();
-                  resolve();
-                }
-              });
-              observer.observe(heading);
-            }),
-        );
-        const thin = await box(page.locator("article header > p"));
-        expect(thin.y + thin.height).toBeGreaterThan(0);
-        await expect(rail).not.toHaveAttribute("data-title-out");
-        await page.evaluate(() => {
-          const line = document.querySelector("article header > p");
-          if (!line) return;
-          const bottom = line.getBoundingClientRect().bottom;
-          window.scrollTo(0, bottom + window.scrollY + 1);
-        });
-        await expect(rail).toHaveAttribute("data-title-out", "");
-
-        await page
-          .locator("article > .prose p")
-          .last()
-          .evaluate((element) => {
-            element.scrollIntoView();
-          });
-        await expect(rail).toHaveAttribute("data-title-out", "");
-
-        const title = rail.locator("p[aria-hidden='true']");
-        const folio = rail.locator("> div").first().locator("> div").first();
-        await expect(title).toHaveCSS("opacity", "1");
-        await expect(folio).toHaveCSS("opacity", "1");
-
-        const titleBox = await box(title);
-        const railBox = await box(rail);
-        expect(titleBox.y + titleBox.height).toBeLessThan(railBox.y);
-
-        const after = await railMetrics(rail);
-        expect(after).not.toBeNull();
-        if (!after) return;
-        expect(after.cellHeight).toBeCloseTo(before.cellHeight, 0);
-        expect(after.metaTop).toBeCloseTo(before.metaTop, 0);
-        expect(after.railHeight).toBeCloseTo(before.railHeight, 0);
-
-        await page.locator("article h1").evaluate((element) => {
-          element.scrollIntoView();
-        });
-        await expect(rail).not.toHaveAttribute("data-title-out");
       });
     }
+
+    const response = await page.goto(fixtureMd.href);
+    expect(response?.status()).toBe(200);
+    const rail = page.locator("[data-post-rail]");
+    await expect(rail).toHaveCount(1);
+    await expect(rail).not.toHaveAttribute("data-title-out");
+
+    const before = await railMetrics(rail);
+    expect(before).not.toBeNull();
+    if (!before) return;
+
+    const line = await readThinLine(page);
+    expect(line, fixtureMd.href).not.toBeNull();
+    if (!line) return;
+    expect(line.room, fixtureMd.href).toBeGreaterThan(line.end);
+
+    await page.evaluate(() => {
+      const heading = document.querySelector("article h1");
+      if (!heading) return;
+      const bottom = heading.getBoundingClientRect().bottom;
+      window.scrollTo(0, bottom + window.scrollY + 1);
+    });
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          const heading = document.querySelector("article h1");
+          if (!heading) {
+            resolve();
+            return;
+          }
+          const observer = new IntersectionObserver(([entry]) => {
+            if (entry && !entry.isIntersecting) {
+              observer.disconnect();
+              resolve();
+            }
+          });
+          observer.observe(heading);
+        }),
+    );
+    const thin = await box(page.locator("article header > p"));
+    expect(thin.y + thin.height).toBeGreaterThan(0);
+    await expect(rail).not.toHaveAttribute("data-title-out");
+    await page.evaluate(() => {
+      const line = document.querySelector("article header > p");
+      if (!line) return;
+      const bottom = line.getBoundingClientRect().bottom;
+      window.scrollTo(0, bottom + window.scrollY + 1);
+    });
+    await expect(rail).toHaveAttribute("data-title-out", "");
+
+    await page
+      .locator("article > .prose p")
+      .last()
+      .evaluate((element) => {
+        element.scrollIntoView();
+      });
+    await expect(rail).toHaveAttribute("data-title-out", "");
+
+    const title = rail.locator("p[aria-hidden='true']");
+    const folio = rail.locator("> div").first().locator("> div").first();
+    await expect(title).toHaveCSS("opacity", "1");
+    await expect(folio).toHaveCSS("opacity", "1");
+
+    const titleBox = await box(title);
+    const railBox = await box(rail);
+    expect(titleBox.y + titleBox.height).toBeLessThan(railBox.y);
+
+    const after = await railMetrics(rail);
+    expect(after).not.toBeNull();
+    if (!after) return;
+    expect(after.cellHeight).toBeCloseTo(before.cellHeight, 0);
+    expect(after.metaTop).toBeCloseTo(before.metaTop, 0);
+    expect(after.railHeight).toBeCloseTo(before.railHeight, 0);
+
+    await page.locator("article h1").evaluate((element) => {
+      element.scrollIntoView();
+    });
+    await expect(rail).not.toHaveAttribute("data-title-out");
   });
 
   test("H4 movimento reduzido", async ({ page }) => {
@@ -441,21 +464,34 @@ test.describe("cabeçalho do post [RF-04]", () => {
         expect(response?.status()).toBe(200);
         const rail = page.locator("[data-post-rail]");
         await expect(rail).toHaveCount(1);
+        await expect(rail).not.toHaveAttribute("data-title-out");
         const title = rail.locator("p[aria-hidden='true']");
-        const folio = rail.locator("> div").first().locator("> div").first();
         await expect(title).toHaveCSS("transition-duration", "0s");
-
-        await page
-          .locator("article > .prose p")
-          .last()
-          .evaluate((element) => {
-            element.scrollIntoView();
-          });
-        await expect(rail).toHaveAttribute("data-title-out", "");
-        await expect(title).toHaveCSS("opacity", "1");
-        await expect(folio).toHaveCSS("opacity", "1");
       });
     }
+
+    const response = await page.goto(fixtureMd.href);
+    expect(response?.status()).toBe(200);
+    const rail = page.locator("[data-post-rail]");
+    await expect(rail).toHaveCount(1);
+    const title = rail.locator("p[aria-hidden='true']");
+    const folio = rail.locator("> div").first().locator("> div").first();
+    await expect(title).toHaveCSS("transition-duration", "0s");
+
+    const line = await readThinLine(page);
+    expect(line, fixtureMd.href).not.toBeNull();
+    if (!line) return;
+    expect(line.room, fixtureMd.href).toBeGreaterThan(line.end);
+
+    await page
+      .locator("article > .prose p")
+      .last()
+      .evaluate((element) => {
+        element.scrollIntoView();
+      });
+    await expect(rail).toHaveAttribute("data-title-out", "");
+    await expect(title).toHaveCSS("opacity", "1");
+    await expect(folio).toHaveCSS("opacity", "1");
   });
 
   test("H6 título de três linhas acima da lateral", async ({ page }) => {
@@ -468,82 +504,133 @@ test.describe("cabeçalho do post [RF-04]", () => {
         expect(response?.status()).toBe(200);
         const rail = page.locator("[data-post-rail]");
         await expect(rail).toHaveCount(1);
-        await page.locator("article > .prose").evaluate((element) => {
-          element.scrollIntoView({ block: "end" });
-        });
-        await expect(rail).toHaveAttribute("data-title-out", "");
-
-        const title = rail.locator("p[aria-hidden='true']");
-        const fitted = await title.evaluate((element) => {
-          const words = [
-            "para",
-            "com",
-            "que",
-            "por",
-            "uma",
-            "em",
-            "de",
-            "ou",
-            "na",
-            "no",
-            "um",
-            "os",
-            "as",
-            "e",
-            "a",
-            "o",
-          ];
-          const measure = () => {
-            const style = getComputedStyle(element);
-            const height = element.getBoundingClientRect().height;
-            const lineHeight = Number.parseFloat(style.lineHeight);
-            const value = (element.textContent ?? "")
-              .replace(/\s+/g, " ")
-              .trim();
-            return {
-              height,
-              lineHeight,
-              ratio: height / lineHeight,
-              text: value,
-            };
-          };
-          let state = measure();
-          for (
-            let step = 0;
-            step < 80 && Math.abs(state.ratio - 3) >= 0.05;
-            step += 1
-          ) {
-            const before = element.textContent ?? "";
-            let placed = false;
-            for (const word of words) {
-              element.textContent = `${before} ${word}`
-                .replace(/\s+/g, " ")
-                .trim();
-              const next = measure();
-              if (Math.abs(next.ratio - 3) < 0.05) return next;
-              if (next.ratio > 3) {
-                element.textContent = before;
-                continue;
-              }
-              state = next;
-              placed = true;
-              break;
-            }
-            if (!placed) break;
-          }
-          return state;
-        });
-        expect(
-          Math.abs(fitted.ratio - 3),
-          `altura ${fitted.height} entrelinha ${fitted.lineHeight} texto ${fitted.text}`,
-        ).toBeLessThan(0.05);
-
-        const titleBox = await box(title);
-        const railBox = await box(rail);
-        expect(titleBox.y).toBeGreaterThanOrEqual(0);
-        expect(titleBox.y + titleBox.height).toBeLessThan(railBox.y);
+        await expect(rail).not.toHaveAttribute("data-title-out");
       });
     }
+
+    const response = await page.goto(fixtureMd.href);
+    expect(response?.status()).toBe(200);
+    const rail = page.locator("[data-post-rail]");
+    await expect(rail).toHaveCount(1);
+
+    const line = await readThinLine(page);
+    expect(line, fixtureMd.href).not.toBeNull();
+    if (!line) return;
+    expect(line.room, fixtureMd.href).toBeGreaterThan(line.end);
+
+    await page.locator("article > .prose").evaluate((element) => {
+      element.scrollIntoView({ block: "end" });
+    });
+    await expect(rail).toHaveAttribute("data-title-out", "");
+
+    const title = rail.locator("p[aria-hidden='true']");
+    const fitted = await title.evaluate((element) => {
+      const words = [
+        "para",
+        "com",
+        "que",
+        "por",
+        "uma",
+        "em",
+        "de",
+        "ou",
+        "na",
+        "no",
+        "um",
+        "os",
+        "as",
+        "e",
+        "a",
+        "o",
+      ];
+      const measure = () => {
+        const style = getComputedStyle(element);
+        const height = element.getBoundingClientRect().height;
+        const lineHeight = Number.parseFloat(style.lineHeight);
+        const value = (element.textContent ?? "").replace(/\s+/g, " ").trim();
+        return {
+          height,
+          lineHeight,
+          ratio: height / lineHeight,
+          text: value,
+        };
+      };
+      let state = measure();
+      for (
+        let step = 0;
+        step < 80 && Math.abs(state.ratio - 3) >= 0.05;
+        step += 1
+      ) {
+        const before = element.textContent ?? "";
+        let placed = false;
+        for (const word of words) {
+          element.textContent = `${before} ${word}`.replace(/\s+/g, " ").trim();
+          const next = measure();
+          if (Math.abs(next.ratio - 3) < 0.05) return next;
+          if (next.ratio > 3) {
+            element.textContent = before;
+            continue;
+          }
+          state = next;
+          placed = true;
+          break;
+        }
+        if (!placed) break;
+      }
+      return state;
+    });
+    expect(
+      Math.abs(fitted.ratio - 3),
+      `altura ${fitted.height} entrelinha ${fitted.lineHeight} texto ${fitted.text}`,
+    ).toBeLessThan(0.05);
+
+    const titleBox = await box(title);
+    const railBox = await box(rail);
+    expect(titleBox.y).toBeGreaterThanOrEqual(0);
+    expect(titleBox.y + titleBox.height).toBeLessThan(railBox.y);
+  });
+
+  test("linha fina que não sai deixa a lateral sem data-title-out", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const response = await page.goto(fixtureSemTitulos.href);
+    expect(response?.status()).toBe(200);
+    const rail = page.locator("[data-post-rail]");
+    await expect(rail).toHaveCount(1);
+
+    const line = await readThinLine(page);
+    expect(line, fixtureSemTitulos.href).not.toBeNull();
+    if (!line) return;
+    expect(line.room, fixtureSemTitulos.href).toBeLessThanOrEqual(line.end);
+
+    await page.evaluate(() => {
+      window.scrollTo(0, document.documentElement.scrollHeight);
+    });
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          const line = document.querySelector("article header > p");
+          if (!(line instanceof HTMLElement)) {
+            resolve();
+            return;
+          }
+          const observer = new IntersectionObserver(() => {
+            observer.disconnect();
+            resolve();
+          });
+          observer.observe(line);
+        }),
+    );
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          requestAnimationFrame(() => {
+            requestAnimationFrame(() => resolve());
+          });
+        }),
+    );
+    await expect(rail).not.toHaveAttribute("data-title-out");
   });
 });
 

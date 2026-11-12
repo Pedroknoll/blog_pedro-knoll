@@ -4,6 +4,7 @@ import { z } from "astro/zod";
 
 import { KINDS } from "./lib/kind";
 import { postIdFromEntry } from "./lib/post-id";
+import { postsGlobPattern, shouldShowFixtures } from "./lib/published";
 import { duplicateReferenceKeys } from "./lib/references";
 
 // Iframe: notebook inteiro num .py da pasta do post, exportado com html-wasm.
@@ -33,7 +34,9 @@ const appendix = z.strictObject({
 
 const posts = defineCollection({
   loader: glob({
-    pattern: "**/index.{md,mdx}",
+    pattern: postsGlobPattern(
+      shouldShowFixtures(import.meta.env.SHOW_FIXTURES),
+    ),
     base: "./src/content/posts",
     // id = nome da pasta, validado por postIdFromEntry; é o slug de /blog/[slug]
     generateId: ({ entry }) => postIdFromEntry(entry),

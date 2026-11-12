@@ -1,0 +1,12 @@
+{
+  "format": 2,
+  "generator": "src/content/posts/fixture-mdx/data/build.py",
+  "inputs": {
+    "src/content/posts/fixture-mdx/data/build.py": "7174ccfd96a60df19b6c6da280900a2b2501bd24175d0ad828a97b850d374900",
+    "src/content/posts/fixture-mdx/data/raw/tokens.json": "d174eefda672996274b9e1cc5b5e0c3277ff0a06cdf311313429d84d973bb1fb"
+  },
+  "outputs": {
+    "src/content/posts/fixture-mdx/data/attention.json": "653bd901bde449edfaf76f07150e62c33855e5d969e383947d36f93644b9a4fa"
+  },
+  "python": "3.14.3"
+}

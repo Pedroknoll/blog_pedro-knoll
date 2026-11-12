@@ -1,13 +1,14 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { fixtureMd } from "./fixtures";
 import { pagesForTheme } from "./published-posts";
 import { authorName, homeTitle, siteTitle, titled } from "./site-literals";
 
-const routes = ["/", "/blog/2026-10-como-o-blog-e-feito/"] as const;
+const routes = ["/", fixtureMd.href] as const;
 
 const expectedTitle: Record<(typeof routes)[number], string> = {
   "/": homeTitle,
-  "/blog/2026-10-como-o-blog-e-feito/": titled("Como o blog é feito"),
+  [fixtureMd.href]: titled(fixtureMd.title),
 };
 
 async function open(page: Page, path: string) {

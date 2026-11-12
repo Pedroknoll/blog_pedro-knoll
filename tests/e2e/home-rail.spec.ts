@@ -1,8 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { fixtureMd, fixtureMdx } from "./fixtures";
 import { authorGithub, authorLinkedin, kindPath } from "./site-literals";
 
-const postB = "/blog/2026-10-como-o-blog-e-feito/";
 const concept = kindPath("concept");
 
 type Rail = {
@@ -285,7 +285,7 @@ test.describe("lateral da home [RF-01]", () => {
   test("H7c lateral do post alinhada à saudação a 1440", async ({ page }) => {
     await open(page, "/", 1440);
     const greeting = await greetingLeft(page);
-    await open(page, postB, 1440);
+    await open(page, fixtureMd.href, 1440);
     const rail = page.locator("[data-post-rail]");
     await expect(rail).toHaveCount(1);
     const box = await rail.boundingBox();
@@ -310,7 +310,7 @@ test.describe("lateral da home [RF-01]", () => {
   });
 
   test("H10 largura do apêndice a 1440", async ({ page }) => {
-    await open(page, postB, 1440);
+    await open(page, fixtureMdx.href, 1440);
     const inner = page
       .getByRole("region", { name: "Apêndice", exact: true })
       .locator(":scope > div");
