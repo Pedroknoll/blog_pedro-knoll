@@ -14,8 +14,6 @@ export type DataReason =
 export type DataProblem = { file: string; reason: DataReason };
 
 const postsPrefix = "src/content/posts/";
-const generatorPath = "scripts/build-data.py";
-const generatorLockPath = "scripts/build-data.py.lock";
 const hashPattern = /^[0-9a-f]{64}$/;
 
 export function sha256Hex(bytes: Uint8Array): string {
@@ -55,17 +53,26 @@ function underRaw(dataDir: string, file: string): boolean {
 }
 
 function inputOutside(dataDir: string, file: string): boolean {
-  if (file === generatorPath || file === generatorLockPath) return false;
+  if (file === `${dataDir}/build.py` || file === `${dataDir}/build.py.lock`) {
+    return false;
+  }
   return !underRaw(dataDir, file);
 }
 
 function outputOutside(dataDir: string, file: string): boolean {
   if (!file.startsWith(`${dataDir}/`)) return true;
   if (underRaw(dataDir, file)) return true;
-  return file === `${dataDir}/data.lock`;
+  return (
+    file === `${dataDir}/data.lock` ||
+    file === `${dataDir}/build.py` ||
+    file === `${dataDir}/build.py.lock`
+  );
 }
 
-function parseLock(bytes: Uint8Array):
+function parseLock(
+  bytes: Uint8Array,
+  generatorPath: string,
+):
   | {
       inputs: Record<string, string>;
       outputs: Record<string, string>;
@@ -92,8 +99,9 @@ function parseLock(bytes: Uint8Array):
     !("python" in value) ||
     !("inputs" in value) ||
     !("outputs" in value) ||
-    value.format !== 1 ||
+    value.format !== 2 ||
     typeof value.generator !== "string" ||
+    value.generator !== generatorPath ||
     typeof value.python !== "string" ||
     !isHashMap(value.inputs) ||
     !isHashMap(value.outputs)
@@ -110,6 +118,8 @@ export function checkDataDir(
   read: (path: string) => Uint8Array | undefined,
 ): DataProblem[] {
   const lockPath = `${dataDir}/data.lock`;
+  const generatorPath = `${dataDir}/build.py`;
+  const generatorLockPath = `${dataDir}/build.py.lock`;
   if (!dataFiles.includes(lockPath)) {
     if (dataFiles.length === 0) return [];
     return [{ file: lockPath, reason: "lock-missing" }];
@@ -117,7 +127,7 @@ export function checkDataDir(
 
   const lockBytes = read(lockPath);
   if (lockBytes === undefined) return lockInvalid(lockPath);
-  const lock = parseLock(lockBytes);
+  const lock = parseLock(lockBytes, generatorPath);
   if (lock === undefined) return lockInvalid(lockPath);
 
   const inputKeys = Object.keys(lock.inputs).sort();
@@ -129,7 +139,7 @@ export function checkDataDir(
   }
 
   if (
-    read(generatorLockPath) !== undefined &&
+    dataFiles.includes(generatorLockPath) &&
     !Object.hasOwn(lock.inputs, generatorLockPath)
   ) {
     problems.push({
