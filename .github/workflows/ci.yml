@@ -72,6 +72,9 @@ jobs:
         env:
           SITE_URL: ${{ vars.SITE_URL }}
 
+      - name: No fixtures in production dist
+        run: node scripts/check-no-fixtures.mjs
+
       - name: Upload dist
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
