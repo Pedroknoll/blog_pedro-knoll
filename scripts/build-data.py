@@ -2,9 +2,15 @@
 # requires-python = ">=3.14"
 # dependencies = []
 # ///
-"""Só acha os data/build.py e os roda.
+"""Acha o data/build.py de cada post e o roda.
 
-Dependência nova no bloco PEP 723 continua sendo pergunta.
+Na raiz do repositório:
+
+    uv run scripts/build-data.py <pasta do post>
+    uv run scripts/build-data.py
+
+Sem argumento, percorre todos. O CI não executa este script: o pnpm check:data
+só confere o lock. Dependência nova no bloco acima é pergunta.
 """
 
 import hashlib
@@ -102,7 +108,8 @@ def output_keys(data_dir: str) -> set[str] | None:
     return set(outputs)
 
 
-def refuse(paths: list[str]) -> None:
+def refuse(data_dir: str, reason: str, paths: list[str]) -> None:
+    print(f"{data_dir}: {reason}", file=sys.stderr)
     for path in paths:
         print(path, file=sys.stderr)
     sys.exit(1)
@@ -114,13 +121,17 @@ def run(data_dir: str) -> None:
     keys = output_keys(data_dir)
     if keys is None:
         blocked = generated
+        reason = "data.lock ilegível; nenhum gerado pode existir:"
     else:
         blocked = [path for path in generated if path not in keys]
+        reason = (
+            "arquivo em data/ fora do data.lock; apague ou mova para raw/:"
+        )
     if blocked:
-        refuse(blocked)
+        refuse(data_dir, reason, blocked)
     odd = [path for path in generated if not (ROOT / path).is_file()]
     if odd:
-        refuse(odd)
+        refuse(data_dir, "não é arquivo comum:", odd)
     for path in generated:
         (ROOT / path).unlink()
 
@@ -164,11 +175,20 @@ def run(data_dir: str) -> None:
         "python": found.stdout.strip(),
     }
     (ROOT / data_dir / "data.lock").write_bytes(dump(lock))
+    print(f"{data_dir}: {len(outputs)} saída(s) e data.lock")
 
 
 def post_data_dir(post: str) -> str:
-    folder = Path(post).as_posix().removeprefix("./").rstrip("/")
-    data_dir = f"{folder}/data"
+    folder = post.removeprefix("./").rstrip("/")
+    prefix = f"{POSTS}/"
+    slug = folder.removeprefix(prefix)
+    if folder == slug or "/" in slug or slug in {"", ".", ".."}:
+        print(
+            f"{post}: pasta do post inválida; use src/content/posts/<slug>",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    data_dir = f"{prefix}{slug}/data"
     build = f"{data_dir}/build.py"
     if not (ROOT / build).is_file():
         print(f"{build} ausente", file=sys.stderr)

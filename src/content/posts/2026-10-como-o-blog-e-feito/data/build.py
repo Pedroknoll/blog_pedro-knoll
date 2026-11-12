@@ -2,8 +2,9 @@
 # requires-python = ">=3.14"
 # dependencies = []
 # ///
-"""A conta é a autoatenção. A saída não se edita à mão.
-"""
+"""softmax(X·Xᵀ/√d) por linha, 3 casas. Lê raw/tokens.json e grava
+attention.json. Rode com uv run scripts/build-data.py <pasta do post>.
+A saída não se edita à mão."""
 
 import json
 import math
