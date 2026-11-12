@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { fixtureMd, fixtureMdx } from "./fixtures";
 import { pagesForTheme, publishedPosts } from "./published-posts";
 import { notFoundHeading } from "./site-literals";
 
@@ -227,7 +228,7 @@ test.describe("escala tipográfica [RNF-01]", () => {
     await page.setViewportSize({ width: 1280, height: 800 });
     const display = await variableFamily(page, "--font-plex-condensed");
     const sans = await variableFamily(page, "--font-plex-sans");
-    let h3Count = 0;
+    const measuredCounts = new Map<string, { h2: number; h3: number }>();
 
     for (const post of posts) {
       const response = await page.goto(post.href);
@@ -283,7 +284,6 @@ test.describe("escala tipográfica [RNF-01]", () => {
       expect(measured.column, where).toBeLessThanOrEqual(70);
 
       const h2 = measured.headings.filter((heading) => heading.tag === "H2");
-      expect(h2.length, where).toBeGreaterThanOrEqual(1);
       for (const heading of h2) {
         expect(heading.fontSize, where).toBe("30px");
         expect(firstFamily(heading.fontFamily), where).toBe(display);
@@ -292,17 +292,24 @@ test.describe("escala tipográfica [RNF-01]", () => {
         expect(heading.textWrapStyle, where).toBe("balance");
       }
 
-      for (const heading of measured.headings.filter(
-        (item) => item.tag === "H3",
-      )) {
-        h3Count += 1;
+      const h3 = measured.headings.filter((heading) => heading.tag === "H3");
+      for (const heading of h3) {
         expect(heading.fontSize, where).toBe("22px");
         expect(firstFamily(heading.fontFamily), where).toBe(sans);
         expect(heading.fontWeight, where).toBe("600");
         expect(heading.textWrapStyle, where).toBe("balance");
       }
+
+      measuredCounts.set(where, { h2: h2.length, h3: h3.length });
     }
 
-    expect(h3Count).toBeGreaterThanOrEqual(1);
+    const md = measuredCounts.get(fixtureMd.href);
+    expect(md, fixtureMd.href).toBeDefined();
+    expect(md?.h2, fixtureMd.href).toBeGreaterThanOrEqual(1);
+    expect(md?.h3, fixtureMd.href).toBeGreaterThanOrEqual(1);
+
+    const mdx = measuredCounts.get(fixtureMdx.href);
+    expect(mdx, fixtureMdx.href).toBeDefined();
+    expect(mdx?.h2, fixtureMdx.href).toBeGreaterThanOrEqual(1);
   });
 });
