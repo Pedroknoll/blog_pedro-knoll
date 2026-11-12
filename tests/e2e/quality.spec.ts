@@ -6,6 +6,26 @@ import { expect, test, type Page } from "@playwright/test";
 import { pagesForTheme, publishedPosts } from "./published-posts";
 
 const loadConfig = createRequire(import.meta.url);
+const lighthouseConfig = "../../lighthouserc.cjs";
+
+type LighthouseConfig = {
+  ci: {
+    collect: {
+      url: string[];
+      numberOfRuns: number;
+      staticDistDir: string;
+    };
+    assert: {
+      assertions: unknown;
+    };
+  };
+};
+
+function loadLighthouseConfig() {
+  const resolved = loadConfig.resolve(lighthouseConfig);
+  delete loadConfig.cache[resolved];
+  return loadConfig(lighthouseConfig) as LighthouseConfig;
+}
 
 function pathnameOf(url: string) {
   return new URL(url).pathname;
@@ -84,15 +104,7 @@ test.describe("qualidade por post [RNF-01, RNF-04, RNF-14]", () => {
   test("a lista do Lighthouse é a home e cada post publicado", async ({
     page,
   }) => {
-    const config = loadConfig("../../lighthouserc.cjs") as {
-      ci: {
-        collect: {
-          url: string[];
-          numberOfRuns: number;
-          staticDistDir: string;
-        };
-      };
-    };
+    const config = loadLighthouseConfig();
     const posts = await publishedPosts(page);
     const fromConfig = config.ci.collect.url.map(pathnameOf);
     const fromSite = ["/", ...posts.map((post) => post.href)];
@@ -102,6 +114,40 @@ test.describe("qualidade por post [RNF-01, RNF-04, RNF-14]", () => {
     expect(fromConfig.slice(1)).toEqual([...fromConfig.slice(1)].sort());
     expect(config.ci.collect.numberOfRuns).toBe(5);
     expect(config.ci.collect.staticDistDir).toBe("./dist");
+  });
+
+  test("a lista do Lighthouse no escopo fixtures é cada post fixture", async ({
+    page,
+  }) => {
+    const previousScope = process.env.LIGHTHOUSE_SCOPE;
+    const previousDist = process.env.LIGHTHOUSE_DIST;
+    try {
+      delete process.env.LIGHTHOUSE_SCOPE;
+      delete process.env.LIGHTHOUSE_DIST;
+      const plain = loadLighthouseConfig();
+
+      process.env.LIGHTHOUSE_SCOPE = "fixtures";
+      process.env.LIGHTHOUSE_DIST = "dist";
+      const config = loadLighthouseConfig();
+      const posts = await publishedPosts(page);
+      const fixtures = posts
+        .map((post) => post.href)
+        .filter((href) => href.startsWith("/blog/fixture-"))
+        .sort();
+      const fromConfig = config.ci.collect.url.map(pathnameOf);
+
+      expect(fromConfig).toEqual(fixtures);
+      expect(fromConfig).not.toContain("/");
+      expect(fromConfig).toEqual([...fromConfig].sort());
+      expect(config.ci.collect.numberOfRuns).toBe(5);
+      expect(config.ci.collect.staticDistDir).toBe("./dist");
+      expect(config.ci.assert.assertions).toEqual(plain.ci.assert.assertions);
+    } finally {
+      if (previousScope === undefined) delete process.env.LIGHTHOUSE_SCOPE;
+      else process.env.LIGHTHOUSE_SCOPE = previousScope;
+      if (previousDist === undefined) delete process.env.LIGHTHOUSE_DIST;
+      else process.env.LIGHTHOUSE_DIST = previousDist;
+    }
   });
 
   test("axe sem violações serious nem critical em cada página publicada", async ({

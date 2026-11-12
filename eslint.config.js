@@ -6,6 +6,7 @@ export default [
   {
     ignores: [
       "dist/**",
+      "dist-fixtures/**",
       ".astro/**",
       "node_modules/**",
       "public/notebooks/**",
