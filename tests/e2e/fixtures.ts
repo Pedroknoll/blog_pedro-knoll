@@ -28,3 +28,5 @@ export const fixtureSemTitulos = {
   published: "01.jan.2099",
   keys: [],
 } as const;
+
+export const fixtureTag = "fixture";
