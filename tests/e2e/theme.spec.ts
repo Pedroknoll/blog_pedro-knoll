@@ -1,9 +1,8 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
+import { fixtureMd } from "./fixtures";
 import { pagesForTheme } from "./published-posts";
-
-const postB = "/blog/2026-10-como-o-blog-e-feito/";
 
 const tokens = [
   "surface",
@@ -176,7 +175,7 @@ for (const theme of ["light", "dark"] as const) {
   }) => {
     const pages = await pagesForTheme(page);
     const posts = pages.filter((path) => path.startsWith("/blog/"));
-    expect(posts).toContain(postB);
+    expect(posts).toContain(fixtureMd.href);
 
     const passed: string[] = [];
     let linkTotal = 0;
@@ -224,9 +223,15 @@ for (const theme of ["light", "dark"] as const) {
         softRole(muted, colors.muted, `${path} footer`);
       }
 
-      if (path === postB) {
+      if (path === fixtureMd.href) {
         const pres = page.getByRole("article").locator("pre.astro-code");
+        const region = page.getByRole("region", {
+          name: "Apêndice",
+          exact: true,
+        });
         await expect(pres).not.toHaveCount(0);
+        await expect(region, `${path} region Apêndice`).toHaveCount(1);
+
         const count = await pres.count();
         for (let index = 0; index < count; index += 1) {
           const paint = await pres.nth(index).evaluate((node) => {
@@ -245,12 +250,6 @@ for (const theme of ["light", "dark"] as const) {
             softRole(paint.border, colors.line, lineWhere);
           }
         }
-
-        const region = page.getByRole("region", {
-          name: "Apêndice",
-          exact: true,
-        });
-        await expect(region, `${path} region Apêndice`).toHaveCount(1);
 
         const band = await region.evaluate((node) => {
           const style = getComputedStyle(node);
