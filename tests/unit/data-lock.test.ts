@@ -130,13 +130,29 @@ describe("data-lock", () => {
     ]);
   });
 
-  it("generator-lock-missing", () => {
-    const lockBytes = new TextEncoder().encode("lock\n");
+  it("build.py.lock nas entradas é aceito", () => {
+    const buildLockBytes = new TextEncoder().encode("lock\n");
+    const lock = freshLock();
+    lock.inputs = {
+      ...lock.inputs,
+      [buildLockPath]: sha256(buildLockBytes),
+    };
     expect(
       checkDataDir(
         dataDir,
         [...freshFiles, buildLockPath],
-        readFrom([...freshEntries(), [buildLockPath, lockBytes]]),
+        readFrom([...freshEntries(lock), [buildLockPath, buildLockBytes]]),
+      ),
+    ).toEqual([]);
+  });
+
+  it("generator-lock-missing", () => {
+    const buildLockBytes = new TextEncoder().encode("lock\n");
+    expect(
+      checkDataDir(
+        dataDir,
+        [...freshFiles, buildLockPath],
+        readFrom([...freshEntries(), [buildLockPath, buildLockBytes]]),
       ),
     ).toEqual([
       { file: buildLockPath, reason: "generator-lock-missing" },
