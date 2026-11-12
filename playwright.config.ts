@@ -10,7 +10,7 @@ export default defineConfig({
   webServer: {
     command: process.env.CI
       ? "pnpm preview --host 127.0.0.1 --port 4321"
-      : "pnpm build && pnpm preview --host 127.0.0.1 --port 4321",
+      : "SHOW_FIXTURES=true pnpm build && pnpm preview --host 127.0.0.1 --port 4321",
     url: "http://127.0.0.1:4321",
     timeout: 120_000,
   },
