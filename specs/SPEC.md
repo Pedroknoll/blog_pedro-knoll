@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 11/11/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 12/11/2026
+
+**Revisão de 12/11/2026:** a T-79 leva os dados pré-calculados para a pasta do post (RNF-14). Cada post com dados tem o próprio `data/build.py`; o `scripts/build-data.py` só acha e roda esses scripts, e o `data.lock` passa ao formato 2, com o script do post no lugar do runner. A §6 e a §8 descrevem a pasta e o lock, e a §9, as dependências do script do post.
 
 **Revisão 2 de 11/11/2026:** a T-85 leva o CLS do post A no CI a 0 (RNF-01). No runner, as faces de fallback que o Astro ajusta sobre `local("Arial")` e `local("Courier New")` não carregam, e o título do post A quebrava em duas linhas antes de a Plex Sans Condensed chegar. A §9 descreve as faces `Metric Sans` e `Metric Mono`, e a §11, a checagem de posição com as fontes presas.
 
@@ -228,7 +230,7 @@ src/
         ├── index.mdx
         ├── cover.png
         ├── figs/
-        ├── data/              # JSON gerado pelo build-data.py e data.lock; raw/ com as entradas (T-73)
+        ├── data/              # build.py do post, o JSON que ele grava e data.lock; raw/ com as entradas (T-73, T-79)
         └── notebooks/
             └── treino.py      # notebook da página própria
 
@@ -531,7 +533,7 @@ O mesmo componente de `src/components/viz/` sem `client:*` é figura estática (
 - Importar módulos D3 avulsos (`d3-scale`, `d3-shape`, `d3-array`, `d3-format`), nunca o pacote `d3` inteiro (RNF-02).
 - Proibido `d3-selection` para criar ou mudar elementos; o DOM é do Svelte. Exceção documentada: `d3-zoom`/`d3-drag` via action do Svelte.
 - Dados vêm por props, importados no MDX a partir de JSON/CSV na pasta do post; nada de `fetch` em runtime. Se o dado não cabe nas props, a figura está no degrau errado.
-- Dado que pede cálculo sai do `scripts/build-data.py`, rodado na máquina do autor com `uv run`. Ele lê as entradas de `data/raw/` e grava em `data/` o JSON reduzido (floats com 3 casas, chaves ordenadas, `indent=2`, UTF-8 e LF) e o `data/data.lock`, um JSON com `format` (1), `generator`, `inputs` e `outputs` (caminho a partir da raiz → SHA-256 dos bytes; o próprio script entra nas entradas, e o `scripts/build-data.py.lock`, quando existir) e `python`, só informativo. O CI não executa o script: o `pnpm check:data`, dentro do `pnpm lint`, refaz os hashes e falha com lock ausente ou inválido, gerador fora das entradas, caminho fora do lugar, lock sem saída, arquivo listado ausente, hash que não bate ou arquivo de `data/` fora do lock. Saída e lock são gerados: não se editam à mão e ficam fora do Prettier. Mudou a entrada ou a conta, rode o script de novo (T-73).
+- Dado que pede cálculo sai do `data/build.py` do próprio post, rodado na máquina do autor com `uv run scripts/build-data.py <pasta do post>` (sem argumento, roda todos). O `build.py` tem o próprio bloco PEP 723, lê as entradas de `data/raw/` e grava ao lado de si o JSON reduzido (floats com 3 casas, chaves ordenadas, `indent=2`, UTF-8 e LF): a serialização é dele, e o runner não toca nos bytes das saídas. O runner lista a pasta `data/` como o `pnpm check:data`, recusa arquivo gerado que não esteja no lock, apaga as saídas antigas, roda o script em processo próprio (`uv run --script`) e grava o `data/data.lock`, um JSON com `format` (2), `generator` (o `data/build.py` do post), `inputs` e `outputs` (caminho a partir da raiz → SHA-256 dos bytes; as entradas são o `build.py`, o `build.py.lock` quando existir e os arquivos de `raw/`; as saídas, o resto de `data/`) e `python`, só informativo. O runner não entra no lock: mudá-lo não invalida o dado de nenhum post. O CI não executa nenhum dos dois: o `pnpm check:data`, dentro do `pnpm lint`, refaz os hashes e falha com lock ausente ou inválido (inclusive no formato 1 ou com outro `generator`), script do post ou lock dele fora das entradas, caminho fora do lugar, lock sem saída, arquivo listado ausente, hash que não bate ou arquivo de `data/` fora do lock. Saída e lock são gerados: não se editam à mão e ficam fora do Prettier. Mudou a entrada ou o `build.py`, rode o runner de novo (T-73, T-79).
 - Datas chegam como string ISO (é o que JSON e CSV entregam); o componente converte para `Date`. O autor não converte nada no MDX.
 - Todo gráfico recebe `title` e `summary` (vira `aria-label`) e oferece "Ver dados" com a tabela (RNF-04).
 - No degrau 3, a hidratação padrão é `client:visible`; `client:load` só com justificativa no PR. O `Stepper` e o `Explorable` só existem como island, com `client:visible`; a figura estática do mesmo desenho é a primitiva dentro do `Figure` (T-20).
@@ -654,7 +656,7 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │       └── shiki/            # pk-claro.json, pk-escuro.json
 ├── scripts/
 │   ├── build-notebooks.py    # leves no CI; --heavy <slug> para export local
-│   └── build-data.py         # na máquina do autor; o CI só confere o lock (T-73)
+│   └── build-data.py         # acha e roda o data/build.py de cada post; o CI só confere o lock (T-73, T-79)
 ├── exports/                  # pesados, commitados: <slug>/<nome>/ + export.lock
 ├── public/
 │   ├── favicon.svg
@@ -711,7 +713,7 @@ Um agente pode instalar, sem perguntar, as dependências abaixo, na versão est�
 | Notebooks      | —                                                                                                                                                                            | `moutils` (só em notebooks com `compute: onnx`, no bloco PEP 723) |
 
 
-Dependências de notebook (numpy, torch etc.) ficam no bloco PEP 723 de cada `.py`, não no `pyproject.toml`. O `scripts/build-data.py` segue a mesma regra e hoje usa só a stdlib; dependência nova nele é pergunta, e com ela o `uv lock --script scripts/build-data.py` grava o `scripts/build-data.py.lock`, que entra nas entradas do `data.lock` (T-73).
+Dependências de notebook (numpy, torch etc.) e do `data/build.py` de cada post ficam no bloco PEP 723 do próprio `.py`, não no `pyproject.toml`. No `build.py`, com dependência, o `uv lock --script` grava o `data/build.py.lock` ao lado; ele se commita e entra nas entradas do `data.lock` (T-79). O `scripts/build-data.py` usa só a stdlib e não entra em lock nenhum; dependência nova nele é pergunta.
 
 O `katex` é um só no `pnpm-lock.yaml`. O `rehype-katex` 7.0.1 e o `micromark-extension-math`, do `remark-math`, pedem `^0.16.0`; um `overrides` no `pnpm-workspace.yaml` os leva à versão do `katex` direto, de onde saem o CSS e as fontes do `PostLayout`. Desde o 0.18.0, que prefixou as classes internas, marcação e CSS de versões diferentes quebram as fórmulas. Ao subir o `katex`, o override sobe junto (T-68).
 

@@ -2,32 +2,26 @@
 # requires-python = ">=3.14"
 # dependencies = []
 # ///
-"""Gera os dados pré-calculados dos posts e o data.lock de cada pasta data/.
+"""Acha o data/build.py de cada post e o roda.
 
-Roda na máquina do autor, da raiz do repositório:
+Na raiz do repositório:
 
+    uv run scripts/build-data.py <pasta do post>
     uv run scripts/build-data.py
 
-O CI não executa este script: o pnpm check:data só confere os hashes do
-data.lock (SPEC §8, T-73). Dependência nova no bloco acima é "Pare e
-pergunte"; com ela, rode uv lock --script scripts/build-data.py e commite o
-scripts/build-data.py.lock, que entra nas entradas do lock.
+Sem argumento, percorre todos. O CI não executa este script: o pnpm check:data
+só confere o lock. Dependência nova no bloco acima é pergunta.
 """
 
 import hashlib
 import json
-import math
-import platform
-from collections.abc import Callable
+import os
+import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-GENERATOR = "scripts/build-data.py"
-GENERATOR_LOCK = "scripts/build-data.py.lock"
 POSTS = "src/content/posts"
-DIGITS = 3
-
-type Job = Callable[[str], tuple[list[str], dict[str, object]]]
 
 
 def dump(data: object) -> bytes:
@@ -37,62 +31,178 @@ def dump(data: object) -> bytes:
     return (text + "\n").encode("utf-8")
 
 
-def write(path: str, payload: bytes) -> None:
-    target = ROOT / path
-    target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_bytes(payload)
+def git_paths() -> list[str]:
+    result = subprocess.run(
+        [
+            "git",
+            "ls-files",
+            "-z",
+            "--cached",
+            "--others",
+            "--exclude-standard",
+            "--",
+            POSTS,
+        ],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+    )
+    paths: list[str] = []
+    for raw in result.stdout.split(b"\0"):
+        if not raw:
+            continue
+        path = raw.decode("utf-8")
+        if (ROOT / path).exists():
+            paths.append(path)
+    return paths
+
+
+def discover(paths: list[str]) -> list[str]:
+    suffix = "/data/build.py"
+    return sorted(
+        path.removesuffix("/build.py") for path in paths if path.endswith(suffix)
+    )
+
+
+def files_in(data_dir: str, paths: list[str]) -> list[str]:
+    prefix = f"{data_dir}/"
+    return sorted(path for path in paths if path.startswith(prefix))
+
+
+def classify(data_dir: str, paths: list[str]) -> tuple[list[str], list[str]]:
+    prefix = f"{data_dir}/"
+    inputs: list[str] = []
+    outputs: list[str] = []
+    for path in paths:
+        if not path.startswith(prefix):
+            continue
+        name = path[len(prefix) :]
+        if name in {"build.py", "build.py.lock"} or name.startswith("raw/"):
+            inputs.append(path)
+        elif name != "data.lock":
+            outputs.append(path)
+    return inputs, outputs
 
 
 def sha256(path: str) -> str:
     return hashlib.sha256((ROOT / path).read_bytes()).hexdigest()
 
 
-def attention(tokens_path: str) -> dict[str, object]:
-    """Autoatenção softmax(X·Xᵀ/√d), por linha, arredondada em DIGITS casas."""
-    raw = json.loads((ROOT / tokens_path).read_text(encoding="utf-8"))
-    vectors: list[list[float]] = raw["vectors"]
-    scale = math.sqrt(len(vectors[0]))
-    weights = []
-    for query in vectors:
-        scores = [
-            sum(q * k for q, k in zip(query, key, strict=True)) / scale
-            for key in vectors
-        ]
-        top = max(scores)
-        exps = [math.exp(score - top) for score in scores]
-        total = sum(exps)
-        weights.append([round(value / total, DIGITS) for value in exps])
-    return {"tokens": raw["tokens"], "weights": weights}
+def hashes(paths: list[str]) -> dict[str, str]:
+    return {path: sha256(path) for path in paths}
 
 
-def proof_post(data_dir: str) -> tuple[list[str], dict[str, object]]:
-    """Prova da T-73, consumida pelo Heatmap da T-20; vai para o post da T-21."""
-    tokens = f"{data_dir}/raw/tokens.json"
-    return [tokens], {f"{data_dir}/attention.json": attention(tokens)}
+def output_keys(data_dir: str) -> set[str] | None:
+    lock_path = ROOT / data_dir / "data.lock"
+    if not lock_path.is_file():
+        return None
+    try:
+        value = json.loads(lock_path.read_bytes())
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return None
+    if not isinstance(value, dict):
+        return None
+    outputs = value.get("outputs")
+    if not isinstance(outputs, dict):
+        return None
+    return set(outputs)
 
 
-JOBS: dict[str, Job] = {
-    f"{POSTS}/2026-10-como-o-blog-e-feito/data": proof_post,
-}
+def refuse(data_dir: str, reason: str, paths: list[str]) -> None:
+    print(f"{data_dir}: {reason}", file=sys.stderr)
+    for path in paths:
+        print(path, file=sys.stderr)
+    sys.exit(1)
+
+
+def run(data_dir: str) -> None:
+    listed = files_in(data_dir, git_paths())
+    inputs, generated = classify(data_dir, listed)
+    keys = output_keys(data_dir)
+    if keys is None:
+        blocked = generated
+        reason = "data.lock ilegível; nenhum gerado pode existir:"
+    else:
+        blocked = [path for path in generated if path not in keys]
+        reason = (
+            "arquivo em data/ fora do data.lock; apague ou mova para raw/:"
+        )
+    if blocked:
+        refuse(data_dir, reason, blocked)
+    odd = [path for path in generated if not (ROOT / path).is_file()]
+    if odd:
+        refuse(data_dir, "não é arquivo comum:", odd)
+    for path in generated:
+        (ROOT / path).unlink()
+
+    before = hashes(inputs)
+    env = os.environ.copy()
+    env["PYTHONDONTWRITEBYTECODE"] = "1"
+    completed = subprocess.run(
+        ["uv", "run", "--script", "build.py"],
+        check=False,
+        cwd=ROOT / data_dir,
+        env=env,
+    )
+    if completed.returncode != 0:
+        sys.exit(completed.returncode)
+
+    inputs, outputs = classify(data_dir, files_in(data_dir, git_paths()))
+    if not outputs:
+        print(f"{data_dir}: nenhuma saída", file=sys.stderr)
+        sys.exit(1)
+    if hashes(inputs) != before:
+        print(f"{data_dir}: entradas diferentes", file=sys.stderr)
+        sys.exit(1)
+
+    script = f"{data_dir}/build.py"
+    found = subprocess.run(
+        ["uv", "python", "find", "--script", script, "--show-version"],
+        check=False,
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+    )
+    if found.returncode != 0:
+        sys.stderr.write(found.stderr)
+        sys.exit(found.returncode)
+
+    lock = {
+        "format": 2,
+        "generator": script,
+        "inputs": hashes(inputs),
+        "outputs": hashes(outputs),
+        "python": found.stdout.strip(),
+    }
+    (ROOT / data_dir / "data.lock").write_bytes(dump(lock))
+    print(f"{data_dir}: {len(outputs)} saída(s) e data.lock")
+
+
+def post_data_dir(post: str) -> str:
+    folder = post.removeprefix("./").rstrip("/")
+    prefix = f"{POSTS}/"
+    slug = folder.removeprefix(prefix)
+    if folder == slug or "/" in slug or slug in {"", ".", ".."}:
+        print(
+            f"{post}: pasta do post inválida; use src/content/posts/<slug>",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    data_dir = f"{prefix}{slug}/data"
+    build = f"{data_dir}/build.py"
+    if not (ROOT / build).is_file():
+        print(f"{build} ausente", file=sys.stderr)
+        sys.exit(1)
+    return data_dir
 
 
 def main() -> None:
-    for data_dir, job in JOBS.items():
-        inputs, outputs = job(data_dir)
-        for path, data in outputs.items():
-            write(path, dump(data))
-        sources = [GENERATOR, *inputs]
-        if (ROOT / GENERATOR_LOCK).exists():
-            sources.append(GENERATOR_LOCK)
-        lock = {
-            "format": 1,
-            "generator": GENERATOR,
-            "inputs": {path: sha256(path) for path in sources},
-            "outputs": {path: sha256(path) for path in outputs},
-            "python": platform.python_version(),
-        }
-        write(f"{data_dir}/data.lock", dump(lock))
-        print(f"{data_dir}: {len(outputs)} saída(s) e data.lock")
+    if len(sys.argv) == 1:
+        data_dirs = discover(git_paths())
+    else:
+        data_dirs = [post_data_dir(post) for post in sys.argv[1:]]
+    for data_dir in data_dirs:
+        run(data_dir)
 
 
 if __name__ == "__main__":
