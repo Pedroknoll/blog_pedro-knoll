@@ -29,4 +29,15 @@ export const fixtureSemTitulos = {
   keys: [],
 } as const;
 
+export const fixtureFormulas = {
+  href: "/blog/fixture-formulas/",
+  folio: 904,
+  title: "Fixture de fórmulas",
+  published: "04.jan.2000",
+  inline: 30,
+  display: 10,
+  katex: ["KaTeX_Main-Regular", "KaTeX_Math-Italic", "KaTeX_Size2-Regular"],
+  brandFiles: 5,
+} as const;
+
 export const fixtureTag = "fixture";

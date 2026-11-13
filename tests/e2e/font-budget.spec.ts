@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
+import { fixtureFormulas } from "./fixtures";
 import { pagesForTheme } from "./published-posts";
 
 const variables = [
@@ -184,6 +185,13 @@ async function requestedFonts(page: Page): Promise<RequestedFonts> {
   });
 }
 
+function katexName(pathname: string): string {
+  const file = pathname.slice(pathname.lastIndexOf("/") + 1);
+  const stem = file.slice(0, file.lastIndexOf("."));
+  const hashAt = stem.lastIndexOf(".");
+  return hashAt === -1 ? stem : stem.slice(0, hashAt);
+}
+
 function classify(family: string, stacks: Stack[]) {
   const name = unquote(family);
   if (name.startsWith("KaTeX_")) return { kind: "katex" as const, name };
@@ -334,5 +342,37 @@ test.describe("orçamento de fontes [RNF-01]", () => {
         }
       });
     }
+  });
+
+  test("fixture-formulas no teto da marca e do KaTeX [RNF-01]", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 412, height: 823 });
+    const response = await page.goto(fixtureFormulas.href);
+    expect(response?.status(), fixtureFormulas.href).toBe(200);
+    await page.evaluate(() => document.fonts.ready);
+
+    const counts = await page.evaluate(() => {
+      const nodes = [...document.querySelectorAll(".katex")];
+      return {
+        inline: nodes.filter((node) => node.closest(".katex-display") === null)
+          .length,
+        display: document.querySelectorAll(".katex-display").length,
+        aboveFold: nodes
+          .map((node) => node.getBoundingClientRect().top)
+          .filter((top) => top < 823),
+      };
+    });
+    expect(counts.display, fixtureFormulas.href).toBe(fixtureFormulas.display);
+    expect(counts.inline, fixtureFormulas.href).toBe(fixtureFormulas.inline);
+    expect(counts.aboveFold, fixtureFormulas.href).toEqual([]);
+
+    const requested = await requestedFonts(page);
+    expect(requested.katex.map(katexName).sort(), fixtureFormulas.href).toEqual(
+      [...fixtureFormulas.katex].sort(),
+    );
+    expect(requested.brand.length, fixtureFormulas.href).toBe(
+      fixtureFormulas.brandFiles,
+    );
   });
 });
