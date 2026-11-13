@@ -1,5 +1,7 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
 
+import { fixtureMdx } from "./fixtures";
+import { katexMetricFaces } from "./katex-metric";
 import { pagesForTheme, publishedPosts } from "./published-posts";
 
 // Família, peso e estilo da T-42. Uma linha por combinação.
@@ -714,6 +716,67 @@ test.describe("fontes da marca [RNF-01]", () => {
           `${entry.variable}: line-gap-override`,
         )
         .toBe(base.lineGapOverride.trim());
+    }
+  });
+
+  test("fallback métrico do KaTeX na fixture-mdx", async ({ page }) => {
+    const response = await page.goto(fixtureMdx.href);
+    expect(response?.status()).toBe(200);
+
+    await page.evaluate(
+      async (entries) => {
+        for (const entry of entries) {
+          await document.fonts
+            .load(`${entry.style} 100px "${entry.family}"`)
+            .catch(() => []);
+        }
+      },
+      [...katexMetricFaces],
+    );
+
+    const faces = await liveFaces(page);
+
+    for (const entry of katexMetricFaces) {
+      const loaded = faces.some(
+        (face) =>
+          unquote(face.family) === entry.family && face.status === "loaded",
+      );
+      expect.soft(loaded, `${entry.family} face ausente`).toBe(true);
+      if (!loaded) continue;
+
+      const boxes = await page.evaluate(
+        async ({ family, katex, style }) => {
+          await document.fonts.ready;
+          const canvas = document.createElement("canvas");
+          const context = canvas.getContext("2d");
+          if (!context) return null;
+          const measure = (name: string) => {
+            context.font = `${style} 100px "${name}"`;
+            const metrics = context.measureText("x");
+            return {
+              ascent: metrics.fontBoundingBoxAscent,
+              descent: metrics.fontBoundingBoxDescent,
+            };
+          };
+          return { metric: measure(family), katex: measure(katex) };
+        },
+        { family: entry.family, katex: entry.katex, style: entry.style },
+      );
+      expect(boxes, entry.family).not.toBeNull();
+      if (!boxes) continue;
+
+      expect
+        .soft(
+          Math.abs(boxes.metric.ascent - boxes.katex.ascent),
+          `${entry.family}: ascent`,
+        )
+        .toBeLessThanOrEqual(1);
+      expect
+        .soft(
+          Math.abs(boxes.metric.descent - boxes.katex.descent),
+          `${entry.family}: descent`,
+        )
+        .toBeLessThanOrEqual(1);
     }
   });
 });

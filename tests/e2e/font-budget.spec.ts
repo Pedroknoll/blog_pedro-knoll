@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 
 import { fixtureFormulas } from "./fixtures";
+import { katexMetricFaces } from "./katex-metric";
 import { pagesForTheme } from "./published-posts";
 
 const variables = [
@@ -49,6 +50,10 @@ type Stack = {
   value: string;
   names: string[];
 };
+
+const katexMetricFamilies = new Set<string>(
+  katexMetricFaces.map((face) => face.family),
+);
 
 type FontCeiling = {
   files: number;
@@ -195,6 +200,9 @@ function katexName(pathname: string): string {
 function classify(family: string, stacks: Stack[]) {
   const name = unquote(family);
   if (name.startsWith("KaTeX_")) return { kind: "katex" as const, name };
+  if (katexMetricFamilies.has(name)) {
+    return { kind: "katexFallback" as const, name };
+  }
   for (const stack of stacks) {
     if (stack.names[0] === name) {
       return { kind: "brand" as const, name, variable: stack.variable };
@@ -257,7 +265,12 @@ test.describe("orçamento de fontes [RNF-01]", () => {
         for (const face of faces) {
           const hit = classify(face.family, stacks);
           const label = `${path}: ${hit.name} ${face.weight} ${face.style}`;
-          if (hit.kind === "katex" || hit.kind === "fallback") continue;
+          if (
+            hit.kind === "katex" ||
+            hit.kind === "katexFallback" ||
+            hit.kind === "fallback"
+          )
+            continue;
           if (hit.kind === "other") {
             expect.soft(false, `${label} fora do orçamento`).toBe(true);
             continue;

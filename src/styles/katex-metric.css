@@ -1,0 +1,59 @@
+@font-face {
+  font-family: "KaTeX Metric Main";
+  src:
+    local("Liberation Serif"), local("LiberationSerif"),
+    local("Times New Roman"), local("TimesNewRomanPSMT"), local("Noto Serif"),
+    local("NotoSerif"), local("Droid Serif");
+  font-weight: normal;
+  font-style: normal;
+  ascent-override: 90%;
+  descent-override: 27%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "KaTeX Metric Math";
+  src:
+    local("Liberation Serif"), local("LiberationSerif"),
+    local("Times New Roman"), local("TimesNewRomanPSMT"), local("Noto Serif"),
+    local("NotoSerif"), local("Droid Serif");
+  font-weight: normal;
+  font-style: italic;
+  ascent-override: 72%;
+  descent-override: 22%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "KaTeX Metric Size2";
+  src:
+    local("Liberation Serif"), local("LiberationSerif"),
+    local("Times New Roman"), local("TimesNewRomanPSMT"), local("Noto Serif"),
+    local("NotoSerif"), local("Droid Serif");
+  font-weight: normal;
+  font-style: normal;
+  ascent-override: 136%;
+  descent-override: 86%;
+  line-gap-override: 0%;
+}
+
+.katex {
+  font-family: KaTeX_Main, "KaTeX Metric Main", math, "Times New Roman", serif;
+}
+.katex .textrm,
+.katex .mainrm {
+  font-family: KaTeX_Main, "KaTeX Metric Main", math, "Times New Roman", serif;
+}
+.katex .mathit,
+.katex .mathbf {
+  font-family: KaTeX_Main, "KaTeX Metric Main", math, "Times New Roman", serif;
+}
+.katex .mathnormal,
+.katex .boldsymbol {
+  font-family: KaTeX_Math, "KaTeX Metric Math", math, "Times New Roman", serif;
+}
+.katex .delimsizing.size2,
+.katex .op-symbol.large-op {
+  font-family:
+    KaTeX_Size2, "KaTeX Metric Size2", math, "Times New Roman", serif;
+}
