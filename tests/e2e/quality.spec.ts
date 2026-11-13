@@ -3,6 +3,7 @@ import { createRequire } from "node:module";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
+import { fixtureMdx } from "./fixtures";
 import { pagesForTheme, publishedPosts } from "./published-posts";
 
 const loadConfig = createRequire(import.meta.url);
@@ -287,6 +288,33 @@ test.describe("qualidade por post [RNF-01, RNF-04, RNF-14]", () => {
           expect.soft(moved, `${path} movidos`).toEqual([]);
         });
       }
+    });
+
+    test("a fixture-mdx mostra KaTeX inline e display no primeiro viewport", async ({
+      page,
+    }) => {
+      const response = await page.goto(fixtureMdx.href);
+      expect(response?.status()).toBe(200);
+      await page.evaluate(() => document.fonts.ready);
+
+      const counts = await page.evaluate(() => {
+        const inFirstViewport = (element: Element) =>
+          element.getBoundingClientRect().top < 823;
+        const inline = [...document.querySelectorAll(".katex")].filter(
+          (element) =>
+            element.closest(".katex-display") === null &&
+            inFirstViewport(element),
+        ).length;
+        const display = [...document.querySelectorAll(".katex-display")].filter(
+          inFirstViewport,
+        ).length;
+        return { inline, display };
+      });
+
+      expect
+        .soft(counts.inline, "katex fora de katex-display")
+        .toBeGreaterThan(0);
+      expect.soft(counts.display, "katex-display").toBeGreaterThan(0);
     });
   });
 });
