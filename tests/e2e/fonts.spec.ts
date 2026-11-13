@@ -1,6 +1,7 @@
 import { expect, test, type Page, type Response } from "@playwright/test";
 
 import { fixtureMdx } from "./fixtures";
+import { katexMetricFaces } from "./katex-metric";
 import { pagesForTheme, publishedPosts } from "./published-posts";
 
 // Família, peso e estilo da T-42. Uma linha por combinação.
@@ -189,12 +190,6 @@ const metricFallbacks = [
       "Cousine-Regular",
     ],
   },
-] as const;
-
-const katexMetricFaces = [
-  { family: "KaTeX Metric Main", katex: "KaTeX_Main", style: "normal" },
-  { family: "KaTeX Metric Math", katex: "KaTeX_Math", style: "italic" },
-  { family: "KaTeX Metric Size2", katex: "KaTeX_Size2", style: "normal" },
 ] as const;
 
 type MetricRule = {
@@ -727,6 +722,17 @@ test.describe("fontes da marca [RNF-01]", () => {
   test("fallback métrico do KaTeX na fixture-mdx", async ({ page }) => {
     const response = await page.goto(fixtureMdx.href);
     expect(response?.status()).toBe(200);
+
+    await page.evaluate(
+      async (entries) => {
+        for (const entry of entries) {
+          await document.fonts
+            .load(`${entry.style} 100px "${entry.family}"`)
+            .catch(() => []);
+        }
+      },
+      [...katexMetricFaces],
+    );
 
     const faces = await liveFaces(page);
 
