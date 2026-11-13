@@ -553,3 +553,43 @@
   ascent-override: 102.5167%;
   descent-override: 27.5045%;
 }
+
+@font-face {
+  font-family: "Metric Plex Sans";
+  src:
+    local("Arial"), local("ArialMT"), local("Liberation Sans"),
+    local("LiberationSans"), local("Arimo Regular"), local("Arimo-Regular");
+  font-weight: 400;
+  font-style: normal;
+  size-adjust: 101.1663%;
+  ascent-override: 101.3184%;
+  descent-override: 27.183%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Metric Plex Sans";
+  src:
+    local("Arial Bold"), local("Arial-BoldMT"), local("Liberation Sans Bold"),
+    local("LiberationSans-Bold"), local("Arimo Bold"), local("Arimo-Bold");
+  font-weight: 600;
+  font-style: normal;
+  size-adjust: 97.2956%;
+  ascent-override: 105.349%;
+  descent-override: 28.2644%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "Metric Plex Sans";
+  src:
+    local("Arial Italic"), local("Arial-ItalicMT"),
+    local("Liberation Sans Italic"), local("LiberationSans-Italic"),
+    local("Arimo Italic"), local("Arimo-Italic");
+  font-weight: 400;
+  font-style: italic;
+  size-adjust: 99.5961%;
+  ascent-override: 102.9157%;
+  descent-override: 27.6115%;
+  line-gap-override: 0%;
+}
