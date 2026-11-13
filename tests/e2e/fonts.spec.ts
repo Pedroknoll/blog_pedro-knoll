@@ -192,6 +192,48 @@ const metricFallbacks = [
   },
 ] as const;
 
+const plexSansMetricFaces = [
+  {
+    weight: "400",
+    style: "normal",
+    locals: [
+      "Arial",
+      "ArialMT",
+      "Liberation Sans",
+      "LiberationSans",
+      "Arimo Regular",
+      "Arimo-Regular",
+    ],
+  },
+  {
+    weight: "600",
+    style: "normal",
+    locals: [
+      "Arial Bold",
+      "Arial-BoldMT",
+      "Liberation Sans Bold",
+      "LiberationSans-Bold",
+      "Arimo Bold",
+      "Arimo-Bold",
+    ],
+  },
+  {
+    weight: "400",
+    style: "italic",
+    locals: [
+      "Arial Italic",
+      "Arial-ItalicMT",
+      "Liberation Sans Italic",
+      "LiberationSans-Italic",
+      "Arimo Italic",
+      "Arimo-Italic",
+    ],
+  },
+] as const;
+
+const plexSansSample =
+  "A frase continua em peso regular, sem título e sem fórmula";
+
 type MetricRule = {
   family: string;
   weight: string;
@@ -716,6 +758,103 @@ test.describe("fontes da marca [RNF-01]", () => {
           `${entry.variable}: line-gap-override`,
         )
         .toBe(base.lineGapOverride.trim());
+    }
+  });
+
+  test("fallback métrico da Plex Sans por face", async ({ page }) => {
+    const response = await page.goto("/");
+    expect(response?.status()).toBe(200);
+
+    const stack = await page.evaluate(() => {
+      return getComputedStyle(document.documentElement)
+        .getPropertyValue("--font-plex-sans")
+        .trim();
+    });
+    const families = familyNames(stack);
+    const plex = families[0] ?? "";
+    const reserve = families[1] ?? "";
+    expect.soft(reserve, "--font-plex-sans").toBe("Metric Plex Sans");
+
+    const rules = await metricRules(page);
+    for (const face of plexSansMetricFaces) {
+      const label = `Metric Plex Sans ${face.weight} ${face.style}`;
+      const rule = rules.find(
+        (item) =>
+          unquote(item.family) === "Metric Plex Sans" &&
+          sameWeight(item.weight, face.weight) &&
+          item.style.trim() === face.style,
+      );
+      expect.soft(rule, label).toBeTruthy();
+      expect
+        .soft(
+          rule ? localSourcesInOrder(rule.src, face.locals) : false,
+          `${label}: ${rule?.src ?? "nenhuma @font-face"}`,
+        )
+        .toBe(true);
+    }
+
+    const faces = plexSansMetricFaces.map((face) => ({
+      weight: face.weight,
+      style: face.style,
+    }));
+    await page.evaluate(
+      async ({ plexFamily, reserveFamily, requested }) => {
+        const familiesToLoad = [plexFamily, reserveFamily].filter(Boolean);
+        await Promise.all(
+          familiesToLoad.flatMap((family) =>
+            requested.map((face) =>
+              document.fonts
+                .load(`${face.style} ${face.weight} 100px "${family}"`)
+                .catch(() => []),
+            ),
+          ),
+        );
+        await document.fonts.ready;
+      },
+      { plexFamily: plex, reserveFamily: reserve, requested: faces },
+    );
+
+    const widths = await page.evaluate(
+      ({ plexFamily, reserveFamily, requested, sample }) => {
+        const canvas = document.createElement("canvas");
+        const context = canvas.getContext("2d");
+        if (!context) return null;
+        const measure = (
+          family: string,
+          face: { style: string; weight: string },
+        ) => {
+          context.font = `${face.style} ${face.weight} 100px "${family}"`;
+          return context.measureText(sample).width;
+        };
+        return requested.map((face) => ({
+          weight: face.weight,
+          style: face.style,
+          reserve: reserveFamily ? measure(reserveFamily, face) : null,
+          plex: plexFamily ? measure(plexFamily, face) : null,
+        }));
+      },
+      {
+        plexFamily: plex,
+        reserveFamily: reserve,
+        requested: faces,
+        sample: plexSansSample,
+      },
+    );
+    expect.soft(widths, "canvas").not.toBeNull();
+    if (!widths) return;
+
+    for (const row of widths) {
+      const label = `${row.weight} ${row.style}`;
+      expect.soft(row.plex, `${label}: plex`).toBeGreaterThan(0);
+      expect.soft(row.reserve, `${label}: reserva`).toBeGreaterThan(0);
+      if (!row.plex || !row.reserve) continue;
+      const delta = (row.reserve - row.plex) / row.plex;
+      const percent = delta * 100;
+      const signed = `${percent > 0 ? "+" : ""}${percent.toFixed(1)}%`;
+      console.log(`${label}: ${signed}`);
+      expect
+        .soft(Math.abs(delta), `${label}: ${signed}`)
+        .toBeLessThanOrEqual(0.015);
     }
   });
 
