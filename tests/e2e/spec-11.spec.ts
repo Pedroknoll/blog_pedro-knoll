@@ -1,9 +1,21 @@
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
+import {
+  effectiveHeaders,
+  extractHashes,
+} from "../../src/integrations/headers.ts";
 import { KIND_LABELS, KINDS } from "../../src/lib/kind";
+import {
+  fixtureFormulas,
+  fixtureMd,
+  fixtureMdx,
+  fixtureSemTitulos,
+} from "./fixtures";
+import { pagesForTheme, publishedPosts } from "./published-posts";
 import { kindPath } from "./site-literals";
 
 test.describe("Notebook marimo inline [RF-08, RNF-03]", () => {
@@ -39,14 +51,165 @@ test.describe("Notebook pesado [RF-08, RNF-09]", () => {
 });
 
 test.describe("CSP por rota [RNF-06, RNF-07]", () => {
-  test.fixme("rota sem notebook", async () => {
-    throw new Error("Cenário da SPEC §11 ainda não implementado.");
+  test("rota sem notebook", async ({ page }) => {
+    const headersText = fs.readFileSync(path.resolve("dist/_headers"), "utf8");
+    const posts = await publishedPosts(page);
+    const artifactPaths = [
+      ...new Set(["/", fixtureMdx.href, ...posts.map((post) => post.href)]),
+    ];
+    for (const pathname of artifactPaths) {
+      assertArtifact(headersText, pathname);
+    }
+
+    const svg = fs.readFileSync(path.resolve("dist/favicon.svg"), "utf8");
+    const faviconHashes = faviconStyleHashes(svg);
+    expect(faviconHashes.length).toBeGreaterThan(0);
+    const styleElem = directiveValue(
+      policyOf(headersText, "/"),
+      "style-src-elem",
+    );
+    for (const hash of faviconHashes) {
+      expect(styleElem).toContain(hash);
+    }
+    expect(extractHashes(svg).styles).toEqual(faviconHashes);
+
+    const themePaths = await pagesForTheme(page);
+    const missing = "/nao-existe/";
+    const browserPaths = [
+      ...new Set([
+        ...themePaths,
+        fixtureMd.href,
+        fixtureMdx.href,
+        fixtureSemTitulos.href,
+        fixtureFormulas.href,
+        missing,
+      ]),
+    ];
+    const violations: Record<string, CspHit> = {};
+    for (const pathname of browserPaths) {
+      await page.unrouteAll();
+      await serveDocument(page, pathname, policyOf(headersText, pathname));
+      await watchCsp(page);
+      const response = await page.goto(pathname);
+      expect(response?.status(), pathname).toBe(
+        pathname === missing ? 404 : 200,
+      );
+      await page.waitForTimeout(1000);
+      const found = await readCspViolations(page);
+      const first = found[0];
+      if (!first) continue;
+      violations[pathname] = {
+        directive: first.directive,
+        sample: first.sample,
+        count: found.length,
+      };
+    }
+    expect(violations).toEqual({});
   });
 
   test.fixme("rota com notebook", async () => {
     throw new Error("Cenário da SPEC §11 ainda não implementado.");
   });
 });
+
+type CspHit = {
+  directive: string;
+  sample: string;
+  count: number;
+};
+
+type CspViolation = {
+  directive: string;
+  sample: string;
+};
+
+type CspWindow = Window & {
+  __cspViolations?: CspViolation[];
+};
+
+function policyOf(text: string, pathname: string): string {
+  const values = effectiveHeaders(text, pathname).get(
+    "content-security-policy",
+  );
+  expect(values, pathname).toHaveLength(1);
+  return values?.[0] ?? "";
+}
+
+function directiveValue(policy: string, name: string): string {
+  const prefix = `${name} `;
+  const part = policy.split("; ").find((item) => item.startsWith(prefix));
+  return part?.slice(prefix.length) ?? "";
+}
+
+function assertArtifact(text: string, pathname: string): void {
+  const applied = effectiveHeaders(text, pathname);
+  const policy = policyOf(text, pathname);
+  expect(policy, pathname).not.toContain("wasm-unsafe-eval");
+  expect(policy, pathname).toContain("frame-ancestors 'self'");
+  expect(applied.get("strict-transport-security"), pathname).toEqual([
+    "max-age=63072000; includeSubDomains",
+  ]);
+  expect(applied.get("x-content-type-options"), pathname).toEqual(["nosniff"]);
+  expect(applied.get("referrer-policy"), pathname).toEqual([
+    "strict-origin-when-cross-origin",
+  ]);
+}
+
+function faviconStyleHashes(svg: string): string[] {
+  return [...svg.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map(
+    (match) => {
+      const digest = createHash("sha256")
+        .update(match[1] ?? "")
+        .digest("base64");
+      return `'sha256-${digest}'`;
+    },
+  );
+}
+
+async function serveDocument(
+  page: Page,
+  pathname: string,
+  csp: string,
+): Promise<void> {
+  await page.route("**/*", async (route) => {
+    const request = route.request();
+    const url = new URL(request.url());
+    if (request.resourceType() !== "document" || url.pathname !== pathname) {
+      await route.continue();
+      return;
+    }
+    const response = await route.fetch();
+    await route.fulfill({
+      response,
+      headers: {
+        ...response.headers(),
+        "content-security-policy": csp,
+      },
+    });
+  });
+}
+
+async function watchCsp(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    const view = window as CspWindow;
+    if (view.__cspViolations) return;
+    const found: CspViolation[] = [];
+    view.__cspViolations = found;
+    document.addEventListener("securitypolicyviolation", (event) => {
+      found.push({
+        directive: event.effectiveDirective,
+        sample: event.sample,
+      });
+    });
+  });
+}
+
+async function readCspViolations(page: Page): Promise<CspViolation[]> {
+  return page.evaluate(() => {
+    const view = window as CspWindow;
+    return view.__cspViolations ?? [];
+  });
+}
 
 type DiskPost = {
   slug: string;
