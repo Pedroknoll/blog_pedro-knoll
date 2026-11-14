@@ -804,7 +804,7 @@ test.describe("fontes da marca [RNF-01]", () => {
           familiesToLoad.flatMap((family) =>
             requested.map((face) =>
               document.fonts
-                .load(`${face.style} ${face.weight} 100px "${family}"`)
+                .load(`${face.style} ${face.weight} 1000px "${family}"`)
                 .catch(() => []),
             ),
           ),
@@ -823,7 +823,7 @@ test.describe("fontes da marca [RNF-01]", () => {
           family: string,
           face: { style: string; weight: string },
         ) => {
-          context.font = `${face.style} ${face.weight} 100px "${family}"`;
+          context.font = `${face.style} ${face.weight} 1000px "${family}"`;
           return context.measureText(sample).width;
         };
         return requested.map((face) => ({
