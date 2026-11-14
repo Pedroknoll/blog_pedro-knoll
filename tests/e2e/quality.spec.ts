@@ -3,7 +3,7 @@ import { createRequire } from "node:module";
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-import { fixtureMdx } from "./fixtures";
+import { fixtureFormulas, fixtureMdx } from "./fixtures";
 import { pagesForTheme, publishedPosts } from "./published-posts";
 
 const loadConfig = createRequire(import.meta.url);
@@ -315,6 +315,34 @@ test.describe("qualidade por post [RNF-01, RNF-04, RNF-14]", () => {
         .soft(counts.inline, "katex fora de katex-display")
         .toBeGreaterThan(0);
       expect.soft(counts.display, "katex-display").toBeGreaterThan(0);
+    });
+
+    test("a fixture-formulas mostra ênfase, negrito e código no primeiro viewport", async ({
+      page,
+    }) => {
+      const response = await page.goto(fixtureFormulas.href);
+      expect(response?.status()).toBe(200);
+      await page.evaluate(() => document.fonts.ready);
+
+      const counts = await page.evaluate(() => {
+        const inFirstViewport = (element: Element) =>
+          element.getBoundingClientRect().top < 823;
+        const count = (selector: string) =>
+          [
+            ...document.querySelectorAll(
+              `.prose > p:first-of-type ${selector}`,
+            ),
+          ].filter(inFirstViewport).length;
+        return {
+          em: count("em"),
+          strong: count("strong"),
+          code: count("code"),
+        };
+      });
+
+      expect.soft(counts.em, "em").toBeGreaterThan(0);
+      expect.soft(counts.strong, "strong").toBeGreaterThan(0);
+      expect.soft(counts.code, "code").toBeGreaterThan(0);
     });
   });
 });

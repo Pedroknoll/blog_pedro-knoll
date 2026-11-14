@@ -45,7 +45,8 @@ export default defineConfig({
       styles: ["normal"],
       subsets: ["latin"],
       formats: ["woff2"],
-      fallbacks: ["sans-serif"],
+      fallbacks: ["Metric Plex Sans", "sans-serif"],
+      optimizedFallbacks: false,
     },
     {
       name: "IBM Plex Sans",
@@ -55,7 +56,8 @@ export default defineConfig({
       styles: ["italic"],
       subsets: ["latin"],
       formats: ["woff2"],
-      fallbacks: ["sans-serif"],
+      fallbacks: ["Metric Plex Sans", "sans-serif"],
+      optimizedFallbacks: false,
     },
     {
       name: "IBM Plex Mono",
