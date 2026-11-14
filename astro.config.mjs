@@ -8,6 +8,7 @@ import { defineConfig, fontProviders } from "astro/config";
 import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 
+import { headersIntegration } from "./src/integrations/headers.ts";
 import { remarkCitations } from "./src/lib/remark-citations.mjs";
 import { remarkHasCode } from "./src/lib/remark-has-code.mjs";
 import { remarkReadingTime } from "./src/lib/remark-reading-time.mjs";
@@ -94,6 +95,7 @@ export default defineConfig({
     }),
     sitemap(),
     svelte(),
+    headersIntegration(),
   ],
   vite: {
     plugins: [tailwindcss()],
