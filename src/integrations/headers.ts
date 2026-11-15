@@ -157,6 +157,13 @@ export function buildHeaders(hashes: Hashes): string {
   ].join("\n")}\n`;
 }
 
+export function cacheHeaders(): string {
+  return `${[
+    "/_astro/:file",
+    "  Cache-Control: public, max-age=31536000, immutable",
+  ].join("\n")}\n`;
+}
+
 export function validateHeaders(text: string): void {
   const lines = text.split(/\r?\n/);
   let rules = 0;
@@ -212,7 +219,7 @@ export function headersIntegration(): AstroIntegration {
           scripts.push(...hashes.scripts);
           styles.push(...hashes.styles);
         }
-        const headers = buildHeaders({ scripts, styles });
+        const headers = buildHeaders({ scripts, styles }) + cacheHeaders();
         validateHeaders(headers);
         await writeFile(fileURLToPath(new URL("./_headers", dir)), headers);
       },

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildHeaders,
+  cacheHeaders,
   effectiveHeaders,
   extractHashes,
   validateHeaders,
@@ -159,5 +160,46 @@ describe("effectiveHeaders", () => {
         "x-content-type-options",
       ),
     ).toBeUndefined();
+  });
+});
+
+describe("cacheHeaders", () => {
+  const immutable = ["public, max-age=31536000, immutable"];
+
+  function headersText(): string {
+    return buildHeaders({ scripts: [], styles: [] }) + cacheHeaders();
+  }
+
+  it("cache de um ano no primeiro nível de /_astro/", () => {
+    const text = headersText();
+    const lines = text.split("\n").filter((line) => line !== "");
+    expect(lines.filter((line) => !line.startsWith(" "))).toEqual([
+      "/*",
+      "/_astro/:file",
+    ]);
+    for (const pathname of [
+      "/_astro/BaseLayout.DLRftG8w.css",
+      "/_astro/KaTeX_Main-Regular.B22Nviop.woff2",
+    ]) {
+      expect(effectiveHeaders(text, pathname).get("cache-control")).toEqual(
+        immutable,
+      );
+    }
+  });
+
+  it("sem Cache-Control fora dele", () => {
+    const text = headersText();
+    for (const pathname of [
+      "/_astro/fonts/0123456789abcdef.woff2",
+      "/",
+      "/blog/a/",
+      "/favicon.svg",
+      "/notebooks/a/b/assets/x.js",
+    ]) {
+      expect(
+        effectiveHeaders(text, pathname).get("cache-control"),
+        pathname,
+      ).toBeUndefined();
+    }
   });
 });

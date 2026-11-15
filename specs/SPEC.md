@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 14/11/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 15/11/2026
+
+**Revisão de 15/11/2026:** a T-91 grava no `_headers` a regra de cache `/_astro/:file`, com `Cache-Control: public, max-age=31536000, immutable` (RNF-01). O placeholder pega só o primeiro nível de `/_astro/`, onde o nome tem o hash do conteúdo; `/_astro/fonts/` fica no padrão da Cloudflare até a T-95, porque o nome das fontes é o hash da URL do Fontsource, e a regra dos assets de notebook passa para a T-82. A §10 descreve as três regras e o 404 em `/_astro/`.
 
 **Revisão de 14/11/2026:** a T-16 gera o `dist/_headers` no build (RNF-06, RNF-07): uma regra `/*` com HSTS, `X-Content-Type-Options`, `Referrer-Policy` e a CSP do site, com os hashes dos `<script>` e dos `<style>` inline calculados a partir do `dist/`. Os atributos `style` do Shiki e do KaTeX passam por `style-src-attr 'unsafe-inline'`; os `<style>` só passam por hash, em `style-src-elem`. A §10 descreve a integração e a política, a §9 e a §10 deixam de citar um `_redirects` que nunca existiu, e a §11 aponta o teste do `_headers` para a integração.
 
@@ -764,7 +766,7 @@ Por isso o `_headers` é **gerado no build** pela integração `src/integrations
 
 1. Regra `/*` com `Strict-Transport-Security: max-age=63072000; includeSubDomains` (sem `preload`, que espera o domínio próprio da T-27), `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin` e a CSP do site: `default-src 'none'; script-src 'self'` mais os hashes; `style-src 'self' 'unsafe-inline'; style-src-elem 'self'` mais os hashes; `style-src-attr 'unsafe-inline'; img-src 'self'; font-src 'self' data:; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'self'`. Não usar `X-Frame-Options: DENY`. Os hashes `sha256` saem do `dist/` no próprio hook: todo `<script>` inline de JavaScript (clássico ou `module`; o `application/ld+json` não executa e fica fora) e todo `<style>` dos `.html` e dos `.svg` (o `favicon.svg` tem um, com o modo escuro). Um post novo com island ou script inline entra no build seguinte, sem lista à mão (RNF-14). Os atributos `style` do Shiki e do KaTeX mudam a cada post e passam por `style-src-attr 'unsafe-inline'`: `'unsafe-hashes'` não cabe na linha, porque o build de teste tem 106 valores distintos. O `'unsafe-inline'` do `style-src` só vale em navegador que não conhece `style-src-elem` e `style-src-attr`. O `font-src` tem `data:` porque o Vite embute o `KaTeX_Size3` no CSS.
 2. A CSP de notebook medida na T-05 vai numa regra por export, `/notebooks/<slug>/<nome>/*`, cada uma com `! Content-Security-Policy` e os hashes do próprio export. A página do post não executa Pyodide e não recebe essa CSP. Diretivas: `default-src 'none'`; `script-src 'self' 'wasm-unsafe-eval' https://cdn.jsdelivr.net` mais os hashes `sha256` dos scripts inline; `style-src 'self' 'unsafe-inline'`; `img-src 'self' data:`; `font-src 'self' data:`; `connect-src 'self' https://wasm.marimo.app https://cdn.jsdelivr.net https://files.pythonhosted.org`; `worker-src 'self'`; `frame-ancestors 'self'`; `base-uri 'none'`; `form-action 'none'`. Os hashes dependem do `index.html` de cada export. Cada linha do `_headers` tem limite de 2.000 caracteres: a linha medida tem 577 com 4 hashes, cerca de 55 por hash. A T-82 implementa essas regras na integração da T-16, com os hashes calculados no build. Hash em `style-src` não entra: com um hash na diretiva, o navegador ignora `'unsafe-inline'`. `'unsafe-inline'` em `style-src` não contradiz o RNF-07; `script-src` não tem `'unsafe-inline'` nem `'unsafe-eval'`.
-3. Regras de cache (abaixo, T-91) e `X-Robots-Tag: noindex` para `https://:version.:subdomain.workers.dev/*` depois que o domínio próprio existir (T-27).
+3. A regra de cache `/_astro/:file` (abaixo, T-91) e `X-Robots-Tag: noindex` para `https://:version.:subdomain.workers.dev/*` depois que o domínio próprio existir (T-27).
 4. O build falha se o arquivo passar de 100 regras (RNF-07) ou se uma linha passar de 2.000 caracteres.
 
 A T-05 confirmou o detach: `! Content-Security-Policy` seguido de nova CSP no mesmo bloco entrega uma única CSP, com `wasm-unsafe-eval`, na rota do notebook; a página que embute o iframe fica só com a CSP global. Headers repetidos chegaram como linhas separadas, não unidos por vírgula; os testes da T-16 contam ocorrências. Ver `specs/spikes/T-05-headers.md`. O plano B não foi necessário. Transform Rules exigem zona, e o `workers.dev` não é uma zona da conta: só depois da T-27. Até lá, se o detach falhar, a alternativa são regras explícitas por rota (`/`, `/blog/*`, `/tags/*`, `/tipos/*`, `/page/*`, `/sobre`, `/_astro/*`…). O site não tem `_redirects`: nenhuma rota redireciona. Se um dia precisar, o arquivo vai em `public/`.
@@ -797,7 +799,10 @@ Segredos necessários no repositório: `CLOUDFLARE_API_TOKEN` (Account API token
 
 ### Cache na edge
 
-- `/_astro/*` e `/notebooks/:slug/:nome/assets/*`: `Cache-Control: public, max-age=31536000, immutable` (nomes com hash). A Cloudflare aceita um splat por URL; a forma com dois `*` não vale. Use um placeholder por segmento.
+- `/_astro/:file`: `Cache-Control: public, max-age=31536000, immutable`. O placeholder casa só com o primeiro nível de `/_astro/`, onde o Vite põe o hash do conteúdo no nome. A Cloudflare aceita um splat por URL; a forma com dois `*` não vale. Use um placeholder por segmento.
+- `/_astro/fonts/`: sem regra, no padrão da Cloudflare. O nome de cada fonte é o hash da URL do Fontsource (`@latest`), e não do conteúdo: uma versão nova da fonte manteria o nome. Cache longo nessa pasta só depois da T-95.
+- `/notebooks/:slug/:nome/assets/*`: a mesma regra entra na T-82, depois de conferir que os nomes do export mudam com o conteúdo.
+- O `_headers` não distingue o status: um 404 numa URL de `/_astro/` também recebe o `immutable` (medido no preview da T-91).
 - HTML: o padrão da Cloudflare já é `public, max-age=0, must-revalidate` com `ETag`; não precisa de regra.
 
 ## 11. Critérios de aceite e testes
