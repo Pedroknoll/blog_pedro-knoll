@@ -153,6 +153,9 @@ function assertArtifact(text: string, pathname: string): void {
   expect(applied.get("referrer-policy"), pathname).toEqual([
     "strict-origin-when-cross-origin",
   ]);
+  expect(applied.get("permissions-policy"), pathname).toEqual([
+    "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
+  ]);
 }
 
 function faviconStyleHashes(svg: string): string[] {

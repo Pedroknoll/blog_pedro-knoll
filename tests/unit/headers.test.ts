@@ -64,7 +64,7 @@ describe("extractHashes", () => {
 });
 
 describe("buildHeaders", () => {
-  it("escreve os quatro headers e cada diretiva", () => {
+  it("escreve os cinco headers e cada diretiva", () => {
     const alpha = "'sha256-aaa'";
     const beta = "'sha256-bbb'";
     const text = buildHeaders({
@@ -80,6 +80,9 @@ describe("buildHeaders", () => {
     expect(applied.get("x-content-type-options")).toEqual(["nosniff"]);
     expect(applied.get("referrer-policy")).toEqual([
       "strict-origin-when-cross-origin",
+    ]);
+    expect(applied.get("permissions-policy")).toEqual([
+      "camera=(), microphone=(), geolocation=(), payment=(), usb=()",
     ]);
     const policies = applied.get("content-security-policy");
     expect(policies).toHaveLength(1);
