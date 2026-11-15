@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 15/11/2026
 
+**Revisão 3 de 15/11/2026:** a T-93 sobe o `astro` de 7.3.8 para a 7.4.12 sem mudar o comportamento do site: o HTML, o CSS, as fontes e o `_headers` de produção saem iguais. A §10 corrige o item de `/_astro/fonts/`: a URL do Fontsource que dá o nome às fontes traz a versão do pacote (`@5.3.0`), e não `@latest`.
+
 **Revisão 2 de 15/11/2026:** a T-92 acrescenta à regra `/*` do `_headers` o `Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()` (RNF-06), que nega à página e aos iframes recursos que o site não usa. O clipboard e o fullscreen ficam no padrão do navegador: o botão de copiar usa `navigator.clipboard.writeText`, e o export do marimo usa os dois. O RNF-06 e a §10 citam o header.
 
 **Revisão de 15/11/2026:** a T-91 grava no `_headers` a regra de cache `/_astro/:file`, com `Cache-Control: public, max-age=31536000, immutable` (RNF-01). O placeholder pega só o primeiro nível de `/_astro/`, onde o nome tem o hash do conteúdo; `/_astro/fonts/` fica no padrão da Cloudflare até a T-95, porque o nome das fontes é o hash da URL do Fontsource, e a regra dos assets de notebook passa para a T-82. A §10 descreve as três regras e o 404 em `/_astro/`.
@@ -802,7 +804,7 @@ Segredos necessários no repositório: `CLOUDFLARE_API_TOKEN` (Account API token
 ### Cache na edge
 
 - `/_astro/:file`: `Cache-Control: public, max-age=31536000, immutable`. O placeholder casa só com o primeiro nível de `/_astro/`, onde o Vite põe o hash do conteúdo no nome. A Cloudflare aceita um splat por URL; a forma com dois `*` não vale. Use um placeholder por segmento.
-- `/_astro/fonts/`: sem regra, no padrão da Cloudflare. O nome de cada fonte é o hash da URL do Fontsource (`@latest`), e não do conteúdo: uma versão nova da fonte manteria o nome. Cache longo nessa pasta só depois da T-95.
+- `/_astro/fonts/`: sem regra, no padrão da Cloudflare. O nome de cada fonte é o hash da URL que a API do Fontsource devolve, e não do conteúdo. Hoje essa URL traz a versão do pacote (`…/ibm-plex-sans@5.3.0/latin-400-normal.woff2`, medido na T-93), e não `@latest`, como a T-91 supôs; a forma da URL é escolha da API, e não do site. Cache longo nessa pasta só depois da T-95.
 - `/notebooks/:slug/:nome/assets/*`: a mesma regra entra na T-82, depois de conferir que os nomes do export mudam com o conteúdo.
 - O `_headers` não distingue o status: um 404 numa URL de `/_astro/` também recebe o `immutable` (medido no preview da T-91).
 - HTML: o padrão da Cloudflare já é `public, max-age=0, must-revalidate` com `ETag`; não precisa de regra.
