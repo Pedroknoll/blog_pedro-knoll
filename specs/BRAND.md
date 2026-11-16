@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.22 · novembro de 2026 · pedroknoll.com
+Versão 1.23 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -10,7 +10,7 @@ Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele 
 - **Sugestão** é um ponto de partida. Ajuste ao código, ao schema e à SPEC.
 - Este arquivo é a identidade. Em conflito de comportamento com a SPEC, vale a SPEC; avise no PR.
 - A seção 14 é sugestão. A ordem das tarefas está na Fase 1b do ROADMAP. Onde a seção 14 discordar da SPEC ou do ROADMAP, valem a SPEC e o ROADMAP.
-- Não crie nomes paralelos `--papel` / `--prussia` no CSS de componente, página ou layout. A T-41 grava a lista fechada: `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `kind-concept`, `kind-tutorial`, `kind-lab`, `kind-playbook`; a T-72 acrescenta `grid` e `grid-strong`, da grade milimetrada. Sem `@custom-variant dark` e sem `dark:` nos componentes.
+- Não crie nomes paralelos `--papel` / `--prussia` no CSS de componente, página ou layout. A T-41 grava a lista fechada: `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `kind-concept`, `kind-tutorial`, `kind-playbook`; a T-72 acrescenta `grid` e `grid-strong`, da grade milimetrada. Sem `@custom-variant dark` e sem `dark:` nos componentes.
 - A stack é Astro 7 + Tailwind v4. A seção 13 é sugestão de tokens; confirme a SPEC §9 antes de aplicá-la.
 - SVGs, favicons e temas do Shiki estão na árvore abaixo, com os nomes originais. O apêndice repete o código dos SVGs principais e usa esses caminhos.
 
@@ -18,8 +18,8 @@ Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele 
 specs/BRAND.md
 src/assets/brand/pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel,-404}.svg
 src/assets/brand/icones/aceno.svg
-src/assets/brand/icones/icone-{conceito,tutorial,lab,playbook}.svg
-src/assets/brand/icones/icone-{conceito,tutorial,lab,playbook}-parado.svg
+src/assets/brand/icones/icone-{conceito,tutorial,playbook}.svg
+src/assets/brand/icones/icone-{conceito,tutorial,playbook}-parado.svg
 src/styles/shiki/pk-claro.json
 src/styles/shiki/pk-escuro.json
 public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-touch-icon.png
@@ -136,14 +136,14 @@ Fundo **sempre liso**, sem textura, sem vinheta.
 | Token | Claro (velino) | Escuro (cianotipia) | Papel |
 |---|---|---|---|
 | `--papel` | `#FAF9F5` | `#0E2236` | Fundo da página. |
-| `--folha` | `#F0EEE6` | `#163250` | Superfícies: blocos de código, cartões em destaque, barra do notebook. |
+| `--folha` | `#F0EEE6` | `#163250` | Superfícies: blocos de código, cartões em destaque, faixa do caderno. |
 | `--tinta` | `#2A2118` | `#E8EEF3` | Texto principal (tinta ferrogálica: marrom quase preto). |
 | `--grafite` | `#5E5345` | `#A9BACB` | Texto secundário. |
 | `--lapis` | `#7B6F5A` | `#869EB6` | Fólio e metadados. Não é texto menor que 24 px sobre folha clara. Comentário de código não usa lápis. |
 | `--linha` | `rgba(60,40,20,.16)` | `rgba(232,238,243,.18)` | Bordas e divisórias. |
 | `--prussia` | `#1F4B7A` | `#8DB8E8` | **Cor principal.** Links, foco, nó do símbolo, ponto do nome, tipo Conceito. |
 | `--latao` | `#84601A` | `#D9B85C` | Tipo **Tutorial**. |
-| `--sanguinea` | `#A3392A` | `#EE8A74` | Tipo **Lab**. |
+| `--sanguinea` | `#A3392A` | `#EE8A74` | Função no código (Shiki, §9.5). |
 | `--verdete` | `#2E6B5A` | `#7CC7AE` | Tipo **Playbook**. |
 | `--ouro` | `#F5B82E` | `#F5B82E` | **Exceção:** só a mão da saudação. |
 | `--contorno-px` | `#2A2118` | `#2A2118` | Contorno da mão em pixel, nos dois modos. |
@@ -152,7 +152,7 @@ Fundo **sempre liso**, sem textura, sem vinheta.
 
 ### Regras de cor (decisões)
 - **Proporção em qualquer peça:** papel ~68%, tinta ~20%, prússia ~7%, latão + sanguínea + verdete ≤ 5% somados.
-- **Latão, sanguínea e verdete marcam só o tipo de conteúdo.** Nunca marcam avisos, erros, sucesso ou resultados, e nunca são fundo de página.
+- **Latão e verdete marcam só o tipo de conteúdo; a sanguínea fica só na função do código (§9.5).** Nunca marcam avisos, erros, sucesso ou resultados, e nunca são fundo de página.
 - **Ouro-pigmento** aparece só na mão da saudação, sempre com contorno em tinta (amarelo puro some sobre o fundo claro).
 - **Pergaminho** (`#EADFC8`, com `--folha #DFD2B6`, `--grafite #5A4D3C`, `--lapis #8E7E64`, `--latao #765514`, `--sanguinea #9E3526`, `--verdete #2B6454`) é um tom mais fundo **só para peças gráficas**: slides, posts de rede social, capas, certificado. Nunca no blog.
 - **Nomes na interface:** o botão de tema diz **Claro** e **Escuro**. "Velino" e "cianotipia" são nomes internos.
@@ -221,13 +221,12 @@ Títulos com `text-wrap: balance`.
 - **Animação quadro a quadro** (decisão):
   - Conceito: o ponteiro do compasso gira em 4 posições (3,2 s).
   - Tutorial: o cursor `_` pisca (1,1 s).
-  - Lab: duas bolhas sobem no frasco em 3 quadros (1,8 s).
   - Playbook: a lista se marca item por item e recomeça (4 s).
   - Aceno: dois quadros alternando 4 vezes, depois pausa (3,2 s, contínuo).
 - **Onde anima:** quando o ícone aparece sozinho e em destaque (cartões de tipo, página "sobre", saudação). **Parado** (`icone-*-parado.svg`) em listas, etiquetas, cards de índice e no cabeçalho do fólio, onde fica em 12 px, no tamanho da grade (T-67).
 - **Relógio** (`icone-relogio.svg`): 12 × 12, só parado, sem versão animada. Entra no rodapé do card, antes do tempo de leitura (seção 9.2).
 - Todas as animações respeitam `prefers-reduced-motion: reduce` (ficam paradas).
-- Os SVGs animados têm classes com prefixo (`pkc-`, `pkt-`, `pkl-`, `pkp-`, `pka-`), então podem ser inseridos inline juntos sem conflito.
+- Os SVGs animados têm classes com prefixo (`pkc-`, `pkt-`, `pkp-`, `pka-`), então podem ser inseridos inline juntos sem conflito.
 
 ---
 
@@ -241,8 +240,9 @@ Três eixos independentes: **tipo** (formato), **nível** (dificuldade) e **tema
 |---|---|---|---|---|
 | **Conceito** | prússia | compasso | Explica uma ideia do zero até um desenho que o leitor refaz de memória. | Pergunta → Esboço → Formalização → Onde aparece |
 | **Tutorial** | latão | `>_` | Leva de A a B com passos verificáveis. | Objetivo → Pré-requisitos → Passos → Conferência |
-| **Lab** | sanguínea | frasco | Experimento de bancada em marimo: hipótese, código, resultado e o que deu errado. | Hipótese → Montagem → Execução → Leitura → Notas |
 | **Playbook** | verdete | checklist | Receita reutilizável para uma situação real. | Quando usar → Checklist → Armadilhas → Decisões |
+
+Qualquer tipo pode ter cadernos marimo (§9.6).
 
 ### Níveis (decisão)
 
@@ -266,7 +266,7 @@ marimo: "https://..."     # obrigatório em labs
 colab: "https://..."      # só quando o lab precisa de GPU
 ```
 
-A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `tags`, `references`, `appendices`); `kind` no enum inglês; temas da marca são rótulo em `src/data/tags.ts`, não um campo; o tempo do post é só o `minutesRead`; lab exige `notebooks`; Colab é `gpuUrl`. Este bloco é a sugestão anterior a essa decisão; caderno, tempo de bancada e material saíram na T-62.
+A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `tags`, `references`, `appendices`); `kind` no enum inglês; temas da marca são rótulo em `src/data/tags.ts`, não um campo; o tempo do post é só o `minutesRead`; o caderno não tem campo no frontmatter: o componente `Notebook` aponta o arquivo no MDX (SPEC §7). Este bloco é a sugestão anterior a essa decisão; caderno, tempo de bancada e material saíram na T-62.
 
 ---
 
@@ -320,14 +320,15 @@ No MDX, `Callout` com `variant` `note`, `caution` ou `result` (SPEC RF-22), impo
 - Moldura: fundo `--folha`, borda `--linha`. Barra superior com o nome do arquivo em mono 12 px (ex.: `fol-001_embeddings.py`) e o botão **Copiar**, que vira **Copiado** por 1,5 s. O nome fica em grafite (lápis sobre folha clara é 4,2), na caixa original, alinhado ao começo do código. Sem nome, a barra fica só com o botão. A linha entre a barra e o código é a borda de cima do bloco (T-48).
 - Opcional: linha de "saída" abaixo do código, no formato de cota (`saída ├────┤ [4, 384]`).
 
-### 9.6 Barra do lab
-- Texto à esquerda: "Este lab roda no navegador. Mude os parâmetros e anote o que acontecer."
-- Botões à direita: **Abrir no marimo** (principal: fundo tinta, texto papel) e **Abrir no Colab** (secundário: borda tinta), este último só quando o lab precisa de GPU.
+### 9.6 Botão do caderno
+- Componente `Notebook`, chamado no texto do post onde o autor quiser, uma ou mais vezes.
+- Faixa com filete em cima e embaixo: texto à esquerda e um botão à direita.
+- Sem `gpu`: "Este caderno roda no navegador. Mude os parâmetros e anote o que acontecer." e o botão **Abrir no marimo** (fundo tinta, texto papel).
+- Com `gpu`: "Este caderno roda num servidor com GPU." e o botão **Abrir com GPU** (borda tinta).
 - Botões em mono 12,5 px, cantos retos.
-- Aparece logo após o cabeçalho de todo Lab.
 
-### 9.7 Notebooks marimo
-Primeira célula de todo lab: cabeçalho renderizado com a assinatura, `Fól. 006 · Lab` (na cor do tipo) e o título. Parâmetros do experimento como controles do marimo (`mo.ui.slider` etc.), não como constantes soltas. Sugestão: um `pk.css` para o marimo com as mesmas fontes e cores.
+### 9.7 Cadernos marimo
+Primeira célula de todo caderno: cabeçalho renderizado com a assinatura, o fólio do post e o título. Parâmetros como controles do marimo (`mo.ui.slider` etc.), não como constantes soltas. Sugestão: um `pk.css` com as mesmas fontes e cores, pelo `css_file` do caderno (a T-97 confere se o molab o aplica).
 
 ### 9.8 Diagramas
 - Tinta para elementos; prússia para **um** destaque por diagrama; tracejado fino para guias.
@@ -395,7 +396,7 @@ Um colega experiente puxando a cadeira ao lado, com uma pitada de inventor curio
 | Botão de código | Copiar → Copiado |
 | Fim de fólio | Achou um erro? Anote na margem: abra uma issue. |
 | Botão de tema | Claro · Escuro |
-| Barra do lab | Abrir no marimo · Abrir no Colab |
+| Botão do caderno | Abrir no marimo · Abrir com GPU |
 
 ---
 
@@ -593,7 +594,7 @@ Versões paradas dos ícones e o símbolo com linhas de construção estão em `
 </svg>
 ```
 
-Desde a T-46, os quatro ícones animados não têm `<style>`. As classes `pkc-`, `pkt-`, `pkl-` e `pkp-`, os keyframes e o `prefers-reduced-motion` estão em `src/styles/global.css`. Os blocos abaixo mostram o desenho e a animação de origem; os arquivos em `src/assets/brand/icones/` são a versão sem `<style>`.
+Desde a T-46, os três ícones animados não têm `<style>`. As classes `pkc-`, `pkt-` e `pkp-`, os keyframes e o `prefers-reduced-motion` estão em `src/styles/global.css`. Os blocos abaixo mostram o desenho e a animação de origem; os arquivos em `src/assets/brand/icones/` são a versão sem `<style>`.
 
 ### Ícone Conceito (animado) · `src/assets/brand/icones/icone-conceito.svg`
 
@@ -615,18 +616,6 @@ Desde a T-46, os quatro ícones animados não têm `<style>`. As classes `pkc-`,
   <style>.pkt-cursor{animation:pkt-pisca 1.1s steps(1) infinite}@keyframes pkt-pisca{50%{opacity:0}}@media (prefers-reduced-motion:reduce){.pkt-cursor{animation:none}}</style>
   <path d="M1 2h2v1h-2zM2 3h2v1h-2zM3 4h2v1h-2zM4 5h2v1h-2zM3 6h2v1h-2zM2 7h2v1h-2zM1 8h2v1h-2z"/>
   <path class="pkt-cursor" d="M6 9h5v1h-5zM6 10h5v1h-5z"/>
-</svg>
-```
-
-### Ícone Lab (animado) · `src/assets/brand/icones/icone-lab.svg`
-
-```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
-  <style>.pkl-q1,.pkl-q2{opacity:0}.pkl-q0{animation:pkl-b0 1.8s step-end infinite}.pkl-q1{animation:pkl-b1 1.8s step-end infinite}.pkl-q2{animation:pkl-b2 1.8s step-end infinite}@keyframes pkl-b0{0%{opacity:1}33.3%{opacity:0}100%{opacity:0}}@keyframes pkl-b1{0%{opacity:0}33.3%{opacity:1}66.6%{opacity:0}100%{opacity:0}}@keyframes pkl-b2{0%{opacity:0}66.6%{opacity:1}100%{opacity:1}}@media (prefers-reduced-motion:reduce){.pkl-q0,.pkl-q1,.pkl-q2{animation:none}}</style>
-  <path d="M3 1h6v1h-6zM4 2h1v1h-1zM7 2h1v1h-1zM4 3h1v1h-1zM7 3h1v1h-1zM3 4h1v1h-1zM8 4h1v1h-1zM2 5h1v1h-1zM9 5h1v1h-1zM2 6h1v1h-1zM9 6h1v1h-1zM1 7h1v1h-1zM10 7h1v1h-1zM1 8h10v1h-10zM0 9h3v1h-3zM4 9h8v1h-8zM0 10h12v1h-12z"/>
-  <path class="pkl-q0" d="M5 5h1v1h-1zM6 7h1v1h-1z"/>
-  <path class="pkl-q1" d="M6 4h1v1h-1zM5 6h1v1h-1z"/>
-  <path class="pkl-q2" d="M5 3h1v1h-1zM6 5h1v1h-1z"/>
 </svg>
 ```
 
