@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.24 · novembro de 2026 · pedroknoll.com
+Versão 1.25 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -259,11 +259,9 @@ Etiquetas em mono, sem cor, borda `--linha`: Machine Learning, Deep Learning, Ag
 
 ```yaml
 folio: 6                  # número do fólio, exibido como "Fól. 006"
-tipo: lab                 # conceito | tutorial | lab | playbook
+tipo: tutorial            # conceito | tutorial | playbook
 nivel: 3                  # 1 iniciante | 2 intermediário | 3 avançado
 temas: [LLMs, Fine-tuning, PyTorch]
-marimo: "https://..."     # obrigatório em labs
-colab: "https://..."      # só quando o lab precisa de GPU
 ```
 
 A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `tags`, `references`, `appendices`); `kind` no enum inglês; temas da marca são rótulo em `src/data/tags.ts`, não um campo; o tempo do post é só o `minutesRead`; o caderno não tem campo no frontmatter: o componente `Notebook` aponta o arquivo no MDX (SPEC §7). Este bloco é a sugestão anterior a essa decisão; caderno, tempo de bancada e material saíram na T-62.
@@ -545,14 +543,13 @@ Ordem que estava sugerida antes desse encaixe:
 2. **Fontes:** carregar as quatro famílias (de preferência auto-hospedadas).
 3. **Marca no layout:** assinatura no cabeçalho, favicon (seção 12), `<title>` no padrão da seção 1, rodapé com assinatura espelhada opcional.
 4. **Home:** saudação com aceno animado, texto de apresentação, newsletter, lista de fólios.
-5. **Schema de conteúdo:** campos de fólio, tipo, nível, temas, links marimo/Colab.
+5. **Schema de conteúdo:** campos de fólio, tipo, nível e temas.
 6. **Card e cabeçalho de fólio:** com ícones parados nas listas e no cabeçalho, hachura de nível.
 7. **Avisos em MDX:** componente com os três tipos da seção 9.4.
 8. **Código:** temas Shiki próprios + barra com nome do arquivo e Copiar/Copiado.
-9. **Barra do lab** e cabeçalho padrão dos notebooks marimo.
-10. **OG image** por fólio.
-11. **Página 404** com o microtexto da marca.
-12. **Revisão de acessibilidade:** contraste (seção 4), foco visível, `prefers-reduced-motion` em todas as animações.
+9. **OG image** por fólio.
+10. **Página 404** com o microtexto da marca.
+11. **Revisão de acessibilidade:** contraste (seção 4), foco visível, `prefers-reduced-motion` em todas as animações.
 
 ---
 
