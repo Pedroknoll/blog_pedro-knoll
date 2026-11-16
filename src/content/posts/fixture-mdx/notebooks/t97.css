@@ -1,0 +1,10 @@
+/* T-97: CSS de prova do molab. Efeito visível e uma marca para o console. */
+:root {
+  --t97-css: aplicado;
+  --marimo-heading-font: "Courier New", monospace;
+}
+
+h1,
+h2 {
+  text-decoration: underline wavy;
+}
