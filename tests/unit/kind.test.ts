@@ -19,7 +19,6 @@ describe("kind", () => {
     expect(KIND_SLUGS).toEqual({
       concept: "conceito",
       tutorial: "tutorial",
-      lab: "lab",
       playbook: "playbook",
     });
     const slugs = KINDS.map((kind) => KIND_SLUGS[kind]);

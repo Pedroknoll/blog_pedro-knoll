@@ -11,7 +11,6 @@
   --color-accent: #1f4b7a;
   --color-kind-concept: var(--color-accent);
   --color-kind-tutorial: #84601a;
-  --color-kind-lab: #a3392a;
   --color-kind-playbook: #2e6b5a;
   --color-grid: rgba(31, 75, 122, 0.03);
   --color-grid-strong: rgba(31, 75, 122, 0.065);
@@ -35,7 +34,6 @@
     --color-line: rgba(232, 238, 243, 0.18);
     --color-accent: #8db8e8;
     --color-kind-tutorial: #d9b85c;
-    --color-kind-lab: #ee8a74;
     --color-kind-playbook: #7cc7ae;
     --color-grid: rgba(200, 225, 255, 0.025);
     --color-grid-strong: rgba(200, 225, 255, 0.055);

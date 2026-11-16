@@ -1,18 +1,16 @@
-export const KINDS = ["concept", "tutorial", "lab", "playbook"] as const;
+export const KINDS = ["concept", "tutorial", "playbook"] as const;
 
 export type Kind = (typeof KINDS)[number];
 
 export const KIND_LABELS: Record<Kind, string> = {
   concept: "Conceito",
   tutorial: "Tutorial",
-  lab: "Lab",
   playbook: "Playbook",
 };
 
 export const KIND_SLUGS: Record<Kind, string> = {
   concept: "conceito",
   tutorial: "tutorial",
-  lab: "lab",
   playbook: "playbook",
 };
 
