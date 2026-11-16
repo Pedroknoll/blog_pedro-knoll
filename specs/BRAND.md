@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.23 · novembro de 2026 · pedroknoll.com
+Versão 1.24 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -324,11 +324,11 @@ No MDX, `Callout` com `variant` `note`, `caution` ou `result` (SPEC RF-22), impo
 - Componente `Notebook`, chamado no texto do post onde o autor quiser, uma ou mais vezes.
 - Faixa com filete em cima e embaixo: texto à esquerda e um botão à direita.
 - Sem `gpu`: "Este caderno roda no navegador. Mude os parâmetros e anote o que acontecer." e o botão **Abrir no marimo** (fundo tinta, texto papel).
-- Com `gpu`: "Este caderno roda num servidor com GPU." e o botão **Abrir com GPU** (borda tinta).
+- Com `gpu`: "Este caderno roda num servidor com GPU. Para rodar, é preciso uma conta no molab; a GPU se escolhe no painel Compute." e o botão **Abrir com GPU** (borda tinta), que leva à prévia estática do molab (SPEC §7, Q19).
 - Botões em mono 12,5 px, cantos retos.
 
 ### 9.7 Cadernos marimo
-Primeira célula de todo caderno: cabeçalho renderizado com a assinatura, o fólio do post e o título. Parâmetros como controles do marimo (`mo.ui.slider` etc.), não como constantes soltas. Sugestão: um `pk.css` com as mesmas fontes e cores, pelo `css_file` do caderno (a T-97 confere se o molab o aplica).
+Primeira célula de todo caderno: cabeçalho renderizado com a assinatura, o fólio do post e o título. Parâmetros como controles do marimo (`mo.ui.slider` etc.), não como constantes soltas. Sem `pk.css`: o molab não aplica o `css_file` do caderno (T-97), e o caderno fica com o estilo do molab; a marca entra pelo cabeçalho da primeira célula. Os dados ficam na pasta do caderno e se leem com `mo.notebook_dir()` (SPEC §7).
 
 ### 9.8 Diagramas
 - Tinta para elementos; prússia para **um** destaque por diagrama; tracejado fino para guias.
