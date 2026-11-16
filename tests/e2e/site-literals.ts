@@ -24,7 +24,6 @@ export const notFoundIntro =
 export const kindSlugs = {
   concept: "conceito",
   tutorial: "tutorial",
-  lab: "lab",
   playbook: "playbook",
 } as const;
 

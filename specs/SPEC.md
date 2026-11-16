@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 16/11/2026
 
+**Revisão 3 de 16/11/2026:** a T-98 tira do código o tipo `lab` e o campo `notebooks` (Q18): o `src/content.config.ts` fica igual ao schema da §6, e sai da §6 a frase que dizia o que ainda faltava sair. Saem também o token `kind-lab` e os ícones do lab. Nenhum requisito muda.
+
 **Revisão 2 de 16/11/2026:** a T-99 grava o que a T-97 mediu no molab (`specs/spikes/T-97-molab.md`) na Q19. O navegador (`/wasm`) é o caminho padrão: abre sem login e ficou interativo em 6,9 s de mediana. O atributo `gpu` fica, com o comportamento medido: o link sem `/wasm` abre a prévia estática, e o leitor com conta no molab roda o caderno no servidor e escolhe a GPU no painel Compute. Os dados do caderno se leem com `mo.notebook_dir()` ou caminho relativo, e não com `mo.notebook_location()`; o molab não aplica o `css_file`, e o `pk.css` sai; o molab não abre caderno de branch com `/` no nome. Mudam a §1 (métrica de sucesso), a §2 (Q19, que atualiza a Q18), o RF-08, o ADR-02 e os riscos técnicos da §5, a §7, a §8 e as Fontes; o cenário da §11 não muda.
 
 **Revisão de 16/11/2026:** a T-96 registra a Q18: o caderno marimo é complemento opcional de qualquer post e abre no molab, pelo componente `Notebook` no MDX; o tipo `lab` e o campo `notebooks` saem, e o blog não exporta nem hospeda caderno. Mudam o RF-08, o RNF-02, o RNF-03, o RNF-07, o RNF-08 e o ADR-02 (o anterior vai para `specs/adr/ADR-02-v3-pagina-propria.md`), e a §5 a §12 acompanham. O código muda na T-98, na T-18 e na T-74.
@@ -322,8 +324,6 @@ const posts = defineCollection({
 export const collections = { posts };
 
 ```
-
-O `src/content.config.ts` ainda tem o tipo `lab`, o `refine` dele e o campo `notebooks` (com `mode`, `compute` e `gpuUrl`); saem na T-98.
 
 Notas de Zod 4: `z.url()` substitui `z.string().url()`, e o parâmetro `error` substitui `message`. As formas antigas ainda funcionam, mas estão depreciadas.
 

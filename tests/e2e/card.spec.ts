@@ -682,9 +682,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       const clone = source.cloneNode(true) as HTMLElement;
       const width = source.getBoundingClientRect().width;
       const kind = [...clone.querySelectorAll("span")].find((span) =>
-        /^(Conceito|Tutorial|Lab|Playbook)$/.test(
-          (span.textContent ?? "").trim(),
-        ),
+        /^(Conceito|Tutorial|Playbook)$/.test((span.textContent ?? "").trim()),
       );
       if (kind) kind.textContent = "Playbook";
       const minutes = [...clone.querySelectorAll("span")].find((span) =>

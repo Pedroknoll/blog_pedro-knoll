@@ -7,17 +7,6 @@ import { postIdFromEntry } from "./lib/post-id";
 import { postsGlobPattern, shouldShowFixtures } from "./lib/published";
 import { duplicateReferenceKeys } from "./lib/references";
 
-// Iframe: notebook inteiro num .py da pasta do post, exportado com html-wasm.
-const notebook = z.strictObject({
-  mode: z.literal("iframe"),
-  src: z.string(),
-  // estratégia de execução, ver seção 7
-  compute: z
-    .enum(["browser", "cache", "precomputed", "onnx", "static"])
-    .default("browser"),
-  gpuUrl: z.url().optional(), // botão "Rodar com GPU" (molab, Colab, HF Space)
-});
-
 const reference = z.strictObject({
   key: z.string().regex(/^[a-z0-9-]+$/),
   authors: z.array(z.string().min(1)).min(1),
@@ -67,17 +56,11 @@ const posts = defineCollection({
           })
           .default([]),
         appendices: z.array(appendix).max(26).default([]),
-        // declara os iframes do post
-        notebooks: z.array(notebook).default([]),
         canonical: z.url().optional(),
       })
       .refine((data) => !data.cover || data.coverAlt, {
         error: "coverAlt é obrigatório quando há cover",
         path: ["coverAlt"],
-      })
-      .refine((data) => data.kind !== "lab" || data.notebooks.length > 0, {
-        error: "kind lab exige ao menos um item em notebooks",
-        path: ["notebooks"],
       }),
 });
 
