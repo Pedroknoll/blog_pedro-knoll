@@ -26,10 +26,6 @@ function htmlFiles(dir) {
   const found = [];
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const full = path.join(dir, entry.name);
-    const rel = path.relative(distDir, full);
-    if (rel === "notebooks" || rel.startsWith(`notebooks${path.sep}`)) {
-      continue;
-    }
     if (entry.isDirectory()) {
       found.push(...htmlFiles(full));
     } else if (entry.isFile() && entry.name.endsWith(".html")) {
