@@ -35,6 +35,7 @@ const scanRoots = [
   { dir: "src/layouts", extensions: [".astro"] },
   { dir: "src/components/ui", extensions: [".astro"] },
   { dir: "src/components/viz", extensions: [".astro", ".svelte"] },
+  { dir: "src/components/marimo", extensions: [".astro"] },
 ] as const;
 
 function filesIn(dir: string, extensions: readonly string[]): string[] {

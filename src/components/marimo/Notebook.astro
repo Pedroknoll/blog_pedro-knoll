@@ -1,0 +1,28 @@
+---
+import { molabUrl, notebookRef } from "~/lib/notebook";
+
+interface Props {
+  src: string;
+  gpu?: boolean;
+}
+
+const { src, gpu = false } = Astro.props;
+const href = molabUrl(src, notebookRef(import.meta.env.NOTEBOOK_REF), gpu);
+---
+
+<div class="not-prose my-8 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-y border-line bg-sheet px-4 py-4">
+  <p>
+    {gpu
+      ? "Este caderno roda num servidor com GPU. Para rodar, é preciso uma conta no molab; a GPU se escolhe no painel Compute."
+      : "Este caderno roda no navegador. Mude os parâmetros e anote o que acontecer."}
+  </p>
+  <a
+    href={href}
+    class:list={[
+      "inline-flex min-h-11 shrink-0 items-center px-5 font-mono text-[0.78125rem] underline-offset-3 hover:underline focus-visible:underline",
+      gpu ? "border border-ink text-ink" : "bg-ink text-surface",
+    ]}
+  >
+    {gpu ? "Abrir com GPU" : "Abrir no marimo"}
+  </a>
+</div>
