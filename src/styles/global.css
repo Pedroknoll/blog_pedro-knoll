@@ -1,4 +1,5 @@
 @import "tailwindcss" source("..");
+@source not "../content/posts/*/notebooks/__marimo__";
 @plugin "@tailwindcss/typography";
 
 @theme static {
