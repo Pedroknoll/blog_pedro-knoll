@@ -238,6 +238,7 @@ jobs:
         env:
           SHOW_DRAFTS: "true"
           SITE_URL: ${{ vars.SITE_URL }}
+          NOTEBOOK_REF: ${{ github.event.pull_request.head.sha }}
 
       - name: Upload preview version
         id: upload

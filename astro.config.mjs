@@ -11,6 +11,7 @@ import remarkMath from "remark-math";
 import { headersIntegration } from "./src/integrations/headers.ts";
 import { remarkCitations } from "./src/lib/remark-citations.mjs";
 import { remarkHasCode } from "./src/lib/remark-has-code.mjs";
+import { remarkNotebook } from "./src/lib/remark-notebook.mjs";
 import { remarkReadingTime } from "./src/lib/remark-reading-time.mjs";
 import { shikiCodeFrame } from "./src/lib/shiki-code-frame.mjs";
 import pkClaro from "./src/styles/shiki/pk-claro.json";
@@ -21,6 +22,7 @@ const remarkPlugins = [
   remarkCitations,
   remarkReadingTime,
   remarkHasCode,
+  remarkNotebook,
 ];
 const rehypePlugins = [rehypeKatex];
 
