@@ -1,6 +1,6 @@
 ---
 name: post-figura
-description: Figuras de um post do blog (degraus 1 a 3). Figura estática com Figure e as primitivas Vector, Matrix, Tensor, Arrow e Grid; figura em passos com Stepper; explorável com Explorable e client:visible; figura livre com SVG no próprio MDX, componente Svelte na pasta do post ou imagem pronta. Use quando um post precisar mostrar algo visual.
+description: Figuras de um post do blog (degraus 1 a 3). Figura estática com Figure e as primitivas Vector, Matrix, Tensor, Arrow e Grid; figura em passos com Stepper; explorável com Explorable e client:visible; cada figura num arquivo figs/<Nome>.astro, importado no MDX; figura livre com SVG nesse arquivo, componente Svelte na pasta do post ou imagem pronta. Use quando um post precisar mostrar algo visual.
 paths:
   - "src/content/posts/**"
 ---
@@ -19,6 +19,25 @@ Não use `IslandProof` nem a seção "Uma figura em dois modos" da fixture: aque
 
 As props do `Figure` estão na seção "Moldura" de `src/components/viz/AGENTS.md`. Modelo: "Figuras com moldura" e "Passos e exploráveis" de `src/content/posts/fixture-mdx/index.mdx`.
 
+## Arquivo da figura
+
+Cada figura fica em `figs/<Nome>.astro`, com o `Figure` e o desenho dentro, e recebe o número pela prop (`const { number } = Astro.props;`). O JSON de `data/` e o `.svelte` local, com o `client:visible`, se importam nesse arquivo. No MDX entram só o import e uma linha, onde o autor quiser: `<Nome number={n} />`.
+
+Não escreva o `Figure` nem SVG no MDX. O Prettier quebra cada `<text>` em linhas, o MDX faz de uma linha solta um `<p>`, e o `<p>` fecha o `svg` no navegador: a figura sai quebrada, e o CI não reprova. A fixture tem o `Figure` no MDX, sem `<text>`: ela serve de modelo para as props, não para o lugar.
+
+```astro
+---
+import Figure from "~/components/viz/Figure.astro";
+import Vector from "~/components/viz/Vector.svelte";
+
+const { number } = Astro.props;
+---
+
+<Figure number={number} name="…" width={…} height={…} title="…" summary="…" caption="…" data={…}>
+  <Vector x={…} y={…} length={4} />
+</Figure>
+```
+
 ## Degraus 1 a 3
 
 1. `Figure` estático, com `Vector`, `Matrix`, `Tensor`, `Arrow` ou `Grid` no slot. O `Figure` é dono do `svg`.
@@ -35,15 +54,21 @@ O `data` do `Figure` é obrigatório. Numa ilustração sem números, o "Ver dad
 
 Quando nenhuma primitiva serve, nesta ordem. As três formas já foram medidas: o build, o `astro check`, o `check:svelte`, o ESLint, o Prettier e o `check:js` alcançam a pasta do post. Um componente em `figs/` continua sendo post.
 
-1. SVG no próprio MDX, no slot do `Figure` estático: `<path>`, `<circle>`, `<text>` nas coordenadas de `width` × `height`. A grade e o `role="img"` são do `Figure`. Zero JS.
-2. `figs/<Nome>.svelte`, na pasta do post. Sem `client:*`: `<svelte:options namespace="svg" />` e um `<g>` dentro do `Figure` estático, como as primitivas. Com `client:visible`: o `.svelte` é dono do `svg`, dentro do `Figure island`. O contrato está em `src/components/viz/AGENTS.md`: `title`, `summary`, `data-viz`, controles `disabled` até hidratar, tokens, 40.000 bytes por island.
-3. Imagem pronta, SVG ou PNG em `figs/`, em Markdown, com linha em branco antes e depois, dentro do `Figure island`, e com alt do autor. Último recurso: cores e fontes ficam fixas, e o texto da imagem só chega ao leitor de tela pelo alt.
+1. SVG no próprio `figs/<Nome>.astro`, no slot do `Figure` estático: `<path>`, `<circle>`, `<text>` nas coordenadas de `width` × `height`. A grade e o `role="img"` são do `Figure`. Zero JS.
+2. `figs/<Nome>.svelte`, na pasta do post. Sem `client:*`: `<svelte:options namespace="svg" />` e um `<g>` dentro do `Figure` estático, como as primitivas. Com `client:visible`: o `.svelte` é dono do `svg`, dentro do `Figure island`, no `figs/<Nome>.astro` que o importa. O contrato está em `src/components/viz/AGENTS.md`: `title`, `summary`, `data-viz`, controles `disabled` até hidratar, tokens, 40.000 bytes por island.
+3. Imagem pronta, SVG ou PNG em `figs/`, com o `<Image>` de `astro:assets` dentro do `Figure island`, e com alt do autor. Último recurso: cores e fontes ficam fixas, e o texto da imagem só chega ao leitor de tela pelo alt.
 
-```mdx
-<Figure island number={1} caption="…" data={{ columns: ["…"], rows: [["…"]] }}>
+```astro
+---
+import { Image } from "astro:assets";
+import Figure from "~/components/viz/Figure.astro";
+import desenho from "./desenho.svg";
 
-![alt do autor](./figs/desenho.svg)
+const { number } = Astro.props;
+---
 
+<Figure island number={number} caption="…" data={{ columns: ["…"], rows: [["…"]] }}>
+  <Image src={desenho} alt="alt do autor" />
 </Figure>
 ```
 
@@ -55,7 +80,7 @@ O mesmo desenho num segundo post vira primitiva em `src/components/viz/`. Isso �
 
 `pnpm exec prettier --write src/content/posts/<pasta>`
 
-Com componente local, também `pnpm exec eslint src/content/posts/<pasta>`, `pnpm astro check` e `pnpm check:svelte`.
+Também `pnpm exec eslint src/content/posts/<pasta>` e `pnpm astro check`; com `.svelte` local, em seguida `pnpm check:svelte`.
 
 ## Onde parar
 

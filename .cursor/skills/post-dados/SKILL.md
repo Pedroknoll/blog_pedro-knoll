@@ -35,7 +35,7 @@ Sem argumento, o runner regrava o lock de todos os posts, fora da pasta (RNF-14)
 
 `pnpm check:data` e `uv run ruff check src/content/posts/<pasta>`.
 
-No MDX, `import <nome> from "./data/<arquivo>.json";`.
+O JSON se importa no arquivo da figura, `figs/<Nome>.astro` (skill `post-figura`): `import <nome> from "../data/<arquivo>.json";`.
 
 ## Gerados
 
