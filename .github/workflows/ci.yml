@@ -38,6 +38,9 @@ jobs:
       - name: Ruff
         run: uv sync --locked && uv run ruff check
 
+      - name: Marimo check
+        run: uv run marimo check --strict src/content/posts/*/notebooks/*.py
+
   test:
     name: test
     runs-on: ubuntu-latest

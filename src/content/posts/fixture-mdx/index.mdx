@@ -40,6 +40,7 @@ appendices:
       - A citação no texto é um número entre colchetes. O número é a posição da obra na lista de referências, e o link leva ao item correspondente no fim do post.
 ---
 
+import Notebook from "~/components/marimo/Notebook.astro";
 import Callout from "~/components/ui/Callout.astro";
 import Arrow from "~/components/viz/Arrow.svelte";
 import Explorable from "~/components/viz/Explorable.svelte";
@@ -195,3 +196,11 @@ Um passo a passo troca o destaque com Anterior e Próximo. O mapa não recalcula
     weights={attention.weights}
   />
 </Figure>
+
+## Caderno no molab
+
+O mesmo caderno, uma vez para rodar no navegador e outra no servidor com GPU.
+
+<Notebook src="./notebooks/prova.py" />
+
+<Notebook src="./notebooks/prova.py" gpu />
