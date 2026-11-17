@@ -19,6 +19,8 @@ export const fixtureMdx = {
   title: "Fixture de MDX",
   published: "03.jan.2000",
   keys: ["distill-multimodal", "astro-unified"],
+  notebook:
+    "https://molab.marimo.io/github/Pedroknoll/blog_pedro-knoll/blob/main/src/content/posts/fixture-mdx/notebooks/prova.py",
 } as const;
 
 export const fixtureSemTitulos = {

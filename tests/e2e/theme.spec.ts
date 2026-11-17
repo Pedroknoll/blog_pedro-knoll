@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
-import { fixtureMd } from "./fixtures";
+import { fixtureMd, fixtureMdx } from "./fixtures";
 import { pagesForTheme } from "./published-posts";
 
 const tokens = [
@@ -316,7 +316,7 @@ for (const theme of ["light", "dark"] as const) {
       }
 
       if (!path.startsWith("/blog/")) continue;
-      const links = page.locator("article .prose a");
+      const links = page.locator("article .prose a:not(.not-prose a)");
       const count = await links.count();
       linkTotal += count;
       for (let index = 0; index < count; index += 1) {
@@ -333,10 +333,34 @@ for (const theme of ["light", "dark"] as const) {
           softRole(color, colors.accent, where);
         }
       }
+
+      if (path === fixtureMdx.href) {
+        const wasm = await paintOf(page, "Abrir no marimo");
+        const gpu = await paintOf(page, "Abrir com GPU");
+        softRole(wasm.color, colors.surface, `${path} Abrir no marimo texto`);
+        softRole(wasm.background, colors.ink, `${path} Abrir no marimo fundo`);
+        softRole(gpu.color, colors.ink, `${path} Abrir com GPU texto`);
+        softRole(gpu.border, colors.ink, `${path} Abrir com GPU borda`);
+      }
     }
 
     console.log(`T2 ${label} passou:\n${passed.join("\n") || "(nada)"}`);
     expect(linkTotal, "nenhum link na prosa dos posts").toBeGreaterThan(0);
+  });
+}
+
+async function paintOf(page: Page, name: string) {
+  const link = page
+    .getByRole("article")
+    .getByRole("link", { name, exact: true });
+  await expect(link, name).toHaveCount(1);
+  return link.evaluate((node) => {
+    const style = getComputedStyle(node);
+    return {
+      color: style.color,
+      background: style.backgroundColor,
+      border: style.borderTopColor,
+    };
   });
 }
 
