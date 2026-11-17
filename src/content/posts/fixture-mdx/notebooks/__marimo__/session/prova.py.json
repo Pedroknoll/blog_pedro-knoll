@@ -1,0 +1,48 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.25.2",
+    "script_metadata_hash": "3f3aaaf52428f42eb881e10bef8d5db8"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "7e3cfcd041af7d1dcc00298478bae93d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">pk.log \u00b7 F\u00f3l. 902</span>\n<h1 id=\"fixture-de-mdx\">Fixture de MDX</h1>\n<span class=\"paragraph\">Caderno de prova do componente <code>Notebook</code>. Mude o tamanho do vetor e\nacompanhe a soma dos quadrados e a norma.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "1c7df89b9f31342f6d1b3ed7b4d0c40f",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='MJUe-0' random-id='219a936a-ec97-d89a-92fd-d46e5984fcd9'><marimo-slider data-initial-value='4' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003etamanho do vetor&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='10' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "1c73f489d3c6fe441d41ae2b557eb41e",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">Com x = [1, 2, 3, 4], a soma dos quadrados \u00e9 <strong>30</strong> e a norma \u00e9\n<strong>5.48</strong>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}
