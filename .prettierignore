@@ -14,3 +14,4 @@ test-results
 .lighthouseci
 lhci-report
 src/content/posts/*/data/
+src/content/posts/*/notebooks/__marimo__/

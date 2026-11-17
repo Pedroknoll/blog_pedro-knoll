@@ -28,7 +28,7 @@ Complementa o `AGENTS.md` da raiz e prevalece no que for mais específico. Fonte
 - Sem `pk.css` e sem `css_file`: o molab não aplica o CSS do caderno em nenhum dos modos (T-97). O caderno fica com o estilo do molab, e a marca entra pelo cabeçalho da primeira célula.
 - No navegador (`/wasm`), só pacotes com wheel WebAssembly; `torch` e treino pesado vão com `gpu`. O molab roda a versão do marimo dele (0.25.2 em 16/11/2026, T-97).
 - As saídas só aparecem na prévia estática com o `__marimo__/session/` commitado (`marimo export session`); é opcional.
-- O `marimo export session` e o `marimo export html` gravam `__marimo__/session/<nome>.py.json` na pasta do caderno, e o `pnpm lint` reprova esse JSON (Prettier). Até a T-101, a pasta não entra no commit.
+- O `marimo export session` e o `marimo export html` gravam `__marimo__/session/<nome>.py.json` na pasta do caderno. O Prettier do `pnpm lint` não confere essa pasta (`src/content/posts/*/notebooks/__marimo__/` no `.prettierignore`, T-101); um `__marimo__/` fora de `notebooks/` continua conferido. Até a T-103, a pasta não entra no commit: o Tailwind lê o JSON, e as classes das saídas do marimo entram no CSS de todas as páginas (na T-101, uma regra de tema escuro, que só a T-24 libera).
 - Antes do commit: `uv run marimo check --strict <arquivo>`, o mesmo que o job `lint` roda em `src/content/posts/*/notebooks/*.py`, e `uv run ruff check`. Nos cadernos, o ruff não aplica o `B018` nem o `PLR1711` (`per-file-ignores` do `pyproject.toml`): a saída da célula é a última expressão, e o marimo grava `return` no fim de cada célula (o `marimo check --fix` o devolve).
 
 ## O caderno de prova
