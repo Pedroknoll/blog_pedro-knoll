@@ -18,37 +18,57 @@ import {
 import { pagesForTheme, publishedPosts } from "./published-posts";
 import { kindPath } from "./site-literals";
 
-test.describe("Notebook marimo inline [RF-08, RNF-03]", () => {
-  test.fixme("leitor abre post com notebook", async () => {
-    throw new Error("Cenário da SPEC §11 ainda não implementado.");
+test.describe("Caderno no molab [RF-08, RNF-03]", () => {
+  test("post sem caderno não carrega runtime", async ({ page }) => {
+    const requested = await pageRequests(page, fixtureMd.href);
+    await expect(molabLinks(page)).toHaveCount(0);
+    expect(requested.filter((url) => RUNTIME.test(url))).toEqual([]);
   });
 
-  test.fixme("post sem notebook não carrega runtime", async () => {
-    throw new Error("Cenário da SPEC §11 ainda não implementado.");
+  test("post com caderno não carrega runtime", async ({ page }) => {
+    const requested = await pageRequests(page, fixtureMdx.href);
+    await expect(molabLinks(page)).toHaveCount(2);
+    expect(requested.filter((url) => RUNTIME.test(url))).toEqual([]);
   });
 
-  test.fixme("fences sem declaração", async () => {
-    throw new Error("Cenário da SPEC §11 ainda não implementado.");
-  });
-
-  test.fixme("inline com src", async () => {
-    throw new Error("Cenário da SPEC §11 ainda não implementado.");
+  test("o botão aponta para o molab", async ({ page }) => {
+    const response = await page.goto(fixtureMdx.href);
+    expect(response?.status()).toBe(200);
+    await expect(molabLinks(page)).toHaveCount(2);
+    await expect(
+      page.getByRole("link", { name: "Abrir no marimo", exact: true }),
+    ).toHaveAttribute("href", `${fixtureMdx.notebook}/wasm`);
+    await expect(
+      page.getByRole("link", { name: "Abrir com GPU", exact: true }),
+    ).toHaveAttribute("href", fixtureMdx.notebook);
   });
 });
 
-test.describe("Notebook pesado [RF-08, RNF-09]", () => {
-  test.fixme("export desatualizado", async () => {
-    throw new Error("Cenário da SPEC §11 ainda não implementado.");
-  });
+const RUNTIME = /pyodide|marimo/;
 
-  test.fixme("notebook pesado em modo inline", async () => {
-    throw new Error("Cenário da SPEC §11 ainda não implementado.");
-  });
+function molabLinks(page: Page) {
+  return page.locator('a[href^="https://molab.marimo.io/"]');
+}
 
-  test.fixme("leitor interage com notebook cacheado", async () => {
-    throw new Error("Cenário da SPEC §11 ainda não implementado.");
+async function pageRequests(page: Page, href: string): Promise<string[]> {
+  const requested: string[] = [];
+  page.on("request", (request) => {
+    requested.push(request.url());
   });
-});
+  const response = await page.goto(href);
+  expect(response?.status(), href).toBe(200);
+  await page.evaluate(() =>
+    window.scrollTo(0, document.documentElement.scrollHeight),
+  );
+  await page.waitForTimeout(1000);
+  const paths = requested.map((url) => new URL(url).pathname);
+  expect(paths, href).toContain(href);
+  expect(
+    paths.some((path) => path.startsWith("/_astro/") && path.endsWith(".css")),
+    href,
+  ).toBe(true);
+  return requested;
+}
 
 test.describe("CSP por rota [RNF-06, RNF-07]", () => {
   test("rota sem notebook", async ({ page }) => {
@@ -105,10 +125,6 @@ test.describe("CSP por rota [RNF-06, RNF-07]", () => {
       };
     }
     expect(violations).toEqual({});
-  });
-
-  test.fixme("rota com notebook", async () => {
-    throw new Error("Cenário da SPEC §11 ainda não implementado.");
   });
 });
 
