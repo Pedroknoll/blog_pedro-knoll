@@ -1,0 +1,53 @@
+---
+title: "O Motor Oculto dos LLMs: Como os Embeddings Fazem a IA Entender Dados"
+description: "Aprenda a transformar textos e dados complexos em significado. Um guia completo cobrindo a teoria essencial, a evolução das técnicas e aplicações práticas."
+pubDate: 2026-11-17
+folio: 3
+kind: concept
+level: 2
+tags: [nlp, llms, embeddings, busca-semantica]
+draft: false
+references:
+  - key: mikolov-2013
+    authors:
+      - Tomas Mikolov
+      - Kai Chen
+      - Greg Corrado
+      - Jeffrey Dean
+    title: Efficient Estimation of Word Representations in Vector Space
+    year: 2013
+    venue: arXiv
+    url: https://arxiv.org/abs/1301.3781
+---
+
+import Notebook from "~/components/marimo/Notebook.astro";
+import Callout from "~/components/ui/Callout.astro";
+import Analogia from "./figs/Analogia.astro";
+import AnguloCosseno from "./figs/AnguloCosseno.astro";
+import PalavraVetor from "./figs/PalavraVetor.astro";
+
+Um modelo de linguagem não lê o texto como a gente lê. Antes de prever a próxima palavra, ele transforma o que recebe em números que dá para comparar. É nesse passo, quase invisível, que mora boa parte do que chamamos de entendimento.
+
+<Callout variant="note">
+
+Um embedding é a lista de números que representa um pedaço de dado, de modo que itens parecidos fiquem perto nesse espaço.
+
+</Callout>
+
+<PalavraVetor number={1} />
+
+## Similaridade de cosseno
+
+Dois vetores parecidos apontam para a mesma direção. O cosseno do ângulo entre eles vai de −1 a 1: perto de 1, mesmo sentido; perto de 0, sem relação; perto de −1, sentidos opostos.
+
+$$
+\cos(u, v) = \frac{u \cdot v}{\lVert u \rVert \, \lVert v \rVert}
+$$
+
+<AnguloCosseno number={2} />
+
+Medir significado pela direção dos vetores ficou popular com o word2vec [@mikolov-2013], que aprende esses vetores a partir das palavras vizinhas em grandes volumes de texto.
+
+<Analogia number={3} />
+
+<Notebook src="./notebooks/cosseno.py" />

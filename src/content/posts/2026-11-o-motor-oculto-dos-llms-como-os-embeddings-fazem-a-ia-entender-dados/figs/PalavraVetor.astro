@@ -1,0 +1,90 @@
+---
+import Arrow from "~/components/viz/Arrow.svelte";
+import Figure from "~/components/viz/Figure.astro";
+import Vector from "~/components/viz/Vector.svelte";
+
+interface Props {
+  number: number;
+}
+
+const { number } = Astro.props;
+---
+
+<Figure
+  number={number}
+  name="palavra-vetor"
+  width={320}
+  height={288}
+  title="A palavra gato como um vetor de 4 números"
+  summary="A palavra gato, uma seta e um vetor coluna de 4 células com os valores 0,21, −0,47, 0,88 e 0,05."
+  caption="Um embedding troca a palavra por uma lista de números. Aqui são 4; nos modelos reais, centenas ou milhares."
+  data={{
+    columns: ["Posição", "Valor"],
+    rows: [
+      ["1", "0,21"],
+      ["2", "−0,47"],
+      ["3", "0,88"],
+      ["4", "0,05"],
+    ],
+  }}
+>
+  <text
+    class="fill-accent font-mono"
+    font-size="16"
+    text-anchor="middle"
+    dominant-baseline="central"
+    x={48}
+    y={142}
+  >
+    gato
+  </text>
+  <Arrow from={[96, 142]} to={[192, 142]} />
+  <Vector
+    x={200}
+    y={24}
+    length={4}
+    orientation="column"
+    size={56}
+    dimension="[4]"
+  />
+  <text
+    class="fill-ink font-mono"
+    font-size="12"
+    text-anchor="middle"
+    dominant-baseline="central"
+    x={228}
+    y={52}
+  >
+    0,21
+  </text>
+  <text
+    class="fill-ink font-mono"
+    font-size="12"
+    text-anchor="middle"
+    dominant-baseline="central"
+    x={228}
+    y={112}
+  >
+    −0,47
+  </text>
+  <text
+    class="fill-ink font-mono"
+    font-size="12"
+    text-anchor="middle"
+    dominant-baseline="central"
+    x={228}
+    y={172}
+  >
+    0,88
+  </text>
+  <text
+    class="fill-ink font-mono"
+    font-size="12"
+    text-anchor="middle"
+    dominant-baseline="central"
+    x={228}
+    y={232}
+  >
+    0,05
+  </text>
+</Figure>

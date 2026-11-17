@@ -1,0 +1,48 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.25.2",
+    "script_metadata_hash": "746e29f63802fa883b695c25f5497fc2"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "c9f3c33bca0daec220551da602d65ec9",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">pk.log \u00b7 F\u00f3l. 003</span>\n<h1 id=\"o-motor-oculto-dos-llms-como-os-embeddings-fazem-a-ia-entender-dados\">O Motor Oculto dos LLMs: Como os Embeddings Fazem a IA Entender Dados</h1>\n<span class=\"paragraph\">Tr\u00eas perguntas para responder mexendo nos controles: que vetores d\u00e3o\ncosseno 1? E \u22121? E o que acontece com o cosseno quando voc\u00ea dobra o\ntamanho de um deles sem mudar a dire\u00e7\u00e3o? Anote o que encontrar.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "4cfc02eb2c3f1211d79c43da5df64657",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<div style='display: flex;flex: 1;flex-direction: column;justify-content: flex-start;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='MJUe-0' random-id='ea8030ab-41b8-57be-4910-34e3eac439c6'><marimo-slider data-initial-value='1' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eu1&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='-1' data-stop='1' data-step='0.05' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='MJUe-1' random-id='ba5f42bf-afd6-008d-e5a2-230165615d82'><marimo-slider data-initial-value='0' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eu2&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='-1' data-stop='1' data-step='0.05' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='MJUe-2' random-id='387265fb-f439-7287-4bf6-e051cd3a5634'><marimo-slider data-initial-value='0' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003eu3&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='-1' data-stop='1' data-step='0.05' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div><div style='display: flex;flex: 1;flex-direction: row;justify-content: space-between;align-items: normal;flex-wrap: nowrap;gap: 0.5rem'><marimo-ui-element object-id='MJUe-3' random-id='9c16abf7-bd4c-e386-56f1-e22a38483b27'><marimo-slider data-initial-value='0' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ev1&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='-1' data-stop='1' data-step='0.05' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='MJUe-4' random-id='3212d61e-aaef-410d-f759-b6d26a6bcdcb'><marimo-slider data-initial-value='1' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ev2&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='-1' data-stop='1' data-step='0.05' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element><marimo-ui-element object-id='MJUe-5' random-id='f4e6e41e-ebf9-66a5-76d4-9151bd9a9f07'><marimo-slider data-initial-value='0' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003ev3&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='-1' data-stop='1' data-step='0.05' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element></div></div>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "bafc6fc45414ea3c796bfe49ddd28f84",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">u = (1,00, 0,00, 0,00) e v = (0,00, 1,00, 0,00). O cosseno \u00e9 <strong>0,00</strong>.</span></span>"
+          }
+        }
+      ],
+      "console": []
+    }
+  ]
+}

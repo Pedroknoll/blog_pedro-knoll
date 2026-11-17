@@ -1,0 +1,41 @@
+---
+import Figure from "~/components/viz/Figure.astro";
+import analogia from "../data/analogia.json";
+import Analogia from "./Analogia.svelte";
+
+interface Props {
+  number: number;
+}
+
+const { number } = Astro.props;
+---
+
+<Figure
+  island
+  number={number}
+  caption="Rei menos homem mais mulher cai em cima de rainha. As quatro palavras ficam no plano o tempo todo; o acento marca o passo."
+  data={{
+    columns: ["Passo", "Conta", "Resultado"],
+    rows: [
+      ["1", "rei", "(1, 1)"],
+      ["2", "rei − homem", "(0, 1)"],
+      ["3", "rei − homem + mulher", "(−1, 1)"],
+      ["4", "rainha", "(−1, 1)"],
+    ],
+  }}
+>
+  <Analogia
+    client:visible
+    name="analogia-rei"
+    title="A conta rei − homem + mulher até a rainha"
+    summary="Quatro setas saem da origem, rei, homem, mulher e rainha, e os botões avançam a soma até coincidir com rainha."
+    words={analogia.words}
+    steps={analogia.steps}
+    labels={[
+      "o vetor rei",
+      "rei − homem termina em (0, 1)",
+      "rei − homem + mulher termina em (−1, 1)",
+      "o resultado coincide com rainha",
+    ]}
+  />
+</Figure>

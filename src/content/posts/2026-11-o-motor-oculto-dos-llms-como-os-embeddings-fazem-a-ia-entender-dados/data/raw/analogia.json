@@ -1,0 +1,8 @@
+{
+  "words": [
+    { "token": "rei", "at": [1, 1] },
+    { "token": "homem", "at": [1, 0] },
+    { "token": "mulher", "at": [-1, 0] },
+    { "token": "rainha", "at": [-1, 1] }
+  ]
+}

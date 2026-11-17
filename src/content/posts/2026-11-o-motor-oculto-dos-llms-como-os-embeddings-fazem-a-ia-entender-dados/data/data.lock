@@ -1,0 +1,12 @@
+{
+  "format": 2,
+  "generator": "src/content/posts/2026-11-o-motor-oculto-dos-llms-como-os-embeddings-fazem-a-ia-entender-dados/data/build.py",
+  "inputs": {
+    "src/content/posts/2026-11-o-motor-oculto-dos-llms-como-os-embeddings-fazem-a-ia-entender-dados/data/build.py": "cadb91d8696255f53dc9cf57593147c849d6c63c42c5207275bec4080b176c69",
+    "src/content/posts/2026-11-o-motor-oculto-dos-llms-como-os-embeddings-fazem-a-ia-entender-dados/data/raw/analogia.json": "07e0a1488c792521732dc5891bdc1bbdc3a570c91a2552b78fa5c73ee62651bb"
+  },
+  "outputs": {
+    "src/content/posts/2026-11-o-motor-oculto-dos-llms-como-os-embeddings-fazem-a-ia-entender-dados/data/analogia.json": "a730323949e85293109eacdb7221ffa64653f151c03a151a2bcbbbfd7e04472d"
+  },
+  "python": "3.14.3"
+}
