@@ -5,7 +5,6 @@ node_modules/
 dist/
 dist-fixtures/
 .astro/
-public/notebooks/
 .venv/
 playwright-report/
 test-results/

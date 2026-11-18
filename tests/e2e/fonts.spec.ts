@@ -31,18 +31,6 @@ const declared = [
     style: "normal",
   },
   {
-    family: "Caveat",
-    cssVariable: "--font-caveat",
-    weight: 500,
-    style: "normal",
-  },
-  {
-    family: "Caveat",
-    cssVariable: "--font-caveat",
-    weight: 600,
-    style: "normal",
-  },
-  {
     family: "IBM Plex Sans Condensed",
     cssVariable: "--font-plex-condensed",
     weight: 600,

@@ -23,7 +23,6 @@
   --font-display: var(--font-plex-condensed);
   --font-sans: var(--font-plex-sans);
   --font-mono: var(--font-plex-mono);
-  --font-hand: var(--font-caveat);
 }
 
 @layer base {
@@ -320,70 +319,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .pkt-cursor {
-    animation: none;
-  }
-}
-
-.pkl-q1,
-.pkl-q2 {
-  opacity: 0;
-}
-
-.pkl-q0 {
-  animation: pkl-b0 1.8s step-end infinite;
-}
-
-.pkl-q1 {
-  animation: pkl-b1 1.8s step-end infinite;
-}
-
-.pkl-q2 {
-  animation: pkl-b2 1.8s step-end infinite;
-}
-
-@keyframes pkl-b0 {
-  0% {
-    opacity: 1;
-  }
-  33.3% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes pkl-b1 {
-  0% {
-    opacity: 0;
-  }
-  33.3% {
-    opacity: 1;
-  }
-  66.6% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 0;
-  }
-}
-
-@keyframes pkl-b2 {
-  0% {
-    opacity: 0;
-  }
-  66.6% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pkl-q0,
-  .pkl-q1,
-  .pkl-q2 {
     animation: none;
   }
 }

@@ -11,7 +11,6 @@ const variables = [
   "--font-plex-condensed",
   "--font-plex-sans",
   "--font-plex-mono",
-  "--font-caveat",
 ] as const;
 
 const allowed = [

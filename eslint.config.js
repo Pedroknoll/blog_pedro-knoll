@@ -9,7 +9,6 @@ export default [
       "dist-fixtures/**",
       ".astro/**",
       "node_modules/**",
-      "public/notebooks/**",
       ".venv/**",
       "playwright-report/**",
       "test-results/**",

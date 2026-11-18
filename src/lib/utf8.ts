@@ -1,4 +1,4 @@
-export const binaryExtensions: readonly string[] = [
+const binaryExtensions: readonly string[] = [
   ".png",
   ".jpg",
   ".jpeg",

@@ -72,16 +72,6 @@ export default defineConfig({
       formats: ["woff2"],
       fallbacks: ["Metric Mono", "monospace"],
     },
-    {
-      name: "Caveat",
-      cssVariable: "--font-caveat",
-      provider: fontProviders.fontsource(),
-      weights: [500, 600],
-      styles: ["normal"],
-      subsets: ["latin"],
-      formats: ["woff2"],
-      fallbacks: ["cursive"],
-    },
   ],
   markdown: {
     shikiConfig: {
