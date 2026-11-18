@@ -23,7 +23,7 @@ Um post que precisa mudar algo fora da pasta dele não é post: a mudança vira 
 
 ## Como trabalhar uma tarefa completa
 
-1. Leia a linha da tarefa no `ROADMAP.md` e o registro de handoff das tarefas de que ela depende. O das tarefas fechadas até 10/11/2026 está em `specs/arquivo/handoff-ate-2026-11-10.md`.
+1. Leia a linha da tarefa no `ROADMAP.md` e o registro de handoff das tarefas de que ela depende. As tarefas das Fases 0 a 3 estão em `specs/arquivo/`: a linha delas em `roadmap-fases-0-a-3.md`, e o handoff em `handoff-ate-2026-11-10.md` (até a T-20) e `handoff-2026-11-10-a-2026-11-18.md` (da T-75 à T-105).
 2. Leia só as seções da SPEC ligadas aos requisitos citados. Não leia a spec inteira por hábito. Se a tarefa citar o BRAND, leia só essa seção.
 3. **Antes de editar código**, apresente um plano curto e espere confirmação: arquivos a criar ou mudar, o que fica fora, como vai provar. O mesmo plano vai para a descrição do PR.
 4. Testes primeiro, nas tarefas que entregam comportamento (RF ou RNF). Tire o `test.fixme` dos cenários da tarefa, ou escreva os testes a partir dos critérios de aceite da SPEC §3, §4 e §11. **Rode-os e mostre que falham antes de implementar**: um teste que já passa sem o código não prova nada.
@@ -57,7 +57,7 @@ Sempre `pnpm`, nunca `npm` ou `yarn`. Sempre `uv run`, nunca `python` ou `pip` d
 ## Mapa
 
 ```text
-specs/                  SPEC, ROADMAP, BRAND.md, spikes/, adr/ (só ADRs substituídos), arquivo/ (handoffs e revisões antigas; não leia por hábito)
+specs/                  SPEC, ROADMAP, BRAND.md, spikes/, adr/ (só ADRs substituídos), arquivo/ (fases fechadas do ROADMAP, handoffs e revisões antigas; não leia por hábito)
 src/site.config.ts      título, URL (SITE_URL) e autor (não existe collection de autores)
 src/content.config.ts   collection `posts` com schema Zod 4
 src/content/posts/<slug>/index.mdx   cada post é uma pasta: texto, capa, figs/, data/, notebooks/
