@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.26 · novembro de 2026 · pedroknoll.com
+Versão 1.27 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -176,14 +176,13 @@ Lápis sobre folha clara (4,2) fica abaixo de 4,5. Lápis não é texto menor qu
 
 ## 5. Tipografia
 
-As quatro famílias entram pela Fonts API do Astro (`fontProviders.fontsource()`), subset `latin`, `woff2`. Sem `fontProviders.google()` e sem pacote `@fontsource/*` instalado à mão.
+As três famílias entram pela Fonts API do Astro (`fontProviders.fontsource()`), subset `latin`, `woff2`. Sem `fontProviders.google()` e sem pacote `@fontsource/*` instalado à mão.
 
 | Papel | Fonte | Pesos | Regras |
 |---|---|---|---|
 | Títulos | **IBM Plex Sans Condensed** | 600 | Só 600 normal, sem itálico declarado, até uma tarefa medir outra face (T-52, T-60, LCP). |
 | Texto | **IBM Plex Sans** | 400, 400 itálico, 600 | 18 px, altura de linha 1,65, coluna de ~65 caracteres. |
 | Código, rótulos, fólio, cotas | **IBM Plex Mono** | 400 | Rótulos em maiúsculas com letter-spacing .08–.14em. Só o peso 400 (T-52, LCP). |
-| Anotação à mão | **Caveat** | 500, 600 | Fora das páginas do site até uma tarefa medir (T-52, LCP). Quando voltar: no máximo uma nota por seção, no máximo uma linha e meia, nunca em parágrafo, botão ou menu. |
 
 **Regras da display (decisão, 05/11/2026, T-60).**
 
@@ -462,7 +461,6 @@ Sugestão anterior à T-41. No site valem os nomes da seção 0, não `--papel` 
   --f-display: "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif;
   --f-texto: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
-  --f-mao: "Caveat", "Segoe Print", cursive;
 }
 
 :root[data-theme="dark"] {
@@ -525,7 +523,6 @@ Com os tokens acima no CSS global, exponha-os como utilitários:
   --font-display: var(--f-display);
   --font-sans: var(--f-texto);
   --font-mono: var(--f-mono);
-  --font-mao: var(--f-mao);
 }
 ```
 
@@ -542,7 +539,7 @@ Sugestão já absorvida pela Fase 1b do ROADMAP. Onde esta seção discordar da 
 Ordem que estava sugerida antes desse encaixe:
 
 1. **Tokens e tema:** variáveis da seção 13, mapeamento dos tokens existentes, botão Claro/Escuro com `data-theme` e persistência.
-2. **Fontes:** carregar as quatro famílias (de preferência auto-hospedadas).
+2. **Fontes:** carregar as três famílias (de preferência auto-hospedadas).
 3. **Marca no layout:** assinatura no cabeçalho, favicon (seção 12), `<title>` no padrão da seção 1, rodapé com assinatura espelhada opcional.
 4. **Home:** saudação com aceno animado, texto de apresentação, newsletter, lista de fólios.
 5. **Schema de conteúdo:** campos de fólio, tipo, nível e temas.

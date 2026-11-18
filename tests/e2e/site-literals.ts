@@ -3,8 +3,7 @@ export const authorName = "Pedro Knoll";
 export const authorGithub = "https://github.com/Pedroknoll";
 export const authorLinkedin =
   "https://www.linkedin.com/in/pedro-henrique-knoll-giacometo/";
-export const siteBio = "Aprendizados e experimentos em IA";
-export const separator = " · ";
+const separator = " · ";
 
 export const homeTitle = `${siteTitle}${separator}${authorName}`;
 
