@@ -92,7 +92,7 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 
 ## 2. Premissas e decisões em aberto
 
-A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/11, 10/11 e 16/11 já estão incorporadas e só o domínio segue em aberto, então a Fase 0 pode começar já.
+A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/11, 10/11, 16/11 e 17/11 já estão incorporadas, e nenhuma decisão segue em aberto.
 
 ### Premissas assumidas
 
@@ -113,7 +113,7 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
 - [x] **Q2 — Autores:** autor único; sem collection `authors` nem páginas de autor (seção 6).
 - [x] **Q3 — Comunidade:** fora do sprint 01; Giscus entra na Fase 4 do roadmap.
 - [x] **Q4 — Ambientes:** sem staging; só preview por PR e produção.
-- [ ] **Q4b — Domínio:** em aberto; falta confirmar se o domínio já está na Cloudflare. Bloqueia só a T-27. Até lá, a URL canônica vem da variável `SITE_URL`, que aponta para o endereço `workers.dev` do Worker, e as tarefas de SEO, RSS e sitemap seguem sem esperar.
+- [x] **Q4b — Domínio:** decidida em 17/11/2026 (T-27). O blog fica na raiz `pedroknoll.com`, registrado na HostGator, com a zona na Cloudflare, na mesma conta do Worker. O Worker `blog` responde nela por Custom Domain, declarado no `wrangler.jsonc` (`routes` com `custom_domain: true`), e o token do CI ganha Workers Routes Write só nessa zona. O `www.pedroknoll.com` redireciona para a raiz por regra da zona. O `workers.dev` continua no ar (`workers_dev: true`), com `X-Robots-Tag: noindex`. O HSTS preload fica para depois.
 - [x] **Q5 — Hospedagem:** Workers com Static Assets (P2 confirmada).
 - [x] **Q6 — Volume:** blog pessoal, bem abaixo de 1.000 posts; build e paginação atuais bastam.
 - [x] **Q7 — Notebooks pesados:** sim; implicações e estratégias na seção 7.
