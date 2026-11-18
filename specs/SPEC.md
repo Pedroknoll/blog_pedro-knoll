@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 17/11/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 18/11/2026
+
+**Revisão de 18/11/2026:** a T-106 registra a Q20, as decisões da Fase 4 depois do lançamento: o `kind` passa a Artigo e Protótipo, o tema vira campo obrigatório sem lista prévia, e entram a página "Comece aqui", o filtro, a busca com Pagefind, o compartilhar e a newsletter. Saem o link "Editar no GitHub", o embed de iframes e a reavaliação do modo inline; o i18n fica para a próxima fase. Mudam a §1, a §2, a §3, a §5, a §8 e a §9.
 
 **Revisão 5 de 17/11/2026:** a T-27 fecha a Q4b: o blog fica na raiz `pedroknoll.com`, por Custom Domain declarado no `wrangler.jsonc`, que nasce no `wrangler deploy` do merge. O `_headers` ganha a regra `https://:version.:subdomain.workers.dev/*` com `X-Robots-Tag: noindex`, e o `script-src` ganha a origem `https://static.cloudflareinsights.com`, do Web Analytics automático, que a Cloudflare injeta na borda. Mudam a §2 (Q4b), o RNF-02, o RNF-06, o RNF-11, o RNF-13, a §6 e a §10; o checklist de lançamento na produção e o Gate 3 ficam com a T-105.
 
@@ -72,7 +74,6 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 - Posts da comunidade com login, upvotes e comentários nativos (o HF tem; aqui fica para v2).
 - CMS visual. A autoria é via Git.
 - Execução de código Python no servidor ou GPU.
-- Captura de e-mail (newsletter).
 - Peças gráficas que não são o site (YouTube, rede, slide, certificado, pergaminho, adesivo).
 - Manifesto PWA.
 
@@ -88,13 +89,13 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 
 ### Métricas de sucesso
 
-- Lighthouse ≥ 95 em Performance, Accessibility, Best Practices e SEO na home e num post sem notebook.
+- Lighthouse ≥ 95 em Performance, Accessibility, Best Practices e SEO na home e em cada post publicado (RNF-01).
 - JavaScript inicial ≤ 50 KB (gzip) em post sem islands.
 - Caderno marimo interativo em ≤ 10 s em desktop banda larga, no molab (T-97: 6,9 s de mediana no `/wasm`).
 
 ## 2. Premissas e decisões em aberto
 
-A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/11, 10/11, 16/11 e 17/11 já estão incorporadas, e nenhuma decisão segue em aberto.
+A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/11, 10/11, 16/11, 17/11 e 18/11 já estão incorporadas, e nenhuma decisão segue em aberto.
 
 ### Premissas assumidas
 
@@ -105,8 +106,8 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
 | P2  | Hospedar em **Cloudflare Workers com Static Assets**, não em Pages                    | A [doc do Astro](https://docs.astro.build/en/guides/deploy/cloudflare) e a Cloudflare recomendam Workers para projetos novos; Pages segue suportado | Trocar só o passo de deploy; o build é o mesmo |
 | P3  | Svelte é a camada de **UI interativa** (islands); as content collections são do Astro | Content collections são um recurso nativo do Astro (schemas Zod + loaders), não do Svelte                                                           | — (esclarecimento de papel, ver ADR-03)        |
 | P4  | Autoria via Git (Markdown/MDX + notebooks `.py` no repositório)                       | Mesmo modelo do repositório [huggingface/blog](https://github.com/huggingface/blog)                                                                 | Avaliar CMS headless + live collections        |
-| P5  | Idioma único pt-BR na v1, estrutura pronta para i18n                                  | Reduz escopo; Astro tem roteamento i18n nativo                                                                                                      | Ativar i18n na Fase 3                          |
-| P6  | Gerenciadores: pnpm (JS) e uv (Python)                                                | uv é exigido pelo export WASM do marimo para resolver dependências e módulos locais                                                                 | —                                              |
+| P5  | Idioma único pt-BR na v1, estrutura pronta para i18n                                  | Reduz escopo; Astro tem roteamento i18n nativo                                                                                                      | Ativar i18n na próxima fase (T-30)             |
+| P6  | Gerenciadores: pnpm (JS) e uv (Python)                                                | O uv roda o `data/build.py` dos posts, o `marimo check` e o export da sessão dos cadernos (§7, §8)                                                  | —                                              |
 
 
 ### Decisões de 06/10/2026
@@ -132,7 +133,7 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
 
 ### Decisões de 22/10/2026
 
-- [x] **Q12 — Identidade:** a identidade visual e verbal está em `specs/BRAND.md`. Em conflito de comportamento, a SPEC ganha. Tags no lugar de temas; o tempo do post é só o `minutesRead` (o `benchMinutes` saiu na T-62); imagem OG só quando não há capa; newsletter fora da v1; sem `dark:` nos componentes; chaves de frontmatter em inglês; `kind` no enum inglês (`concept`, `tutorial`, `lab`, `playbook`).
+- [x] **Q12 — Identidade:** a identidade visual e verbal está em `specs/BRAND.md`. Em conflito de comportamento, a SPEC ganha. Tags no lugar de temas; o tempo do post é só o `minutesRead` (o `benchMinutes` saiu na T-62); imagem OG só quando não há capa; newsletter fora da v1; sem `dark:` nos componentes; chaves de frontmatter em inglês; `kind` no enum inglês (`concept`, `tutorial`, `lab`, `playbook`). A parte sobre tipos, temas e newsletter foi substituída pela Q20.
 
 ### Decisões de 09/11/2026
 
@@ -149,6 +150,23 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
 
 - [x] **Q18 — Caderno como complemento, aberto no molab:** qualquer post pode ter um ou mais cadernos marimo, e nenhum é obrigatório; o tipo `lab` sai (os tipos são `concept`, `tutorial` e `playbook`). O autor chama o componente `Notebook` no MDX onde quiser (`<Notebook src="./notebooks/<nome>.py" />`); um post com caderno é `.mdx`. O caderno abre no molab, o serviço gratuito da marimo, a partir do arquivo no GitHub: no navegador (`/wasm`) por padrão e no servidor, com GPU, com o atributo `gpu`. O blog não exporta nem hospeda caderno. Substitui a Q14 e a Q15. A T-97 confere o molab; se ele falhar, o export próprio volta em tarefa nova, mudando só o link do componente.
 - [x] **Q19 — O molab depois da T-97** (`specs/spikes/T-97-molab.md`; atualiza o que a Q18 diz do servidor): o caderno abre no navegador (`/wasm`) por padrão, sem login; na T-97, ficou interativo em 6,9 s de mediana. Com `gpu`, o link leva à prévia estática do molab; de lá, o leitor com conta no molab clica em "Run it now" e "Run on server" e escolhe a GPU no painel Compute. Na T-97, a página de login mostrou "Join waitlist"; logado, o caderno leve subiu no servidor em 1 de 3 rodadas, e o pesado rodou com a GPU na única rodada feita. Os dados do caderno ficam na pasta dele e se leem com `mo.notebook_dir()` ou caminho relativo; `mo.notebook_location()` não lê no `/wasm`. O molab não aplica o `css_file` do caderno: sem `pk.css`. O molab não abre caderno de branch com `/` no nome, nem com `%2F`, e o link quebra quando o branch é apagado; o link do preview nesse caso é decisão da T-18.
+
+### Decisões de 18/11/2026
+
+- [x] **Q20 — Fase 4 depois do lançamento** (T-106; substitui a parte da Q12 sobre tipos, temas e newsletter):
+  1. **Tipo:** o `kind` passa a `article` e `prototype` (Artigo e Protótipo), um por post. É classificação: os dois podem ter caderno no molab, sem layout próprio, e cada tipo tem lista própria, com as rotas decididas na T-109. Saem `concept`, `tutorial` e `playbook` (T-110).
+  2. **Tema:** campo `theme`, obrigatório, um por post, sem lista prévia. O frontmatter guarda o nome visível, e o build gera o slug a partir dele; duas grafias com o mesmo slug quebram o build. Não há arquivo central de rótulos: um tema novo não muda arquivo fora da pasta do post (RNF-14) (T-110).
+  3. **Destaque:** o campo `featured` continua no schema, e os posts deixam de usá-lo.
+  4. **Card:** o tema aparece no lugar do tipo. O card mostra fólio, data, título, tema, nível e tempo de leitura, sem o resumo. A forma sai da T-109 (T-111).
+  5. **Filtro:** selects de tema e de tag nas listas completas, sem paginação, por script do próprio site, com a escolha gravada na URL. Sem JavaScript, a lista inteira e os links das páginas de tag (T-112).
+  6. **Busca:** Pagefind, que pede `wasm-unsafe-eval` onde a busca roda. O lugar da busca (página própria, as listas ou o header) e a CSP que ele pede se decidem na T-109 e na T-22.
+  7. **Comece aqui:** página com estrutura a definir na T-114. Substitui a página Sobre e o "Editar no GitHub" (T-114).
+  8. **Compartilhar:** no fim do post: X, LinkedIn e e-mail por links, e "copiar link" (T-115).
+  9. **Relacionados:** pelo tema, com as tags para desempatar (T-26).
+  10. **Newsletter:** entra no escopo, com Beehiiv ou Kit, escolhido na T-116.
+  11. **Header e footer:** revistos na T-109 e implementados na T-113.
+  12. **Fontes e marca:** a Caveat sai (T-108); os símbolos da marca que o site não usa ficam em `src/assets/brand/`; o nível continua no card e no post; o `author.avatar` fica, para a T-114 decidir o uso.
+  13. **Saem:** o embed de iframes (RF-20, T-29) e a reavaliação do modo inline do mdx-marimo (T-32). O i18n (T-30) fica para a próxima fase. O HSTS preload não entra; reavaliar se o domínio ganhar subdomínios ou e-mail.
 
 ## 3. Requisitos funcionais
 
@@ -169,16 +187,18 @@ A v1 entrega 11 requisitos Must; o restante entra por ordem de prioridade sem bl
 | RF-10 | Feed RSS e sitemap                                                                    | Must       | `/rss.xml` válido no W3C Validator; `sitemap-index.xml` gerado                                                          |
 | RF-11 | Rascunhos (`draft: true`) visíveis só em preview                                      | Must       | Build de produção exclui drafts de páginas, feed e sitemap                                                              |
 | RF-12 | SEO por post: title, description, canonical, Open Graph, JSON-LD `BlogPosting`        | Must       | O `<title>` do post é o título do post. Home `{site.title} · {autor}`, post `{título} · {site.title} · {autor}`, `/page/n/` `Blog — página N · {site.title} · {autor}`, tag `Tag: <tag> · {site.title} · {autor}`, tipo `Tipo: <rótulo> · {site.title} · {autor}`, 404 `Página não encontrada · {site.title} · {autor}`. A 404 não tem canonical nem `og:url` e leva `noindex`, porque a Cloudflare serve `/404` com status 200. `og:image` e `image` do JSON-LD só existem quando há capa, até a T-23. Validado no Rich Results Test; URLs absolutas montadas a partir de `SITE_URL` |
-| RF-13 | Link "Editar no GitHub" por post                                                      | Should     | URL aponta para o arquivo-fonte na branch `main`                                                                        |
-| RF-14 | Página Sobre `/sobre` com bio, foto e links                                           | Should     | Dados vêm do config do site (autor único)                                                                               |
-| RF-15 | Busca full-text estática                                                              | Should     | Pagefind indexa só o corpo dos posts; sem backend                                                                       |
+| RF-13 | ~~Link "Editar no GitHub" por post~~                                                  | Removido   | Saiu na T-106 (Q20): o site não leva ao GitHub pelo post                                                                |
+| RF-14 | Página "Comece aqui"                                                                  | Should     | Página de entrada do blog, sem link para o GitHub; a estrutura sai da T-114 e a rota, da T-109                          |
+| RF-15 | Busca full-text estática                                                              | Should     | O Pagefind indexa só o corpo dos posts, sem backend. O lugar da busca sai da T-109, e a CSP que ela pede, da T-22       |
 | RF-16 | Imagem OG gerada por post quando não houver capa                                      | Should     | Com capa, a capa ganha. Sem capa, PNG 1200×630 no layout da seção 11 do BRAND; o gerador é hipótese da T-23 |
 | RF-17 | Tema escuro com controle segmentado, respeitando `prefers-color-scheme`               | Should     | O controle Claro/Escuro grava a escolha em `localStorage` e aplica `data-theme` na raiz. Sem escolha gravada, segue `prefers-color-scheme`. Sem flash de tema errado no carregamento |
-| RF-18 | Posts relacionados ao fim (por tags em comum)                                         | Could      | Até 3 posts, nunca o próprio                                                                                            |
+| RF-18 | Posts relacionados ao fim (pelo tema)                                                 | Could      | Até 3 posts do mesmo tema, com as tags em comum para desempatar; nunca o próprio                                        |
 | RF-19 | Comentários e reações via Giscus                                                      | Could      | Fase 4, pós-sprint 01; carregamento lazy                                                                                |
-| RF-20 | Embed de Hugging Face Spaces e iframes genéricos                                      | Could      | Componente `<Embed>` com `loading="lazy"` e aspect ratio                                                                |
+| RF-20 | ~~Embed de Hugging Face Spaces e iframes genéricos~~                                  | Removido   | Saiu na T-106 (Q20)                                                                                                     |
 | RF-21 | Artigos da comunidade com login e upvote                                              | Won't (v1) | Fora da v1; exigiria D1 + auth                                                                                          |
 | RF-22 | `Callout` com `variant` `note`, `caution` ou `result`                                 | Should     | Rótulos visíveis `// NOTA DE BANCADA`, `[!] CUIDADO` e `= RESULTADO`, tudo em tinta                                    |
+| RF-23 | Compartilhar no fim do post                                                           | Should     | X, LinkedIn e e-mail por links com o título e a URL do post, sem script de terceiro; "Copiar link" por script do próprio site (T-115) |
+| RF-24 | Inscrição na newsletter                                                               | Should     | O formulário do provedor (Beehiiv ou Kit, T-116), com a CSP e o DNS ajustados na mesma tarefa; o lugar sai da T-109     |
 
 
 ## 4. Requisitos não-funcionais
@@ -246,7 +266,7 @@ Em produção, o blog só serve arquivos; o caderno roda no molab, fora do blog,
 
 ### Riscos técnicos
 
-- **Modo inline adiado** na T-03, por custo de manutenção. Reavaliação na T-32 (`specs/spikes/T-03-mdx-marimo.md`). O iframe no post saiu em 09/11/2026 (Q14), e a página própria do caderno, na T-96: o caderno abre no molab (Q18).
+- **Modo inline adiado** na T-03, por custo de manutenção. A T-32, que o reavaliaria, saiu na T-106 (Q20) (`specs/spikes/T-03-mdx-marimo.md`). O iframe no post saiu em 09/11/2026 (Q14), e a página própria do caderno, na T-96: o caderno abre no molab (Q18).
 - **Pacotes sem wheel WebAssembly** não rodam no navegador (`/wasm`). Mitigação: o caderno que precisa de outro vai com `gpu`, que pede ao leitor uma conta no molab (Q19).
 - **Astro 7 é estrito com HTML.** O compilador Rust recusa tags não fechadas e não corrige aninhamento inválido; o padrão `compressHTML: 'jsx'` remove espaço entre elementos inline. Mitigação: `astro check` no CI e revisão visual do preview.
 - **Dependência do molab:** serviço gratuito de terceiros, com a versão do marimo dele. Mitigação: o arquivo do caderno fica no repositório, e o export próprio volta em tarefa nova, mudando só o link do componente (T-97). Na T-97, logado, o servidor do molab subiu o caderno em 1 de 3 rodadas, numa tarde só; o caminho padrão é o `/wasm` (Q19).
@@ -575,7 +595,7 @@ O contrato do `LineChart` acima permanece como exemplo do padrão. `LineChart`, 
 | `Stepper`    | Passo a passo: Anterior/Próximo percorrem os passos de uma `Matrix` | —                      |
 
 
-Antes da T-19, crie `src/components/viz/AGENTS.md` a partir desta seção e da seção 9.8 de `specs/BRAND.md`. Isso não cria dependência da T-19 com a Fase 1b.
+O `src/components/viz/AGENTS.md` junta esta seção e a seção 9.8 da BRAND.
 
 ## 9. Estrutura do repositório e convenções
 
@@ -594,7 +614,7 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   ├── SPEC.md               # este documento
 │   ├── ROADMAP.md            # tarefas, dependências, status e handoff
 │   ├── BRAND.md              # identidade; em conflito de comportamento, esta spec ganha
-│   ├── spikes/               # resultados de T-03 e T-04
+│   ├── spikes/               # resultados dos spikes (T-03, T-04, T-05, T-78, T-97)
 │   ├── arquivo/              # handoffs e revisões antigas da SPEC; só leitura
 │   └── adr/                  # só ADRs substituídos; os vigentes ficam na seção 5
 ├── src/
@@ -603,7 +623,7 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   ├── content/posts/
 │   ├── assets/brand/         # símbolo e ícones; ver a árvore da marca abaixo
 │   ├── components/
-│   │   ├── ui/               # .astro: Card, TagList, PostRail, AuthorBadge, KindFilter
+│   │   ├── ui/               # .astro: Card, TagList, PostRail, KindFilter
 │   │   ├── viz/              # .svelte: primitivas e exploráveis; Figure.astro (AGENTS.md próprio, criado antes da T-19)
 │   │   └── marimo/           # Notebook.astro, o botão do caderno (AGENTS.md próprio, criado antes da T-18)
 │   ├── integrations/
@@ -615,7 +635,6 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   │   ├── blog/[slug].astro
 │   │   ├── tags/[tag].astro
 │   │   ├── tipos/[tipo].astro
-│   │   ├── sobre.astro
 │   │   ├── rss.xml.ts
 │   │   └── robots.txt.ts
 │   ├── lib/                  # getPublishedPosts, readingTime, seo; unicidade de folio; viz/ (geometria pura)
