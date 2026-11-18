@@ -207,6 +207,10 @@ jobs:
         if: ${{ !cancelled() }}
         run: pnpm check:js
 
+      - name: SVG figures
+        if: ${{ !cancelled() }}
+        run: pnpm check:svg
+
       - name: Links in dist-fixtures
         if: ${{ !cancelled() }}
         run: pnpm exec linkinator ./dist-fixtures
@@ -214,6 +218,10 @@ jobs:
       - name: JavaScript per page in dist-fixtures
         if: ${{ !cancelled() }}
         run: node scripts/check-page-js.mjs dist-fixtures
+
+      - name: SVG figures in dist-fixtures
+        if: ${{ !cancelled() }}
+        run: node scripts/check-svg.mjs dist-fixtures
 
   preview:
     name: preview

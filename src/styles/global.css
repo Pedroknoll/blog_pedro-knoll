@@ -1,5 +1,6 @@
 @import "tailwindcss" source("..");
 @source not "../content/posts/*/notebooks/__marimo__";
+@source not "../lib/svg-breakout.ts";
 @plugin "@tailwindcss/typography";
 
 @theme static {
