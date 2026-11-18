@@ -137,7 +137,7 @@ export function buildHeaders(hashes: Hashes): string {
   const styles = uniqueSorted(hashes.styles);
   const csp = [
     "default-src 'none'",
-    `script-src ${["'self'", ...scripts].join(" ")}`,
+    `script-src ${["'self'", "https://static.cloudflareinsights.com", ...scripts].join(" ")}`,
     "style-src 'self' 'unsafe-inline'",
     `style-src-elem ${["'self'", ...styles].join(" ")}`,
     "style-src-attr 'unsafe-inline'",
@@ -162,6 +162,13 @@ export function cacheHeaders(): string {
   return `${[
     "/_astro/:file",
     "  Cache-Control: public, max-age=31536000, immutable",
+  ].join("\n")}\n`;
+}
+
+export function robotsHeaders(): string {
+  return `${[
+    "https://:version.:subdomain.workers.dev/*",
+    "  X-Robots-Tag: noindex",
   ].join("\n")}\n`;
 }
 
@@ -220,7 +227,8 @@ export function headersIntegration(): AstroIntegration {
           scripts.push(...hashes.scripts);
           styles.push(...hashes.styles);
         }
-        const headers = buildHeaders({ scripts, styles }) + cacheHeaders();
+        const headers =
+          buildHeaders({ scripts, styles }) + cacheHeaders() + robotsHeaders();
         validateHeaders(headers);
         await writeFile(fileURLToPath(new URL("./_headers", dir)), headers);
       },

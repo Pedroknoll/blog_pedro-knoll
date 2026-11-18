@@ -7,6 +7,7 @@ import {
   cacheHeaders,
   effectiveHeaders,
   extractHashes,
+  robotsHeaders,
   validateHeaders,
 } from "../../src/integrations/headers";
 
@@ -88,7 +89,7 @@ describe("buildHeaders", () => {
     expect(policies).toHaveLength(1);
     expect(directivesOf(policies?.[0] ?? "")).toEqual({
       "default-src": "'none'",
-      "script-src": `'self' ${alpha} ${beta}`,
+      "script-src": `'self' https://static.cloudflareinsights.com ${alpha} ${beta}`,
       "style-src": "'self' 'unsafe-inline'",
       "style-src-elem": `'self' ${alpha} ${beta}`,
       "style-src-attr": "'unsafe-inline'",
@@ -201,6 +202,40 @@ describe("cacheHeaders", () => {
     ]) {
       expect(
         effectiveHeaders(text, pathname).get("cache-control"),
+        pathname,
+      ).toBeUndefined();
+    }
+  });
+});
+
+describe("robotsHeaders", () => {
+  function headersText(): string {
+    return (
+      buildHeaders({ scripts: [], styles: [] }) +
+      cacheHeaders() +
+      robotsHeaders()
+    );
+  }
+
+  it("noindex na regra do workers.dev", () => {
+    const text = headersText();
+    const lines = text.split("\n").filter((line) => line !== "");
+    expect(lines.filter((line) => !line.startsWith(" "))).toEqual([
+      "/*",
+      "/_astro/:file",
+      "https://:version.:subdomain.workers.dev/*",
+    ]);
+    expect(lines.filter((line) => line.includes("X-Robots-Tag"))).toEqual([
+      "  X-Robots-Tag: noindex",
+    ]);
+    for (const pathname of [
+      "/",
+      "/blog/a/",
+      "/_astro/BaseLayout.DLRftG8w.css",
+      "/favicon.svg",
+    ]) {
+      expect(
+        effectiveHeaders(text, pathname).get("x-robots-tag"),
         pathname,
       ).toBeUndefined();
     }
