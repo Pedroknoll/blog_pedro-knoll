@@ -1,6 +1,6 @@
 export const site = {
   title: "pk.log",
-  // até a Q4b fechar, SITE_URL aponta para o endereço workers.dev do Worker
+  // SITE_URL é a variável do repositório; em produção, https://pedroknoll.com.
   url: import.meta.env.SITE_URL ?? "https://blog.exemplo.com",
   author: {
     name: "Pedro Knoll",
