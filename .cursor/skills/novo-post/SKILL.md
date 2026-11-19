@@ -1,6 +1,6 @@
 ---
 name: novo-post
-description: Cria um post novo do blog pk.log. Pergunta ao autor título, descrição, tipo, nível e tags, calcula o próximo fólio e cria src/content/posts/AAAA-MM-<slug>/index.mdx com draft true. Traz a tabela de degrau e skill e o checklist de publicar. Só por /novo-post.
+description: Cria um post novo do blog pk.log. Pergunta ao autor título, descrição, tipo e tags, e cria src/content/posts/AAAA-MM-<slug>/index.mdx com draft true. Traz a tabela de degrau e skill e o checklist de publicar. Só por /novo-post.
 disable-model-invocation: true
 ---
 
@@ -16,15 +16,10 @@ Uma mensagem só. Se um campo não servir, peça de novo antes de criar o arquiv
 
 - Título, até 90 caracteres. Acima disso, peça de novo.
 - Descrição, de 50 a 160 caracteres. Conte e mostre a contagem. O schema valida também o rascunho (SPEC §6).
-- Tipo: `concept` (Conceito), `tutorial` (Tutorial) ou `playbook` (Playbook). Os rótulos estão em `src/lib/kind.ts`. No frontmatter entra o valor inglês.
-- Nível: 1 (Iniciante), 2 (Intermediário) ou 3 (Avançado). Os rótulos estão em `src/lib/level.ts`.
+- Tipo: `article` (Artigo) ou `prototype` (Protótipo). Os rótulos estão em `src/lib/kind.ts`. No frontmatter entra o valor inglês.
 - Tags: `^[a-z0-9-]+$`, até 6. Liste as tags dos posts publicados (pasta que não começa com `fixture-` e sem `draft: true`) para reuso.
 
 Com as respostas, proponha o sufixo do slug a partir do título: minúsculas, sem acento, `^[a-z0-9-]+$`. Confirme antes de criar a pasta.
-
-## Fólio
-
-O próximo livre é o maior `folio` abaixo de 900 entre as pastas de `src/content/posts/` que não começam com `fixture-`, mais 1. De 900 a 999 ficam de fora (SPEC §6). Mostre o número e a pasta de onde veio.
 
 ## Arquivo
 
@@ -37,15 +32,13 @@ Frontmatter na ordem do exemplo da SPEC §6. `pubDate` é a data de hoje. Sem `c
 title: ""
 description: ""
 pubDate: AAAA-MM-DD
-folio: N
-kind: concept
-level: 1
+kind: article
 tags: []
 draft: true
 ---
 ```
 
-Os valores são os que o autor confirmou. `kind` e `level` acima são o lugar de cada campo, não uma escolha.
+Os valores são os que o autor confirmou. `kind` acima é o lugar do campo, não uma escolha.
 
 ## Conferir
 
@@ -68,7 +61,6 @@ A trilha Post e a Definition of Done estão no `AGENTS.md`. Imprima este checkli
 
 - Branch `post/AAAA-MM-<slug>`.
 - `draft: false` e `pubDate` do dia da publicação. A pasta fica com o mês da criação.
-- Depois do rebase na `main`, confira de novo que o fólio é o próximo livre.
 - `git diff --stat main...` só com a pasta do post.
 - `pnpm lint`.
 - `pnpm astro check`. Se o post tiver `.svelte`, em seguida `pnpm check:svelte`. O `pnpm lint` não roda os dois.

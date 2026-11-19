@@ -3,7 +3,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { fixtureMd, fixtureMdx } from "./fixtures";
 import { authorGithub, authorLinkedin, kindPath } from "./site-literals";
 
-const concept = kindPath("concept");
+const articles = kindPath("article");
 
 type Rail = {
   columnWidth: number;
@@ -169,8 +169,8 @@ test.describe("lateral da home [RF-01]", () => {
     }
   });
 
-  test("H2 links do autor em conceito", async ({ page }) => {
-    await open(page, concept, 1280);
+  test("H2 links do autor em artigos", async ({ page }) => {
+    await open(page, articles, 1280);
     await expect(authorList(page)).toHaveCount(1);
   });
 
@@ -194,8 +194,8 @@ test.describe("lateral da home [RF-01]", () => {
       .toBeCloseTo(at1280.columnWidth, 0);
   });
 
-  test("H4 saudação sobre a barra em conceito", async ({ page }) => {
-    await open(page, concept, 1280);
+  test("H4 saudação sobre a barra em artigos", async ({ page }) => {
+    await open(page, articles, 1280);
     const rail = await readRail(page);
     const overlaps =
       rail.greetingBottom > rail.barTop && rail.greetingTop < rail.barBottom;
@@ -249,7 +249,7 @@ test.describe("lateral da home [RF-01]", () => {
   });
 
   test("H11 respiro acima da lateral", async ({ page }) => {
-    for (const path of ["/", concept]) {
+    for (const path of ["/", articles]) {
       await test.step(path, async () => {
         await open(page, path, 1023);
         const below = await handBelowHeader(page);

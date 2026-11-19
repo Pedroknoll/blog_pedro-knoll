@@ -5,13 +5,9 @@ description: "Rascunho usado nos testes para garantir que a produção não publ
 
 pubDate: 2026-10-23
 
-folio: 999
-kind: tutorial
-level: 1
+kind: prototype
 
 tags: [meta, so-rascunho]
-
-featured: true
 
 draft: true
 ---

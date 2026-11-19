@@ -1,44 +1,24 @@
 ---
-import ConceptAnimated from "~/assets/brand/icones/icone-conceito.svg";
-import ConceptStill from "~/assets/brand/icones/icone-conceito-parado.svg";
-import PlaybookAnimated from "~/assets/brand/icones/icone-playbook.svg";
-import PlaybookStill from "~/assets/brand/icones/icone-playbook-parado.svg";
-import TutorialAnimated from "~/assets/brand/icones/icone-tutorial.svg";
-import TutorialStill from "~/assets/brand/icones/icone-tutorial-parado.svg";
+import Article from "~/assets/brand/icones/icone-artigo.svg";
+import Prototype from "~/assets/brand/icones/icone-prototipo.svg";
 import { KIND_LABELS, type Kind } from "~/lib/kind";
 
 interface Props {
   kind: Kind;
-  animated: boolean;
   px: 12 | 24;
 }
 
-const { kind, animated, px } = Astro.props;
+const { kind, px } = Astro.props;
 
-const animatedIcons: Record<Kind, typeof ConceptAnimated> = {
-  concept: ConceptAnimated,
-  tutorial: TutorialAnimated,
-  playbook: PlaybookAnimated,
-};
+const icons = {
+  article: Article,
+  prototype: Prototype,
+} as const;
 
-const stillIcons: Record<Kind, typeof ConceptStill> = {
-  concept: ConceptStill,
-  tutorial: TutorialStill,
-  playbook: PlaybookStill,
-};
-
-const kindClass: Record<Kind, string> = {
-  concept: "text-kind-concept",
-  tutorial: "text-kind-tutorial",
-  playbook: "text-kind-playbook",
-};
-
-const Icon = animated ? animatedIcons[kind] : stillIcons[kind];
+const Icon = icons[kind];
 ---
 
-<span
-  class:list={["font-mono text-xs uppercase tracking-widest", kindClass[kind]]}
->
+<span class="font-mono text-xs uppercase tracking-widest text-ink">
   <Icon aria-hidden="true" width={px} height={px} class="inline-block" />{" "}
   <span>{KIND_LABELS[kind]}</span>
 </span>

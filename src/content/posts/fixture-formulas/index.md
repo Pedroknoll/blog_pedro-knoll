@@ -5,9 +5,7 @@ description: "Post de prova com a math densa que os dois tetos de fonte admitem.
 
 pubDate: 2000-01-04
 
-folio: 904
-kind: concept
-level: 3
+kind: article
 
 tags: [fixture, math]
 ---

@@ -37,16 +37,13 @@ const posts = defineCollection({
         description: z.string().min(50).max(160),
         pubDate: z.coerce.date(),
         updatedDate: z.coerce.date().optional(),
-        folio: z.int().min(1), // exibido como "Fól. 006"
         kind: z.enum(KINDS),
-        level: z.int().min(1).max(3),
         tags: z
           .array(z.string().regex(/^[a-z0-9-]+$/))
           .max(6)
           .default([]),
         cover: image().optional(),
         coverAlt: z.string().optional(),
-        featured: z.boolean().default(false),
         draft: z.boolean().default(false),
         references: z
           .array(reference)

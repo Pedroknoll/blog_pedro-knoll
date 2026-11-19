@@ -1,81 +1,29 @@
 ---
-import { Image } from "astro:assets";
 import type { CollectionEntry } from "astro:content";
 
 import Clock from "~/assets/brand/icones/icone-relogio.svg";
 import KindLabel from "~/components/ui/KindLabel.astro";
-import LevelLabel from "~/components/ui/LevelLabel.astro";
 import { formatPubDate } from "~/lib/format-date";
-import { folioDigits } from "~/lib/folio";
 
 interface Props {
   post: CollectionEntry<"posts">;
-  featured?: boolean;
   minutesRead: number;
 }
 
-const { post, featured = false, minutesRead } = Astro.props;
-const { title, description, pubDate, cover, folio, kind, level } = post.data;
+const { post, minutesRead } = Astro.props;
+const { title, description, pubDate, kind } = post.data;
 const { text, datetime } = formatPubDate(pubDate);
 const href = `/blog/${post.id}/`;
 const linkClass =
   "text-ink no-underline active:text-accent after:absolute after:inset-0";
-const showCover = Boolean(featured && cover);
 ---
 
-<article
-  class:list={[
-    "relative grid gap-y-0",
-    featured && "border-b border-line pt-5 pb-8 sm:py-8",
-    featured
-      ? showCover &&
-        "sm:grid-cols-[minmax(0,1fr)_18rem] sm:grid-rows-[1fr_auto_auto_auto_1fr] sm:gap-x-8"
-      : "sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:items-center sm:gap-x-8",
-  ]}
->
-  {featured && (
-    <p class="mb-2 font-mono text-xs uppercase tracking-widest text-muted sm:col-start-1 sm:row-start-2">
-      Destaque
-    </p>
-  )}
-  <p
-    class:list={[
-      "font-mono text-xs text-pencil",
-      featured
-        ? "sm:col-start-1 sm:row-start-3"
-        : "sm:col-start-1 sm:row-start-1 sm:flex sm:flex-col sm:items-start",
-    ]}
-  >
-    <span class="whitespace-nowrap">
-      Fól.{" "}
-      <span class="font-display text-[1.45rem] font-semibold not-italic leading-none text-ink">
-        {folioDigits(folio)}
-      </span>
-    </span>{" "}
-    <span class:list={[!featured && "sm:hidden"]}>·</span>{" "}
+<article class="relative grid gap-y-0 sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:items-center sm:gap-x-8">
+  <p class="font-mono text-xs text-pencil sm:col-start-1 sm:row-start-1">
     <time datetime={datetime}>{text}</time>
   </p>
-  {showCover && cover && (
-    <div class="my-4 aspect-[1200/630] w-full overflow-hidden sm:col-start-2 sm:row-start-1 sm:row-span-5 sm:my-0 sm:self-center">
-      <Image src={cover} alt="" class="h-full w-full object-cover" priority />
-    </div>
-  )}
-  <div
-    class:list={[
-      "min-w-0",
-      featured
-        ? "sm:col-start-1 sm:row-start-4"
-        : "sm:col-start-2 sm:row-start-1",
-    ]}
-  >
-    <h2
-      class:list={[
-        "font-display font-semibold not-italic text-ink",
-        featured
-          ? "text-4xl leading-snug sm:text-[2.75rem]"
-          : "text-[1.75rem] leading-[1.2]",
-      ]}
-    >
+  <div class="min-w-0 sm:col-start-2 sm:row-start-1">
+    <h2 class="font-display text-[1.75rem] leading-[1.2] font-semibold text-ink not-italic">
       <a class={linkClass} href={href}>
         {title}
       </a>
@@ -83,16 +31,7 @@ const showCover = Boolean(featured && cover);
     <p class="mt-2 text-[1rem] leading-[1.6] text-muted">{description}</p>
     <p class="footer pointer-events-none mt-3 flex flex-wrap items-baseline gap-x-5 gap-y-1.5 overflow-x-clip font-mono text-xs uppercase tracking-widest">
       <span class="whitespace-nowrap">
-        <KindLabel kind={kind} animated={false} px={12} />
-      </span>
-      <span class="relative whitespace-nowrap">
-        <span
-          class="absolute right-full flex w-5 justify-center text-line"
-          aria-hidden="true"
-        >
-          |
-        </span>
-        <LevelLabel level={level} />
+        <KindLabel kind={kind} px={12} />
       </span>
       <span class="relative whitespace-nowrap">
         <span

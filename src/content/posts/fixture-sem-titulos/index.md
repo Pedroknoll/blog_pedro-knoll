@@ -5,13 +5,9 @@ description: "Post de prova sem títulos de seção, só com parágrafos, para o
 
 pubDate: 2099-01-01
 
-folio: 903
-kind: concept
-level: 3
+kind: article
 
 tags: [fixture, sem-titulos]
-
-featured: true
 
 cover: ./cover.png
 

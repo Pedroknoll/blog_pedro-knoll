@@ -18,17 +18,7 @@ const MONTHS = [
   "dez",
 ] as const;
 
-const MONTH = MONTHS.join("|");
-const FOLIO_DATE = new RegExp(
-  `^Fól\\. \\d{3} · \\d{2}\\.(?:${MONTH})\\.\\d{4}$`,
-);
 const KIND = new RegExp(`^(${Object.values(KIND_LABELS).join("|")})$`);
-const LEVEL = /^\\{3} (Iniciante|Intermediário|Avançado)$/;
-const HATCH = {
-  Iniciante: 1,
-  Intermediário: 2,
-  Avançado: 3,
-} as const;
 
 function dateFromDatetime(datetime: string): string {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datetime);
@@ -145,35 +135,8 @@ async function listArticles(page: Page): Promise<Locator[]> {
   return articles;
 }
 
-async function featuredArticle(page: Page): Promise<Locator | null> {
-  const destaque = page.getByRole("region", { name: "Destaque", exact: true });
-  if ((await destaque.count()) === 0) return null;
-  const featured = destaque.locator("article");
-  await expect(featured).toHaveCount(1);
-  return featured;
-}
-
-async function cardsOn(page: Page, path: string): Promise<Locator[]> {
-  const articles: Locator[] = [];
-  if (path === "/") {
-    const destaque = page.getByRole("region", {
-      name: "Destaque",
-      exact: true,
-    });
-    await expect(destaque).toHaveCount(1);
-    const featured = destaque.locator("article");
-    await expect(featured).toHaveCount(1);
-    articles.push(featured);
-  }
-  const list = postsList(page);
-  await expect(list).toHaveCount(1);
-  const items = list.locator(":scope > li").locator("article");
-  const count = await items.count();
-  expect(count).toBeGreaterThan(0);
-  for (let index = 0; index < count; index += 1) {
-    articles.push(items.nth(index));
-  }
-  return articles;
+async function cardsOn(page: Page): Promise<Locator[]> {
+  return listArticles(page);
 }
 
 async function publishedHrefs(page: Page): Promise<string[]> {
@@ -196,32 +159,20 @@ async function publishedHrefs(page: Page): Promise<string[]> {
   return hrefs;
 }
 
-async function expectFolioLine(container: Locator) {
+async function expectDateLine(container: Locator) {
   const time = container.locator("time");
   await expect(time).toHaveCount(1);
   const datetime = (await time.getAttribute("datetime")) ?? "";
   expect(datetime).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   await expect(time).toHaveText(dateFromDatetime(datetime));
-  await expect(time.locator("xpath=..")).toHaveText(FOLIO_DATE);
+  await expect(time.locator("xpath=..")).toHaveText(dateFromDatetime(datetime));
 
   const kind = container.getByText(KIND);
   await expect(kind).toHaveText(KIND);
-
-  const level = container.getByText(LEVEL);
-  await expect(level).toHaveText(LEVEL);
-  const levelText = textOf(await level.textContent());
-  const name = /^\\{3} (Iniciante|Intermediário|Avançado)$/.exec(
-    levelText,
-  )?.[1];
-  const label = name as keyof typeof HATCH | undefined;
-  const marked = textOf(
-    await level
-      .locator("[aria-hidden='true'] > span")
-      .first()
-      .evaluate((element) => element.textContent),
-  );
-  const strokes = /^(\\+)$/.exec(marked)?.[1]?.length;
-  expect(strokes).toBe(label ? HATCH[label] : undefined);
+  await expect(container.getByText(/Fól\./)).toHaveCount(0);
+  await expect(
+    container.getByText(/Iniciante|Intermediário|Avançado/),
+  ).toHaveCount(0);
 }
 
 async function animationNames(svg: Locator): Promise<string[]> {
@@ -233,12 +184,12 @@ async function animationNames(svg: Locator): Promise<string[]> {
 }
 
 test.describe("card e cabeçalho [RF-01, RF-04]", () => {
-  test("C1 fólio, data, tipo e nível nos cards", async ({ page }) => {
+  test("C1 data e tipo nos cards, sem fólio e sem nível", async ({ page }) => {
     for (const path of await listingPaths(page)) {
       await test.step(path, async () => {
         await open(page, path);
-        for (const article of await cardsOn(page, path)) {
-          await expectFolioLine(article);
+        for (const article of await cardsOn(page)) {
+          await expectDateLine(article);
         }
       });
     }
@@ -291,7 +242,9 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     }
   });
 
-  test("C4 fólio, data, tipo e nível no cabeçalho", async ({ page }) => {
+  test("C4 data e tipo no cabeçalho, sem fólio e sem nível", async ({
+    page,
+  }) => {
     for (const href of await publishedHrefs(page)) {
       await test.step(href, async () => {
         await open(page, href);
@@ -302,21 +255,19 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           .getByText("Publicação", { exact: true })
           .count();
         expect.soft(publication).toBe(0);
+        await expect(header.getByText(/Fól\./)).toHaveCount(0);
+        await expect(header.getByText("Nível", { exact: true })).toHaveCount(0);
+        await expect(
+          header.getByText("Atualizado em", { exact: true }),
+        ).toHaveCount(0);
 
         const rail = header.locator("[data-post-rail]");
         await expect(rail).toHaveCount(1);
-        const folio = rail.locator("> div").first().locator("> div").first();
-        expect(textOf(await folio.textContent())).toMatch(/^Fól\. \d{3,}$/);
-
         const times = header.locator("time");
-        const timeCount = await times.count();
-        expect([1, 2]).toContain(timeCount);
-        for (let index = 0; index < timeCount; index += 1) {
-          const time = times.nth(index);
-          const datetime = (await time.getAttribute("datetime")) ?? "";
-          expect(datetime).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-          await expect(time).toHaveText(dateFromDatetime(datetime));
-        }
+        await expect(times).toHaveCount(1);
+        const datetime = (await times.getAttribute("datetime")) ?? "";
+        expect(datetime).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        await expect(times).toHaveText(dateFromDatetime(datetime));
 
         const items = rail.locator("> div").nth(1).locator("> div");
         const item = (label: string) =>
@@ -324,45 +275,30 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
         await expect(item("Data")).toHaveCount(1);
         await expect(item("Data").locator("time")).toHaveCount(1);
         await expect(item("Tipo").getByText(KIND)).toHaveText(KIND);
-        await expect(item("Nível").getByText(LEVEL)).toHaveText(LEVEL);
-        await expect(item("Atualizado em")).toHaveCount(timeCount - 1);
-        if (timeCount === 2) {
-          await expect(item("Atualizado em").locator("time")).toHaveCount(1);
-        }
       });
     }
   });
 
-  test("C5 ícone parado em 12 px no cabeçalho", async ({ page }) => {
+  test("C5 ícone do tipo só abaixo de lg", async ({ page }) => {
     for (const href of await publishedHrefs(page)) {
       await test.step(href, async () => {
         await open(page, href);
-        const svg = page.getByRole("article").locator("header svg");
-        expect(await svg.count()).toBe(1);
+        const header = page.getByRole("article").locator("header");
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await expect(header.locator("svg:visible")).toHaveCount(0);
+
+        await page.setViewportSize({ width: 360, height: 800 });
+        const tipo = header
+          .locator("[data-post-rail] > div")
+          .nth(1)
+          .locator("> div")
+          .filter({ has: page.getByText("Tipo", { exact: true }) });
+        const svg = tipo.locator("svg");
+        await expect(svg).toHaveCount(1);
+        await expect(svg).toBeVisible();
         await expect(svg).toHaveAttribute("aria-hidden", "true");
         await expect(svg).toHaveCSS("width", "12px");
         await expect(svg).toHaveCSS("height", "12px");
-        const names = await animationNames(svg);
-        expect(names.every((name) => name === "none")).toBe(true);
-      });
-    }
-  });
-
-  test("C6 ícone parado com movimento reduzido", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await open(page, "/");
-    const hrefs = await page
-      .locator("article h2 a")
-      .evaluateAll((links) =>
-        links.map((link) => link.getAttribute("href") ?? ""),
-      );
-    expect(hrefs.length).toBeGreaterThan(0);
-    await page.emulateMedia({ reducedMotion: "reduce" });
-    for (const href of hrefs) {
-      await test.step(href, async () => {
-        await open(page, href);
-        const svg = page.getByRole("article").locator("header svg");
-        expect(await svg.count()).toBe(1);
         const names = await animationNames(svg);
         expect(names.every((name) => name === "none")).toBe(true);
       });
@@ -373,7 +309,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     const cards: { listing: string; href: string }[] = [];
     for (const path of await listingPaths(page)) {
       await open(page, path);
-      for (const article of await cardsOn(page, path)) {
+      for (const article of await cardsOn(page)) {
         const link = article.locator("h2").getByRole("link");
         await expect(link).toHaveCount(1);
         const href = (await link.getAttribute("href")) ?? "";
@@ -407,12 +343,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     for (const path of await listingSurfaces(page)) {
       await test.step(path, async () => {
         await open(page, path);
-        const featured = await featuredArticle(page);
-        const articles = [
-          ...(featured ? [featured] : []),
-          ...(await listArticles(page)),
-        ];
-        for (const article of articles) {
+        for (const article of await listArticles(page)) {
           const hidden = article.locator(".sr-only");
           await expect(hidden).toHaveCount(1);
           const cardText = await article.evaluate((root) => {
@@ -446,64 +377,17 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     expect(seen.size).toBeGreaterThan(0);
   });
 
-  test("C9 capa só no destaque", async ({ page }) => {
-    await open(page, "/");
-    const destaque = page.getByRole("region", {
-      name: "Destaque",
-      exact: true,
-    });
-    await expect(destaque.locator("img")).toHaveCount(1);
-    for (const article of await listArticles(page)) {
-      await expect(article.locator("img")).toHaveCount(0);
-    }
-
-    const tags = await tagHrefsFromPosts(page);
-    for (const path of tags) {
+  test("C9 nenhum card com capa", async ({ page }) => {
+    const paths = ["/", ...(await tagHrefsFromPosts(page))];
+    for (const path of paths) {
       await test.step(path, async () => {
         await open(page, path);
-        for (const article of await listArticles(page)) {
-          await expect(article.locator("img")).toHaveCount(0);
-        }
+        await expect(page.locator("article img")).toHaveCount(0);
       });
     }
   });
 
-  test("C10 número do fólio na fonte de display 600", async ({ page }) => {
-    for (const path of await listingSurfaces(page)) {
-      await test.step(path, async () => {
-        await open(page, path);
-        const numbers = page
-          .locator("article time")
-          .locator("xpath=..")
-          .getByText(/^\d+$/);
-        const count = await numbers.count();
-        expect(count).toBeGreaterThan(0);
-        for (let index = 0; index < count; index += 1) {
-          const measured = await numbers.nth(index).evaluate((element) => {
-            const style = getComputedStyle(element);
-            const variable = getComputedStyle(document.documentElement)
-              .getPropertyValue("--font-plex-condensed")
-              .trim();
-            return {
-              text: (element.textContent ?? "").trim(),
-              family: style.fontFamily,
-              variable,
-              weight: style.fontWeight,
-              fontSize: style.fontSize,
-            };
-          });
-          expect(measured.text).toMatch(/^\d+$/);
-          expect(familyPrefix(measured.family, measured.variable)).toBe(
-            normalizeFamily(measured.variable),
-          );
-          expect(measured.weight).toBe("600");
-          expect(fontSizePx(measured.fontSize)).toBeGreaterThanOrEqual(22);
-        }
-      });
-    }
-  });
-
-  test("C11 faixa do fólio e Fól. 1000", async ({ page }) => {
+  test("C11 faixa da data e a ordem a 360", async ({ page }) => {
     const paths = await listingSurfaces(page);
 
     await page.setViewportSize({ width: 1280, height: 800 });
@@ -512,10 +396,10 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
         await open(page, path);
         for (const article of await listArticles(page)) {
           const placed = await article.evaluate((root) => {
-            const folio = root.querySelector("time")?.parentElement;
+            const date = root.querySelector("time")?.parentElement;
             const heading = root.querySelector("h2");
-            if (!folio || !heading) return null;
-            const folioBox = folio.getBoundingClientRect();
+            if (!date || !heading) return null;
+            const dateBox = date.getBoundingClientRect();
             const headingBox = heading.getBoundingClientRect();
             const track = Number.parseFloat(
               getComputedStyle(root)
@@ -526,11 +410,11 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
               getComputedStyle(document.documentElement).fontSize,
             );
             return {
-              folioRight: folioBox.right,
+              dateRight: dateBox.right,
               headingLeft: headingBox.left,
               track,
               expectedTrack: 6.5 * fontSize,
-              folioCenter: (folioBox.top + folioBox.bottom) / 2,
+              dateCenter: (dateBox.top + dateBox.bottom) / 2,
               textCenter: heading.parentElement
                 ? (heading.parentElement.getBoundingClientRect().top +
                     heading.parentElement.getBoundingClientRect().bottom) /
@@ -540,98 +424,14 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           });
           expect(placed).not.toBeNull();
           if (!placed) continue;
-          expect(placed.folioRight).toBeLessThanOrEqual(placed.headingLeft);
+          expect(placed.dateRight).toBeLessThanOrEqual(placed.headingLeft);
           expect(
             Math.abs(placed.track - placed.expectedTrack),
           ).toBeLessThanOrEqual(1);
           expect(
-            Math.abs(placed.folioCenter - placed.textCenter),
-            "fólio centrado no texto",
+            Math.abs(placed.dateCenter - placed.textCenter),
+            "data centrada no texto",
           ).toBeLessThanOrEqual(1);
-
-          const fitted = await article
-            .locator("time")
-            .locator("xpath=..")
-            .evaluate((column) => {
-              const line = [...column.querySelectorAll("span")].find((span) =>
-                [...span.childNodes].some(
-                  (node) =>
-                    node.nodeType === Node.TEXT_NODE &&
-                    (node.textContent ?? "").includes("Fól."),
-                ),
-              );
-              const number = line
-                ? [...line.querySelectorAll("span")].find((span) =>
-                    /^\d+$/.test((span.textContent ?? "").trim()),
-                  )
-                : undefined;
-              if (!line || !number) {
-                return {
-                  ok: false,
-                  reason: "sem linha",
-                  scrollWidth: 0,
-                  clientWidth: 0,
-                  rects: 0,
-                };
-              }
-              const clone = line.cloneNode(true) as HTMLElement;
-              const clonedNumber = [...clone.querySelectorAll("span")].find(
-                (span) => /^\d+$/.test((span.textContent ?? "").trim()),
-              );
-              if (!clonedNumber) {
-                return {
-                  ok: false,
-                  reason: "sem número",
-                  scrollWidth: 0,
-                  clientWidth: 0,
-                  rects: 0,
-                };
-              }
-              clonedNumber.textContent = "1000";
-              const clientWidth = column.clientWidth;
-              const columnStyle = getComputedStyle(column);
-              const holder = document.createElement("div");
-              holder.style.cssText = `position:absolute;left:0;top:0;visibility:hidden;width:${clientWidth}px;`;
-              holder.style.fontFamily = columnStyle.fontFamily;
-              holder.style.fontSize = columnStyle.fontSize;
-              holder.style.fontWeight = columnStyle.fontWeight;
-              holder.style.letterSpacing = columnStyle.letterSpacing;
-              holder.style.lineHeight = columnStyle.lineHeight;
-              clone.style.display = "inline-block";
-              holder.appendChild(clone);
-              document.body.appendChild(holder);
-              const scrollWidth = clone.scrollWidth;
-              const rects = clone.getClientRects().length;
-              holder.remove();
-              return {
-                ok:
-                  scrollWidth > 0 && scrollWidth <= clientWidth && rects === 1,
-                scrollWidth,
-                clientWidth,
-                rects,
-              };
-            });
-          expect(fitted.ok, JSON.stringify(fitted)).toBe(true);
-        }
-
-        const featured = await featuredArticle(page);
-        if (featured) {
-          const above = await featured.evaluate((root) => {
-            const folio = root.querySelector("time")?.parentElement;
-            const heading = root.querySelector("h2");
-            if (!folio || !heading) return null;
-            const folioBox = folio.getBoundingClientRect();
-            const headingBox = heading.getBoundingClientRect();
-            return {
-              folioTop: folioBox.top,
-              folioBottom: folioBox.bottom,
-              headingTop: headingBox.top,
-            };
-          });
-          expect(above).not.toBeNull();
-          if (!above) return;
-          expect(above.folioTop).toBeLessThan(above.headingTop);
-          expect(above.folioBottom).toBeLessThanOrEqual(above.headingTop + 1);
         }
       });
     }
@@ -640,28 +440,23 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     for (const path of paths) {
       await test.step(`${path} 360`, async () => {
         await open(page, path);
-        const featured = await featuredArticle(page);
-        const articles = [
-          ...(featured ? [featured] : []),
-          ...(await listArticles(page)),
-        ];
-        for (const article of articles) {
+        for (const article of await listArticles(page)) {
           const above = await article.evaluate((root) => {
-            const folio = root.querySelector("time")?.parentElement;
+            const date = root.querySelector("time")?.parentElement;
             const heading = root.querySelector("h2");
-            if (!folio || !heading) return null;
-            const folioBox = folio.getBoundingClientRect();
+            if (!date || !heading) return null;
+            const dateBox = date.getBoundingClientRect();
             const headingBox = heading.getBoundingClientRect();
             return {
-              folioTop: folioBox.top,
-              folioBottom: folioBox.bottom,
+              dateTop: dateBox.top,
+              dateBottom: dateBox.bottom,
               headingTop: headingBox.top,
             };
           });
           expect(above).not.toBeNull();
           if (!above) continue;
-          expect(above.folioTop).toBeLessThan(above.headingTop);
-          expect(above.folioBottom).toBeLessThanOrEqual(above.headingTop + 1);
+          expect(above.dateTop).toBeLessThan(above.headingTop);
+          expect(above.dateBottom).toBeLessThanOrEqual(above.headingTop + 1);
         }
       });
     }
@@ -682,25 +477,15 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       const clone = source.cloneNode(true) as HTMLElement;
       const width = source.getBoundingClientRect().width;
       const kind = [...clone.querySelectorAll("span")].find((span) =>
-        /^(Conceito|Tutorial|Playbook)$/.test((span.textContent ?? "").trim()),
+        /^(Artigo|Protótipo)$/.test((span.textContent ?? "").trim()),
       );
-      if (kind) kind.textContent = "Playbook";
+      if (kind) kind.textContent = "Protótipo";
       const minutes = [...clone.querySelectorAll("span")].find((span) =>
         /^\d+\s+min$/.test(
           (span.textContent ?? "").replace(/\s+/g, " ").trim(),
         ),
       );
       if (minutes) minutes.textContent = "20 min";
-      const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
-      while (walker.nextNode()) {
-        const value = walker.currentNode.textContent ?? "";
-        if (/Iniciante|Intermediário|Avançado/.test(value)) {
-          walker.currentNode.textContent = value.replace(
-            /Iniciante|Intermediário|Avançado/,
-            "Intermediário",
-          );
-        }
-      }
       clone.style.position = "absolute";
       clone.style.left = "0";
       clone.style.top = "0";
@@ -755,83 +540,11 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     expect(edges).toEqual([]);
   });
 
-  test("C13 vãos na linha do fólio", async ({ page }) => {
-    await page.setViewportSize({ width: 360, height: 800 });
-    for (const path of await listingSurfaces(page)) {
-      await test.step(path, async () => {
-        await open(page, path);
-        const featured = await featuredArticle(page);
-        const articles = [
-          ...(featured ? [featured] : []),
-          ...(await listArticles(page)),
-        ];
-        for (const article of articles) {
-          const gaps = await article
-            .locator("time")
-            .locator("xpath=..")
-            .evaluate((column) => {
-              const number = [...column.querySelectorAll("span")].find(
-                (span) =>
-                  span.childElementCount === 0 &&
-                  /^\d+$/.test((span.textContent ?? "").trim()),
-              );
-              const dot = [...column.querySelectorAll("span")].find(
-                (span) => (span.textContent ?? "") === "·",
-              );
-              const time = column.querySelector("time");
-              const folioNode = number
-                ? [...(number.parentElement?.childNodes ?? [])].find(
-                    (node) =>
-                      node.nodeType === Node.TEXT_NODE &&
-                      (node.textContent ?? "").includes("Fól."),
-                  )
-                : undefined;
-              if (
-                !number ||
-                !dot ||
-                !time ||
-                !folioNode ||
-                folioNode.nodeType !== Node.TEXT_NODE
-              ) {
-                return null;
-              }
-              const raw = folioNode.textContent ?? "";
-              const start = raw.indexOf("Fól.");
-              const range = document.createRange();
-              range.setStart(folioNode, start);
-              range.setEnd(folioNode, start + "Fól.".length);
-              return [range.getBoundingClientRect(), number, dot, time].map(
-                (box) => {
-                  const rect =
-                    box instanceof Element ? box.getBoundingClientRect() : box;
-                  return { left: rect.left, right: rect.right };
-                },
-              );
-            });
-          expect(gaps).not.toBeNull();
-          if (!gaps) continue;
-          expect(gaps).toHaveLength(4);
-          for (let index = 1; index < gaps.length; index += 1) {
-            const previous = gaps[index - 1];
-            const current = gaps[index];
-            if (!previous || !current) continue;
-            expect(current.left - previous.right).toBeGreaterThan(0);
-          }
-        }
-      });
-    }
-  });
-
   test("C14 relógio parado e título sem sublinhado", async ({ page }) => {
     for (const path of await listingSurfaces(page)) {
       await test.step(path, async () => {
         await open(page, path);
-        const featured = await featuredArticle(page);
-        const articles = [
-          ...(featured ? [featured] : []),
-          ...(await listArticles(page)),
-        ];
-        for (const article of articles) {
+        for (const article of await listArticles(page)) {
           const clock = await article.evaluate((root) => {
             const note = root.querySelector(".sr-only");
             const span = note?.previousElementSibling;
@@ -871,183 +584,12 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     }
   });
 
-  test("C15 borda só no destaque", async ({ page }) => {
-    await open(page, "/");
-    const featured = await featuredArticle(page);
-    expect(featured).not.toBeNull();
-    if (!featured) return;
-    const border = await featured.evaluate((article) => {
-      const style = getComputedStyle(article);
-      const probe = document.createElement("div");
-      probe.style.borderBottomColor = "var(--color-line)";
-      document.body.appendChild(probe);
-      const line = getComputedStyle(probe).borderBottomColor;
-      probe.remove();
-      return {
-        top: style.borderTopWidth,
-        right: style.borderRightWidth,
-        bottom: style.borderBottomWidth,
-        left: style.borderLeftWidth,
-        bottomStyle: style.borderBottomStyle,
-        bottomColor: style.borderBottomColor,
-        line,
-        paddingTop: Number.parseFloat(style.paddingTop),
-        paddingRight: Number.parseFloat(style.paddingRight),
-        paddingBottom: Number.parseFloat(style.paddingBottom),
-        paddingLeft: Number.parseFloat(style.paddingLeft),
-      };
-    });
-    expect(border.bottom).toBe("1px");
-    expect(border.top).toBe("0px");
-    expect(border.left).toBe("0px");
-    expect(border.right).toBe("0px");
-    expect(border.bottomStyle).toBe("solid");
-    expect(border.bottomColor).toBe(border.line);
-    expect(border.paddingTop).toBeGreaterThanOrEqual(20);
-    expect(border.paddingBottom).toBeGreaterThanOrEqual(20);
-
-    for (const width of [1280, 360]) {
-      await page.setViewportSize({ width, height: 800 });
-      const spacing = await page.evaluate(() => {
-        const featured = document.querySelector(
-          'section[aria-label="Destaque"] article',
-        );
-        const item = document.querySelector('ul[aria-label="Posts"] > li');
-        const card = item?.querySelector("article");
-        const featuredTitle = featured?.querySelector("h2");
-        const listTitle = card?.querySelector("h2");
-        const cover = featured?.querySelector("img");
-        if (
-          !featured ||
-          !item ||
-          !card ||
-          !featuredTitle ||
-          !listTitle ||
-          !cover
-        )
-          return null;
-        const itemStyle = getComputedStyle(item);
-        const featuredStyle = getComputedStyle(featured);
-        const featuredTitleBox = featuredTitle.getBoundingClientRect();
-        const listTitleBox = listTitle.getBoundingClientRect();
-        const cardBox = card.getBoundingClientRect();
-        const coverBox = cover.getBoundingClientRect();
-        return {
-          gap:
-            card.getBoundingClientRect().top -
-            featured.getBoundingClientRect().bottom,
-          above: Number.parseFloat(featuredStyle.paddingBottom),
-          below: Number.parseFloat(itemStyle.paddingTop),
-          between: Number.parseFloat(itemStyle.paddingBottom),
-          paddingTop: Number.parseFloat(featuredStyle.paddingTop),
-          paddingBottom: Number.parseFloat(featuredStyle.paddingBottom),
-          paddingLeft: Number.parseFloat(featuredStyle.paddingLeft),
-          paddingRight: Number.parseFloat(featuredStyle.paddingRight),
-          left: featuredTitleBox.left - cardBox.left,
-          titleLeft: featuredTitleBox.left - listTitleBox.left,
-          right: coverBox.right - cardBox.right,
-        };
-      });
-      expect(spacing, `${width}`).not.toBeNull();
-      if (!spacing) continue;
-      expect(
-        Math.abs(spacing.gap - spacing.below),
-        `${width}`,
-      ).toBeLessThanOrEqual(1);
-      expect(
-        Math.abs(spacing.above - spacing.between),
-        `${width}`,
-      ).toBeLessThanOrEqual(1);
-      if (width === 1280) {
-        expect(spacing.paddingTop, `${width}`).toBe(32);
-        expect(spacing.paddingBottom, `${width}`).toBe(32);
-        expect(spacing.paddingLeft, `${width}`).toBe(0);
-        expect(spacing.paddingRight, `${width}`).toBe(0);
-        expect(Math.abs(spacing.left), `${width}`).toBeLessThanOrEqual(1);
-        expect(Math.abs(spacing.right), `${width}`).toBeLessThanOrEqual(1);
-      } else {
-        expect(spacing.paddingLeft, `${width}`).toBe(0);
-        expect(spacing.paddingRight, `${width}`).toBe(0);
-        expect(Math.abs(spacing.titleLeft), `${width}`).toBeLessThanOrEqual(1);
-      }
-    }
-
-    for (const article of await listArticles(page)) {
-      const widths = await article.evaluate((root) => {
-        const style = getComputedStyle(root);
-        return [
-          style.borderTopWidth,
-          style.borderRightWidth,
-          style.borderBottomWidth,
-          style.borderLeftWidth,
-        ].map((value) => Number.parseFloat(value));
-      });
-      expect(widths.every((width) => width === 0)).toBe(true);
-    }
-  });
-
-  test("C16 capa centralizada sem abrir vão", async ({ page }) => {
-    await page.setViewportSize({ width: 1280, height: 800 });
-    await open(page, "/");
-    const featured = await featuredArticle(page);
-    expect(featured).not.toBeNull();
-    if (!featured) return;
-
-    const measure = () =>
-      featured.evaluate((root) => {
-        const label = [...root.querySelectorAll("p")].find((paragraph) =>
-          (paragraph.textContent ?? "").includes("Destaque"),
-        );
-        const folio = root.querySelector("time")?.parentElement;
-        const heading = root.querySelector("h2");
-        const footer = root.querySelector("p.footer");
-        const cover = root.querySelector("img")?.parentElement;
-        if (!label || !folio || !heading || !footer || !cover) return null;
-        const labelBox = label.getBoundingClientRect();
-        const footerBox = footer.getBoundingClientRect();
-        const coverBox = cover.getBoundingClientRect();
-        const folioBox = folio.getBoundingClientRect();
-        const headingBox = heading.getBoundingClientRect();
-        return {
-          delta: Math.abs(
-            (coverBox.top + coverBox.bottom) / 2 -
-              (labelBox.top + footerBox.bottom) / 2,
-          ),
-          gap: headingBox.top - folioBox.bottom,
-          coverHeight: coverBox.height,
-          textHeight: footerBox.bottom - labelBox.top,
-        };
-      });
-
-    const before = await measure();
-    expect(before, "medição inicial").not.toBeNull();
-    if (!before) return;
-    expect(before.delta).toBeLessThanOrEqual(2);
-
-    await featured.evaluate((root) => {
-      const link = root.querySelector("h2 a");
-      if (link) link.textContent = "Curto";
-      root.querySelector("h2")?.nextElementSibling?.remove();
-    });
-
-    const after = await measure();
-    expect(after, "medição com texto curto").not.toBeNull();
-    if (!after) return;
-    expect(after.coverHeight).toBeGreaterThan(after.textHeight);
-    expect(after.delta).toBeLessThanOrEqual(2);
-    expect(Math.abs(after.gap - before.gap)).toBeLessThanOrEqual(1);
-  });
-
   test("C17 resumo em 16px com entrelinha de cerca de 25,6px", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     await open(page, "/");
-    const featured = await featuredArticle(page);
-    const articles = [
-      ...(featured ? [featured] : []),
-      ...(await listArticles(page)),
-    ];
+    const articles = await listArticles(page);
     expect(articles.length).toBeGreaterThan(1);
     for (const article of articles) {
       const summary = article.locator("h2 + p");
@@ -1099,11 +641,11 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     if (!linkBox || !articleBox) return;
     expect(linkBox.height).toBeLessThan(articleBox.height / 2);
 
-    const level = article.getByText(LEVEL);
+    const kind = article.getByText(KIND);
     const reading = article.locator("p.footer span.text-pencil", {
       hasText: /\d+\s+min/,
     });
-    for (const piece of [level, reading]) {
+    for (const piece of [kind, reading]) {
       await piece.scrollIntoViewIfNeeded();
       const hit = await piece.evaluate((element) => {
         const rect = element.getBoundingClientRect();
@@ -1148,39 +690,6 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
         summaryBox.y + summaryBox.height / 2,
       ),
     ]);
-
-    await page.setViewportSize({ width: 360, height: 800 });
-    await open(page, "/");
-    const featured = await featuredArticle(page);
-    expect(featured).not.toBeNull();
-    if (!featured) return;
-    for (const width of [360, 1280]) {
-      await page.setViewportSize({ width, height: 800 });
-      await featured.locator("img").scrollIntoViewIfNeeded();
-      const hit = await featured.evaluate((root) => {
-        const image = root.querySelector("img");
-        const titleLink = root.querySelector("h2 a");
-        if (!image || !titleLink) return null;
-        const box = image.getBoundingClientRect();
-        const target = document.elementFromPoint(
-          box.left + box.width / 2,
-          box.top + box.height / 2,
-        );
-        const titleBox = titleLink.getBoundingClientRect();
-        const titleTarget = document.elementFromPoint(
-          titleBox.left + titleBox.width / 2,
-          titleBox.top + titleBox.height / 2,
-        );
-        return {
-          cover: target === titleLink || titleLink.contains(target),
-          title: titleTarget === titleLink || titleLink.contains(titleTarget),
-          coverTag: target?.tagName ?? "",
-        };
-      });
-      expect(hit, `${width}`).not.toBeNull();
-      expect(hit?.cover, `${width} ${hit?.coverTag}`).toBe(true);
-      expect(hit?.title, `${width}`).toBe(true);
-    }
   });
 
   test("C20 vão vertical quando o rodapé quebra", async ({ page }) => {
@@ -1190,16 +699,10 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     await expect(footer).toBeVisible();
     const measured = await footer.evaluate((node) => {
       const block = node as HTMLElement;
-      const walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT);
-      while (walker.nextNode()) {
-        const value = walker.currentNode.textContent ?? "";
-        if (/Iniciante|Intermediário|Avançado/.test(value)) {
-          walker.currentNode.textContent = value.replace(
-            /Iniciante|Intermediário|Avançado/,
-            "Intermediário",
-          );
-        }
-      }
+      const kind = [...block.querySelectorAll("span")].find((span) =>
+        /^(Artigo|Protótipo)$/.test((span.textContent ?? "").trim()),
+      );
+      if (kind) kind.textContent = "Protótipo";
       const wraps = () => {
         const tops = [...block.children].map(
           (child) => child.getBoundingClientRect().top,
@@ -1248,79 +751,6 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     for (const gap of measured.gaps) {
       expect(gap).toBeGreaterThanOrEqual(5);
       expect(gap).toBeLessThanOrEqual(8);
-    }
-  });
-
-  test("C21 capa do destaque entre o fólio e o título no mobile", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 360, height: 800 });
-    await open(page, "/");
-    const featured = await featuredArticle(page);
-    expect(featured).not.toBeNull();
-    if (!featured) return;
-
-    const order = await featured.evaluate((root) => {
-      const label = [...root.querySelectorAll("p")].find((paragraph) =>
-        (paragraph.textContent ?? "").includes("Destaque"),
-      );
-      const folio = root.querySelector("time")?.parentElement;
-      const image = root.querySelector("img");
-      const heading = root.querySelector("h2");
-      const summary = heading?.nextElementSibling;
-      const footer = root.querySelector("p.footer");
-      if (!label || !folio || !image || !heading || !summary || !footer) {
-        return null;
-      }
-      const top = (element: Element) => element.getBoundingClientRect().top;
-      return {
-        label: top(label),
-        folio: top(folio),
-        image: top(image),
-        heading: top(heading),
-        summary: top(summary),
-        footer: top(footer),
-      };
-    });
-    expect(order).not.toBeNull();
-    if (!order) return;
-    expect(order.label).toBeLessThan(order.folio);
-    expect(order.folio).toBeLessThan(order.image);
-    expect(order.image).toBeLessThan(order.heading);
-    expect(order.heading).toBeLessThan(order.summary);
-    expect(order.summary).toBeLessThan(order.footer);
-
-    await page.setViewportSize({ width: 1280, height: 800 });
-    const beside = await featured.evaluate((root) => {
-      const image = root.querySelector("img");
-      const heading = root.querySelector("h2");
-      if (!image || !heading) return null;
-      const imageBox = image.getBoundingClientRect();
-      const headingBox = heading.getBoundingClientRect();
-      return { imageLeft: imageBox.left, headingRight: headingBox.right };
-    });
-    expect(beside).not.toBeNull();
-    if (!beside) return;
-    expect(beside.imageLeft).toBeGreaterThanOrEqual(beside.headingRight - 1);
-  });
-
-  test("C22 título do destaque", async ({ page }) => {
-    await open(page, "/");
-    const featured = await featuredArticle(page);
-    expect(featured).not.toBeNull();
-    if (!featured) return;
-    const heading = featured.locator("h2");
-    await expect(heading).toHaveCount(1);
-
-    for (const [width, size] of [
-      [360, 36],
-      [1280, 44],
-    ] as const) {
-      await page.setViewportSize({ width, height: 800 });
-      const actual = fontSizePx(
-        await heading.evaluate((element) => getComputedStyle(element).fontSize),
-      );
-      expect(actual, String(width)).toBe(size);
     }
   });
 });

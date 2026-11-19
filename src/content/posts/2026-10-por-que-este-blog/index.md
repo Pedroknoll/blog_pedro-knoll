@@ -5,13 +5,9 @@ description: "Notas de estudo sobre aprendizado de máquina, com notebooks que r
 
 pubDate: 2026-10-16
 
-folio: 1
-kind: concept
-level: 1
+kind: article
 
 tags: [meta]
-
-featured: true
 
 cover: ./cover.png
 

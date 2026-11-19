@@ -21,9 +21,8 @@ export const notFoundIntro =
   "O endereço pode ter mudado, ou esta página ainda não foi escrita. O resto do caderno continua aqui.";
 
 export const kindSlugs = {
-  concept: "conceito",
-  tutorial: "tutorial",
-  playbook: "playbook",
+  article: "artigos",
+  prototype: "prototipos",
 } as const;
 
 export function kindPath(kind: keyof typeof kindSlugs): string {

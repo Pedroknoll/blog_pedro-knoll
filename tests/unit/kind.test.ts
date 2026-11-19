@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   KINDS,
+  KIND_LABELS,
   KIND_SLUGS,
   kindCountText,
   kindCountWord,
@@ -11,16 +12,22 @@ import {
   postsWithKind,
   type Kind,
 } from "../../src/lib/kind";
+import { selectPublished } from "../../src/lib/published";
 
 const slugPattern = /^[a-z0-9-]+$/;
 
 describe("kind", () => {
   it("slugs exatos, únicos e no padrão", () => {
-    expect(KIND_SLUGS).toEqual({
-      concept: "conceito",
-      tutorial: "tutorial",
-      playbook: "playbook",
+    expect(KINDS).toEqual(["article", "prototype"]);
+    expect(KIND_LABELS).toEqual({
+      article: "Artigo",
+      prototype: "Protótipo",
     });
+    expect(KIND_SLUGS).toEqual({
+      article: "artigos",
+      prototype: "prototipos",
+    });
+    expect(kindPath("article")).toBe("/tipos/artigos/");
     const slugs = KINDS.map((kind) => KIND_SLUGS[kind]);
     expect(new Set(slugs).size).toBe(slugs.length);
     for (const slug of slugs) expect(slug).toMatch(slugPattern);
@@ -41,27 +48,56 @@ describe("kind", () => {
 
   it("contagem na ordem de KINDS e sem o tipo vazio", () => {
     const posts = [
-      { data: { kind: "playbook" as Kind } },
-      { data: { kind: "concept" as Kind } },
-      { data: { kind: "tutorial" as Kind } },
-      { data: { kind: "concept" as Kind } },
+      { data: { kind: "prototype" as Kind } },
+      { data: { kind: "article" as Kind } },
+      { data: { kind: "article" as Kind } },
     ];
     expect(kindCounts(posts)).toEqual([
-      { kind: "concept", count: 2 },
-      { kind: "tutorial", count: 1 },
-      { kind: "playbook", count: 1 },
+      { kind: "article", count: 2 },
+      { kind: "prototype", count: 1 },
+    ]);
+    expect(kindCounts([{ data: { kind: "article" as Kind } }])).toEqual([
+      { kind: "article", count: 1 },
+    ]);
+  });
+
+  it("tipo só com rascunho fica de fora da publicação", () => {
+    const entries = [
+      {
+        id: "artigo",
+        data: {
+          kind: "article" as Kind,
+          draft: false,
+          pubDate: new Date("2026-01-02"),
+        },
+      },
+      {
+        id: "rascunho",
+        data: {
+          kind: "prototype" as Kind,
+          draft: true,
+          pubDate: new Date("2026-01-03"),
+        },
+      },
+    ];
+    expect(kindCounts(selectPublished(entries, false))).toEqual([
+      { kind: "article", count: 1 },
+    ]);
+    expect(kindCounts(selectPublished(entries, true))).toEqual([
+      { kind: "article", count: 1 },
+      { kind: "prototype", count: 1 },
     ]);
   });
 
   it("filtra o tipo e preserva a ordem", () => {
     const posts = [
-      { id: "c", data: { kind: "concept" as Kind } },
-      { id: "t", data: { kind: "tutorial" as Kind } },
-      { id: "c2", data: { kind: "concept" as Kind } },
+      { id: "a", data: { kind: "article" as Kind } },
+      { id: "p", data: { kind: "prototype" as Kind } },
+      { id: "a2", data: { kind: "article" as Kind } },
     ];
-    expect(postsWithKind(posts, "concept").map((post) => post.id)).toEqual([
-      "c",
-      "c2",
+    expect(postsWithKind(posts, "article").map((post) => post.id)).toEqual([
+      "a",
+      "a2",
     ]);
   });
 

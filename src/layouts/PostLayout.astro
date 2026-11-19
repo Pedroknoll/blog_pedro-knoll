@@ -29,9 +29,7 @@ const {
   tags,
   cover,
   coverAlt,
-  folio,
   kind,
-  level,
 } = post.data;
 const canonical =
   post.data.canonical ?? absoluteUrl(postPath(post.id), Astro.site);
@@ -85,12 +83,9 @@ const jsonLd = blogPostingJsonLd({
       </p>
       <PostRail
         title={title}
-        folio={folio}
         pubDate={pubDate}
-        updatedDate={updatedDate}
         minutesRead={minutesRead}
         kind={kind}
-        level={level}
         tags={tags}
       />
     </header>
@@ -98,10 +93,8 @@ const jsonLd = blogPostingJsonLd({
       <div
         data-prose-mark
         aria-hidden="true"
-        class="not-prose max-lg:hidden border-b border-ink pb-2 mb-[1.5em] font-mono text-xs uppercase tracking-widest text-ink"
-      >
-        / Artigo
-      </div>
+        class="not-prose max-lg:hidden mb-[1.5em] border-b border-ink pb-2 font-mono text-xs min-h-[calc(1lh+0.5rem+1px)]"
+      ></div>
       <slot />
     </div>
     {hasCode && <CodeCopy />}
