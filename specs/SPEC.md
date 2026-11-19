@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 18/11/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 19/11/2026
+
+**Revisão de 19/11/2026:** a T-118 registra a Q22; requisitos já entregues mudam com o código (decisão 1A), cada um na tarefa do handoff.
 
 **Revisão 2 de 18/11/2026:** a T-109 registra a Q21, a revisão visual da Fase 4: as listas `/artigos/` e `/prototipos/`, as páginas de tema, a home sem destaque, o filtro só por tema, a busca nas listas, a rota `/comece-aqui/`, o fim do post e a imagem OG; a forma fica na BRAND (§7, §8, §9 e §11). Mudam a §2 e os critérios do RF-14, do RF-15, do RF-23 e do RF-24; o RF-01, o RF-02, o RF-04, o RF-12 e a §6 mudam com o código, na T-110 e na T-111.
 
@@ -23,7 +25,7 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 
 ### Não-objetivos (v1)
 
-- Posts da comunidade com login, upvotes e comentários nativos (o HF tem; aqui fica para v2).
+- Posts da comunidade com login e comentários nativos (o HF tem; aqui fica para v2).
 - CMS visual. A autoria é via Git.
 - Execução de código Python no servidor ou GPU.
 - Peças gráficas que não são o site (YouTube, rede, slide, certificado, pergaminho, adesivo).
@@ -47,7 +49,7 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 
 ## 2. Premissas e decisões em aberto
 
-A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/11, 10/11, 16/11, 17/11 e 18/11 já estão incorporadas, e nenhuma decisão segue em aberto.
+A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/11, 10/11, 16/11, 17/11, 18/11 e 19/11 já estão incorporadas, e nenhuma decisão segue em aberto.
 
 ### Premissas assumidas
 
@@ -105,7 +107,7 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
 
 ### Decisões de 18/11/2026
 
-- [x] **Q20 — Fase 4 depois do lançamento** (T-106; substitui a parte da Q12 sobre tipos, temas e newsletter; a Q21 decide a forma e ajusta os itens 3, 5 e 6):
+- [x] **Q20 — Fase 4 depois do lançamento** (T-106; substitui a parte da Q12 sobre tipos, temas e newsletter; a Q21 decide a forma e ajusta os itens 3, 5 e 6). Substituída em 19/11/2026 pela Q22 onde discordar:
   1. **Tipo:** o `kind` passa a `article` e `prototype` (Artigo e Protótipo), um por post. É classificação: os dois podem ter caderno no molab, sem layout próprio, e cada tipo tem lista própria, com as rotas decididas na T-109. Saem `concept`, `tutorial` e `playbook` (T-110).
   2. **Tema:** campo `theme`, obrigatório, um por post, sem lista prévia. O frontmatter guarda o nome visível, e o build gera o slug a partir dele; duas grafias com o mesmo slug quebram o build. Não há arquivo central de rótulos: um tema novo não muda arquivo fora da pasta do post (RNF-14) (T-110).
   3. **Destaque:** o campo `featured` continua no schema, e os posts deixam de usá-lo.
@@ -119,7 +121,7 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
   11. **Header e footer:** revistos na T-109 e implementados na T-113.
   12. **Fontes e marca:** a Caveat sai (T-108); os símbolos da marca que o site não usa ficam em `src/assets/brand/`; o nível continua no card e no post; o `author.avatar` fica, para a T-114 decidir o uso.
   13. **Saem:** o embed de iframes (RF-20, T-29) e a reavaliação do modo inline do mdx-marimo (T-32). O i18n (T-30) fica para a próxima fase. O HSTS preload não entra; reavaliar se o domínio ganhar subdomínios ou e-mail.
-- [x] **Q21 — Revisão visual da Fase 4** (T-109; a forma está na BRAND §7, §8, §9.1 a §9.3, §9.9, §9.12 a §9.14, §10 e §11):
+- [x] **Q21 — Revisão visual da Fase 4** (T-109; a forma está na BRAND §7, §8, §9.1 a §9.3, §9.9, §9.12 a §9.14, §10 e §11). Substituída em 19/11/2026 pela Q22 onde discordar:
   1. **Listas:** `/artigos/` e `/prototipos/`, cada uma inteira, por data, sem paginação; um tipo sem post publicado não tem página. Cada tema tem a sua página, `/temas/<slug>/`, sem página `/temas/`, com seções por tipo quando tem os dois. A barra "Filtrar por tipo" e as páginas `/tipos/` saem (T-111).
   2. **Home:** a saudação e todos os posts, dos dois tipos, paginados (RF-03 sem mudança). Sem destaque: o `featured` fica no schema, sem efeito (ajusta o item 3 da Q20). A saudação fica só na home.
   3. **Card:** sem resumo e sem tipo; o tema, sem link, é cortado com reticências quando não cabe (T-111).
@@ -130,6 +132,22 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
   8. **Comece aqui:** em `/comece-aqui/` (T-114).
   9. **Fim do post:** texto, compartilhar, apêndice, relacionados e newsletter, nessa ordem (T-115, T-26, T-116). A newsletter fica no fim do post; outro lugar, se houver, sai da T-116. Sai da BRAND o convite para abrir uma issue no fim do post.
   10. **Imagem OG:** a ficha da BRAND §11, com fólio, tipo, título, tema, nível, assinatura e domínio (T-23).
+
+### Decisões de 19/11/2026
+
+- [x] **Q22 — Refatoração da Fase 4** (T-118; substitui a Q20 e a Q21 onde discordar):
+  1. **Modelo:** saem `folio`, `level`, `featured` e o campo `theme`, que não entra. O `kind` passa a `article` e `prototype` (Artigo e Protótipo). Os dois posts publicados, hoje `concept`, viram `article`. O rascunho `2026-10-rascunho-de-teste` vira `prototype`. A `fixture-md` vira `prototype` e as outras três fixtures ficam `article`. A prova de tipo só com rascunho é um teste do Vitest; o cenário "Rascunhos" da §11 continua no E2E só para o post. Entram a folha e o frasco, em tinta. O topo da lateral diz `/ ARTIGO` ou `/ PROTÓTIPO`. A palavra "fólio" sai; o post é "post" (T-120).
+  2. **Card e destaque:** o card de produção perde o fólio e o nível, e a home perde o destaque. O RF-01 muda nesse ponto na T-120. O resto do RF-01, as três listas, muda na T-123.
+  3. **Home e listas:** a saudação fica à esquerda a partir de `lg`. A home tem 5 recentes, o top 10 e 5 protótipos, cada lista com "Todos". A lista Protótipos não aparece quando não há protótipo publicado. As listas inteiras são `/blog/`, `/artigos/`, `/prototipos/` e `/mais-votados/`. O item é título, data, votos e tempo de leitura, também em `/tags/<tag>/`. Saem a paginação (o RF-03 e a exceção da Q10), `/page/n/` e `/tipos/`, que passam a 404, sem `_redirects`. Um tipo sem post publicado não tem página. Da T-120 até a T-123, `/tipos/artigos/` entra no sitemap; isso é aceito (T-123).
+  4. **Filtro:** um `select` nativo, uma tag por vez, gravada em `?tag=`, nas quatro listas. Sem JavaScript, a lista inteira e os links de `/tags/`. Em `/mais-votados/`, sem JavaScript, o aviso (T-124).
+  5. **Busca:** o modal do Pagefind 1.5 abre pelo botão no header ou com Cmd/Ctrl+K, em todas as páginas. O índice cobre só o corpo dos posts. O `wasm-unsafe-eval` vale no site todo (T-22).
+  6. **Header, footer e Comece aqui:** no header, a assinatura, Comece aqui, Artigos, Protótipos (este só com protótipo publicado), o lugar da busca e o lugar do tema. No footer, o nome, o ano, RSS, GitHub e LinkedIn (T-113). A página `/comece-aqui/` tem a estrutura definida na própria tarefa, com o link em primeiro no header (T-114).
+  7. **Fim do post:** o voto (T-122), o compartilhar (T-115), o apêndice, os relacionados pelas tags (T-26) e a newsletter (T-116). A revisão visual desse fim é a T-117, só docs.
+  8. **Newsletter:** Kit. O formulário é HTML do próprio site e aponta para `https://app.kit.com/forms/<id>/subscriptions`, sem o script do Kit, no fim do post e na home. O `form-action` e o DNS saem da T-116.
+  9. **Imagem OG:** a ficha da BRAND §11, sem fólio, tema e nível. A forma sai da T-119. Com capa, a capa ganha (T-23).
+  10. **Upvotes anônimos:** substituem o RF-21. Uma linha por par (hash do IP, slug), sem cookie e sem desfazer; dois leitores no mesmo NAT dividem o voto. A gravação só acontece em `pedroknoll.com`. O slug é conferido contra o catálogo dos posts publicados. O top 10 só lista posts com pelo menos 1 voto, com desempate pela data mais recente. Sem JavaScript, um aviso. O teto diário por hash fica a definir na T-121. A API e o D1 são a T-121; o botão é a T-122. O site segue `output: 'static'`, sem `@astrojs/cloudflare`. O Worker ganha um `main` só para `/api/*` (`run_worker_first`), com o binding do D1, e as páginas continuam vindo do `dist/`. O `_headers` não vale para a resposta do Worker, então os headers da API ficam no código. O ADR-04 e o ADR-05 mudam na T-121.
+  11. **Seguem no fim:** a revisão visual com mockups fora do repositório grava a BRAND 1.29 (T-119). Cores das figuras (T-76) e tema escuro com sol e lua (T-24). Giscus (T-28) e o spike do Workers Previews (T-31).
+  12. **Decisão 1A:** requisito já entregue muda no PR que muda o código. O handoff desta tarefa lista qual. Posts novos só depois da T-120.
 
 ## 3. Requisitos funcionais
 
@@ -152,16 +170,17 @@ A v1 entrega 11 requisitos Must; o restante entra por ordem de prioridade sem bl
 | RF-12 | SEO por post: title, description, canonical, Open Graph, JSON-LD `BlogPosting`        | Must       | O `<title>` do post é o título do post. Home `{site.title} · {autor}`, post `{título} · {site.title} · {autor}`, `/page/n/` `Blog — página N · {site.title} · {autor}`, tag `Tag: <tag> · {site.title} · {autor}`, tipo `Tipo: <rótulo> · {site.title} · {autor}`, 404 `Página não encontrada · {site.title} · {autor}`. A 404 não tem canonical nem `og:url` e leva `noindex`, porque a Cloudflare serve `/404` com status 200. `og:image` e `image` do JSON-LD só existem quando há capa, até a T-23. Validado no Rich Results Test; URLs absolutas montadas a partir de `SITE_URL` |
 | RF-13 | ~~Link "Editar no GitHub" por post~~                                                  | Removido   | Saiu na T-106 (Q20): o site não leva ao GitHub pelo post                                                                |
 | RF-14 | Página "Comece aqui"                                                                  | Should     | Página de entrada do blog em `/comece-aqui/`, com o link em primeiro no header (BRAND §9.13), sem link para o GitHub; a estrutura sai da T-114                          |
-| RF-15 | Busca full-text estática                                                              | Should     | O Pagefind indexa só o corpo dos posts, sem backend. A busca fica em `/artigos/` e `/prototipos/`, junto do filtro por tema, e procura só no tipo da lista, respeitando o tema escolhido (BRAND §9.12); a CSP que ela pede (`wasm-unsafe-eval` nessas duas rotas) sai da T-22       |
-| RF-16 | Imagem OG gerada por post quando não houver capa                                      | Should     | Com capa, a capa ganha. Sem capa, PNG 1200×630 no layout da seção 11 do BRAND; o gerador é hipótese da T-23 |
+| RF-15 | Busca full-text estática | Should | O Pagefind 1.5 indexa só o corpo dos posts, sem backend. O modal abre pelo botão no header ou com Cmd/Ctrl+K, em todas as páginas. O script do Pagefind carrega ao abrir. O `wasm-unsafe-eval` no site todo sai da T-22 |
+| RF-16 | Imagem OG gerada por post quando não houver capa | Should | Com capa, a capa ganha. Sem capa, PNG 1200×630 na ficha da seção 11 do BRAND, sem fólio, tema e nível; a forma sai da T-119 e o gerador é hipótese da T-23 |
 | RF-17 | Tema escuro com controle segmentado, respeitando `prefers-color-scheme`               | Should     | O controle Claro/Escuro grava a escolha em `localStorage` e aplica `data-theme` na raiz. Sem escolha gravada, segue `prefers-color-scheme`. Sem flash de tema errado no carregamento |
-| RF-18 | Posts relacionados ao fim (pelo tema)                                                 | Could      | Até 3 posts do mesmo tema, com as tags em comum para desempatar; nunca o próprio                                        |
+| RF-18 | Posts relacionados ao fim (pelas tags) | Could | Até 3 posts com tags em comum, nunca o próprio, ordenados pelo número de tags em comum e, no empate, pela data mais recente; sem post com tag em comum, a seção não aparece (T-26) |
 | RF-19 | Comentários e reações via Giscus                                                      | Could      | Fase 4, pós-sprint 01; carregamento lazy                                                                                |
 | RF-20 | ~~Embed de Hugging Face Spaces e iframes genéricos~~                                  | Removido   | Saiu na T-106 (Q20)                                                                                                     |
-| RF-21 | Artigos da comunidade com login e upvote                                              | Won't (v1) | Fora da v1; exigiria D1 + auth                                                                                          |
+| RF-21 | ~~Artigos da comunidade com login e upvote~~ | Substituído | Substituído pelo RF-25 (T-118, Q22) |
 | RF-22 | `Callout` com `variant` `note`, `caution` ou `result`                                 | Should     | Rótulos visíveis `// NOTA DE BANCADA`, `[!] CUIDADO` e `= RESULTADO`, tudo em tinta                                    |
 | RF-23 | Compartilhar no fim do post                                                           | Should     | X, LinkedIn e e-mail por links com o título e a URL do post, sem script de terceiro; "Copiar link" por script do próprio site, que vira "Link copiado" por 1,5 s; no fim da coluna do texto, antes da faixa do apêndice (BRAND §9.14, T-115) |
-| RF-24 | Inscrição na newsletter                                                               | Should     | O formulário do provedor (Beehiiv ou Kit, T-116), no fim do post, depois dos posts relacionados (BRAND §9.14), com a CSP e o DNS ajustados na mesma tarefa; outro lugar, se houver, sai da T-116     |
+| RF-24 | Inscrição na newsletter | Should | Formulário HTML do próprio site para https://app.kit.com/forms/<id>/subscriptions, sem o script do Kit, no fim do post e na home. O `form-action` e o DNS saem da T-116 |
+| RF-25 | Upvotes anônimos | Should | Uma linha por par (hash do IP, slug), sem cookie e sem desfazer. O hash do IPv6 é o do prefixo /64 e o do IPv4 é o do endereço inteiro. O `localStorage` só muda o botão para Votado; limpar o storage não soma de novo se o IP for o mesmo, e dois leitores no mesmo NAT dividem um voto por post. A gravação só acontece em pedroknoll.com, com Origin https://pedroknoll.com e Content-Type application/json; no preview e no workers.dev a API só lê. O slug é conferido contra o catálogo dos posts publicados e o slug desconhecido não é gravado. O top 10 só lista posts com pelo menos 1 voto, com desempate pela data mais recente. Sem JavaScript, um aviso. O teto diário por hash fica a definir na T-121. A API é a T-121 e o botão, no fim do post, é a T-122 |
 
 
 ## 4. Requisitos não-funcionais
