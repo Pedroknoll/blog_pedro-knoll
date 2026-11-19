@@ -160,7 +160,14 @@ test.describe("cabeçalho do post [RF-04]", () => {
         const label = cell.locator("> div").first();
         const bar = cell.locator("> span");
         const table = rail.locator("> div").nth(1);
-        expect(text(await label.textContent())).toBe("METADADOS");
+        const tipoText = text(
+          await table
+            .getByText(/^(Artigo|Protótipo)$/)
+            .first()
+            .textContent(),
+        );
+        expect(["Artigo", "Protótipo"]).toContain(tipoText);
+        expect(text(await label.textContent())).toBe(tipoText);
         await expect(cell.locator("svg")).toHaveCount(0);
         await expect(label).toHaveCSS("font-size", "12px");
         await expect(label).toHaveCSS("text-transform", "uppercase");
@@ -173,9 +180,6 @@ test.describe("cabeçalho do post [RF-04]", () => {
           (element) => getComputedStyle(element).color,
         );
         expect(channels(labelColor)).toEqual(channels(ink));
-
-        const mark = page.locator("article > .prose > [data-prose-mark]");
-        await expect(mark).toHaveCSS("letter-spacing", "1.2px");
 
         await expect(bar).toHaveCount(1);
         await expect(bar).toHaveAttribute("aria-hidden", "true");
@@ -191,15 +195,7 @@ test.describe("cabeçalho do post [RF-04]", () => {
         const first = page.locator("article > .prose > :first-child");
         await expect(first).toHaveAttribute("data-prose-mark", "");
         await expect(first).toHaveAttribute("aria-hidden", "true");
-        await expect(first).toHaveCSS("text-transform", "uppercase");
-        const tipoText = text(
-          await table
-            .getByText(/^(Artigo|Protótipo)$/)
-            .first()
-            .textContent(),
-        );
-        expect(["Artigo", "Protótipo"]).toContain(tipoText);
-        expect(text(await first.textContent())).toBe(`/ ${tipoText}`);
+        expect(text(await first.textContent())).toBe("");
         expect(await first.evaluate((element) => element.tagName)).not.toBe(
           "P",
         );
@@ -647,7 +643,7 @@ test.describe("cabeçalho do post [RF-04]", () => {
 test.describe("cabeçalho do post sem JavaScript [RF-04]", () => {
   test.use({ javaScriptEnabled: false });
 
-  test("H5 sem JavaScript fica / METADADOS", async ({ page }) => {
+  test("H5 sem JavaScript fica / ARTIGO ou / PROTÓTIPO", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     const posts = await publishedPosts(page);
 
@@ -669,7 +665,9 @@ test.describe("cabeçalho do post sem JavaScript [RF-04]", () => {
           "0",
         );
         const label = rail.locator("> div").first().locator("> div").first();
-        expect(text(await label.textContent())).toBe("METADADOS");
+        expect(["Artigo", "Protótipo"]).toContain(
+          text(await label.textContent()),
+        );
         await expect(label).toHaveCSS("opacity", "1");
       });
     }

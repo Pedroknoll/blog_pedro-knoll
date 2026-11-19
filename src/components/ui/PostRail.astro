@@ -2,7 +2,7 @@
 import KindLabel from "~/components/ui/KindLabel.astro";
 import TagList from "~/components/ui/TagList.astro";
 import { formatPubDate } from "~/lib/format-date";
-import type { Kind } from "~/lib/kind";
+import { KIND_LABELS, type Kind } from "~/lib/kind";
 import { site } from "~/site.config";
 
 interface Props {
@@ -39,7 +39,7 @@ const published = formatPubDate(pubDate);
   >
     <span aria-hidden="true">/</span>{" "}
     <div class="inline font-mono text-xs uppercase tracking-widest text-ink">
-      METADADOS
+      {KIND_LABELS[kind]}
     </div>
   </div>
   <div class="mt-8 border-t border-b border-line lg:mt-0 lg:border-t-0">

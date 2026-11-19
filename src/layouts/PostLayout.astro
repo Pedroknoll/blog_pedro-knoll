@@ -10,7 +10,6 @@ import PostAppendix from "~/components/ui/PostAppendix.astro";
 import PostRail from "~/components/ui/PostRail.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import type { PostAppendixModel } from "~/lib/references";
-import { KIND_LABELS } from "~/lib/kind";
 import { absoluteUrl, blogPostingJsonLd, pageTitle, postPath } from "~/lib/seo";
 import { site } from "~/site.config";
 
@@ -94,10 +93,8 @@ const jsonLd = blogPostingJsonLd({
       <div
         data-prose-mark
         aria-hidden="true"
-        class="not-prose max-lg:hidden border-b border-ink pb-2 mb-[1.5em] font-mono text-xs uppercase tracking-widest text-ink"
-      >
-        / {KIND_LABELS[kind]}
-      </div>
+        class="not-prose max-lg:hidden mb-[1.5em] border-b border-ink pb-2 font-mono text-xs min-h-[calc(1lh+0.5rem+1px)]"
+      ></div>
       <slot />
     </div>
     {hasCode && <CodeCopy />}
