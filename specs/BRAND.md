@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.27 · novembro de 2026 · pedroknoll.com
+Versão 1.28 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -152,10 +152,10 @@ Fundo **sempre liso**, sem textura, sem vinheta.
 
 ### Regras de cor (decisões)
 - **Proporção em qualquer peça:** papel ~68%, tinta ~20%, prússia ~7%, latão + sanguínea + verdete ≤ 5% somados.
-- **Latão e verdete marcam só o tipo de conteúdo; a sanguínea fica só na função do código (§9.5).** Nunca marcam avisos, erros, sucesso ou resultados, e nunca são fundo de página.
+- **Latão e verdete marcam só o tipo de conteúdo; a sanguínea fica só na função do código (§9.5).** Nunca marcam avisos, erros, sucesso ou resultados, e nunca são fundo de página. Os tipos Artigo e Protótipo ficam em tinta (§8, T-109): com a T-110, o latão e o verdete deixam de marcar tipo e ficam só no código (§9.5).
 - **Ouro-pigmento** aparece só na mão da saudação, sempre com contorno em tinta (amarelo puro some sobre o fundo claro).
 - **Pergaminho** (`#EADFC8`, com `--folha #DFD2B6`, `--grafite #5A4D3C`, `--lapis #8E7E64`, `--latao #765514`, `--sanguinea #9E3526`, `--verdete #2B6454`) é um tom mais fundo **só para peças gráficas**: slides, posts de rede social, capas, certificado. Nunca no blog.
-- **Nomes na interface:** o botão de tema diz **Claro** e **Escuro**. "Velino" e "cianotipia" são nomes internos.
+- **Nomes na interface:** o controle de tema mostra um sol e uma lua (§9.9), e os nomes dos dois botões, para o leitor de tela, são **Claro** e **Escuro** (T-109). "Velino" e "cianotipia" são nomes internos.
 - O modo claro é o padrão; o escuro é opção do leitor, respeitando `prefers-color-scheme` até ele escolher.
 
 ### Contraste medido (WCAG)
@@ -222,7 +222,8 @@ Títulos com `text-wrap: balance`.
   - Tutorial: o cursor `_` pisca (1,1 s).
   - Playbook: a lista se marca item por item e recomeça (4 s).
   - Aceno: dois quadros alternando 4 vezes, depois pausa (3,2 s, contínuo).
-- **Onde anima:** quando o ícone aparece sozinho e em destaque (cartões de tipo, página "sobre", saudação). **Parado** (`icone-*-parado.svg`) em listas, etiquetas, cards de índice e no cabeçalho do fólio, onde fica em 12 px, no tamanho da grade (T-67).
+- **Onde anima:** só a mão da saudação. Os ícones animados dos tipos de hoje não aparecem no site desde a T-67 e saem na T-110. **Parado** (`icone-*-parado.svg`) em listas, etiquetas, cards de índice e no cabeçalho do fólio, onde fica em 12 px, no tamanho da grade (T-67).
+- **Ícones novos (decisão da T-109):** `icone-artigo.svg` (folha) e `icone-prototipo.svg` (frasco), dos tipos (§8); `icone-busca.svg` (lupa) e `icone-filtro.svg`, das listas (§9.12); `icone-sol.svg` e `icone-lua.svg`, do controle de tema (§9.9). Todos com 12 × 12, uma cor, só parados, sem versão animada. O desenho está no apêndice, e cada um entra com a tarefa que o usa.
 - **Relógio** (`icone-relogio.svg`): 12 × 12, só parado, sem versão animada. Entra no rodapé do card, antes do tempo de leitura (seção 9.2).
 - Todas as animações respeitam `prefers-reduced-motion: reduce` (ficam paradas).
 - Os SVGs animados têm classes com prefixo (`pkc-`, `pkt-`, `pkp-`, `pka-`), então podem ser inseridos inline juntos sem conflito.
@@ -231,17 +232,18 @@ Títulos com `text-wrap: balance`.
 
 ## 8. Sistema de conteúdo
 
-**Decisão de 18/11/2026 (SPEC, Q20):** o tipo passa a Artigo e Protótipo, e o tema vira um campo obrigatório, um por post, sem lista prévia. As tabelas e o bloco de frontmatter abaixo valem até a T-110; a cor e o ícone dos tipos novos saem da T-109.
+**Decisão de 18/11/2026 (SPEC, Q20 e Q21):** o tipo passa a Artigo e Protótipo, e o tema vira um campo obrigatório, um por post, sem lista prévia. Os tipos abaixo são os da T-109 e entram na T-110; até lá, o site tem Conceito (prússia, compasso), Tutorial (latão, `>_`) e Playbook (verdete, checklist). Os temas e o bloco de frontmatter abaixo valem até a T-110.
 
-Três eixos independentes: **tipo** (formato), **nível** (dificuldade) e **tema** (assunto). Só o tipo tem cor.
+Três eixos independentes: **tipo** (formato), **nível** (dificuldade) e **tema** (assunto). Nenhum tem cor: o tipo se distingue pelo ícone (T-109).
 
 ### Tipos (decisão)
 
-| Tipo | Cor | Ícone | O que é | Estrutura |
-|---|---|---|---|---|
-| **Conceito** | prússia | compasso | Explica uma ideia do zero até um desenho que o leitor refaz de memória. | Pergunta → Esboço → Formalização → Onde aparece |
-| **Tutorial** | latão | `>_` | Leva de A a B com passos verificáveis. | Objetivo → Pré-requisitos → Passos → Conferência |
-| **Playbook** | verdete | checklist | Receita reutilizável para uma situação real. | Quando usar → Checklist → Armadilhas → Decisões |
+| Tipo | Cor | Ícone | O que é |
+|---|---|---|---|
+| **Artigo** | tinta | folha (`icone-artigo.svg`) | Explica uma ideia ou conta um aprendizado, do problema ao resultado. |
+| **Protótipo** | tinta | frasco (`icone-prototipo.svg`) | Mostra algo construído e funcionando: o que faz, como foi feito e onde quebra. |
+
+Os tipos não têm estrutura nem layout próprios (SPEC Q20). O tipo aparece no h1 das listas (ícone de 24 px) e nos rótulos das seções da página de tema (§9.2), no header (§9.13), na lateral do post (linha Tipo, ícone de 12 px), no rótulo do topo do texto (`/ ARTIGO` ou `/ PROTÓTIPO`, §9.3) e na imagem OG (§11). O card não mostra o tipo.
 
 Qualquer tipo pode ter cadernos marimo (§9.6).
 
@@ -275,29 +277,34 @@ A SPEC §6 fecha o schema. Chaves em inglês (`kind`, `level`, `tags`, `referenc
 - `<h1>` na fonte de display 600, `clamp(2.4rem, 4.4vw, 3.5rem)` abaixo de `lg` (no máximo 56 px, abaixo do display de 64 px da seção 5; T-44) e 36 px de `lg` em diante (T-69). A mão (`aceno.svg`) fica fora do `h1`, sozinha numa linha acima dele, decorativa (`aria-hidden`): 48 px, e 32 px abaixo de 560 px, com 1rem até o título (T-69).
 - O nome dentro da saudação usa a mesma marcação da assinatura (`<em>pk</em><span class="ponto">.</span><span class="ext">log</span>`), sem quebrar linha dentro do nome. Abaixo de 560 px e de `lg` em diante, o nome começa sempre na segunda linha (`Bem-vindo ao` / `pk.log`): a quebra não pode depender da fonte, senão a troca da fonte reserva pela fonte de display desloca a página (T-44, CLS).
 - Abaixo, o texto de apresentação em Plex Sans 18 px, entrelinha 1,55, cor grafite, máximo ~46 caracteres por linha, para a saudação ficar sozinha no topo (T-63, T-64).
-- Links do autor, logo abaixo do texto: `RSS`, `GitHub` e `LinkedIn`, em texto e sem ícone, no estilo da barra da seção 9.12 (IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em), em grafite, indo para prússia no hover e no foco, com 44 px de altura para o toque e na mesma aba (T-69).
-- Lateral, de `lg` em diante, na home e nas páginas de tipo: a saudação vira uma coluna de 15rem à esquerda, sticky no topo da tela, com 6rem de vão até a barra e a lista. O conteúdo do site fica em 72rem (token `--container-site`, utilidade `max-w-site`), e o header e o footer alinham a essa largura, na mesma margem das laterais da home e do post. Abaixo de `lg`, a saudação e os links ficam em cima da barra e rolam com a página (T-69). De `lg` em diante, o contêiner da lateral e da lista ganha 56 px de respiro em cima, somados aos 40 px da saudação e da barra; as tags e `/page/n/` não mudam (T-70).
-- A newsletter entra (SPEC Q20, RF-24); o lugar e a forma saem da T-109.
+- Links do autor, logo abaixo do texto: `RSS`, `GitHub` e `LinkedIn`, em texto e sem ícone, em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, em grafite, indo para prússia no hover e no foco, com 44 px de altura para o toque e na mesma aba (T-69).
+- Lateral, de `lg` em diante, na home (a saudação fica só na home, T-109; as páginas de tipo saem na T-111): a saudação vira uma coluna de 15rem à esquerda, sticky no topo da tela, com 6rem de vão até a barra e a lista. O conteúdo do site fica em 72rem (token `--container-site`, utilidade `max-w-site`), e o header e o footer alinham a essa largura, na mesma margem das laterais da home e do post. Abaixo de `lg`, a saudação e os links ficam em cima da barra e rolam com a página (T-69). De `lg` em diante, o contêiner da lateral e da lista ganha 56 px de respiro em cima, somados aos 40 px da saudação e da barra; as tags e `/page/n/` não mudam (T-70).
+- A newsletter não entra na saudação: o lugar é o fim do post (§9.14, T-109).
 
-### 9.2 Card de fólio (listas)
-- Um `article` em grade. No mobile, a ordem é a do DOM: fólio e data, título, resumo, rodapé. No destaque, a capa fica depois do rótulo e do fólio com a data, e antes do título, do resumo e do rodapé.
-- De `sm` em diante, o card da lista tem duas colunas: a faixa do fólio (6,5rem) à esquerda, centrada na vertical em relação ao texto (T-70), e o texto à direita (T-63). O destaque com capa inverte: texto à esquerda, capa de 18rem à direita, centralizada na vertical.
-- Linha do fólio: `Fól.` em mono, lápis; o número na fonte de display 600, tinta, desde 22 px; data em mono, lápis (`09.out.2026`). No mobile e no destaque, ficam na mesma linha (`Fól. 001 · 09.out.2026`). Na lista, de `sm` em diante, a data desce para baixo do número.
-- Título na fonte de display 600 na lista: 28 px em todas as larguras, entrelinha 1,2. No destaque, 36 px abaixo de `sm` e 44 px de `sm` em diante. Sem sublinhado e sem troca de cor, em repouso, no hover e no foco (T-63).
-- Resumo em Plex Sans 16 px, entrelinha 1,6, grafite (T-63).
-- O card inteiro é tocável: o link do título se estica sobre o card (`after:absolute after:inset-0`, com o `article` em `relative`) e dá retorno em acento no toque (`active:text-accent`). O rodapé não intercepta o toque (`pointer-events-none`).
-- Hover, no modelo do claude.dev: com o ponteiro sobre um card da listagem, destaque incluído, os outros caem para opacidade 0,35, com transição curta. Só com mouse (`hover: hover` e `pointer: fine`); o foco do teclado faz o mesmo. Sem transição com `prefers-reduced-motion`. Exceção à seção 9.10 (T-63).
-- Rodapé: tipo (ícone parado 12 px + nome), nível (hachura + nome) e tempo de leitura (relógio parado 12 px + `8 min`), em mono 12 px, maiúsculas. Separadores `|` na cor da linha, no vão entre os trechos; quando a linha quebra, o separador não abre nem fecha a linha, e as linhas do rodapé têm vão de 0,375rem. Sem tags.
-- A capa só aparece no destaque, na proporção 1200/630. Os cards da lista não mostram capa.
-- A lista separa os cards com divisória `divide-line`. Os cards da lista ficam sem borda de 1 px, sem sombra e sem hover de borda. O destaque tem borda de 1 px `--linha` só embaixo, sem raio e sem sombra. O respiro é só vertical: 1,25rem em cima e 2rem embaixo no mobile, 2rem em cima e embaixo de `sm` em diante. O texto e a capa alinham com os cards da lista. O espaço até o post seguinte é o mesmo que entre os cards da lista: 2rem de cada lado do filete.
+### 9.2 Card de fólio e páginas de lista
+Decisão da T-109; entra na T-111. Até lá, vale o card da T-63: com o resumo, o tipo com cor no rodapé e o destaque com capa na home.
+
+- Um `article` em grade, sem resumo e sem tipo (SPEC Q20): fólio, data, título, tema, nível e tempo de leitura. Sem capa e sem destaque: o `featured` fica no schema e não muda a home.
+- **Abaixo de `sm`:** a linha do fólio, `Fól. 003 · 17.nov.2026`, em mono 12 px, lápis; o título na fonte de display 600, 22 px, entrelinha 1,25; o rodapé, 0,5rem abaixo do título.
+- **De `sm` em diante:** duas colunas, a do fólio com 6,5rem e a do texto, com 2rem de vão, centradas na vertical. A coluna do fólio tem `Fól. 003` e a data em duas linhas, na mesma fonte e na mesma cor do celular (mono 12 px, lápis). Título em 28 px, entrelinha 1,2, com `text-wrap: balance`; o rodapé, 0,75rem abaixo.
+- **Rodapé:** tema, nível (hachura + nome) e tempo de leitura (relógio parado 12 px + `8 min`), numa linha só, em mono 12 px, maiúsculas, com separadores `|` na cor da linha. O tema fica em tinta, sem link, e é cortado com reticências quando não cabe; o nome inteiro fica no HTML, na lateral do post e na página do tema. O nível e o tempo, em lápis, não encolhem. Sem tags.
+- Título sem sublinhado e sem troca de cor, em repouso, no hover e no foco. O card inteiro é tocável: o link do título se estica sobre o card (`after:absolute after:inset-0`, com o `article` em `relative`) e dá retorno em acento no toque (`active:text-accent`). O rodapé não intercepta o toque (`pointer-events-none`).
+- Hover, no modelo do claude.dev: com o ponteiro sobre um card da listagem, os outros caem para opacidade 0,35, com transição curta. Só com mouse (`hover: hover` e `pointer: fine`); o foco do teclado faz o mesmo. Sem transição com `prefers-reduced-motion`. Exceção à seção 9.10 (T-63).
+- A lista separa os cards com divisória `divide-line`, com filete também em cima do primeiro e embaixo do último. O respiro é só vertical: 1,25rem em cima e embaixo abaixo de `sm`, e 2rem de `sm` em diante. Sem borda, sem sombra e sem capa.
+
+**Páginas de lista (T-109; entram na T-111).**
+
+- **Home:** a saudação (§9.1) e todos os posts, dos dois tipos, por data, paginados (SPEC RF-03). Sem destaque, sem barra de tipos, sem busca e sem filtro.
+- **`/artigos/` e `/prototipos/`:** a lista inteira do tipo, por data, sem paginação e sem saudação. h1 `Artigos` ou `Protótipos`, na escala do h1 de página (§5), com o ícone do tipo em 24 px, em tinta, antes do nome; abaixo, a busca e o filtro (§9.12) e a linha de contagem. Um tipo sem post publicado não tem página.
+- **`/temas/<slug>/`:** uma página por tema, com h1 `Tema: <nome>`, sem busca e sem filtro; não há página `/temas/`. Quando o tema tem artigos e protótipos, a lista se divide em duas seções, `/ ARTIGOS` e `/ PROTÓTIPOS`, cada uma com o ícone do tipo em 12 px, em mono 12 px maiúsculo, tinta, sobre um filete de 1 px em tinta; o rótulo é h2, e o título do card passa a h3. Com um tipo só, a lista simples.
 
 ### 9.3 Cabeçalho do fólio (página do post)
 Decisão da T-63, no modelo do Stripe (stripe.dev); entra nas T-65, T-66 e T-67.
 
 - **Título em cima, sozinho:** h1 na escala do post (seção 5), na largura toda, com `text-wrap: balance`. Abaixo, a linha fina de introdução em grafite, até ~52 caracteres.
-- **Lateral, de `lg` em diante:** à esquerda, com 15rem, vão de 4rem até o texto, sticky a 7,5rem do topo. No topo, `/ FÓL. 002` em mono 12 px, maiúsculas, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete; a barra é decorativa (`aria-hidden`). A coluna do texto abre com `/ ARTIGO`, no mesmo estilo e na mesma altura, decorativo, com o filete alinhado ao da lateral. Abaixo do filete, os metadados numa tabela de chave e valor: o rótulo à esquerda, em mono 12 px maiúsculo e grafite, numa coluna de 7rem, e o valor à direita; linhas com 9 px de respiro e pontilhado em `line` entre elas, e filete sólido em `line` no fim. Data, atualizado em (quando houver), leitura, tipo (ícone parado em 12 px), nível, autor e tags; nas tags, o rótulo fica em cima, na largura toda.
+- **Lateral, de `lg` em diante:** à esquerda, com 15rem, vão de 4rem até o texto, sticky a 7,5rem do topo. No topo, `/ FÓL. 002` em mono 12 px, maiúsculas, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete; a barra é decorativa (`aria-hidden`). A coluna do texto abre com o tipo do post, `/ ARTIGO` ou `/ PROTÓTIPO` (T-109, entra na T-110), no mesmo estilo e na mesma altura, decorativo, com o filete alinhado ao da lateral. Abaixo do filete, os metadados numa tabela de chave e valor: o rótulo à esquerda, em mono 12 px maiúsculo e grafite, numa coluna de 7rem, e o valor à direita; linhas com 9 px de respiro e pontilhado em `line` entre elas, e filete sólido em `line` no fim. Data, atualizado em (quando houver), leitura, tipo (ícone parado em 12 px), tema (link para a página do tema, no estilo das tags; T-109, entra na T-111), nível, autor e tags; nas tags, o rótulo fica em cima, na largura toda.
 - **Título ao rolar:** quando o h1 e a linha fina saem da tela, o título aparece acima da lateral, em 28 px, a 0,75rem dela. Fica em posição absoluta: não reserva espaço, não desloca nada, e o fólio continua visível. Um título de três linhas cabe acima da lateral sticky a 7,5rem. O título é texto com `aria-hidden`, não heading. A troca usa só opacidade, sem transição com `prefers-reduced-motion`. Sem JavaScript, o título não aparece.
-- **Abaixo de `lg`:** sem lateral. `/ FÓL. 006` em mono, sem filete; o título; a linha fina; e a mesma tabela de metadados, com filete em cima e 32 px de respiro, tudo rolando com o texto. O `/ ARTIGO` não aparece.
+- **Abaixo de `lg`:** sem lateral. `/ FÓL. 006` em mono, sem filete; o título; a linha fina; e a mesma tabela de metadados, com filete em cima e 32 px de respiro, tudo rolando com o texto. O rótulo do tipo (`/ ARTIGO`) não aparece.
 - **Sem sumário** (SPEC: o RF-05 saiu na T-63).
 
 **Apêndice, no modelo do Distill (T-66).** No fim do fólio, numa faixa própria depois do artigo, na largura toda, com filete de 1 px em `line` em cima e fundo `sheet`: os apêndices do autor e as referências numeradas (SPEC RF-04). Os títulos (`Apêndice A · <título>`, `Referências`) são rótulos em mono 12 px maiúsculo e grafite, nunca lápis (seção 4: lápis sobre folha clara dá 4,2). De `lg` em diante, o rótulo fica na coluna da lateral (15rem, vão de 4rem) e o texto, em Plex Sans 15 px com entrelinha 1,6, na coluna do texto; abaixo de `lg`, o rótulo fica em cima do texto. Cada referência traz o número da lista em grafite, o título com link numa linha e, abaixo, autores, ano e veículo em grafite; só o título é link. A ficha de bancada saiu na T-62.
@@ -356,7 +363,7 @@ Primeira célula de todo caderno: cabeçalho renderizado com a assinatura, o fó
 - Movimento: a troca de cor da célula tem transição curta, desligada com `prefers-reduced-motion`; o contorno do mapa muda de linha sem transição.
 
 ### 9.9 Botão de tema
-Dois estados, **Claro** e **Escuro**, num controle segmentado em mono 12 px. Grava a escolha (localStorage) e aplica `data-theme` na raiz.
+Decisão da T-109; entra na T-24. Um controle segmentado com dois botões de ícone, em 12 px: o sol (`icone-sol.svg`), tema claro, e a lua (`icone-lua.svg`), tema escuro. Cada botão tem 36 × 32 px; o grupo tem borda `line`, filete `line` entre os dois e cantos de 0,375rem. O botão ativo tem fundo tinta e ícone papel, com `aria-pressed="true"`; o outro, ícone grafite. Os nomes para o leitor de tela são **Claro** e **Escuro** (`aria-label`), e o grupo se chama Tema. Fica no header, à direita (§9.13). Grava a escolha (localStorage) e aplica `data-theme` na raiz.
 
 ### 9.10 Foco e interação
 Foco visível: contorno 2 px prússia com afastamento 3 px. Links em prússia, sublinhado de 1 px com afastamento 3 px.
@@ -364,8 +371,32 @@ Foco visível: contorno 2 px prússia com afastamento 3 px. Links em prússia, s
 ### 9.11 Link com cara de botão (página 404)
 O "Voltar ao início" da página 404 parece um botão, mas continua um link (`<a>`) para `/`. Fundo tinta, texto papel, IBM Plex Mono 400 em 14 px, 44 px de altura, 20 px de respiro nas laterais. Cantos retos e sem sombra, como os botões da seção 9.6. Sem sublinhado em repouso; no hover e no foco, sublinhado com afastamento de 3 px, sem troca de cor. O foco é o da seção 9.10. No tema escuro, os mesmos tokens invertem o par: fundo claro, texto escuro.
 
-### 9.12 Filtro por tipo (listas)
-Decisão da T-63, na disposição do claude.dev, revista na T-64. Uma linha de links acima da lista, com filete embaixo: `Todos` e os tipos com post publicado, na ordem de `KINDS` (SPEC §6). Cada item em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, lápis. Cada tipo leva só o nome e o número de posts publicados em sobrescrito, sem ícone (T-64). O ativo vai para tinta, com sublinhado de 2 px na cor do texto. Na home e nas páginas de tipo, o primeiro card começa logo abaixo do filete, só com o respiro do próprio card (seção 9.2): 2rem, e 1,25rem no destaque abaixo de `sm` (T-64). No celular, a linha rola na horizontal. Só links, sem JavaScript.
+### 9.12 Busca e filtro (listas)
+Decisão da T-109. O filtro entra na T-112, e a busca, na T-22; a barra "Filtrar por tipo" (T-63, T-64) sai na T-111. Só em `/artigos/` e `/prototipos/`, 2rem abaixo do h1 e acima da linha de contagem: o campo de busca e o filtro por tema, lado a lado de `sm` em diante (o filtro com 14rem) e empilhados abaixo, com 0,75rem de vão.
+
+- **Busca:** `input type="search"` com 44 px de altura, IBM Plex Mono 16 px (abaixo de 16 px, o Safari do iPhone dá zoom no toque), borda `line`, cantos de 0,375rem e fundo `surface`. O placeholder é `Buscar artigos` ou `Buscar protótipos`, em grafite (o lápis fica abaixo de 4,5 sobre a folha). A lupa (`icone-busca.svg`, 12 px, grafite) fica à direita, dentro do campo. Sem rótulo visível: o rótulo fica no HTML, escondido, com o texto do placeholder.
+- **Filtro:** `select` nativo, só por tema, sem filtro por tag. Sem a seta do sistema (`appearance: none`), com 44 px, IBM Plex Mono 16 px, fundo `sheet`, borda `line` e cantos de 0,375rem. O ícone do filtro (`icone-filtro.svg`, 12 px, grafite) fica à esquerda, e o texto também. Sem tema escolhido, mostra `Filtre por`, em grafite; com tema, o nome e o número de posts (`Bastidores (2)`), em tinta. Rótulo escondido: `Filtrar por tema`.
+- No HTML do build, os dois saem `disabled`, já com as opções, e o script os habilita sem mudar a altura de nada (sem CLS). A escolha vai para a URL: `?tema=<slug>&q=<termo>`.
+- **Contagem:** em mono 12 px, maiúsculas, lápis, com `aria-live="polite"`: `3 artigos`, `2 de 3 artigos`, `1 artigo com “cosseno”`. Com tema ou termo, o botão `Limpar` vem ao lado, em tinta, sublinhado.
+- **Com termo:** a busca procura só no tipo da página e respeita o tema escolhido. Os resultados vêm por relevância, no card da lista (§9.2), com o trecho do texto embaixo, em Plex Sans 16 px, grafite, e o termo marcado com fundo `sheet`, sem negrito (a página não carrega a Plex Sans 600).
+- **Sem resultado:** `Nenhum artigo nesse tema.` ou `Nenhum artigo com esse termo nesse tema.` (em `/prototipos/`, `Nenhum protótipo…`), entre filetes `line`.
+- **Sem JavaScript:** os dois campos ficam desabilitados, a lista vem inteira, e um aviso em Plex Sans 14 px, grafite, abaixo deles: `A busca e o filtro precisam de JavaScript. Sem ele, a lista abaixo mostra todos os artigos, e cada tema tem a sua página:`, seguido dos links das páginas de tema.
+
+### 9.13 Header e footer
+Decisão da T-109. O header e o footer entram na T-113, o link "Comece aqui", na T-114, e o controle de tema, na T-24.
+
+- **Header:** fundo `surface`, filete `line` embaixo, na largura do site (72rem), com 0,75rem de respiro em cima e embaixo. A assinatura (§3) fica à esquerda. Os links, nesta ordem: `Comece aqui` (`/comece-aqui/`), `Artigos`, com a folha, e `Protótipos`, com o frasco, os ícones em 12 px. Cada link em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, grafite, indo para prússia no hover e no foco, com 44 px de toque e 1,25rem entre eles; o da página atual vai para tinta, com sublinhado de 2 px e `aria-current="page"`. `Protótipos` só aparece quando há protótipo publicado: sem ele, a página não existe. O controle de tema (§9.9) fica por último, à direita.
+- **De `md` em diante:** uma linha só, com a assinatura à esquerda e os links e o controle de tema à direita.
+- **Abaixo de `md`:** duas linhas, sem menu e sem JavaScript. Na de cima, a assinatura e o controle de tema; na de baixo, depois de um filete `line`, os links, rolando na horizontal se não couberem.
+- **Footer:** filete `line` em cima, na largura do site, com 1,5rem de respiro. Numa linha, `Pedro Knoll · 2026`, em mono 12 px, maiúsculas, grafite, à esquerda, e `RSS`, `GitHub` e `LinkedIn` à direita, no estilo dos links do header. Abaixo de `sm`, as duas partes se empilham.
+
+### 9.14 Fim do post
+Decisão da T-109. O compartilhar entra na T-115, os relacionados, na T-26, e a newsletter, na T-116; o estilo da faixa do apêndice é revisto na T-117.
+
+- **Ordem:** texto, compartilhar, faixa do apêndice (§9.3, só quando o post tem referências ou apêndices), posts relacionados, newsletter e footer.
+- **Compartilhar:** no fim da coluna do texto, 2,5rem abaixo do último parágrafo. O rótulo `/ COMPARTILHAR`, em mono 12 px maiúsculo, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete; abaixo, `X`, `LinkedIn`, `E-mail` e `Copiar link`, no estilo dos links do header (§9.13). Os três primeiros são links com o título e a URL do post (o e-mail por `mailto:`), sem script de terceiro. `Copiar link` é um botão do próprio site, criado pelo script: sem JavaScript, ele não aparece. Ao copiar, vira `Link copiado` por 1,5 s, com o `aria-label` junto, como o botão do código (§9.5).
+- **Posts relacionados:** na coluna do texto, o rótulo `/ POSTS RELACIONADOS`, no estilo do compartilhar, e até 3 cards da lista (§9.2).
+- **Newsletter:** na coluna do texto, depois dos relacionados. Forma preferida: um bloco com fundo `sheet` e cantos de 0,375rem; o título `Receba os próximos fólios por e-mail.` na fonte de display 600, o campo de e-mail como o da busca (§9.12) e o botão `Receber fólios`, com fundo tinta, texto papel, IBM Plex Mono e cantos de 0,375rem. A forma final depende do formulário do provedor (T-116).
 
 ---
 
@@ -393,8 +424,13 @@ Um colega experiente puxando a cadeira ao lado, com uma pitada de inventor curio
 | Newsletter | Receba os próximos fólios por e-mail. · botão: Receber fólios |
 | Página 404 | Esta página foi arrancada do caderno. · texto: O endereço pode ter mudado, ou esta página ainda não foi escrita. O resto do caderno continua aqui. · link: Voltar ao início · notas da ilustração: estava aqui · nó não encontrado |
 | Botão de código | Copiar → Copiado |
-| Fim de fólio | Achou um erro? Anote na margem: abra uma issue. |
-| Botão de tema | Claro · Escuro |
+| Botão de tema | ícones de sol e lua · nomes acessíveis: Claro · Escuro |
+| Busca | Buscar artigos · Buscar protótipos |
+| Filtro | Filtre por · nome acessível: Filtrar por tema · botão: Limpar |
+| Contagem | 3 artigos · 2 de 3 artigos · 1 artigo com “cosseno” |
+| Lista sem resultado | Nenhum artigo nesse tema. · Nenhum artigo com esse termo nesse tema. |
+| Lista sem JavaScript | A busca e o filtro precisam de JavaScript. Sem ele, a lista abaixo mostra todos os artigos, e cada tema tem a sua página: |
+| Fim do post | / Compartilhar · Copiar link → Link copiado · / Posts relacionados |
 | Botão do caderno | Abrir no marimo · Abrir com GPU |
 
 ---
@@ -405,7 +441,7 @@ Um colega experiente puxando a cadeira ao lado, com uma pitada de inventor curio
 |---|---|---|
 | **Site** | velino (claro) / cianotipia (escuro) | Acompanha o tema do leitor. |
 | **Thumbnail YouTube** 16:9 | cianotipia fixa + grade | `Fól. 001 · Conceito` em latão no topo, símbolo com nó em latão, título grande na fonte de display, IBM Plex Sans Condensed 600 (parte em itálico prússia clara), mini-diagrama, rodapé `pk.log · pedroknoll.com` em mono. |
-| **Imagem de link (OG)** 1200×630 | velino + grade | Sugestão: gerar por fólio no build (ex.: Satori). Fólio + tipo, título, nível, assinatura e `pedroknoll.com`. |
+| **Imagem de link (OG)** 1200×630 | velino + grade | Decisão da T-109, gerada no build pela T-23, só para post sem capa. Margem de 72 px. No alto, `/ FÓL. 003` à esquerda e o tipo (ícone e nome) à direita, em mono 22 px, tinta, sobre um filete de 2 px em tinta. O título na fonte de display 600, 72 px, até 3 linhas, quebradas pelo gerador entre palavras, com reticências no fim da 3ª se passar. Abaixo, o tema em tinta e o nível (hachura e nome), em mono 22 px. No pé, um filete `line`, a assinatura à esquerda e `pedroknoll.com` à direita, em mono 22 px, grafite. Só as faces da marca, sem itálico. |
 | **Post de rede** 1:1 | pergaminho + grade | Tipo no topo, título, até 3 itens, assinatura e `pedroknoll.com` no rodapé. |
 | **Slide** 16:9 | pergaminho + grade | Coluna esquerda: tipo, título, frase, assinatura. Direita: Hipótese / Montagem / Resultado. |
 | **Certificado** A4 paisagem | pergaminho + grade | Moldura dupla com cantos de compasso, símbolo, "Certificado de bancada", nome do caderno, nome do participante, assinatura à mão e `pedroknoll.com`. |
@@ -644,5 +680,57 @@ Desde a T-44 o arquivo não tem `<style>`, `role` nem `aria-label`: as classes `
     <path fill="#F5B82E" d="M5 1h2v1h-2zM5 2h2v1h-2zM8 2h2v1h-2zM2 3h2v1h-2zM5 3h2v1h-2zM8 3h2v1h-2zM3 4h2v1h-2zM6 4h2v1h-2zM9 4h2v1h-2zM12 4h2v1h-2zM3 5h2v1h-2zM6 5h2v1h-2zM9 5h2v1h-2zM12 5h2v1h-2zM3 6h2v1h-2zM6 6h2v1h-2zM9 6h2v1h-2zM12 6h2v1h-2zM4 7h11v1h-11zM1 8h1v1h-1zM4 8h11v1h-11zM1 9h14v1h-14zM2 10h13v1h-13zM3 11h11v1h-11zM4 12h9v1h-9zM5 13h7v1h-7z"/>
     <path fill="#2A2118" d="M5 0h2v1h-2zM13 0h1v1h-1zM4 1h1v1h-1zM7 1h3v1h-3zM14 1h1v1h-1zM2 2h3v1h-3zM7 2h1v1h-1zM10 2h1v1h-1zM1 3h1v1h-1zM4 3h1v1h-1zM7 3h1v1h-1zM10 3h3v1h-3zM14 3h1v1h-1zM2 4h1v1h-1zM5 4h1v1h-1zM8 4h1v1h-1zM11 4h1v1h-1zM14 4h1v1h-1zM2 5h1v1h-1zM5 5h1v1h-1zM8 5h1v1h-1zM11 5h1v1h-1zM14 5h1v1h-1zM2 6h1v1h-1zM5 6h1v1h-1zM8 6h1v1h-1zM11 6h1v1h-1zM14 6h1v1h-1zM0 7h2v1h-2zM3 7h1v1h-1zM15 7h1v1h-1zM0 8h1v1h-1zM2 8h2v1h-2zM15 8h1v1h-1zM0 9h1v1h-1zM15 9h1v1h-1zM1 10h1v1h-1zM15 10h1v1h-1zM2 11h1v1h-1zM14 11h1v1h-1zM3 12h1v1h-1zM13 12h1v1h-1zM4 13h1v1h-1zM12 13h1v1h-1zM5 14h7v1h-7z"/>
   </g>
+</svg>
+```
+
+### Ícones novos (T-109) · `src/assets/brand/icones/`
+
+Só parados, sem versão animada (§7). Cada um entra com a tarefa que o usa: a folha e o frasco na T-110, o filtro na T-112, a lupa na T-22, o sol e a lua na T-24.
+
+`icone-artigo.svg`
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
+  <path d="M1 0h7v1h-7zM1 1h1v1h-1zM7 1h2v1h-2zM1 2h1v1h-1zM7 2h1v1h-1zM9 2h1v1h-1zM1 3h1v1h-1zM7 3h4v1h-4zM1 4h1v1h-1zM10 4h1v1h-1zM1 5h1v1h-1zM3 5h5v1h-5zM10 5h1v1h-1zM1 6h1v1h-1zM10 6h1v1h-1zM1 7h1v1h-1zM3 7h6v1h-6zM10 7h1v1h-1zM1 8h1v1h-1zM10 8h1v1h-1zM1 9h1v1h-1zM3 9h4v1h-4zM10 9h1v1h-1zM1 10h1v1h-1zM10 10h1v1h-1zM1 11h10v1h-10z"/>
+</svg>
+```
+
+`icone-prototipo.svg`
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
+  <path d="M3 0h6v1h-6zM4 1h1v1h-1zM7 1h1v1h-1zM4 2h1v1h-1zM7 2h1v1h-1zM4 3h1v1h-1zM7 3h1v1h-1zM3 4h1v1h-1zM8 4h1v1h-1zM3 5h1v1h-1zM8 5h1v1h-1zM2 6h1v1h-1zM9 6h1v1h-1zM2 7h8v1h-8zM1 8h10v1h-10zM1 9h10v1h-10zM0 10h12v1h-12zM0 11h12v1h-12z"/>
+</svg>
+```
+
+`icone-busca.svg`
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
+  <path d="M2 0h4v1h-4zM1 1h1v1h-1zM6 1h1v1h-1zM0 2h1v1h-1zM7 2h1v1h-1zM0 3h1v1h-1zM7 3h1v1h-1zM0 4h1v1h-1zM7 4h1v1h-1zM0 5h1v1h-1zM7 5h1v1h-1zM1 6h1v1h-1zM6 6h2v1h-2zM2 7h4v1h-4zM7 7h2v1h-2zM8 8h2v1h-2zM9 9h2v1h-2zM10 10h2v1h-2zM11 11h1v1h-1z"/>
+</svg>
+```
+
+`icone-filtro.svg`
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
+  <path d="M0 2h12v1h-12zM2 5h8v1h-8zM4 8h4v1h-4z"/>
+</svg>
+```
+
+`icone-sol.svg`
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
+  <path d="M5 0h2v1h-2zM1 1h1v1h-1zM5 1h2v1h-2zM10 1h1v1h-1zM2 2h1v1h-1zM9 2h1v1h-1zM4 3h4v1h-4zM3 4h6v1h-6zM0 5h2v1h-2zM3 5h6v1h-6zM10 5h2v1h-2zM0 6h2v1h-2zM3 6h6v1h-6zM10 6h2v1h-2zM3 7h6v1h-6zM4 8h4v1h-4zM2 9h1v1h-1zM9 9h1v1h-1zM1 10h1v1h-1zM5 10h2v1h-2zM10 10h1v1h-1zM5 11h2v1h-2z"/>
+</svg>
+```
+
+`icone-lua.svg`
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
+  <path d="M4 0h4v1h-4zM2 1h4v1h-4zM1 2h3v1h-3zM1 3h2v1h-2zM0 4h3v1h-3zM0 5h3v1h-3zM0 6h3v1h-3zM10 6h2v1h-2zM0 7h4v1h-4zM9 7h2v1h-2zM1 8h4v1h-4zM7 8h4v1h-4zM1 9h9v1h-9zM2 10h7v1h-7zM4 11h4v1h-4z"/>
 </svg>
 ```
