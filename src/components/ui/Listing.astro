@@ -9,7 +9,6 @@ interface Props {
   heading: string;
   showHeading?: boolean;
   posts: CollectionEntry<"posts">[];
-  featured?: CollectionEntry<"posts"> | null;
   prev: string | null;
   next: string | null;
   listLabel?: string;
@@ -19,12 +18,10 @@ const {
   heading,
   showHeading = true,
   posts,
-  featured = null,
   prev,
   next,
   listLabel = "Posts",
 } = Astro.props;
-const featuredMinutes = featured ? await minutesReadOf(featured) : null;
 const items = await Promise.all(
   posts.map(async (post) => ({
     post,
@@ -45,13 +42,8 @@ const items = await Promise.all(
       {heading}
     </h1>
   )}
-  {featured && featuredMinutes !== null && (
-    <section class:list={[showHeading && "mt-12"]} aria-label="Destaque">
-      <Card post={featured} featured minutesRead={featuredMinutes} />
-    </section>
-  )}
   <ul
-    class:list={["divide-y divide-line", !featured && showHeading && "mt-10"]}
+    class:list={["divide-y divide-line", showHeading && "mt-10"]}
     aria-label={listLabel}
   >
     {items.map(({ post, minutesRead }) => (

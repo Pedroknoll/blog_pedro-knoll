@@ -1,25 +1,19 @@
 ---
 import KindLabel from "~/components/ui/KindLabel.astro";
-import LevelLabel from "~/components/ui/LevelLabel.astro";
 import TagList from "~/components/ui/TagList.astro";
 import { formatPubDate } from "~/lib/format-date";
-import { formatFolio } from "~/lib/folio";
 import type { Kind } from "~/lib/kind";
 import { site } from "~/site.config";
 
 interface Props {
   title: string;
-  folio: number;
   pubDate: Date;
-  updatedDate?: Date;
   minutesRead?: number;
   kind: Kind;
-  level: number;
   tags: string[];
 }
 
-const { title, folio, pubDate, updatedDate, minutesRead, kind, level, tags } =
-  Astro.props;
+const { title, pubDate, minutesRead, kind, tags } = Astro.props;
 
 const labelClass = "font-mono text-xs uppercase tracking-widest text-muted";
 const rowClass =
@@ -27,11 +21,10 @@ const rowClass =
 const tagsRowClass =
   "grid gap-y-1.5 border-b border-dotted border-line py-[9px] last:border-b-0";
 const published = formatPubDate(pubDate);
-const updated = updatedDate ? formatPubDate(updatedDate) : undefined;
 ---
 
 <div
-  class="group contents lg:sticky lg:top-30 lg:block lg:min-w-0 lg:mt-10 lg:self-start"
+  class="group contents lg:sticky lg:top-30 lg:mt-10 lg:block lg:min-w-0 lg:self-start"
   data-post-rail
 >
   <p
@@ -40,38 +33,31 @@ const updated = updatedDate ? formatPubDate(updatedDate) : undefined;
   >
     {title}
   </p>
-  <div class="order-first font-mono text-xs uppercase tracking-widest text-ink lg:border-b lg:border-ink lg:pb-2">
+  <div
+    aria-hidden="true"
+    class="max-lg:hidden font-mono text-xs uppercase tracking-widest text-ink lg:border-b lg:border-ink lg:pb-2"
+  >
     <span aria-hidden="true">/</span>{" "}
-    <div class="inline">{formatFolio(folio)}</div>
+    <div class="inline font-mono text-xs uppercase tracking-widest text-ink">
+      METADADOS
+    </div>
   </div>
   <div class="mt-8 border-t border-b border-line lg:mt-0 lg:border-t-0">
+    <div class:list={[rowClass, "lg:sr-only"]} data-tipo-row>
+      <p class={labelClass}>Tipo</p>
+      <KindLabel kind={kind} px={12} />
+    </div>
     <div class={rowClass}>
       <p class={labelClass}>Data</p>
       <p class="text-sm text-ink">
         <time datetime={published.datetime}>{published.text}</time>
       </p>
     </div>
-    {updated && (
-      <div class={rowClass}>
-        <p class={labelClass}>Atualizado em</p>
-        <p class="text-sm text-ink">
-          <time datetime={updated.datetime}>{updated.text}</time>
-        </p>
-      </div>
-    )}
     <div class={rowClass}>
       <p class={labelClass}>Leitura</p>
       {typeof minutesRead === "number" && (
         <p class="text-sm text-ink">{minutesRead} min de leitura</p>
       )}
-    </div>
-    <div class={rowClass}>
-      <p class={labelClass}>Tipo</p>
-      <KindLabel kind={kind} animated={false} px={12} />
-    </div>
-    <div class={rowClass}>
-      <p class={labelClass}>Nível</p>
-      <LevelLabel level={level} />
     </div>
     <div class={rowClass}>
       <p class={labelClass}>Autor</p>

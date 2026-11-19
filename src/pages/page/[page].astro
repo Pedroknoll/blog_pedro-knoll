@@ -2,7 +2,6 @@
 import KindFilter from "~/components/ui/KindFilter.astro";
 import Listing from "~/components/ui/Listing.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
-import { splitFeatured } from "~/lib/featured";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
 import { kindCounts } from "~/lib/kind";
 import { PAGE_SIZE, paginatePosts } from "~/lib/pagination";
@@ -11,9 +10,8 @@ import { site } from "~/site.config";
 
 export async function getStaticPaths() {
   const posts = await getPublishedPosts();
-  const { rest } = splitFeatured(posts);
 
-  return paginatePosts(rest, PAGE_SIZE)
+  return paginatePosts(posts, PAGE_SIZE)
     .filter((entry) => entry.href !== "/")
     .map((entry) => ({
       params: { page: entry.href.slice("/page/".length, -1) },
@@ -22,8 +20,7 @@ export async function getStaticPaths() {
 
 const page = Astro.params.page;
 const posts = await getPublishedPosts();
-const { rest } = splitFeatured(posts);
-const current = paginatePosts(rest, PAGE_SIZE).find(
+const current = paginatePosts(posts, PAGE_SIZE).find(
   (entry) => entry.href === `/page/${page}/`,
 );
 

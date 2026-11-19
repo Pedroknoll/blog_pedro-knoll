@@ -7,9 +7,7 @@ pubDate: 2000-01-02
 
 updatedDate: 2000-01-09
 
-folio: 901
-kind: playbook
-level: 2
+kind: prototype
 
 tags: [fixture, md]
 

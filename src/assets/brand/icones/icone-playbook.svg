@@ -1,9 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
-  <path d="M5 2h6v1h-6zM5 6h6v1h-6zM5 10h6v1h-6z"/>
-  <path class="pkp-on0" d="M3 1h1v1h-1zM0 2h1v1h-1zM2 2h1v1h-1zM1 3h1v1h-1z"/>
-  <path class="pkp-off0" d="M0 1h3v1h-3zM0 2h1v1h-1zM2 2h1v1h-1zM0 3h3v1h-3z"/>
-  <path class="pkp-on1" d="M3 5h1v1h-1zM0 6h1v1h-1zM2 6h1v1h-1zM1 7h1v1h-1z"/>
-  <path class="pkp-off1" d="M0 5h3v1h-3zM0 6h1v1h-1zM2 6h1v1h-1zM0 7h3v1h-3z"/>
-  <path class="pkp-on2" d="M3 9h1v1h-1zM0 10h1v1h-1zM2 10h1v1h-1zM1 11h1v1h-1z"/>
-  <path class="pkp-off2" d="M0 9h3v1h-3zM0 10h1v1h-1zM2 10h1v1h-1zM0 11h3v1h-3z"/>
-</svg>

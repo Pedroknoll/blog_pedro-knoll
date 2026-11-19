@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.29 · novembro de 2026 · pedroknoll.com
+Versão 1.30 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -10,7 +10,7 @@ Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele 
 - **Sugestão** é um ponto de partida. Ajuste ao código, ao schema e à SPEC.
 - Este arquivo é a identidade. Em conflito de comportamento com a SPEC, vale a SPEC; avise no PR.
 - A seção 14 é sugestão. A ordem das tarefas está na Fase 1b do ROADMAP. Onde a seção 14 discordar da SPEC ou do ROADMAP, valem a SPEC e o ROADMAP.
-- Não crie nomes paralelos `--papel` / `--prussia` no CSS de componente, página ou layout. A lista fechada é `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `grid` e `grid-strong` (T-41, T-72). Saem `kind-concept`, `kind-tutorial` e `kind-playbook` (T-119); os tokens saem do CSS na T-120. Sem `@custom-variant dark` e sem `dark:` nos componentes.
+- Não crie nomes paralelos `--papel` / `--prussia` no CSS de componente, página ou layout. A lista fechada é `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `grid` e `grid-strong` (T-41, T-72, T-120). Sem `@custom-variant dark` e sem `dark:` nos componentes.
 - A stack é Astro 7 + Tailwind v4. A seção 13 é sugestão de tokens; confirme a SPEC §9 antes de aplicá-la.
 - SVGs, favicons e temas do Shiki estão na árvore abaixo, com os nomes originais. O apêndice repete o código dos SVGs principais e usa esses caminhos.
 
@@ -18,6 +18,8 @@ Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele 
 specs/BRAND.md
 src/assets/brand/pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel,-404}.svg
 src/assets/brand/icones/aceno.svg
+src/assets/brand/icones/icone-artigo.svg
+src/assets/brand/icones/icone-prototipo.svg
 src/assets/brand/icones/icone-relogio.svg
 src/styles/shiki/pk-claro.json
 src/styles/shiki/pk-escuro.json
@@ -26,7 +28,7 @@ public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-t
 
 `icon-192.png` e `icon-512.png` não entram no repositório. Sem manifesto PWA.
 
-Os arquivos `icone-{conceito,tutorial,playbook}.svg` e as versões `-parado` continuam no disco até a T-120 e já não fazem parte da marca. Folha, frasco, lupa, sol, lua, fogo e voto estão só no apêndice, até a tarefa que cria o arquivo.
+Lupa, sol, lua, fogo e voto estão só no apêndice, até a tarefa que cria o arquivo.
 
 ---
 
@@ -47,7 +49,7 @@ Os arquivos `icone-{conceito,tutorial,playbook}.svg` e as versões `-parado` con
 **Significado.** "pk" são as iniciais de Pedro Knoll. "log" é ao mesmo tempo o log de treino de um modelo, o diário de bordo dos aviadores e o blog. Na assinatura, "pk" vem na fonte de display, IBM Plex Sans Condensed 600 (até a T-60, era a serifa Cormorant), e "log" em mono. O pk não usa itálico: o itálico pedia outro arquivo e entrava no LCP (T-52). O ponto é sempre azul-da-prússia e é o mesmo nó central do símbolo.
 
 **Vocabulário editorial.**
-- Cada texto é um **post**. A palavra "fólio" sai (T-119; o schema perde `folio` na T-120).
+- Cada texto é um **post**. A palavra "fólio" sai (T-119, T-120).
 - Datas no formato `21.out.2026`.
 
 ---
@@ -153,7 +155,7 @@ Fundo **sempre liso**, sem textura, sem vinheta.
 
 ### Regras de cor (decisões)
 - **Proporção em qualquer peça:** papel ~68%, tinta ~20%, prússia ~7%, latão + sanguínea + verdete ≤ 5% somados.
-- **Latão e verdete ficam só no código (§9.5); a sanguínea fica só na função.** Nunca marcam tipo, avisos, erros, sucesso ou resultados, e nunca são fundo de página. Os tipos ficam em tinta (§8). Até a T-120, o site ainda pinta Conceito, Tutorial e Playbook com prússia, latão e verdete.
+- **Latão e verdete ficam só no código (§9.5); a sanguínea fica só na função.** Nunca marcam tipo, avisos, erros, sucesso ou resultados, e nunca são fundo de página. Os tipos ficam em tinta (§8).
 - **Ouro-pigmento** aparece só na mão da saudação, sempre com contorno em tinta (amarelo puro some sobre o fundo claro).
 - **Pergaminho** (`#EADFC8`, com `--folha #DFD2B6`, `--grafite #5A4D3C`, `--lapis #8E7E64`, `--latao #765514`, `--sanguinea #9E3526`, `--verdete #2B6454`) é um tom mais fundo **só para peças gráficas**: slides, posts de rede social, capas, certificado. Nunca no blog.
 - **Nomes na interface:** o controle de tema mostra um sol e uma lua (§9.9), e os nomes dos dois botões, para o leitor de tela, são **Claro** e **Escuro** (T-109). "Velino" e "cianotipia" são nomes internos.
@@ -216,9 +218,9 @@ Títulos com `text-wrap: balance`.
 - **Grade 12 × 12, uma cor (`currentColor`), cantos retos, sem suavização** (`shape-rendering: crispEdges`).
 - Use em **12, 24, 36 ou 48 px** (múltiplos de 12) para não borrar.
 - **Exceção:** a mão da saudação (`aceno.svg`) é **16 × 16**, com contorno `--contorno-px` e corpo `--ouro`. Use em 16, 32 ou 48 px.
-- **Animação quadro a quadro** (decisão): só o aceno, dois quadros alternando 4 vezes, depois pausa (3,2 s, contínuo). Conceito, Tutorial e Playbook saem da lista e da animação (T-119). Os arquivos e os keyframes `pkc-*`, `pkt-*` e `pkp-*` saem na T-120.
+- **Animação quadro a quadro** (decisão): só o aceno, dois quadros alternando 4 vezes, depois pausa (3,2 s, contínuo). Conceito, Tutorial e Playbook saíram da lista e da animação (T-119, T-120).
 - **Onde anima:** só a mão da saudação. O aceno usa classes com prefixo `pka-`.
-- **Ícones (decisão da T-119):** `icone-artigo.svg` (folha) e `icone-prototipo.svg` (frasco), dos tipos (§8), no h1 de `/artigos/` e de `/prototipos/` e no topo da lateral; `icone-fogo.svg`, no h1 de `/mais-votados/`; `icone-voto.svg`, à esquerda da contagem no item; `icone-busca.svg` (lupa), no botão de busca do header (§9.13); `icone-sol.svg` e `icone-lua.svg`, do controle de tema (§9.9). Todos com 12 × 12, uma cor, só parados, sem versão animada. O desenho está no apêndice. A folha e o frasco entram na T-120; a lupa, na T-22; o sol e a lua, na T-24; o fogo e o voto, na T-123. O `icone-filtro.svg` não entra: o filtro é um `select` nativo (T-124).
+- **Ícones (decisão da T-119):** `icone-artigo.svg` (folha) e `icone-prototipo.svg` (frasco), dos tipos (§8), no h1 de `/artigos/` e de `/prototipos/` e na linha Tipo da tabela do post abaixo de `lg`; `icone-fogo.svg`, no h1 de `/mais-votados/`; `icone-voto.svg`, à esquerda da contagem no item; `icone-busca.svg` (lupa), no botão de busca do header (§9.13); `icone-sol.svg` e `icone-lua.svg`, do controle de tema (§9.9). Todos com 12 × 12, uma cor, só parados, sem versão animada. O desenho está no apêndice. A folha e o frasco estão na árvore (T-120); a lupa entra na T-22; o sol e a lua, na T-24; o fogo e o voto, na T-123. O `icone-filtro.svg` não entra: o filtro é um `select` nativo (T-124).
 - **Relógio** (`icone-relogio.svg`): 12 × 12, só parado, sem versão animada. Entra na linha do item, antes do tempo de leitura (§9.2).
 - Todas as animações respeitam `prefers-reduced-motion: reduce` (ficam paradas).
 
@@ -226,7 +228,7 @@ Títulos com `text-wrap: balance`.
 
 ## 8. Sistema de conteúdo
 
-**Decisão de 19/11/2026 (SPEC, Q22, T-119):** o tipo é Artigo ou Protótipo. Saem nível e tema. Entra na T-120. Até lá, o site tem Conceito (prússia, compasso), Tutorial (latão, `>_`) e Playbook (verdete, checklist), com nível.
+**Decisão de 19/11/2026 (SPEC, Q22, T-120):** o tipo é Artigo ou Protótipo. Saem nível e tema.
 
 Um eixo: **tipo** (formato). Não tem cor: o tipo se distingue pelo ícone.
 
@@ -237,7 +239,7 @@ Um eixo: **tipo** (formato). Não tem cor: o tipo se distingue pelo ícone.
 | **Artigo** | tinta | folha (`icone-artigo.svg`) | Explica uma ideia ou conta um aprendizado, do problema ao resultado. |
 | **Protótipo** | tinta | frasco (`icone-prototipo.svg`) | Mostra algo construído e funcionando: o que faz, como foi feito e onde quebra. |
 
-Os tipos não têm estrutura nem layout próprios (SPEC Q22). O tipo aparece no h1 de `/artigos/` e de `/prototipos/` (ícone de 24 px, em tinta), no topo da lateral do post (ícone de 12 px, `/ ARTIGO` ou `/ PROTÓTIPO`, §9.3) e na imagem OG (§11). O header não leva o ícone (§9.13). O item não mostra o tipo.
+Os tipos não têm estrutura nem layout próprios (SPEC Q22). O tipo aparece no h1 de `/artigos/` e de `/prototipos/` (ícone de 24 px, em tinta), na linha Tipo da tabela do post abaixo de `lg` (ícone de 12 px, §9.3) e na imagem OG (§11). De `lg` em diante, a coluna do texto abre com `/ ARTIGO` ou `/ PROTÓTIPO`, sem ícone. O header não leva o ícone (§9.13). O item não mostra o tipo.
 
 Qualquer tipo pode ter cadernos marimo (§9.6).
 
@@ -248,7 +250,7 @@ kind: article            # article | prototype
 tags: [LLMs, Fine-tuning]
 ```
 
-A SPEC §6 fecha o schema e, até a T-120, ainda tem `folio`, `level` e `featured`. Este bloco é o alvo da T-120. Chaves em inglês (`kind`, `tags`, `references`, `appendices`); `kind` no enum inglês; o tempo do post é só o `minutesRead`; o caderno não tem campo no frontmatter: o componente `Notebook` aponta o arquivo no MDX (SPEC §7).
+A SPEC §6 fecha o schema, sem `folio`, `level` e `featured` (T-120). Chaves em inglês (`kind`, `tags`, `references`, `appendices`); `kind` no enum inglês; o tempo do post é só o `minutesRead`; o caderno não tem campo no frontmatter: o componente `Notebook` aponta o arquivo no MDX (SPEC §7).
 
 ---
 
@@ -263,7 +265,7 @@ A SPEC §6 fecha o schema e, até a T-120, ainda tem `folio`, `level` e `feature
 - A newsletter não entra na saudação. Na home, fica depois das listas, na coluna da direita (§9.2). No post, fica no fim (§9.14). Entra na T-116. Até lá, a home não tem esse bloco.
 
 ### 9.2 Item e páginas de lista
-Decisão da T-119. O item sem fólio e sem nível, e a home sem destaque, entram na T-120. Entram na T-123 a home, com as três listas, e as quatro rotas. Até a T-120, vale o card da T-63: com o resumo, o tipo com cor no rodapé e o destaque com capa na home.
+Decisão da T-119. O card sem fólio e sem nível, e a home sem destaque, estão no ar (T-120). Entram na T-123 a home, com as três listas, e as quatro rotas.
 
 - Um `article` em grade. De `sm` em diante, duas colunas, com 2rem de vão, centradas na vertical: a da data, com 6,5rem, e a do texto. Abaixo de `sm`, uma coluna só.
 - **Data:** mono 12 px, lápis, no formato `17.nov.2026`. Na coluna de 6,5rem de `sm` em diante; acima do título, abaixo de `sm`.
@@ -291,11 +293,11 @@ Decisão da T-119. O item sem fólio e sem nível, e a home sem destaque, entram
 - Abaixo do h1 das quatro listas, o filtro (§9.12) e a linha de contagem.
 
 ### 9.3 Cabeçalho do post (página do post)
-Decisão da T-63, no modelo do Stripe (stripe.dev); entra nas T-65, T-66 e T-67. O topo sem fólio entra na T-120. Até lá, a lateral abre com `/ FÓL.` e a tabela traz nível.
+Decisão da T-63, no modelo do Stripe (stripe.dev); entra nas T-65, T-66 e T-67. O topo `/ METADADOS` e o tipo na coluna do texto entram na T-120.
 
 - **Título em cima, sozinho:** h1 na escala do post (seção 5), na largura toda, com `text-wrap: balance`. Abaixo, a linha fina de introdução em grafite, até ~52 caracteres.
-- **Lateral, de `lg` em diante:** à esquerda, com 15rem, vão de 4rem até o texto, sticky a 7,5rem do topo. No topo, `/ ARTIGO` ou `/ PROTÓTIPO`, com a folha ou o frasco em 12 px, em mono 12 px, maiúsculas, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete; a barra é decorativa (`aria-hidden`). A coluna do texto não repete esse rótulo. Abaixo do filete, os metadados numa tabela de chave e valor: o rótulo à esquerda, em mono 12 px maiúsculo e grafite, numa coluna de 7rem, e o valor à direita; linhas com 9 px de respiro e pontilhado em `line` entre elas, e filete sólido em `line` no fim. Data, leitura, autor e tags; nas tags, o rótulo fica em cima, na largura toda. Sem fólio, sem "atualizado em", sem nível e sem tema. O campo `updatedDate` continua no schema; a lateral não o mostra. No fim da coluna, o voto (§9.14).
-- **Título ao rolar:** quando o h1 e a linha fina saem da tela, o título aparece acima da lateral, em 28 px, a 0,75rem dela. Fica em posição absoluta: não reserva espaço, não desloca nada, e o rótulo do tipo continua visível. Um título de três linhas cabe acima da lateral sticky a 7,5rem. O título é texto com `aria-hidden`, não heading. A troca usa só opacidade, sem transição com `prefers-reduced-motion`. Sem JavaScript, o título não aparece.
+- **Lateral, de `lg` em diante:** à esquerda, com 15rem, vão de 4rem até o texto, sticky a 7,5rem do topo. No topo, `/ METADADOS`, sem ícone, em mono 12 px, maiúsculas, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete; o rótulo é decorativo (`aria-hidden`). A coluna do texto abre com `/ ARTIGO` ou `/ PROTÓTIPO`, sem ícone, no mesmo estilo, e o filete alinha com o da lateral. Os dois rótulos são decorativos. Abaixo do filete, os metadados numa tabela de chave e valor: o rótulo à esquerda, em mono 12 px maiúsculo e grafite, numa coluna de 7rem, e o valor à direita; linhas com 9 px de respiro e pontilhado em `line` entre elas, e filete sólido em `line` no fim. A linha Tipo existe para o leitor de tela e não aparece na tela. Data, leitura, autor e tags; nas tags, o rótulo fica em cima, na largura toda. Sem fólio, sem "atualizado em", sem nível e sem tema. O campo `updatedDate` continua no schema; a lateral não o mostra. No fim da coluna, o voto (§9.14).
+- **Título ao rolar:** quando o h1 e a linha fina saem da tela, o título aparece acima da lateral, em 28 px, a 0,75rem dela. Fica em posição absoluta: não reserva espaço, não desloca nada, e o rótulo `/ METADADOS` continua visível. Um título de três linhas cabe acima da lateral sticky a 7,5rem. O título é texto com `aria-hidden`, não heading. A troca usa só opacidade, sem transição com `prefers-reduced-motion`. Sem JavaScript, o título não aparece.
 - **Abaixo de `lg`:** sem lateral. O título; a linha fina; e a mesma tabela, com filete em cima e 32 px de respiro, tudo rolando com o texto. O tipo é a primeira linha da tabela, com o ícone de 12 px e `ARTIGO` ou `PROTÓTIPO`, porque não há lateral. O voto fica no fim do texto (§9.14).
 - **Sem sumário** (SPEC: o RF-05 saiu na T-63).
 
@@ -326,7 +328,7 @@ No MDX, `Callout` com `variant` `note`, `caution` ou `result` (SPEC RF-22), impo
 - Botões em mono 12,5 px, cantos retos.
 
 ### 9.7 Cadernos marimo
-Primeira célula de todo caderno: cabeçalho renderizado com a assinatura e o título. Até a T-120, o cabeçalho ainda mostra o fólio. Parâmetros como controles do marimo (`mo.ui.slider` etc.), não como constantes soltas. Sem `pk.css`: o molab não aplica o `css_file` do caderno (T-97), e o caderno fica com o estilo do molab; a marca entra pelo cabeçalho da primeira célula. Os dados ficam na pasta do caderno e se leem com `mo.notebook_dir()` (SPEC §7).
+Primeira célula de todo caderno: cabeçalho renderizado com a assinatura e o título, sem fólio (T-120). Parâmetros como controles do marimo (`mo.ui.slider` etc.), não como constantes soltas. Sem `pk.css`: o molab não aplica o `css_file` do caderno (T-97), e o caderno fica com o estilo do molab; a marca entra pelo cabeçalho da primeira célula. Os dados ficam na pasta do caderno e se leem com `mo.notebook_dir()` (SPEC §7).
 
 ### 9.8 Diagramas
 - Tinta para elementos; prússia para **um** destaque por diagrama; tracejado fino para guias.
@@ -647,7 +649,7 @@ Desde a T-44 o arquivo não tem `<style>`, `role` nem `aria-label`: as classes `
 
 ### Ícones (T-119) · `src/assets/brand/icones/`
 
-Só parados, sem versão animada (§7). Cada um entra com a tarefa que o usa: a folha e o frasco na T-120, a lupa na T-22, o sol e a lua na T-24, o fogo e o voto na T-123. O filtro não entra.
+Só parados, sem versão animada (§7). A folha e o frasco estão em `src/assets/brand/icones/` (T-120). A lupa entra na T-22, o sol e a lua na T-24, o fogo e o voto na T-123. O filtro não entra.
 
 `icone-artigo.svg`
 

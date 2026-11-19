@@ -23,7 +23,7 @@ Complementa o `AGENTS.md` da raiz e prevalece no que for mais específico. Fonte
 
 - O `.py` fica em `notebooks/` na pasta do post, com as dependências no bloco PEP 723 dele. O blog não exporta nem hospeda caderno.
 - O molab lê o arquivo do GitHub: o repositório segue público, e o caderno só existe para o molab depois do push, no commit do link. Na T-97, o link de um branch apagado quebrou na hora, e o molab não guarda cópia.
-- Primeira célula: cabeçalho renderizado com a assinatura, o fólio do post e o título. Parâmetros como controles do marimo (`mo.ui.slider` etc.), não como constantes soltas (BRAND §9.7).
+- Primeira célula: cabeçalho renderizado com a assinatura e o título, sem fólio (BRAND §9.7). Parâmetros como controles do marimo (`mo.ui.slider` etc.), não como constantes soltas.
 - Dados na pasta do caderno, lidos com `mo.notebook_dir()` ou pelo caminho relativo; `mo.notebook_location()` não lê no `/wasm` (T-97).
 - Sem `pk.css` e sem `css_file`: o molab não aplica o CSS do caderno em nenhum dos modos (T-97). O caderno fica com o estilo do molab, e a marca entra pelo cabeçalho da primeira célula.
 - No navegador (`/wasm`), só pacotes com wheel WebAssembly; `torch` e treino pesado vão com `gpu`. O molab roda a versão do marimo dele (0.25.2 em 16/11/2026, T-97).

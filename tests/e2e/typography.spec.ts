@@ -213,14 +213,6 @@ test.describe("escala tipográfica [RNF-01]", () => {
         );
       }
     }
-
-    const home = await page.goto("/");
-    expect(home?.status()).toBe(200);
-    expectLabel(
-      await exactParagraph(page, "body", "Destaque"),
-      "home Destaque",
-      mono,
-    );
   });
 
   test("T3 prosa", async ({ page }) => {

@@ -3,15 +3,7 @@ import { expect, test, type Locator, type Page } from "@playwright/test";
 import { fixtureMd, fixtureSemTitulos } from "./fixtures";
 import { publishedPosts } from "./published-posts";
 
-const LABELS = [
-  "Data",
-  "Atualizado em",
-  "Leitura",
-  "Tipo",
-  "Nível",
-  "Autor",
-  "Tags",
-] as const;
+const LABELS = ["Tipo", "Data", "Leitura", "Autor", "Tags"] as const;
 
 function familyNames(stack: string): string[] {
   const names: string[] = [];
@@ -165,20 +157,22 @@ test.describe("cabeçalho do post [RF-04]", () => {
         expect(channels(deckColor)).toEqual(channels(muted));
 
         const cell = rail.locator("> div").first();
-        const folio = cell.locator("> div").first();
+        const label = cell.locator("> div").first();
         const bar = cell.locator("> span");
         const table = rail.locator("> div").nth(1);
-        await expect(folio).toHaveCSS("font-size", "12px");
-        await expect(folio).toHaveCSS("text-transform", "uppercase");
-        await expect(folio).toHaveCSS("letter-spacing", "1.2px");
-        const family = await folio.evaluate(
+        expect(text(await label.textContent())).toBe("METADADOS");
+        await expect(cell.locator("svg")).toHaveCount(0);
+        await expect(label).toHaveCSS("font-size", "12px");
+        await expect(label).toHaveCSS("text-transform", "uppercase");
+        await expect(label).toHaveCSS("letter-spacing", "1.2px");
+        const family = await label.evaluate(
           (element) => getComputedStyle(element).fontFamily,
         );
         expect(firstFamily(family)).toBe(mono);
-        const folioColor = await folio.evaluate(
+        const labelColor = await label.evaluate(
           (element) => getComputedStyle(element).color,
         );
-        expect(channels(folioColor)).toEqual(channels(ink));
+        expect(channels(labelColor)).toEqual(channels(ink));
 
         const mark = page.locator("article > .prose > [data-prose-mark]");
         await expect(mark).toHaveCSS("letter-spacing", "1.2px");
@@ -197,6 +191,15 @@ test.describe("cabeçalho do post [RF-04]", () => {
         const first = page.locator("article > .prose > :first-child");
         await expect(first).toHaveAttribute("data-prose-mark", "");
         await expect(first).toHaveAttribute("aria-hidden", "true");
+        await expect(first).toHaveCSS("text-transform", "uppercase");
+        const tipoText = text(
+          await table
+            .getByText(/^(Artigo|Protótipo)$/)
+            .first()
+            .textContent(),
+        );
+        expect(["Artigo", "Protótipo"]).toContain(tipoText);
+        expect(text(await first.textContent())).toBe(`/ ${tipoText}`);
         expect(await first.evaluate((element) => element.tagName)).not.toBe(
           "P",
         );
@@ -225,12 +228,21 @@ test.describe("cabeçalho do post [RF-04]", () => {
         const rowCount = await rows.count();
         expect(rowCount).toBeGreaterThan(0);
         const rowLabels: string[] = [];
+        const visible: number[] = [];
         for (let index = 0; index < rowCount; index += 1) {
           rowLabels.push(
             text(await rows.nth(index).locator("p").first().textContent()),
           );
+          if (await rows.nth(index).isVisible()) visible.push(index);
         }
-        for (let index = 0; index < rowCount; index += 1) {
+        expect(rowLabels).toContain("Tipo");
+        const tipoRow = rowLabels.indexOf("Tipo");
+        await expect(rows.nth(tipoRow)).toHaveClass(/sr-only/);
+        expect(visible.every((index) => rowLabels[index] !== "Tipo")).toBe(
+          true,
+        );
+        expect(visible.length).toBeGreaterThan(0);
+        for (const index of visible) {
           if (rowLabels[index] === "Tags") continue;
           const row = rows.nth(index);
           const tracks = await columnTracks(row);
@@ -238,9 +250,10 @@ test.describe("cabeçalho do post [RF-04]", () => {
           await expect(row).toHaveCSS("padding-top", "9px");
           await expect(row).toHaveCSS("padding-bottom", "9px");
         }
-        for (let index = 0; index < rowCount; index += 1) {
+        for (let position = 0; position < visible.length; position += 1) {
+          const index = visible[position] ?? 0;
           const row = rows.nth(index);
-          if (index === rowCount - 1) {
+          if (position === visible.length - 1) {
             await expect(row).toHaveCSS("border-bottom-width", "0px");
           } else {
             await expect(row).toHaveCSS("border-bottom-width", "1px");
@@ -269,11 +282,7 @@ test.describe("cabeçalho do post [RF-04]", () => {
                 .filter((value) => labels.includes(value)),
             [...LABELS] as string[],
           );
-        const timeCount = await header.locator("time").count();
-        const expected = LABELS.filter(
-          (label) => label !== "Atualizado em" || timeCount === 2,
-        );
-        expect(found).toEqual(expected);
+        expect(found).toEqual([...LABELS]);
 
         const title = rail.locator("p[aria-hidden='true']");
         await expect(title).toHaveCount(1);
@@ -301,28 +310,29 @@ test.describe("cabeçalho do post [RF-04]", () => {
         await expect(rail).not.toHaveCSS("position", "sticky");
 
         const cell = rail.locator("> div").first();
-        const folio = cell.locator("> div").first();
         const deck = header.locator("> p");
         const table = rail.locator("> div").nth(1);
         const articleBox = await box(page.getByRole("article"));
-        const cellBox = await box(cell);
-        expect(cellBox.y - articleBox.y).toBeCloseTo(56, 0);
-
-        const folioBox = await box(folio);
-        const titleTop = (await box(header.locator("h1"))).y;
-        const deckTop = (await box(deck)).y;
-        const tableTop = (await box(table)).y;
-        expect(folioBox.y).toBeLessThan(titleTop);
-        expect(titleTop).toBeLessThan(deckTop);
-        expect(deckTop).toBeLessThan(tableTop);
-
+        const h1Box = await box(header.locator("h1"));
+        expect(h1Box.y - articleBox.y).toBeCloseTo(56, 0);
+        await expect(cell).toBeHidden();
         await expect(
           page.locator("article > .prose > [data-prose-mark]"),
-        ).toHaveCSS("display", "none");
-        await expect(cell.locator("> span")).toBeVisible();
-        await expect(cell).toHaveCSS("border-bottom-width", "0px");
+        ).toBeHidden();
+
+        const deckTop = (await box(deck)).y;
+        const tableTop = (await box(table)).y;
+        expect(h1Box.y).toBeLessThan(deckTop);
+        expect(deckTop).toBeLessThan(tableTop);
 
         const rows = table.locator("> div");
+        expect(text(await rows.nth(0).locator("p").first().textContent())).toBe(
+          "Tipo",
+        );
+        const icon = rows.nth(0).locator("svg");
+        await expect(icon).toHaveCount(1);
+        await expect(icon).toHaveCSS("width", "12px");
+        await expect(icon).toHaveCSS("height", "12px");
         const rowCount = await rows.count();
         expect(rowCount).toBeGreaterThan(1);
         let previousBottom = Number.NEGATIVE_INFINITY;
@@ -432,9 +442,9 @@ test.describe("cabeçalho do post [RF-04]", () => {
     await expect(rail).toHaveAttribute("data-title-out", "");
 
     const title = rail.locator("p[aria-hidden='true']");
-    const folio = rail.locator("> div").first().locator("> div").first();
+    const label = rail.locator("> div").first().locator("> div").first();
     await expect(title).toHaveCSS("opacity", "1");
-    await expect(folio).toHaveCSS("opacity", "1");
+    await expect(label).toHaveCSS("opacity", "1");
 
     const titleBox = await box(title);
     const railBox = await box(rail);
@@ -475,7 +485,7 @@ test.describe("cabeçalho do post [RF-04]", () => {
     const rail = page.locator("[data-post-rail]");
     await expect(rail).toHaveCount(1);
     const title = rail.locator("p[aria-hidden='true']");
-    const folio = rail.locator("> div").first().locator("> div").first();
+    const label = rail.locator("> div").first().locator("> div").first();
     await expect(title).toHaveCSS("transition-duration", "0s");
 
     const line = await readThinLine(page);
@@ -491,7 +501,7 @@ test.describe("cabeçalho do post [RF-04]", () => {
       });
     await expect(rail).toHaveAttribute("data-title-out", "");
     await expect(title).toHaveCSS("opacity", "1");
-    await expect(folio).toHaveCSS("opacity", "1");
+    await expect(label).toHaveCSS("opacity", "1");
   });
 
   test("H6 título de três linhas acima da lateral", async ({ page }) => {
@@ -637,7 +647,7 @@ test.describe("cabeçalho do post [RF-04]", () => {
 test.describe("cabeçalho do post sem JavaScript [RF-04]", () => {
   test.use({ javaScriptEnabled: false });
 
-  test("H5 sem JavaScript fica o fólio", async ({ page }) => {
+  test("H5 sem JavaScript fica / METADADOS", async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 });
     const posts = await publishedPosts(page);
 
@@ -658,9 +668,9 @@ test.describe("cabeçalho do post sem JavaScript [RF-04]", () => {
           "opacity",
           "0",
         );
-        await expect(
-          rail.locator("> div").first().locator("> div").first(),
-        ).toHaveCSS("opacity", "1");
+        const label = rail.locator("> div").first().locator("> div").first();
+        expect(text(await label.textContent())).toBe("METADADOS");
+        await expect(label).toHaveCSS("opacity", "1");
       });
     }
   });

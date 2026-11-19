@@ -11,7 +11,7 @@ Degraus 4 e 5 de um post em `src/content/posts/<pasta>/`. A escada está na SPEC
 
 Leia `src/components/marimo/AGENTS.md` ("O componente" e "O caderno"), a SPEC §7 ("Caderno no molab") e a BRAND §9.7. Não copie o link do molab nem o texto da faixa.
 
-O agente escreve o `.py`. O autor revisa. Fólio e título vêm do frontmatter, e a assinatura é a da BRAND §9.7. O texto de apresentação da primeira célula vem do autor, nesta conversa. Sem frase provisória. Só arquivos dentro da pasta do post (RNF-14). Sem `git add`, commit ou push.
+O agente escreve o `.py`. O autor revisa. O título vem do frontmatter, e a assinatura é a da BRAND §9.7, sem fólio. O texto de apresentação da primeira célula vem do autor, nesta conversa. Sem frase provisória. Só arquivos dentro da pasta do post (RNF-14). Sem `git add`, commit ou push.
 
 ## Arquivo
 

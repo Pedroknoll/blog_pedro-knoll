@@ -22,18 +22,14 @@ test.describe("página do post [RF-04]", () => {
         );
 
         const times = header.locator("time");
-        const timeCount = await times.count();
-        expect([1, 2]).toContain(timeCount);
-        for (let index = 0; index < timeCount; index += 1) {
-          const time = times.nth(index);
-          await expect(time).toHaveAttribute("datetime", /^\d{4}-\d{2}-\d{2}$/);
-          await expect(time).toHaveText(
-            /^\d{2}\.(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\.\d{4}$/,
-          );
-        }
+        await expect(times).toHaveCount(1);
+        await expect(times).toHaveAttribute("datetime", /^\d{4}-\d{2}-\d{2}$/);
+        await expect(times).toHaveText(
+          /^\d{2}\.(jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)\.\d{4}$/,
+        );
         await expect(
           header.getByText("Atualizado em", { exact: true }),
-        ).toHaveCount(timeCount - 1);
+        ).toHaveCount(0);
 
         await expect(header.getByText(/^\d+ min de leitura$/)).toHaveCount(1);
 

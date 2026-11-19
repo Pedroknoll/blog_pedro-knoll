@@ -189,9 +189,6 @@ test("páginas de tipo [RF-02, RF-11, RF-12]", async ({ page }) => {
       .map((row) => row.href);
     expect(hrefs).toEqual(expected);
     await expect(
-      page.getByRole("region", { name: "Destaque", exact: true }),
-    ).toHaveCount(0);
-    await expect(
       page.getByRole("navigation", { name: "Paginação", exact: true }),
     ).toHaveCount(0);
     const current = page.locator('[aria-current="true"]');
@@ -208,15 +205,6 @@ test("páginas de tipo [RF-02, RF-11, RF-12]", async ({ page }) => {
     expect(blocking.map((violation) => violation.id)).toEqual([]);
   }
 
-  const missing = KINDS.filter(
-    (kind) => !counts.some((entry) => entry.kind === kind),
-  );
-  expect(missing.length).toBeGreaterThan(0);
-  for (const kind of missing) {
-    const path = kindPath(kind);
-    const response = await page.goto(path);
-    expect(response?.status(), path).toBe(404);
-  }
   const index = await page.goto("/tipos/");
   expect(index?.status()).toBe(404);
 });
@@ -361,7 +349,7 @@ test("vão da barra ao primeiro card [RF-01]", async ({ page }) => {
   if (!kind) return;
   const cases = [
     { path: "/", width: 1280, gap: 32 },
-    { path: "/", width: 360, gap: 20 },
+    { path: "/", width: 360, gap: 32 },
     { path: kindPath(kind), width: 1280, gap: 32 },
     { path: kindPath(kind), width: 360, gap: 32 },
   ];

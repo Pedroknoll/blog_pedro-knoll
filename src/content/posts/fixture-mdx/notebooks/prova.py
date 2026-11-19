@@ -16,7 +16,7 @@ def _():
     import marimo as mo
 
     mo.md("""
-    pk.log · Fól. 902
+    pk.log
 
     # Fixture de MDX
 

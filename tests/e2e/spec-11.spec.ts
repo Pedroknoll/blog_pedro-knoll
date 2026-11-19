@@ -8,7 +8,7 @@ import {
   effectiveHeaders,
   extractHashes,
 } from "../../src/integrations/headers.ts";
-import { KIND_LABELS, KINDS } from "../../src/lib/kind";
+import { KINDS } from "../../src/lib/kind";
 import {
   fixtureFormulas,
   fixtureMd,
@@ -346,19 +346,9 @@ test.describe("Rascunhos [RF-11]", () => {
     const home = await page.goto("/");
     expect(home?.status()).toBe(200);
     const homeHrefs = await hrefsOf(page);
-    const destaque = page.getByRole("region", {
-      name: "Destaque",
-      exact: true,
-    });
-    await expect(destaque).toHaveCount(1);
-    const destaqueHref = await destaque
-      .locator("a")
-      .first()
-      .getAttribute("href");
 
     for (const draft of drafts) {
       expect(homeHrefs.some((href) => href.includes(draft.slug))).toBe(false);
-      expect(destaqueHref ?? "").not.toContain(draft.slug);
     }
 
     const names = await publishedTagNames(
@@ -391,20 +381,6 @@ test.describe("Rascunhos [RF-11]", () => {
     const publishedKinds = new Set(
       posts.filter((post) => !post.draft).map((post) => post.kind),
     );
-    const draftOnlyKinds = KINDS.filter(
-      (kind) =>
-        drafts.some((post) => post.kind === kind) && !publishedKinds.has(kind),
-    );
-    expect(draftOnlyKinds.length).toBeGreaterThan(0);
-    for (const kind of draftOnlyKinds) {
-      await expect(
-        nav.getByRole("link", { name: KIND_LABELS[kind] }),
-      ).toHaveCount(0);
-    }
-    for (const kind of draftOnlyKinds) {
-      const response = await page.goto(kindPath(kind));
-      expect(response?.status(), kindPath(kind)).toBe(404);
-    }
 
     for (const kind of KINDS) {
       if (!publishedKinds.has(kind)) continue;

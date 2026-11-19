@@ -27,13 +27,16 @@ test.describe("fixtures [RF-04]", () => {
   }) => {
     const rail = await openFixture(page, fixtureMd.href, fixtureMd.title);
     const published = row(page, rail, "Data");
-    const updated = row(page, rail, "Atualizado em");
     await expect(published).toBeVisible();
-    await expect(updated).toBeVisible();
-    await expect(rail.locator("time").first()).toBeVisible();
-    await expect(rail.locator("time")).toHaveCount(2);
+    await expect(row(page, rail, "Atualizado em")).toHaveCount(0);
+    await expect(rail.locator("time")).toHaveCount(1);
     await expect(published.locator("time")).toHaveText(fixtureMd.published);
-    await expect(updated.locator("time")).toHaveText(fixtureMd.updated);
+    await expect(
+      page.locator('meta[property="article:published_time"]'),
+    ).toHaveAttribute("content", /^2000-01-02/);
+    await expect(
+      page.locator('meta[property="article:modified_time"]'),
+    ).toHaveAttribute("content", /^2000-01-09/);
 
     const prose = page.locator("article .prose");
     await expect(prose).toBeVisible();

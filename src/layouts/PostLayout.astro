@@ -10,6 +10,7 @@ import PostAppendix from "~/components/ui/PostAppendix.astro";
 import PostRail from "~/components/ui/PostRail.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import type { PostAppendixModel } from "~/lib/references";
+import { KIND_LABELS } from "~/lib/kind";
 import { absoluteUrl, blogPostingJsonLd, pageTitle, postPath } from "~/lib/seo";
 import { site } from "~/site.config";
 
@@ -29,9 +30,7 @@ const {
   tags,
   cover,
   coverAlt,
-  folio,
   kind,
-  level,
 } = post.data;
 const canonical =
   post.data.canonical ?? absoluteUrl(postPath(post.id), Astro.site);
@@ -85,12 +84,9 @@ const jsonLd = blogPostingJsonLd({
       </p>
       <PostRail
         title={title}
-        folio={folio}
         pubDate={pubDate}
-        updatedDate={updatedDate}
         minutesRead={minutesRead}
         kind={kind}
-        level={level}
         tags={tags}
       />
     </header>
@@ -100,7 +96,7 @@ const jsonLd = blogPostingJsonLd({
         aria-hidden="true"
         class="not-prose max-lg:hidden border-b border-ink pb-2 mb-[1.5em] font-mono text-xs uppercase tracking-widest text-ink"
       >
-        / Artigo
+        / {KIND_LABELS[kind]}
       </div>
       <slot />
     </div>

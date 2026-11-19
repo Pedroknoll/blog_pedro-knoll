@@ -1,17 +1,15 @@
-export const KINDS = ["concept", "tutorial", "playbook"] as const;
+export const KINDS = ["article", "prototype"] as const;
 
 export type Kind = (typeof KINDS)[number];
 
 export const KIND_LABELS: Record<Kind, string> = {
-  concept: "Conceito",
-  tutorial: "Tutorial",
-  playbook: "Playbook",
+  article: "Artigo",
+  prototype: "Protótipo",
 };
 
 export const KIND_SLUGS: Record<Kind, string> = {
-  concept: "conceito",
-  tutorial: "tutorial",
-  playbook: "playbook",
+  article: "artigos",
+  prototype: "prototipos",
 };
 
 export function kindPath(kind: Kind): string {

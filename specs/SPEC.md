@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 19/11/2026
 
+**Revisão 3 de 19/11/2026:** a T-120 tira `folio`, `level` e `featured` do schema. O `kind` passa a `article` e `prototype` (Artigo e Protótipo, slugs `artigos` e `prototipos`). O card fica sem fólio e sem nível, e a home sem destaque. De `lg` em diante, a lateral abre com `/ METADADOS` e a coluna do texto com `/ ARTIGO` ou `/ PROTÓTIPO`; abaixo de `lg`, o tipo é a primeira linha da tabela. O `updatedDate` continua no schema, no JSON-LD e no `og:updated_time`, e sai da lateral.
+
 **Revisão 2 de 19/11/2026:** a T-119 grava a forma da Q22 na BRAND 1.29 (§0, §1, §4, §6, §7, §8, §9.1 a §9.3, §9.12 a §9.14, §10 e §11). O RF-15, o RF-16 e o RF-25 passam a apontar essa forma. O RF-01, o RF-02 e o RF-04 mudam com o código, na T-120 e na T-123.
 
 **Revisão de 19/11/2026:** a T-118 registra a Q22; requisitos já entregues mudam com o código (decisão 1A), cada um na tarefa do handoff.
@@ -138,7 +140,7 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
 ### Decisões de 19/11/2026
 
 - [x] **Q22 — Refatoração da Fase 4** (T-118; substitui a Q20 e a Q21 onde discordar):
-  1. **Modelo:** saem `folio`, `level`, `featured` e o campo `theme`, que não entra. O `kind` passa a `article` e `prototype` (Artigo e Protótipo). Os dois posts publicados, hoje `concept`, viram `article`. O rascunho `2026-10-rascunho-de-teste` vira `prototype`. A `fixture-md` vira `prototype` e as outras três fixtures ficam `article`. A prova de tipo só com rascunho é um teste do Vitest; o cenário "Rascunhos" da §11 continua no E2E só para o post. Entram a folha e o frasco, em tinta. O topo da lateral diz `/ ARTIGO` ou `/ PROTÓTIPO`. A palavra "fólio" sai; o post é "post" (T-120).
+  1. **Modelo:** saem `folio`, `level`, `featured` e o campo `theme`, que não entra. O `kind` passa a `article` e `prototype` (Artigo e Protótipo). Os dois posts publicados, hoje `concept`, viram `article`. O rascunho `2026-10-rascunho-de-teste` vira `prototype`. A `fixture-md` vira `prototype` e as outras três fixtures ficam `article`. A prova de tipo só com rascunho é um teste do Vitest; o cenário "Rascunhos" da §11 continua no E2E só para o post. Entram a folha e o frasco, em tinta. Na T-120, o autor trocou o topo da lateral por `/ METADADOS` e passou o tipo para a coluna do texto, `/ ARTIGO` ou `/ PROTÓTIPO`. A palavra "fólio" sai; o post é "post" (T-120).
   2. **Card e destaque:** o card de produção perde o fólio e o nível, e a home perde o destaque. O RF-01 muda nesse ponto na T-120. O resto do RF-01, as três listas, muda na T-123.
   3. **Home e listas:** a saudação fica à esquerda a partir de `lg`. A home tem 5 recentes, o top 10 e 5 protótipos, cada lista com "Todos". A lista Protótipos não aparece quando não há protótipo publicado. As listas inteiras são `/blog/`, `/artigos/`, `/prototipos/` e `/mais-votados/`. O item é título, data, votos e tempo de leitura, também em `/tags/<tag>/`. Saem a paginação (o RF-03 e a exceção da Q10), `/page/n/` e `/tipos/`, que passam a 404, sem `_redirects`. Um tipo sem post publicado não tem página. Da T-120 até a T-123, `/tipos/artigos/` entra no sitemap; isso é aceito (T-123).
   4. **Filtro:** um `select` nativo, uma tag por vez, gravada em `?tag=`, nas quatro listas. Sem JavaScript, a lista inteira e os links de `/tags/`. Em `/mais-votados/`, sem JavaScript, o aviso (T-124).
@@ -158,10 +160,10 @@ A v1 entrega 11 requisitos Must; o restante entra por ordem de prioridade sem bl
 
 | ID    | Requisito                                                                             | Prioridade | Critério de aceite                                                                                                      |
 | ----- | ------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------- |
-| RF-01 | Home com saudação, post em destaque e lista de cards (fólio, data, título, resumo, tipo, nível, tempo de leitura) | Must       | Saudação na home e nas páginas de tipo, com a mão acima do `h1` e os links do autor em texto (RSS, GitHub e LinkedIn); de `lg` em diante a saudação vira uma lateral sticky à esquerda, e abaixo de `lg` fica em cima da barra (BRAND §9.1); cards ordenados por data desc; destaque via `featured: true`; o card mostra fólio, data, título, resumo, tipo, nível e tempo de leitura com ícone de relógio parado, sem tags; só o destaque mostra capa; título do card e número do fólio na fonte de display, peso 600 (BRAND §5); o tempo de leitura do card é o mesmo `minutesRead` da página do post |
+| RF-01 | Home com saudação e lista de cards (data, título, resumo, tipo, tempo de leitura) | Must       | Saudação na home e nas páginas de tipo, com a mão acima do `h1` e os links do autor em texto (RSS, GitHub e LinkedIn); de `lg` em diante a saudação vira uma lateral sticky à esquerda, e abaixo de `lg` fica em cima da barra (BRAND §9.1); cards ordenados por data desc, sem destaque; o card mostra data, título, resumo, tipo e tempo de leitura com ícone de relógio parado, sem fólio, sem nível, sem tags e sem capa; título do card na fonte de display, peso 600 (BRAND §5); o tempo de leitura do card é o mesmo `minutesRead` da página do post |
 | RF-02 | Filtro por tipo e páginas `/tipos/[tipo]` e `/tags/[tag]`                             | Must       | Cada tipo com post publicado e cada tag usada geram uma página; tipo ou tag inexistente é 404; a barra de tipos funciona sem JavaScript |
 | RF-03 | Paginação da listagem                                                                 | Must       | 12 posts por página; a página 1 é `/` e as seguintes são `/page/2`, `/page/3`… (exceção à regra de rotas em pt-BR, Q10) |
-| RF-04 | Página do post com título, autor, fólio, data `21.out.2026`, tipo, nível, datas e tempo de leitura | Must       | O cabeçalho traz fólio, data visível, tipo e nível; o tempo de leitura permanece; os campos vêm do frontmatter validado. O título fica em cima; de `lg` em diante, o fólio e os metadados ficam numa lateral fixa ao lado do texto, e o título aparece acima dela quando o `h1` e a linha fina saem da tela, como melhoria progressiva, sem deslocar a página; sem JavaScript, a lateral mostra o fólio. Quando o post tem `references` ou `appendices`, o fim do post tem a área de apêndice, com os apêndices do autor (Apêndice A, B…) e a lista numerada de referências. No texto, a citação `[@chave]` vira `[n]`, com link para a referência e nome acessível `Referência n`, sem JavaScript. Chave citada sem referência, referência não citada, citação dentro de link e chave repetida quebram o build. Post sem os dois campos não muda |
+| RF-04 | Página do post com título, autor, tipo, data `21.out.2026` e tempo de leitura | Must       | O cabeçalho traz o tipo, a data, a leitura, o autor e as tags, sem fólio, sem nível e sem "Atualizado em"; o `updatedDate` continua no schema, no JSON-LD (`dateModified`) e no `og:updated_time`. O título fica em cima. De `lg` em diante, a lateral abre com `/ METADADOS` e a coluna do texto com `/ ARTIGO` ou `/ PROTÓTIPO`, e o título aparece acima da lateral quando o `h1` e a linha fina saem da tela, como melhoria progressiva, sem deslocar a página; a linha Tipo fica só para leitor de tela. Abaixo de `lg`, o tipo é a primeira linha da tabela, com a folha ou o frasco. Sem JavaScript, a lateral mostra `/ METADADOS`. Quando o post tem `references` ou `appendices`, o fim do post tem a área de apêndice, com os apêndices do autor (Apêndice A, B…) e a lista numerada de referências. No texto, a citação `[@chave]` vira `[n]`, com link para a referência e nome acessível `Referência n`, sem JavaScript. Chave citada sem referência, referência não citada, citação dentro de link e chave repetida quebram o build. Post sem os dois campos não muda |
 | RF-05 | ~~TOC lateral fixa (h2–h3) com seção ativa destacada~~                                | Removido   | Saiu na T-63: o post não tem sumário; a lateral do cabeçalho é parte do RF-04                                           |
 | RF-06 | Syntax highlighting com botão copiar                                                  | Must       | Shiki em build time, temas `pk-claro` e `pk-escuro`. Uma cerca com a meta `title=<arquivo>` depois da linguagem (```` ```py title=fol-001_embeddings.py ````) mostra o nome do arquivo na barra do bloco; sem `title=`, a barra não mostra nome. O botão diz Copiar e vira Copiado por 1,5 s; o `aria-label` é `Copiar código` e vira `Código copiado` junto com o texto, para o nome acessível conter o rótulo visível (WCAG 2.5.3). A barra existe com ou sem `title=` e com ou sem JavaScript; o nome do arquivo sai do build |
 | RF-07 | Matemática LaTeX inline e em bloco                                                    | Must       | `remark-math` + `rehype-katex` no processador `unified()`, render no build                                              |
@@ -257,7 +259,7 @@ Em produção, o blog só serve arquivos; o caderno roda no molab, fora do blog,
 
 ## 6. Modelo de conteúdo
 
-A v1 tem uma única collection, `posts`. O autor é único e vem de `src/site.config.ts`; tags são derivadas dos posts. Todo campo é validado por Zod no build, e um frontmatter inválido quebra o build (RNF-09). O schema inclui `folio`, `kind` e `level`. A unicidade de `folio` não é um `refine` de entrada única: fica na função descrita nas regras derivadas. O schema abaixo é o do `content.config.ts` desde a T-45.
+A v1 tem uma única collection, `posts`. O autor é único e vem de `src/site.config.ts`; tags são derivadas dos posts. Todo campo é validado por Zod no build, e um frontmatter inválido quebra o build (RNF-09). O schema inclui `kind`. O schema abaixo é o do `content.config.ts` desde a T-120.
 
 ### Convenção de pastas
 
@@ -317,13 +319,10 @@ const posts = defineCollection({
         description: z.string().min(50).max(160),
         pubDate: z.coerce.date(),
         updatedDate: z.coerce.date().optional(),
-        folio: z.int().min(1), // exibido como "Fól. 006"
-        kind: z.enum(KINDS), // concept | tutorial | playbook, em src/lib/kind.ts
-        level: z.int().min(1).max(3),
+        kind: z.enum(KINDS), // article | prototype, em src/lib/kind.ts
         tags: z.array(z.string().regex(/^[a-z0-9-]+$/)).max(6).default([]),
         cover: image().optional(),
         coverAlt: z.string().optional(),
-        featured: z.boolean().default(false),
         draft: z.boolean().default(false),
         references: z
           .array(reference)
@@ -374,9 +373,7 @@ Os literais `pk.log`, `Pedro Knoll` e a descrição curta entraram na T-43. `git
 title: "Embeddings na prática: similaridade de cosseno"
 description: "Como calcular e visualizar similaridade entre frases, com um notebook marimo que roda no seu navegador."
 pubDate: 2026-10-20
-folio: 6
-kind: tutorial
-level: 2
+kind: article
 tags: [nlp, embeddings]
 cover: ./cover.png
 coverAlt: "Pontos coloridos agrupados num plano 2D"
@@ -386,10 +383,9 @@ coverAlt: "Pontos coloridos agrupados num plano 2D"
 
 ### Regras derivadas
 
-- `getPublishedPosts()` é o único acesso à collection nas páginas. Antes do filtro de publicados, chama `assertUniqueFolios` (`src/lib/folio.ts`) sobre todas as entradas da collection, rascunho incluído. Dois fólios iguais falham o build com a mensagem `Fólio repetido: <n> em <id1>, <id2>`, com os ids em ordem crescente e vários conflitos separados por `; `. Em seguida filtra `draft` quando `SHOW_DRAFTS` não é `true` e ordena por `pubDate` desc, com desempate por `id` crescente.
-- Fixtures de teste (T-39) são pastas `src/content/posts/fixture-<nome>/`, e pasta de post real nunca começa com `fixture-`. O loader só as carrega com `SHOW_FIXTURES=true` (sem prefixo `PUBLIC_`, como `SHOW_DRAFTS`); sem ela, o `pattern` do glob nega `fixture-*/**` (`postsGlobPattern`, em `src/lib/published.ts`), e o build nem lê essas pastas: uma entrada carregada e só filtrada poria o JS das islands dela no `dist/`. Com a variável, a fixture é um post publicado como os outros (home, tags, tipos, RSS e sitemap). `scripts/check-no-fixtures.mjs` reprova o `dist/` de produção que tenha `blog/fixture-*` ou o texto `/blog/fixture-`. São quatro: `fixture-md` (`.md`, `updatedDate`, h2 a h4, código, fórmula, referências e apêndice), `fixture-mdx` (as figuras, os exploráveis, os dados da T-73, os Callouts, as referências e, no primeiro viewport do celular, uma fórmula inline e outra em bloco, com o ∑, desde a T-88; no fim, o caderno de prova `notebooks/prova.py`, chamado duas vezes pelo componente `Notebook`, sem e com `gpu`, desde a T-74, e a sessão dele em `notebooks/__marimo__/session/`, desde a T-103), `fixture-sem-titulos` (destaque com capa e data de 2099, só parágrafos) e `fixture-formulas` (`.md`, o pior caso de fórmula: 30 fórmulas inline e 10 em bloco, com os 5 arquivos da marca e os 3 do KaTeX que a guarda de fontes admite; sem fórmula no primeiro viewport do celular, porque a prova da T-88 é a `fixture-mdx`, e com ênfase, negrito e código inline no primeiro parágrafo, a prova da T-90).
-- `folio` é inteiro e a exibição é `Fól. 006`: três dígitos até 999 e o número inteiro acima disso (`formatFolio`, em `src/lib/folio.ts`). **Fól. 001** é `2026-10-por-que-este-blog` ("Por que este blog existe"). **Fól. 002** é `2026-10-como-o-blog-e-feito`. Os dois entram como `kind: concept` e `level: 1`. O rascunho `2026-10-rascunho-de-teste` é Fól. 999, com `kind: tutorial` e `level: 1`: ele nunca será publicado, e o 003 fica para o próximo post. Ele é o único tutorial, e o cenário de rascunhos usa isso para provar que tipo só com rascunho não gera página nem entra na barra (T-64). Os fólios de 900 a 998 são das fixtures (901 a 904 hoje) e o 999 é o rascunho: post real não usa a faixa de 900 a 999.
-- `kind` usa o enum inglês. Os rótulos pt-BR (`Conceito`, `Tutorial`, `Playbook`) ficam em `KIND_LABELS`, em `src/lib/kind.ts`, ao lado de `KINDS`, que o schema usa. Não vão no frontmatter. Os rótulos de nível (`Iniciante`, `Intermediário`, `Avançado`) e a hachura ficam em `src/lib/level.ts` (`LEVEL_LABELS` e `levelHatch`).
+- `getPublishedPosts()` é o único acesso à collection nas páginas. Filtra `draft` quando `SHOW_DRAFTS` não é `true` e ordena por `pubDate` desc, com desempate por `id` crescente.
+- Fixtures de teste (T-39) são pastas `src/content/posts/fixture-<nome>/`, e pasta de post real nunca começa com `fixture-`. O loader só as carrega com `SHOW_FIXTURES=true` (sem prefixo `PUBLIC_`, como `SHOW_DRAFTS`); sem ela, o `pattern` do glob nega `fixture-*/**` (`postsGlobPattern`, em `src/lib/published.ts`), e o build nem lê essas pastas: uma entrada carregada e só filtrada poria o JS das islands dela no `dist/`. Com a variável, a fixture é um post publicado como os outros (home, tags, tipos, RSS e sitemap). `scripts/check-no-fixtures.mjs` reprova o `dist/` de produção que tenha `blog/fixture-*` ou o texto `/blog/fixture-`. São quatro: `fixture-md` (`.md`, `updatedDate`, h2 a h4, código, fórmula, referências e apêndice), `fixture-mdx` (as figuras, os exploráveis, os dados da T-73, os Callouts, as referências e, no primeiro viewport do celular, uma fórmula inline e outra em bloco, com o ∑, desde a T-88; no fim, o caderno de prova `notebooks/prova.py`, chamado duas vezes pelo componente `Notebook`, sem e com `gpu`, desde a T-74, e a sessão dele em `notebooks/__marimo__/session/`, desde a T-103), `fixture-sem-titulos` (capa e data de 2099, só parágrafos) e `fixture-formulas` (`.md`, o pior caso de fórmula: 30 fórmulas inline e 10 em bloco, com os 5 arquivos da marca e os 3 do KaTeX que a guarda de fontes admite; sem fórmula no primeiro viewport do celular, porque a prova da T-88 é a `fixture-mdx`, e com ênfase, negrito e código inline no primeiro parágrafo, a prova da T-90).
+- `kind` usa o enum inglês `article` e `prototype`, com `article` primeiro. Os rótulos pt-BR (`Artigo`, `Protótipo`) e os slugs (`artigos`, `prototipos`) ficam em `KIND_LABELS` e `KIND_SLUGS`, em `src/lib/kind.ts`, ao lado de `KINDS`, que o schema usa. Não vão no frontmatter. Os dois posts publicados são `article`. O rascunho `2026-10-rascunho-de-teste` é `prototype` e nunca será publicado. A `fixture-md` é `prototype` e as outras três fixtures são `article`. A prova de tipo só com rascunho é o Vitest: `kindCounts(selectPublished(...))` devolve só o tipo publicado quando `SHOW_DRAFTS` não é `true`.
 - O tempo do post é só o `minutesRead`. Temas da marca são rótulo em `src/data/tags.ts`, não um segundo campo. O caderno não tem campo no frontmatter: o componente `Notebook` aponta o arquivo no MDX (§7).
 - Referências e apêndices ficam no frontmatter (`references` e `appendices`) e não contam no `minutesRead`. A citação no corpo, no `.md` e no `.mdx`, é `[@chave]`, uma chave por marcador; duas seguidas se escrevem `[@a] [@b]`.
   - **Plugin:** `src/lib/remark-citations.mjs`, registrado nos dois `unified()` entre o `remark-math` e o do tempo de leitura, lê as chaves em `file.data.astro.frontmatter.references` (o frontmatter cru) e chama `applyCitations`, de `src/lib/references.ts`. Cada marcador vira um link `[n]` para `#ref-<chave>`, com `aria-label` `Referência n`. O `n` é a posição na lista `references`, a partir de 1, e não a ordem da primeira citação. O marcador não é procurado em código, fórmula, HTML cru nem expressão MDX.
@@ -407,9 +403,8 @@ coverAlt: "Pontos coloridos agrupados num plano 2D"
   - **Não conta:** `inlineCode` nem `code` com `lang === "math"`.
 - Tags são validadas pelo schema, com `^[a-z0-9-]+$` e até 6 por post, e o build falha fora disso; não há normalização. Um arquivo `src/data/tags.ts` opcional dá rótulo e descrição para as páginas de tag.
 - A página `/tags/<tag>/` existe para cada tag de post publicado e lista todos os posts publicados com a tag, na ordem de `getPublishedPosts()`, sem paginação, com h1 `Tag: <tag>`. Não há página `/tags/`. As tags aparecem como links na página do post; os cards não mostram tags (T-56). As páginas de tag não têm barra.
-- A página `/tipos/<tipo>/` existe para cada tipo com post publicado, com o slug em pt-BR (`conceito`, `tutorial`, `playbook`) definido em `src/lib/kind.ts`, e lista todos os posts publicados do tipo, na ordem de `getPublishedPosts()`, sem paginação e sem destaque. Ela espelha a home: a saudação continua o h1, e o `<title>` (RF-12), a descrição (`Posts do tipo <rótulo>.`) e o nome acessível da lista (`Posts do tipo <rótulo>`) dizem o tipo. Não há página `/tipos/`.
+- A página `/tipos/<tipo>/` existe para cada tipo com post publicado, com o slug em pt-BR (`artigos`, `prototipos`) definido em `src/lib/kind.ts`, e lista todos os posts publicados do tipo, na ordem de `getPublishedPosts()`, sem paginação. Ela espelha a home: a saudação continua o h1, e o `<title>` (RF-12), a descrição (`Posts do tipo <rótulo>.`) e o nome acessível da lista (`Posts do tipo <rótulo>`) dizem o tipo. Não há página `/tipos/`. Até a T-123, `/tipos/artigos/` entra no sitemap.
 - `/`, `/page/n/` e as páginas de tipo têm a barra "Filtrar por tipo", só com links e sem JavaScript, com "Todos" e os tipos com post publicado, na ordem de `KINDS`, cada um com o nome e o número de posts publicados, sem ícone. O filtro ativo leva `aria-current="true"`.
-- A home mostra como destaque o post mais recente com `featured: true`, só em `/`, e ele sai da lista paginada. Sem nenhum `featured`, não há destaque.
 - A página 1 da listagem é `/`; as seguintes são `/page/2/`, `/page/3/`…; `/page/1/` não é gerada.
 - Links internos usam barra final (`/blog/<slug>/`, `/page/2/`): sem ela, a Cloudflare responde 307 (T-05).
 
@@ -620,7 +615,7 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   │   ├── tipos/[tipo].astro
 │   │   ├── rss.xml.ts
 │   │   └── robots.txt.ts
-│   ├── lib/                  # getPublishedPosts, readingTime, seo; unicidade de folio; viz/ (geometria pura)
+│   ├── lib/                  # getPublishedPosts, readingTime, seo; viz/ (geometria pura)
 │   └── styles/
 │       ├── global.css
 │       └── shiki/            # pk-claro.json, pk-escuro.json
@@ -646,8 +641,7 @@ Arquivos da marca, sem `icon-192.png` e sem `icon-512.png`:
 specs/BRAND.md
 src/assets/brand/pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel,-404}.svg
 src/assets/brand/icones/aceno.svg
-src/assets/brand/icones/icone-{conceito,tutorial,playbook}.svg
-src/assets/brand/icones/icone-{conceito,tutorial,playbook}-parado.svg
+src/assets/brand/icones/icone-{artigo,prototipo,relogio}.svg
 src/styles/shiki/pk-claro.json
 src/styles/shiki/pk-escuro.json
 public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-touch-icon.png
@@ -813,6 +807,8 @@ Funcionalidade: Figura estática [RF-09, RNF-02]
     E a figura não está dentro de um astro-island
 
 ```
+
+A prova de tipo só com rascunho está no Vitest (`tests/unit/kind.test.ts`): o cenário Rascunhos abaixo continua no E2E só para o post.
 
 Os cenários do caderno são testados na `fixture-mdx`, que chama o caderno de prova `notebooks/prova.py` duas vezes, sem e com `gpu` (T-74). Os três primeiros estão no grupo "Caderno no molab" de `tests/e2e/spec-11.spec.ts`, contra o build de teste, com a ref `main`: o post sem caderno é a `fixture-md`, e o teste conta as requisições com `page.on("request")` e exige ter visto a página e o CSS dela. O "caderno inexistente" é o teste unitário "quebra o build com caderno inexistente" de `tests/unit/notebook.test.ts`, que chama o plugin do build. O "rota sem notebook" confere também a `fixture-mdx`, que tem caderno. O botão do caderno fica fora da prosa (`not-prose`): o T2 de `tests/e2e/theme.spec.ts` exige `accent` só dos links da prosa e confere as cores dos dois botões (BRAND §9.6).
 

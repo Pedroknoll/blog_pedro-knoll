@@ -7,12 +7,12 @@
   "cells": [
     {
       "id": "Hbol",
-      "code_hash": "7e3cfcd041af7d1dcc00298478bae93d",
+      "code_hash": "00f8e0ec6b4abdabd6a6bd2cb53ac9ae",
       "outputs": [
         {
           "type": "data",
           "data": {
-            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">pk.log \u00b7 F\u00f3l. 902</span>\n<h1 id=\"fixture-de-mdx\">Fixture de MDX</h1>\n<span class=\"paragraph\">Caderno de prova do componente <code>Notebook</code>. Mude o tamanho do vetor e\nacompanhe a soma dos quadrados e a norma.</span></span>"
+            "text/markdown": "<span class=\"markdown prose dark:prose-invert contents\"><span class=\"paragraph\">pk.log</span>\n<h1 id=\"fixture-de-mdx\">Fixture de MDX</h1>\n<span class=\"paragraph\">Caderno de prova do componente <code>Notebook</code>. Mude o tamanho do vetor e\nacompanhe a soma dos quadrados e a norma.</span></span>"
           }
         }
       ],
@@ -25,7 +25,7 @@
         {
           "type": "data",
           "data": {
-            "text/html": "<marimo-ui-element object-id='MJUe-0' random-id='219a936a-ec97-d89a-92fd-d46e5984fcd9'><marimo-slider data-initial-value='4' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003etamanho do vetor&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='10' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element>"
+            "text/html": "<marimo-ui-element object-id='MJUe-0' random-id='f181d962-ff2c-6467-be4a-8cbebc44aa46'><marimo-slider data-initial-value='4' data-label='&quot;&#92;u003cspan class=&#92;&quot;markdown prose dark:prose-invert contents&#92;&quot;&#92;u003e&#92;u003cspan class=&#92;&quot;paragraph&#92;&quot;&#92;u003etamanho do vetor&#92;u003c/span&#92;u003e&#92;u003c/span&#92;u003e&quot;' data-start='1' data-stop='10' data-steps='[]' data-debounce='false' data-disabled='false' data-orientation='&quot;horizontal&quot;' data-show-value='false' data-include-input='false' data-full-width='false'></marimo-slider></marimo-ui-element>"
           }
         }
       ],

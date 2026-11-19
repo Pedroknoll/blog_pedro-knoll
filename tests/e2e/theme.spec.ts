@@ -12,9 +12,6 @@ const tokens = [
   "pencil",
   "line",
   "accent",
-  "kind-concept",
-  "kind-tutorial",
-  "kind-playbook",
   "grid",
   "grid-strong",
 ] as const;
@@ -30,9 +27,6 @@ const light: Record<Token, Channels> = {
   pencil: { r: 123, g: 111, b: 90, a: 1 },
   line: { r: 60, g: 40, b: 20, a: 0.16 },
   accent: { r: 31, g: 75, b: 122, a: 1 },
-  "kind-concept": { r: 31, g: 75, b: 122, a: 1 },
-  "kind-tutorial": { r: 132, g: 96, b: 26, a: 1 },
-  "kind-playbook": { r: 46, g: 107, b: 90, a: 1 },
   grid: { r: 31, g: 75, b: 122, a: 0.03 },
   "grid-strong": { r: 31, g: 75, b: 122, a: 0.065 },
 };
@@ -45,9 +39,6 @@ const dark: Record<Token, Channels> = {
   pencil: { r: 134, g: 158, b: 182, a: 1 },
   line: { r: 232, g: 238, b: 243, a: 0.18 },
   accent: { r: 141, g: 184, b: 232, a: 1 },
-  "kind-concept": { r: 141, g: 184, b: 232, a: 1 },
-  "kind-tutorial": { r: 217, g: 184, b: 92, a: 1 },
-  "kind-playbook": { r: 124, g: 199, b: 174, a: 1 },
   grid: { r: 200, g: 225, b: 255, a: 0.025 },
   "grid-strong": { r: 200, g: 225, b: 255, a: 0.055 },
 };
@@ -153,17 +144,6 @@ for (const theme of ["light", "dark"] as const) {
       expect
         .soft(Math.round(got.a * 255), token)
         .toBe(Math.round(want.a * 255));
-    }
-
-    if (!isMissing(colors["kind-concept"]) && !isMissing(colors.accent)) {
-      const alias = channels(colors["kind-concept"]);
-      const accent = channels(colors.accent);
-      expect.soft(alias.r, "kind-concept").toBe(accent.r);
-      expect.soft(alias.g, "kind-concept").toBe(accent.g);
-      expect.soft(alias.b, "kind-concept").toBe(accent.b);
-      expect
-        .soft(Math.abs(alias.a - accent.a), "kind-concept")
-        .toBeLessThanOrEqual(0.001);
     }
   });
 
