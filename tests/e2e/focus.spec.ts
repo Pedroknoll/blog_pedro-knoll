@@ -15,7 +15,6 @@ type FocusHit = {
   inPre: boolean;
   card: boolean;
   copyButton: boolean;
-  kindFilter: boolean;
   authorLink: boolean;
 };
 
@@ -151,10 +150,9 @@ async function walk(
           node.closest("pre.astro-code") !== null,
         card:
           node.matches("a") &&
-          node.closest("h2") !== null &&
+          node.closest("h2, h3") !== null &&
           node.closest("article") !== null,
         copyButton: node.matches("button.code-copy-button"),
-        kindFilter: node.closest('nav[aria-label="Filtrar por tipo"]') !== null,
         authorLink: node.closest('ul[aria-label="Links do autor"]') !== null,
       };
     });
@@ -179,7 +177,6 @@ for (const viewport of [1280, 360]) {
       const errors: string[] = [];
       let sawCard = false;
       let sawCopy = false;
-      let sawFilter = false;
       let sawAuthorLink = false;
 
       for (const path of pages) {
@@ -202,7 +199,6 @@ for (const viewport of [1280, 360]) {
         for (const hit of hits) {
           if (hit.card) sawCard = true;
           if (hit.copyButton) sawCopy = true;
-          if (hit.kindFilter) sawFilter = true;
           if (hit.authorLink) sawAuthorLink = true;
           const where = `${path} @ ${viewport}px ${hit.label}`;
           if (hit.outlineStyle !== "solid") {
@@ -228,7 +224,6 @@ for (const viewport of [1280, 360]) {
       if (!sawCard) errors.push("nenhum card no conjunto");
       if (!sawCopy)
         errors.push("botão de copiar do post B ausente no conjunto");
-      if (!sawFilter) errors.push("link da barra de tipo ausente no conjunto");
       if (!sawAuthorLink) errors.push("link do autor ausente no conjunto");
       expect(errors).toEqual([]);
     });

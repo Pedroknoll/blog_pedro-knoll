@@ -5,7 +5,7 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { fixtureFormulas } from "./fixtures";
 import { katexMetricFaces } from "./katex-metric";
-import { pagesForTheme } from "./published-posts";
+import { isPostPath, pagesForTheme } from "./published-posts";
 
 const variables = [
   "--font-plex-condensed",
@@ -121,7 +121,7 @@ function distWoff2Bytes(): Map<string, number> {
 function ceilingFor(path: string): FontCeiling {
   const katexFiles = 3;
   const katexBytes = 48_000;
-  if (path.startsWith("/blog/")) {
+  if (isPostPath(path)) {
     return { files: 5, bytes: 110_000, katexFiles, katexBytes };
   }
   return { files: 3, bytes: 61_000, katexFiles, katexBytes };

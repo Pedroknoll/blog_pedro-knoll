@@ -16,7 +16,6 @@ import {
   fixtureSemTitulos,
 } from "./fixtures";
 import { pagesForTheme, publishedPosts } from "./published-posts";
-import { kindPath } from "./site-literals";
 
 test.describe("Caderno no molab [RF-08, RNF-03]", () => {
   test("post sem caderno não carrega runtime", async ({ page }) => {
@@ -370,26 +369,23 @@ test.describe("Rascunhos [RF-11]", () => {
       expect(response?.status()).toBe(404);
     }
 
-    const homeAgain = await page.goto("/");
-    expect(homeAgain?.status()).toBe(200);
-    const nav = page.getByRole("navigation", {
-      name: "Filtrar por tipo",
-      exact: true,
-    });
-    await expect(nav).toHaveCount(1);
-
-    const publishedKinds = new Set(
-      posts.filter((post) => !post.draft).map((post) => post.kind),
-    );
-
-    for (const kind of KINDS) {
-      if (!publishedKinds.has(kind)) continue;
-      const tipo = kindPath(kind);
-      const response = await page.goto(tipo);
-      expect(response?.status(), tipo).toBe(200);
-      const typeHrefs = await hrefsOf(page);
+    for (const listPath of ["/blog/", "/artigos/", "/prototipos/"]) {
+      const response = await page.goto(listPath);
+      expect(response?.status(), listPath).toBe(200);
+      const listHrefs = await hrefsOf(page);
       for (const draft of drafts) {
-        expect(typeHrefs.some((href) => href.includes(draft.slug))).toBe(false);
+        expect(listHrefs.some((href) => href.includes(draft.slug))).toBe(false);
+      }
+    }
+
+    for (const catalogPath of ["/", "/mais-votados/"]) {
+      const response = await page.goto(catalogPath);
+      expect(response?.status(), catalogPath).toBe(200);
+      const catalog = page.locator('script[type="application/json"]');
+      await expect(catalog).toHaveCount(1);
+      const text = (await catalog.textContent()) ?? "";
+      for (const draft of drafts) {
+        expect(text).not.toContain(draft.slug);
       }
     }
 
