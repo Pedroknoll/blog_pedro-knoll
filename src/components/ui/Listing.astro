@@ -2,26 +2,16 @@
 import type { CollectionEntry } from "astro:content";
 
 import Card from "~/components/ui/Card.astro";
-import Pagination from "~/components/ui/Pagination.astro";
 import { minutesReadOf } from "~/lib/reading-minutes";
 
 interface Props {
   heading: string;
   showHeading?: boolean;
   posts: CollectionEntry<"posts">[];
-  prev: string | null;
-  next: string | null;
   listLabel?: string;
 }
 
-const {
-  heading,
-  showHeading = true,
-  posts,
-  prev,
-  next,
-  listLabel = "Posts",
-} = Astro.props;
+const { heading, showHeading = true, posts, listLabel = "Posts" } = Astro.props;
 const items = await Promise.all(
   posts.map(async (post) => ({
     post,
@@ -52,5 +42,4 @@ const items = await Promise.all(
       </li>
     ))}
   </ul>
-  <Pagination prev={prev} next={next} />
 </div>
