@@ -128,6 +128,33 @@ test.describe("votos na API [RF-25]", () => {
     expect(csp).toBeTruthy();
     expect(response.headers()["content-security-policy"]).toBe(csp?.join(", "));
   });
+
+  test("o botão da fixture grava pelo Worker", async ({ page }) => {
+    await page.route("**/api/votes", async (route) => {
+      await route.continue({
+        headers: {
+          ...route.request().headers(),
+          "cf-connecting-ip": "203.0.113.77",
+        },
+      });
+    });
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const response = await page.goto(fixtureMdx.href);
+    expect(response?.status()).toBe(200);
+
+    const vote = page.locator("[data-post-vote]:visible");
+    const posted = page.waitForResponse(
+      (answer) =>
+        answer.url().includes("/api/votes") &&
+        answer.request().method() === "POST",
+    );
+    await vote.getByRole("button", { name: "Curtir" }).click();
+    const body = (await (await posted).json()) as { votes: number };
+    await expect(vote.getByRole("button", { name: "Curtido" })).toBeDisabled();
+    await expect(vote.locator("[data-vote-count]")).toContainText(
+      String(body.votes),
+    );
+  });
 });
 
 function sharedHeader(name: string): string {

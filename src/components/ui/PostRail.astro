@@ -1,5 +1,6 @@
 ---
 import KindLabel from "~/components/ui/KindLabel.astro";
+import PostVote from "~/components/ui/PostVote.astro";
 import TagList from "~/components/ui/TagList.astro";
 import { formatPubDate } from "~/lib/format-date";
 import { KIND_LABELS, type Kind } from "~/lib/kind";
@@ -11,9 +12,10 @@ interface Props {
   minutesRead?: number;
   kind: Kind;
   tags: string[];
+  slug: string;
 }
 
-const { title, pubDate, minutesRead, kind, tags } = Astro.props;
+const { title, pubDate, minutesRead, kind, tags, slug } = Astro.props;
 
 const labelClass = "font-mono text-xs uppercase tracking-widest text-muted";
 const rowClass =
@@ -70,6 +72,7 @@ const published = formatPubDate(pubDate);
       </div>
     )}
   </div>
+  <PostVote slug={slug} class="mt-8 max-lg:hidden" />
 </div>
 <script>
   const rail = document.querySelector("[data-post-rail]");

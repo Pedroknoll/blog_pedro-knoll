@@ -152,6 +152,9 @@ jobs:
           name: dist-fixtures
           path: dist
 
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: API tests
         run: pnpm exec playwright test -c playwright.api.config.ts
 
