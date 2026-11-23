@@ -1,12 +1,23 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "blog",
+  "main": "./worker/index.ts",
   "compatibility_date": "2026-10-06",
   "workers_dev": true,
   "preview_urls": true,
   "routes": [{ "pattern": "pedroknoll.com", "custom_domain": true }],
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"],
   },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "blog-votes",
+      "database_id": "01066d57-d585-4090-b1ce-392969a29445",
+      "migrations_dir": "migrations",
+    },
+  ],
 }
