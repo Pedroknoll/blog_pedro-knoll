@@ -15,6 +15,7 @@ export default [
       "coverage/**",
       ".lighthouseci/**",
       "lhci-report/**",
+      "worker/worker-configuration.d.ts",
     ],
   },
   ...tseslint.configs.recommended,

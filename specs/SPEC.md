@@ -149,7 +149,7 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
   7. **Fim do post:** o voto (T-122), o compartilhar (T-115), o apêndice, os relacionados pelas tags (T-26) e a newsletter (T-116). A revisão visual desse fim é a T-117, só docs.
   8. **Newsletter:** Kit. O formulário é HTML do próprio site e aponta para `https://app.kit.com/forms/<id>/subscriptions`, sem o script do Kit, no fim do post e na home. O `form-action` e o DNS saem da T-116.
   9. **Imagem OG:** a ficha da BRAND §11, sem fólio, tema e nível. A forma está na BRAND §11 (T-119). Com capa, a capa ganha (T-23).
-  10. **Upvotes anônimos:** substituem o RF-21. Uma linha por par (hash do IP, slug), sem cookie e sem desfazer; dois leitores no mesmo NAT dividem o voto. A gravação só acontece em `pedroknoll.com`. O slug é conferido contra o catálogo dos posts publicados. O top 10 só lista posts com pelo menos 1 voto, com desempate pela data mais recente. Sem JavaScript, um aviso. O teto diário por hash fica a definir na T-121. A API e o D1 são a T-121; o botão é a T-122. O site segue `output: 'static'`, sem `@astrojs/cloudflare`. O Worker ganha um `main` só para `/api/*` (`run_worker_first`), com o binding do D1, e as páginas continuam vindo do `dist/`. O `_headers` não vale para a resposta do Worker, então os headers da API ficam no código. O ADR-04 e o ADR-05 mudam na T-121.
+  10. **Upvotes anônimos:** substituem o RF-21. Uma linha por par (hash do IP, slug), sem cookie e sem desfazer; dois leitores no mesmo NAT dividem o voto. A gravação só acontece em `pedroknoll.com`. O slug é conferido contra o catálogo dos posts publicados. O top 10 só lista posts com pelo menos 1 voto, com desempate pela data mais recente. Sem JavaScript, um aviso. O teto diário por hash é 20 votos novos, no dia UTC (T-121). A API e o D1 são a T-121; o botão é a T-122. O site segue `output: 'static'`, sem `@astrojs/cloudflare`. O Worker tem um `main` só para `/api/*` (`run_worker_first`), com o binding do D1, e as páginas continuam vindo do `dist/`. O `_headers` não vale para a resposta do Worker, então os headers da API ficam no código. O ADR-04 e o ADR-05 mudaram na T-121.
   11. **Seguem no fim:** a forma está na BRAND 1.29 (§0, §1, §4, §6, §7, §8, §9.1 a §9.3, §9.12 a §9.14, §10 e §11; T-119). Cores das figuras (T-76) e tema escuro com sol e lua (T-24). Giscus (T-28) e o spike do Workers Previews (T-31).
   12. **Decisão 1A:** requisito já entregue muda no PR que muda o código. O handoff desta tarefa lista qual. Posts novos só depois da T-120.
 
@@ -184,7 +184,7 @@ A v1 entrega 11 requisitos Must; o restante entra por ordem de prioridade sem bl
 | RF-22 | `Callout` com `variant` `note`, `caution` ou `result`                                 | Should     | Rótulos visíveis `// NOTA DE BANCADA`, `[!] CUIDADO` e `= RESULTADO`, tudo em tinta                                    |
 | RF-23 | Compartilhar no fim do post                                                           | Should     | X, LinkedIn e e-mail por links com o título e a URL do post, sem script de terceiro; "Copiar link" por script do próprio site, que vira "Link copiado" por 1,5 s; no fim da coluna do texto, antes da faixa do apêndice (BRAND §9.14, T-115) |
 | RF-24 | Inscrição na newsletter | Should | Formulário HTML do próprio site para https://app.kit.com/forms/<id>/subscriptions, sem o script do Kit, no fim do post e na home. O `form-action` e o DNS saem da T-116 |
-| RF-25 | Upvotes anônimos | Should | Uma linha por par (hash do IP, slug), sem cookie e sem desfazer. O hash do IPv6 é o do prefixo /64 e o do IPv4 é o do endereço inteiro. O `localStorage` só muda o botão para Votado; limpar o storage não soma de novo se o IP for o mesmo, e dois leitores no mesmo NAT dividem um voto por post. A gravação só acontece em pedroknoll.com, com Origin https://pedroknoll.com e Content-Type application/json; no preview e no workers.dev a API só lê. O slug é conferido contra o catálogo dos posts publicados e o slug desconhecido não é gravado. O top 10 só lista posts com pelo menos 1 voto, com desempate pela data mais recente. Sem JavaScript, um aviso. O teto diário por hash fica a definir na T-121. A API é a T-121 e o botão é a T-122. A forma do botão está na BRAND §9.14 |
+| RF-25 | Upvotes anônimos | Should | Uma linha por par (hash do IP, slug), sem cookie e sem desfazer. O hash do IPv6 é o do prefixo /64 e o do IPv4 é o do endereço inteiro. O `localStorage` só muda o botão para Votado; limpar o storage não soma de novo se o IP for o mesmo, e dois leitores no mesmo NAT dividem um voto por post. A gravação só acontece em pedroknoll.com, com Origin https://pedroknoll.com e Content-Type application/json; no preview e no workers.dev a API só lê. O slug é conferido contra o catálogo dos posts publicados e o slug desconhecido não é gravado. O top 10 só lista posts com pelo menos 1 voto, com desempate pela data mais recente. Sem JavaScript, um aviso. O teto diário por hash é 20 votos novos, no dia UTC: o índice da tabela conta uma linha escrita a mais, e 20 pares novos são 40 linhas naquele hash (T-121). A API é a T-121 e o botão é a T-122. A forma do botão está na BRAND §9.14 |
 
 
 ## 4. Requisitos não-funcionais
@@ -199,12 +199,12 @@ Cada RNF tem um número verificável no CI; o que não dá para medir automatica
 | RNF-03 | Performance      | Nenhuma página do blog requisita Pyodide nem o runtime do marimo: o caderno abre no molab (Q18)                                                                         | Teste E2E da §11: post sem caderno e post com caderno não requisitam `/pyodide\|marimo/` (T-74)                                                                                                                                             |
 | RNF-04 | Acessibilidade   | WCAG 2.2 AA; gráficos D3 com `role="img"`, `aria-label` e tabela de dados alternativa. Animações da marca respeitam `prefers-reduced-motion`. Lápis não é texto menor que 24 px sobre folha clara | axe-core no Playwright, zero violações serious/critical em cada página publicada do build de teste, que tem também as fixtures (a home, cada post, uma tag e um tipo), no tema claro (`tests/e2e/quality.spec.ts`) e no escuro (T4 de `tests/e2e/theme.spec.ts`); E2E com `prefers-reduced-motion: reduce` nas animações da marca |
 | RNF-05 | SEO              | HTML semântico, um `h1` por página, URLs estáveis `/blog/[slug]`                                                                                                        | Teste de build + Lighthouse SEO ≥ 95                                                                                                                                                                                                       |
-| RNF-06 | Segurança        | Headers: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`. Na CSP, o `script-src` admite `'self'`, os hashes do build e só a origem `https://static.cloudflareinsights.com` (Web Analytics, T-27)                                                                                   | `dist/_headers` gerado no build e conferido por teste de artefato; securityheaders.com em produção                                                                                                                                         |
+| RNF-06 | Segurança        | Headers: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`. Na CSP das páginas, o `script-src` admite `'self'`, os hashes do build e só a origem `https://static.cloudflareinsights.com` (Web Analytics, T-27). A resposta de `/api/*` não lê o `_headers`: o Worker repete o HSTS, o nosniff, a Referrer-Policy e a Permissions-Policy do `buildHeaders()`, e acrescenta `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`, `X-Robots-Tag: noindex` e `Cache-Control: no-store` (T-121)                                                                                   | `dist/_headers` gerado no build e conferido por teste de artefato; securityheaders.com em produção. Os quatro headers da API são comparados ao `buildHeaders()` no Vitest, e o Playwright da API lê a resposta do `wrangler dev`                                                                                                                                         |
 | RNF-07 | Segurança        | Nenhuma rota tem `wasm-unsafe-eval` nem as origens do Pyodide: o blog não hospeda caderno (Q18); o `dist/_headers` gerado tem no máximo 100 regras (limite da Cloudflare) | Teste de artefato: nenhuma rota tem `wasm-unsafe-eval`; o build falha acima de 100 regras                                                                                                                                                 |
 | RNF-08 | Build            | Build completo < 5 min com 200 posts                                                                                                                                   | Medido no CI                                                                                                                                                                                                                              |
 | RNF-09 | Confiabilidade   | Build falha se frontmatter for inválido, link interno quebrar, notebook falhar no `marimo check` ou dado pré-calculado não bater com o `data.lock`                                   | Zod + `astro check` + verificador de links + `marimo check` + `pnpm check:data`                                                                                                                                                            |
-| RNF-10 | Custo            | US$ 0/mês até o limite do plano free (static assets não são cobrados)                                                                                                   | Revisão mensal no dashboard Cloudflare                                                                                                                                                                                                     |
-| RNF-11 | Privacidade      | Analytics sem cookies; o beacon do Web Analytics automático é injetado pela Cloudflare na borda, fora do `dist/`, do `check:js` e do Lighthouse (T-27)                                                                                                                                                   | Cloudflare Web Analytics                                                                                                                                                                                                                   |
+| RNF-10 | Custo            | US$ 0/mês até o limite do plano free. Os assets estáticos não são cobrados. Com `run_worker_first` em `/api/*`, só essas rotas contam nos 100.000 pedidos por dia do Worker; acima do limite elas recebem 429 e as páginas continuam vindo dos assets. O D1 free tem 5 milhões de linhas lidas por dia, 100.000 linhas escritas por dia e 5 GB. Um índice soma uma linha escrita. Sem `cache.enabled`: com ele ligado, o pedido de asset também conta (T-121)                                                                                                   | Revisão mensal no dashboard Cloudflare                                                                                                                                                                                                     |
+| RNF-11 | Privacidade      | Analytics sem cookies; o beacon do Web Analytics automático é injetado pela Cloudflare na borda, fora do `dist/`, do `check:js` e do Lighthouse (T-27). O voto não grava IP cru nem cookie: o hash é o SHA-256, em hex, do secret `VOTE_IP_SALT`, dois-pontos e a chave (o IPv4 inteiro ou o prefixo /64 do IPv6) (T-121)                                                                                                                                                   | Cloudflare Web Analytics. O Vitest confere que a linha gravada é o hash e que o IP não aparece nela                                                                                                                                                                                                                   |
 | RNF-12 | Manutenibilidade | TypeScript strict, ESLint + Prettier, Ruff para Python                                                                                                                  | Gates no CI                                                                                                                                                                                                                                |
 | RNF-13 | Performance      | INP p75 ≤ 200 ms em campo                                                                                                                                               | Cloudflare Web Analytics (RNF-11), que reporta LCP, INP e CLS, na configuração automática, ligada no painel depois do merge da T-27. O Lighthouse não mede INP                                                                                                                          |
 | RNF-14 | Manutenibilidade | Publicar um post não exige mudar arquivo fora da pasta dele em `src/content/posts/`: nem `src/` fora dela, nem `tests/`, nem configuração | Testes de funcionalidade só na fixture (T-39); Lighthouse, axe, links e JS por página em todo post publicado, com a lista gerada do `dist/` (T-77); figura sem tag que feche o `svg` em cada página (`pnpm check:svg`, T-104); dados pelo script da pasta do post (T-79); no Gate 3, um post criado pela skill `novo-post` e montado pelas skills de bloco passa no CI sem outra mudança (T-80, PR #87) |
@@ -212,7 +212,7 @@ Cada RNF tem um número verificável no CI; o que não dá para medir automatica
 
 ## 5. Arquitetura e decisões de stack
 
-A arquitetura é um build estático: o Astro gera o HTML, a Cloudflare só serve arquivos e o caderno roda no molab, fora do blog. Nada roda no servidor em produção na v1.
+A arquitetura é um build estático: o Astro gera o HTML, a Cloudflare serve os arquivos e, só em `/api/*`, um Worker com D1. O caderno roda no molab, fora do blog. As páginas não rodam no servidor.
 
 ```mermaid
 flowchart LR
@@ -225,7 +225,10 @@ flowchart LR
   end
   mdx --> ab --> pf --> dist["dist/"]
   dist -- "wrangler deploy" --> cf["Cloudflare Workers<br/>Static Assets"]
-  cf --> br["Navegador"]
+  cf -->|"/api/*"| api["worker/index.ts"]
+  cf -->|"resto"| br["Navegador"]
+  api --> br
+  api --> d1[("D1 blog-votes")]
   molab["molab<br/>caderno do post"]
   br -. "botão do caderno" .-> molab
   molab -. "lê o .py no GitHub" .-> mdx
@@ -234,7 +237,7 @@ flowchart LR
 
 
 
-Em produção, o blog só serve arquivos; o caderno roda no molab, fora do blog, e a página do post não baixa Pyodide.
+Em produção, as páginas são arquivos do `dist/`; só `/api/*` roda no Worker. O caderno roda no molab, fora do blog, e a página do post não baixa Pyodide.
 
 ### ADRs
 
@@ -244,8 +247,8 @@ Em produção, o blog só serve arquivos; o caderno roda no molab, fora do blog,
 | ADR-01 | **Astro 7**, `output: 'static'`, content collections com loader `glob` e schemas Zod 4 (`astro/zod`). Markdown e MDX passam pelo processador `unified()` de `@astrojs/markdown-remark` | Next.js, Hugo, Docusaurus; Astro 6 (ver `specs/adr/ADR-01-v1-astro-6.md`); processador Sätteri, padrão do Astro 7 | Islands nativos, zero JS por padrão, MDX de primeira classe. O [Astro 7](https://docs.astro.build/en/guides/upgrade-to/v7/) saiu em 22/06/2026 e a doc do Astro 6 virou snapshot sem manutenção. O `unified()` mantém `remark-math`, `rehype-katex` e o tempo de leitura sem precisar portá-los para o Sätteri. Revisado em 09/10/2026 (Q8) |
 | ADR-02 | **marimo no molab:** o componente `Notebook`, no MDX do post, leva ao caderno no molab, aberto a partir do arquivo no GitHub (`/wasm` no navegador; com `gpu`, a prévia estática, de onde o leitor com conta roda no servidor com GPU); o blog não exporta nem hospeda caderno | Jupyter + nbconvert estático; Thebe/Binder; mdx-marimo no meio do texto (adiado, ver `specs/adr/ADR-02-v1-mdx-marimo.md` e `specs/spikes/T-03-mdx-marimo.md`); iframe no post (ver `specs/adr/ADR-02-v2-iframe.md`); página própria com `marimo export html-wasm` em `/notebooks/` (substituída na T-96, ver `specs/adr/ADR-02-v3-pagina-propria.md`); islands (prévia, com fontes e KaTeX de CDN) | O caderno é complemento do post. O molab é gratuito, roda no navegador ou no servidor com GPU (este pede ao leitor uma conta no molab, Q19) e lê o arquivo direto do GitHub ([docs](https://docs.marimo.io/guides/molab/)). O blog deixa de gerar, hospedar e proteger páginas de caderno (exportação, runtime compartilhado, CSP com `wasm-unsafe-eval`, R2), e o post continua sem Pyodide (RNF-03). Custo: dependência de um serviço de terceiros, a versão do marimo do molab e o endereço dele; se ele falhar, o export próprio volta mudando só o link do componente. Revisado na T-96 (Q18) e na T-99 (Q19, medido na T-97) |
 | ADR-03 | **Svelte 5** para islands interativos; **D3 v7** só para cálculo (escalas, eixos, layouts), com o Svelte dono do DOM                                                                   | React + D3; Observable Plot puro                                                                                  | Svelte compila para bundles pequenos; D3 manipulando DOM brigaria com a reatividade. Content collections ficam no Astro, não no Svelte. Não há segundo framework de UI. Componente Svelte sem `client:*` é renderizado no build e não envia JavaScript.                                                                                                                                                      |
-| ADR-04 | **Cloudflare Workers com Static Assets** (`wrangler.jsonc` com `assets.directory: ./dist`)                                                                                             | Cloudflare Pages, Vercel, Netlify                                                                                 | [Recomendação atual](https://docs.astro.build/en/guides/deploy/cloudflare) para projetos novos; static assets não são cobrados; caminho direto para D1/KV no futuro. Confirmado em 06/10 (Q5)                                                                                                                                                                                                            |
-| ADR-05 | Sem SSR na v1                                                                                                                                                                          | `@astrojs/cloudflare` desde o início                                                                              | YAGNI. Se vierem upvotes/comentários próprios, adiciona-se o adapter `@astrojs/cloudflare` compatível com a versão do Astro em uso, e D1                                                                                                                                                                                                                                                                 |
+| ADR-04 | **Cloudflare Workers com Static Assets** e um Worker só para `/api/*` (`main`, `assets.binding`, `run_worker_first: ["/api/*"]`, D1 `blog-votes`). Sem `cache.enabled` | Cloudflare Pages, Vercel, Netlify; Workers Caching (`cache.enabled`), que passa a cobrar os assets | [Recomendação atual](https://docs.astro.build/en/guides/deploy/cloudflare) para projetos novos; os assets continuam de graça e só `/api/*` conta nos 100.000 pedidos por dia. Confirmado em 06/10 (Q5). O D1 entrou na T-121 |
+| ADR-05 | Sem SSR. A API de votos é um Worker comum (`worker/index.ts`), com `output: 'static'` | `@astrojs/cloudflare` | O site continua estático. Os upvotes não pedem render por request; o adapter SSR ficaria de fora e a CSP, o `dist/` e o custo mudariam de lugar. Revisado na T-121 |
 | ADR-06 | **Pagefind** para busca                                                                                                                                                                | Algolia, Orama                                                                                                    | Indexa o `dist/` no pós-build, roda 100% no cliente, sem custo                                                                                                                                                                                                                                                                                                                                           |
 | ADR-07 | **Tailwind CSS v4** + plugin `typography` para a prosa                                                                                                                                 | CSS Modules, UnoCSS                                                                                               | O HF Blog usa Tailwind; tipografia de artigo pronta                                                                                                                                                                                                                                                                                                                                                      |
 
@@ -614,11 +617,14 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   │   ├── tags/[tag].astro
 │   │   ├── tipos/[tipo].astro
 │   │   ├── rss.xml.ts
-│   │   └── robots.txt.ts
+│   │   ├── robots.txt.ts
+│   │   └── api/catalogo.json.ts   # catálogo dos posts publicados; o público recebe 404 (T-121)
 │   ├── lib/                  # getPublishedPosts, readingTime, seo; viz/ (geometria pura)
 │   └── styles/
 │       ├── global.css
 │       └── shiki/            # pk-claro.json, pk-escuro.json
+├── worker/                   # Worker só para /api/* (T-121)
+├── migrations/               # SQL do D1, 0001_votes.sql
 ├── scripts/
 │   └── build-data.py         # acha e roda o data/build.py de cada post; o CI só confere o lock (T-73, T-79)
 ├── public/
@@ -679,25 +685,38 @@ Fontes: a opção `fonts` no topo do `defineConfig`, estável desde o Astro 6, e
 
 ## 10. Deploy, CI/CD e ambientes
 
-O deploy roda no GitHub Actions, e não no build nativo da Cloudflare, porque o build precisa de Node e de Python com uv no mesmo job. A Cloudflare recebe só o `dist/` pronto via Wrangler.
+O deploy roda no GitHub Actions, e não no build nativo da Cloudflare, porque o build precisa de Node e de Python com uv no mesmo job. O Wrangler envia o `dist/` pronto e o script do Worker.
 
-### `wrangler.jsonc` (site estático, sem Worker)
+### `wrangler.jsonc` (Static Assets e Worker só para `/api/*`)
 
 ```jsonc
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "blog",
+  "main": "./worker/index.ts",
   "compatibility_date": "2026-10-06",
   "workers_dev": true,
   "preview_urls": true,
   "routes": [{ "pattern": "pedroknoll.com", "custom_domain": true }],
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "404-page"
-  }
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": ["/api/*"]
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "blog-votes",
+      "database_id": "01066d57-d585-4090-b1ce-392969a29445",
+      "migrations_dir": "migrations"
+    }
+  ]
 }
-
 ```
+
+O `database_id` não é secret: sem token da conta, ele não abre o banco. Não há `vars` nem `cache`. O `VOTES_WRITE` só entra no `wrangler dev` dos testes, por `--var`. O GET e o POST de `/api/votes` respondem com `Cache-Control: no-store`. A Cache API (`caches.default`) ficou de fora: o Worker roda em todo pedido de `/api/*`, então ela não alivia os 100.000 pedidos por dia, e a contagem precisa chegar fresca ao botão (T-122) e às listas (T-123). Os headers da API estão em `worker/votes.ts`, porque o `_headers` não vale para a resposta do Worker.
+
 
 A rota `pedroknoll.com`, com `custom_domain: true`, é o Custom Domain do Worker (Q4b): o `wrangler deploy` do merge cria o registro DNS e o certificado, e o `wrangler versions upload` do preview não publica rota. Com rota, o default de `workers_dev` passa a `false`; o `true` explícito mantém o `blog.p-giacometo.workers.dev` e os previews (T-27). `preview_urls: true` liga as Version URLs. Omitir esse campo não altera a configuração que o Worker já tem na Cloudflare.
 
@@ -733,16 +752,17 @@ O `astro preview` e o `staticDistDir` do Lighthouse não aplicam o `_headers`; o
 ### Pipeline (`.github/workflows/ci.yml`)
 
 1. **Setup:** pnpm, Node LTS, uv; cache de `~/.cache/uv` e `node_modules`.
-2. **Lint e tipos:** `pnpm lint`, que começa pela guarda de codificação (`pnpm check:utf8`: todo arquivo de texto em `src/` é UTF-8 válido e sem BOM) e segue pelo frescor dos dados pré-calculados (`pnpm check:data`: o `data.lock` de cada pasta `data/` bate com os arquivos, sem rodar Python), `astro check`, `pnpm check:svelte` (o `svelte-check`, que confere os tipos dentro dos `.svelte`; roda depois do `astro check` porque precisa do `.astro/types.d.ts` que ele gera), `uv run ruff check` (nos cadernos, sem o `B018` e o `PLR1711`: a saída da célula é a última expressão, e o marimo grava `return` no fim de cada célula) e, num passo próprio, `uv run marimo check --strict src/content/posts/*/notebooks/*.py`, em que um aviso também reprova (T-74).
+2. **Lint e tipos:** `pnpm lint`, que começa pela guarda de codificação (`pnpm check:utf8`: todo arquivo de texto em `src/` é UTF-8 válido e sem BOM) e segue pelo frescor dos dados pré-calculados (`pnpm check:data`: o `data.lock` de cada pasta `data/` bate com os arquivos, sem rodar Python), `astro check`, `pnpm check:svelte` (o `svelte-check`, que confere os tipos dentro dos `.svelte`; roda depois do `astro check` porque precisa do `.astro/types.d.ts` que ele gera), `uv run ruff check` (nos cadernos, sem o `B018` e o `PLR1711`: a saída da célula é a última expressão, e o marimo grava `return` no fim de cada célula), `pnpm check:worker` (`wrangler types --check` e `tsc -p worker`) e, num passo próprio, `uv run marimo check --strict src/content/posts/*/notebooks/*.py`, em que um aviso também reprova (T-74).
 3. **Testes unitários:** `vitest` em `src/lib`.
 4. **Build de produção:** `pnpm build` sem `SHOW_DRAFTS`. Em seguida, `node scripts/check-no-fixtures.mjs` reprova o `dist/` com fixture, e um segundo build, `SHOW_FIXTURES=true pnpm build --outDir dist-fixtures`, gera o build de teste (artifact `dist-fixtures`): as páginas de produção mais as fixtures (T-39).
 5. **Verificações do artefato:** dois jobs sobre o `dist/` do passo 4 (artifact), em paralelo ao E2E. `artifact-checks` roda os links internos (`pnpm check:links`, linkinator com fragmentos), o JS por página (`pnpm check:js`) e as figuras (`pnpm check:svg`: nenhuma tag que tire o parser do SVG dentro de `<svg>…</svg>`, pela lista do HTML Standard, §13.2.6.5, T-104) no `dist/`, e os mesmos três no `dist-fixtures`; cada passo roda mesmo se o anterior falhar. `lighthouse` roda o Lighthouse CI com budgets na home e em cada post publicado, com a lista gerada do `dist/` pelo `lighthouserc.cjs` e 5 execuções por URL, e, numa segunda passada, em cada fixture do `dist-fixtures`, sem a home (`LIGHTHOUSE_SCOPE=fixtures`, T-39); guarda os dois relatórios no artifact `lighthouse-report` (14 dias), o das fixtures em `fixtures/`. As regras do `dist/_headers` entram com a T-16; o `check:js` também conta cada island (T-19) (RNF-01/02/05/06/07).
 6. **E2E:** Playwright + axe, só no Chromium, contra `astro preview` do build de teste do passo 4 (artifact `dist-fixtures`, servido como `dist/`), sem `SHOW_DRAFTS`, o que inclui o cenário de rascunhos.
-7. **Deploy:** em PR, outro `astro build` com `SHOW_DRAFTS=true` e sem `SHOW_FIXTURES`, e passa ao build o commit do PR em `NOTEBOOK_REF` (`github.event.pull_request.head.sha`), para o link do caderno (T-18), seguido de `wrangler versions upload`, que gera a URL de preview. Em `main`, o deploy espera o E2E, o `lighthouse` e o `artifact-checks` e faz `wrangler deploy` do build de produção do passo 4. O preview do PR não espera nenhum dos três.
+7. **API:** o job `api` tem `needs: build`, baixa o `dist-fixtures` como `dist/` e roda `pnpm exec playwright test -c playwright.api.config.ts` contra `wrangler dev` com D1 local (`VOTES_WRITE=local`, sal `teste`). Sem `CLOUDFLARE_API_TOKEN` e sem o D1 remoto. O `playwright.config.ts` e `tests/e2e/` não entram nesse job (T-121).
+8. **Deploy:** em PR, outro `astro build` com `SHOW_DRAFTS=true` e sem `SHOW_FIXTURES`, e passa ao build o commit do PR em `NOTEBOOK_REF` (`github.event.pull_request.head.sha`), para o link do caderno (T-18), seguido de `wrangler versions upload`, que gera a URL de preview e sobe o binding do D1; a API no preview só lê. Em `main`, o deploy espera o E2E, o `lighthouse`, o `artifact-checks` e o `api`. Antes do `wrangler deploy`, `wrangler d1 migrations apply blog-votes --remote` (no CI a pergunta é pulada). O deploy usa `--secrets-file` com o secret `VOTE_IP_SALT`, gravado em `$RUNNER_TEMP` com `umask 077` e apagado no fim. O preview não migra o D1 de produção e não envia o secret.
 
 `SHOW_DRAFTS`, `SHOW_FIXTURES` e `NOTEBOOK_REF` não têm prefixo `PUBLIC_`: só o build as lê, e elas não devem ir para o cliente.
 
-Segredos necessários no repositório: `CLOUDFLARE_API_TOKEN` (Account API token com o papel Workers · Editor e, só na zona `pedroknoll.com`, Zone · Workers Routes · Write, para o Custom Domain no `wrangler deploy`, T-27) e `CLOUDFLARE_ACCOUNT_ID`. Variável: `SITE_URL`.
+Segredos necessários no repositório: `CLOUDFLARE_API_TOKEN` (Account API token com o papel Workers · Editor, D1 Edit na conta desde a T-121, e, só na zona `pedroknoll.com`, Zone · Workers Routes · Write, para o Custom Domain no `wrangler deploy`, T-27), `CLOUDFLARE_ACCOUNT_ID` e `VOTE_IP_SALT` (só o nome no repositório; o valor sobe no deploy da `main`). Variável: `SITE_URL`.
 
 ### Cache na edge
 
@@ -750,6 +770,7 @@ Segredos necessários no repositório: `CLOUDFLARE_API_TOKEN` (Account API token
 - `/_astro/fonts/`: sem regra, no padrão da Cloudflare. O nome de cada fonte é o hash da URL que a API do Fontsource devolve, e não do conteúdo. Hoje essa URL traz a versão do pacote (`…/ibm-plex-sans@5.3.0/latin-400-normal.woff2`, medido na T-93), e não `@latest`, como a T-91 supôs; a forma da URL é escolha da API, e não do site. Cache longo nessa pasta só depois da T-95.
 - O `_headers` não distingue o status: um 404 numa URL de `/_astro/` também recebe o `immutable` (medido no preview da T-91).
 - HTML: o padrão da Cloudflare já é `public, max-age=0, must-revalidate` com `ETag`; não precisa de regra.
+- `/api/votes`: `Cache-Control: no-store`, no código do Worker. Sem `cache.enabled` e sem Cache API (T-121).
 
 ## 11. Critérios de aceite e testes
 
