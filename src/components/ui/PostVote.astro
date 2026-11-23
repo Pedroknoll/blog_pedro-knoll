@@ -1,0 +1,171 @@
+---
+interface Props {
+  slug: string;
+  class?: string;
+}
+
+const { slug, class: className } = Astro.props;
+---
+
+<div class:list={["min-w-0", className]} data-post-vote={slug}>
+  <div data-vote-line class="flex h-9 items-center">
+    <p data-vote-notice class="text-sm text-ink">
+      O voto precisa de JavaScript.
+    </p>
+    <button
+      type="button"
+      hidden
+      data-vote-button
+      class="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border border-line bg-surface px-3 text-sm text-ink hover:bg-sheet"
+    >
+      <span
+        aria-hidden="true"
+        class="box-content inline-block h-0 w-0 shrink-0 border-x-[5px] border-b-8 border-x-transparent border-b-current"
+      ></span>
+      <span data-vote-label>Curtir</span>
+      <span data-vote-count class="inline-block w-[3ch] text-right text-accent">
+        <span data-vote-value>–</span>
+        <span class="sr-only"> votos</span>
+      </span>
+    </button>
+  </div>
+  <script>
+    type Block = {
+      notice: HTMLElement;
+      button: HTMLButtonElement;
+      count: HTMLElement;
+    };
+
+    function storageKey(slug: string) {
+      return `pk-vote:${slug}`;
+    }
+
+    function readVoted(slug: string) {
+      try {
+        return localStorage.getItem(storageKey(slug)) === "1";
+      } catch {
+        return false;
+      }
+    }
+
+    function writeVoted(slug: string) {
+      try {
+        localStorage.setItem(storageKey(slug), "1");
+      } catch {
+        // A página já mostra Curtido; o próximo carregamento volta a Curtir.
+      }
+    }
+
+    function setCount(count: HTMLElement, value: string) {
+      const node = count.querySelector("[data-vote-value]");
+      if (node) node.textContent = value;
+    }
+
+    function showReady(block: Block) {
+      block.notice.hidden = true;
+      block.button.hidden = false;
+      block.count.hidden = false;
+    }
+
+    function labelOf(block: Block) {
+      return block.button.querySelector("[data-vote-label]");
+    }
+
+    function showVoted(block: Block) {
+      const label = labelOf(block);
+      if (label) label.textContent = "Curtido";
+      block.button.disabled = true;
+    }
+
+    function finiteNumber(value: unknown) {
+      return typeof value === "number" && Number.isFinite(value) ? value : null;
+    }
+
+    function catalogCount(body: unknown, slug: string) {
+      if (!body || typeof body !== "object") return null;
+      const votes = (body as { votes?: unknown }).votes;
+      if (!votes || typeof votes !== "object") return null;
+      return finiteNumber((votes as Record<string, unknown>)[slug]);
+    }
+
+    function voteCount(body: unknown) {
+      if (!body || typeof body !== "object") return null;
+      return finiteNumber((body as { votes?: unknown }).votes);
+    }
+
+    const view = window as Window & { __pkVote?: boolean };
+    if (!view.__pkVote) {
+      view.__pkVote = true;
+
+      const found = new Map<string, Block[]>();
+      for (const root of document.querySelectorAll<HTMLElement>(
+        "[data-post-vote]",
+      )) {
+        const slug = root.dataset.postVote;
+        const notice = root.querySelector<HTMLElement>("[data-vote-notice]");
+        const button =
+          root.querySelector<HTMLButtonElement>("[data-vote-button]");
+        const count = root.querySelector<HTMLElement>("[data-vote-count]");
+        if (!slug || !notice || !button || !count) continue;
+        const blocks = found.get(slug) ?? [];
+        blocks.push({ notice, button, count });
+        found.set(slug, blocks);
+      }
+
+      for (const [slug, blocks] of found) {
+        const voted = readVoted(slug);
+        let locked = voted;
+        for (const block of blocks) {
+          showReady(block);
+          if (voted) showVoted(block);
+        }
+
+        void fetch("/api/votes")
+          .then(async (response) => {
+            if (!response.ok || locked) return;
+            const value = catalogCount(await response.json(), slug);
+            if (value === null || locked) return;
+            for (const block of blocks) setCount(block.count, String(value));
+          })
+          .catch(() => {
+            // Sem API, a contagem fica em –.
+          });
+
+        if (voted) continue;
+
+        const onClick = () => {
+          if (locked) return;
+          for (const block of blocks) block.button.disabled = true;
+          void fetch("/api/votes", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ slug }),
+          })
+            .then(async (response) => {
+              if (!response.ok) throw new Error("vote");
+              const value = voteCount(await response.json());
+              if (value === null) throw new Error("vote");
+              locked = true;
+              writeVoted(slug);
+              for (const block of blocks) {
+                setCount(block.count, String(value));
+                showVoted(block);
+              }
+            })
+            .catch(() => {
+              if (locked) return;
+              for (const block of blocks) {
+                const label = labelOf(block);
+                if (label) label.textContent = "Curtir";
+                block.button.disabled = false;
+              }
+            });
+        };
+
+        for (const block of blocks) {
+          block.button.addEventListener("click", onClick);
+        }
+      }
+    }
+  </script>
+</div>

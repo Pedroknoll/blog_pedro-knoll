@@ -111,7 +111,7 @@ for (const path of routes) {
   });
 }
 
-test("home e tag sem script; post sem pre com um module e com pre com dois [RNF-02]", async ({
+test("home e tag sem script; post sem pre com dois modules e com pre com três [RNF-02]", async ({
   page,
 }) => {
   for (const path of await pagesForTheme(page)) {
@@ -125,7 +125,7 @@ test("home e tag sem script; post sem pre com um module e com pre com dois [RNF-
         return;
       }
       const pres = await page.getByRole("article").locator("pre").count();
-      const modules = pres === 0 ? 1 : 2;
+      const modules = pres === 0 ? 2 : 3;
       await expect(page.locator('script[type="module"]')).toHaveCount(modules);
 
       const plain = page.locator("script:not([type])");

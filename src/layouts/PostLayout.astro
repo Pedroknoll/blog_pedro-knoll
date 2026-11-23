@@ -8,6 +8,7 @@ import "~/styles/katex-metric.css";
 import CodeCopy from "~/components/ui/CodeCopy.astro";
 import PostAppendix from "~/components/ui/PostAppendix.astro";
 import PostRail from "~/components/ui/PostRail.astro";
+import PostVote from "~/components/ui/PostVote.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import type { PostAppendixModel } from "~/lib/references";
 import { absoluteUrl, blogPostingJsonLd, pageTitle, postPath } from "~/lib/seo";
@@ -87,6 +88,7 @@ const jsonLd = blogPostingJsonLd({
         minutesRead={minutesRead}
         kind={kind}
         tags={tags}
+        slug={post.id}
       />
     </header>
     <div class="prose prose-site mt-10 min-w-0 lg:col-start-2">
@@ -97,6 +99,7 @@ const jsonLd = blogPostingJsonLd({
       ></div>
       <slot />
     </div>
+    <PostVote slug={post.id} class="mt-10 lg:col-start-2 lg:hidden" />
     {hasCode && <CodeCopy />}
   </article>
   {appendix && <PostAppendix appendix={appendix} />}
