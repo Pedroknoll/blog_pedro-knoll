@@ -225,9 +225,9 @@ test.describe("voto com JavaScript [RF-25]", () => {
     ).toBe("1");
 
     await page.reload();
-    await expect(
-      visibleVote(page).getByRole("button", { name: "Curtido" }),
-    ).toBeDisabled();
+    const again = visibleVote(page);
+    await expect(again.getByRole("button", { name: "Curtido" })).toBeDisabled();
+    await expect(again.locator("[data-vote-count]")).toContainText("7");
   });
 
   test("POST 403 e 429 voltam a Curtir sem gravar", async ({ page }) => {
