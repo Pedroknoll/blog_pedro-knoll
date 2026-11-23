@@ -114,7 +114,9 @@ const { slug, class: className } = Astro.props;
 
       for (const [slug, blocks] of found) {
         const voted = readVoted(slug);
-        let locked = voted;
+        // O GET também preenche a contagem com Curtido. locked só impede
+        // que um GET atrasado cubra o número do POST desta visita.
+        let locked = false;
         for (const block of blocks) {
           showReady(block);
           if (voted) showVoted(block);
