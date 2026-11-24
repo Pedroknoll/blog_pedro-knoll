@@ -10,6 +10,8 @@ export const fixtureMd = {
     "Alan Turing, 2000. Caderno de prova.",
   ],
   appendixHeading: "Apêndice A · Notas da fixture",
+  bodyTerm: "exercita",
+  descriptionTerm: "aninhados",
 } as const;
 
 export const fixtureMdx = {

@@ -96,7 +96,7 @@ describe("buildHeaders", () => {
     expect(policies).toHaveLength(1);
     expect(directivesOf(policies?.[0] ?? "")).toEqual({
       "default-src": "'none'",
-      "script-src": `'self' https://static.cloudflareinsights.com ${alpha} ${beta}`,
+      "script-src": `'self' 'wasm-unsafe-eval' https://static.cloudflareinsights.com ${alpha} ${beta}`,
       "style-src": "'self' 'unsafe-inline'",
       "style-src-elem": `'self' ${alpha} ${beta}`,
       "style-src-attr": "'unsafe-inline'",
