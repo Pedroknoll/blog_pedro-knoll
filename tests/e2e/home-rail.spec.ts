@@ -1,7 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { fixtureMd, fixtureMdx } from "./fixtures";
-import { authorGithub, authorLinkedin, homeGreeting } from "./site-literals";
+import {
+  authorGithub,
+  authorLinkedin,
+  homeGreeting,
+  siteTitle,
+} from "./site-literals";
 
 const articles = "/artigos/";
 
@@ -268,7 +273,10 @@ test.describe("lateral da home [RF-01]", () => {
   test("H7a header alinhado à saudação a 1440", async ({ page }) => {
     await open(page, "/", 1440);
     const greeting = await greetingLeft(page);
-    const link = page.getByRole("banner").getByRole("link");
+    const link = page.getByRole("banner").getByRole("link", {
+      name: siteTitle,
+      exact: true,
+    });
     await expect(link).toHaveCount(1);
     const box = await link.boundingBox();
     expect(box).not.toBeNull();
