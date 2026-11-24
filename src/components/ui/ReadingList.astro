@@ -1,0 +1,58 @@
+---
+import Card from "~/components/ui/Card.astro";
+import ExternalItem from "~/components/ui/ExternalItem.astro";
+import { getPublishedPosts } from "~/lib/getPublishedPosts";
+import { minutesReadOf } from "~/lib/reading-minutes";
+import { resolveReadingList, type ReadingEntry } from "~/lib/reading-list";
+
+interface Props {
+  items: ReadingEntry[];
+  label?: string;
+}
+
+const { items, label = "Leituras" } = Astro.props;
+const posts = await getPublishedPosts();
+const resolved = resolveReadingList(items, posts);
+
+const rows = await Promise.all(
+  resolved.map(async (entry) => {
+    if (entry.kind === "external") return entry;
+    const post = posts.find((item) => item.id === entry.slug);
+    if (!post) return null;
+    return {
+      kind: "post" as const,
+      item: {
+        slug: post.id,
+        title: post.data.title,
+        date: post.data.pubDate,
+        minutes: await minutesReadOf(post),
+      },
+    };
+  }),
+);
+
+const visible = rows.filter((row) => row !== null);
+---
+
+{visible.length > 0 && (
+  <ul
+    class="not-prose divide-y divide-line border-t border-b border-line"
+    aria-label={label}
+    data-reading-list
+  >
+    {visible.map((row) => (
+      <li class="py-5 sm:py-8">
+        {row.kind === "post" ? (
+          <Card item={row.item} headingLevel={3} layout="aligned" />
+        ) : (
+          <ExternalItem
+            href={row.href}
+            title={row.title}
+            source={row.source}
+            headingLevel={3}
+          />
+        )}
+      </li>
+    ))}
+  </ul>
+)}

@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.33 · novembro de 2026 · pedroknoll.com
+Versão 1.34 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -387,7 +387,7 @@ Decisão da T-119. O filtro está no ar (T-124). A busca entra na T-22. A barra 
 - A T-22 para se o Pagefind 1.5 pedir `unsafe-inline` em `style-src-elem` ou script inline. Esta seção não desenha um modal paralelo ao do Pagefind.
 
 ### 9.13 Header e footer
-Decisão da T-119. O header e o footer estão no ar (T-113). O link "Comece aqui" entra na T-114, o botão de busca na T-22 e o controle de tema na T-24.
+Decisão da T-119. O header e o footer estão no ar (T-113). O link "Comece aqui" está no ar (T-114). O botão de busca entra na T-22 e o controle de tema na T-24.
 
 - **Header:** fundo `surface`, filete `line` embaixo, na largura do site (72rem), com 0,75rem de respiro em cima e embaixo. A assinatura (§3) fica à esquerda. Depois, nesta ordem: `Comece aqui` (`/comece-aqui/`), `Artigos`, `Protótipos`, o botão de busca (§9.12) e o controle de tema (§9.9). `Artigos` e `Protótipos` não levam ícone. Cada link em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, grafite, indo para prússia no hover e no foco, com 44 px de toque e 1,25rem entre eles; o da página atual vai para tinta, com sublinhado de 2 px e `aria-current="page"`. `Protótipos` só aparece quando há protótipo publicado: sem ele, a página não existe.
 - **De `md` em diante:** uma linha só, com a assinatura à esquerda e o resto à direita.
@@ -402,6 +402,16 @@ Decisão da T-119. O voto entra na T-122, o compartilhar na T-115, os relacionad
 - **Compartilhar:** no fim da coluna do texto, 2,5rem abaixo do último parágrafo, ou abaixo do voto quando o voto está nessa coluna. O rótulo `/ COMPARTILHAR`, em mono 12 px maiúsculo, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete; abaixo, `X`, `LinkedIn`, `E-mail` e `Copiar link`, no estilo dos links do header (§9.13). Os três primeiros são links com o título e a URL do post (o e-mail por `mailto:`), sem script de terceiro. `Copiar link` é um botão do próprio site, criado pelo script: sem JavaScript, ele não aparece. Ao copiar, vira `Link copiado` por 1,5 s, com o `aria-label` junto, como o botão do código (§9.5).
 - **Posts relacionados:** na coluna do texto, o rótulo `/ POSTS RELACIONADOS`, no estilo do compartilhar, e até 3 itens da lista (§9.2).
 - **Newsletter:** na coluna do texto, depois dos relacionados, e na home, depois das faixas (§9.2). Um bloco com fundo `sheet` e cantos de 0,375rem; o título `Receba os próximos posts por e-mail.` na fonte de display 600; o campo de e-mail no tamanho do campo da busca (§9.12); o botão `Receber`, com fundo tinta, texto papel, IBM Plex Mono e cantos de 0,375rem. A forma final do campo depende do formulário do Kit (T-116).
+
+### 9.15 Comece aqui
+Decisão da T-114. Está no ar.
+
+- **h1** `Comece aqui`, fixo, na escala do h1 das listas (§9.2), sem ícone. É o rótulo do header.
+- **Prosa** na coluna de texto do post (§5): parágrafos, seções `##` e links. O texto mora em `src/content/comece-aqui.mdx`. Editar a página é mudar esse arquivo: dá para acrescentar, tirar e reordenar seções, e pôr uma lista em qualquer uma.
+- **Item de post:** o item alinhado (§9.2), com data, título, minutos e curtidas. O título é h3.
+- **Item externo:** a mesma grade. No lugar da data, o nome da fonte, em mono 12 px, lápis; sem fonte informada, o domínio sem `www.`. O título no mesmo estilo do item. No lugar dos minutos e das curtidas, `↗` em lápis, decorativo (`aria-hidden`). O nome acessível do link é o título mais "(site externo)". O link abre na mesma aba.
+- A lista some se nenhum item sobrar. Um slug que não está nos posts publicados sai da lista, sem quebrar o build. Link externo que não é `https:` quebra o build.
+- Sem foto e sem link para o GitHub.
 
 ---
 
