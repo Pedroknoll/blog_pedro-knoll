@@ -253,16 +253,17 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await test.step(href, async () => {
         await open(page, href);
         const header = page.getByRole("article").locator("header");
-        await page.setViewportSize({ width: 1280, height: 800 });
-        await expect(header.locator("svg:visible")).toHaveCount(0);
-
-        await page.setViewportSize({ width: 360, height: 800 });
         const tipo = header
           .locator("[data-post-rail] > div")
           .nth(1)
           .locator("> div")
           .filter({ has: page.getByText("Tipo", { exact: true }) });
         const svg = tipo.locator("svg");
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await expect(svg).toHaveCount(1);
+        await expect(svg).toBeHidden();
+
+        await page.setViewportSize({ width: 360, height: 800 });
         await expect(svg).toHaveCount(1);
         await expect(svg).toBeVisible();
         await expect(svg).toHaveAttribute("aria-hidden", "true");
