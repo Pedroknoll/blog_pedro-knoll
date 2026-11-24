@@ -135,7 +135,9 @@ async function animationNames(svg: Locator): Promise<string[]> {
 
 function inRecentBand(root: Element) {
   const label = root.closest("section")?.querySelector("h2");
-  return (label?.textContent ?? "").replace(/\s+/g, " ").trim() === "/ RECENTES";
+  return (
+    (label?.textContent ?? "").replace(/\s+/g, " ").trim() === "/ RECENTES"
+  );
 }
 
 function inPrototypeBand(root: Element) {
@@ -726,7 +728,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       };
       if (!wraps()) {
         let width = Math.floor(block.getBoundingClientRect().width);
-        while (width > 120 && !wraps()) {
+        while (width > 8 && !wraps()) {
           width -= 16;
           block.style.width = `${width}px`;
         }

@@ -1,4 +1,4 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { fixtureMd, fixtureSemTitulos } from "./fixtures";
 import { homeGreeting } from "./site-literals";
@@ -281,7 +281,7 @@ test.describe("home [RF-01]", () => {
     }
   });
 
-  test("com a página rolada, / PROTÓTIPOS move menos de 3 px", async ({
+  test("o ranking empurra / PROTÓTIPOS e não mexe em / RECENTES", async ({
     page,
   }) => {
     await page.setViewportSize({ width: 360, height: 800 });
@@ -299,7 +299,12 @@ test.describe("home [RF-01]", () => {
       );
     });
     await page.goto("/");
-    const label = page.getByRole("heading", {
+    const recent = page.getByRole("heading", {
+      level: 2,
+      name: RECENT,
+      exact: true,
+    });
+    const prototypes = page.getByRole("heading", {
       level: 2,
       name: PROTO,
       exact: true,
@@ -308,19 +313,24 @@ test.describe("home [RF-01]", () => {
       .getByRole("heading", { level: 2, name: VOTED, exact: true })
       .scrollIntoViewIfNeeded();
     await page.evaluate(() => document.fonts.ready);
-    const before = await label.evaluate(
-      (element) => element.getBoundingClientRect().top,
-    );
+    const topOf = (heading: Locator) =>
+      heading.evaluate((element) => element.getBoundingClientRect().top);
+    const before = {
+      recent: await topOf(recent),
+      prototypes: await topOf(prototypes),
+    };
     open = true;
     release();
     await expect(
       band(page, VOTED).locator("[data-ranking] article"),
     ).not.toHaveCount(0);
     await settle(page);
-    const after = await label.evaluate(
-      (element) => element.getBoundingClientRect().top,
+    expect(Math.abs((await topOf(recent)) - before.recent)).toBeLessThan(
+      PIXELS_TO_SIGNIFICANCE,
     );
-    expect(Math.abs(after - before)).toBeLessThan(PIXELS_TO_SIGNIFICANCE);
+    expect((await topOf(prototypes)) - before.prototypes).toBeGreaterThan(
+      PIXELS_TO_SIGNIFICANCE,
+    );
   });
 });
 

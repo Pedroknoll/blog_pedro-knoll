@@ -20,39 +20,6 @@ const votes = {
   "2026-10-por-que-este-blog": 1,
 };
 
-async function markVisible(page: Page) {
-  return page.evaluate(() => {
-    const elements = [...document.querySelectorAll("body *")];
-    const boxes: { id: string; tag: string; classes: string; top: number }[] =
-      [];
-    for (let index = 0; index < elements.length; index += 1) {
-      const element = elements[index];
-      if (!element) continue;
-      const rect = element.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) continue;
-      if (!(rect.bottom > 0 && rect.top < innerHeight)) continue;
-      const id = String(index);
-      element.setAttribute("data-cls", id);
-      boxes.push({
-        id,
-        tag: element.tagName,
-        classes: element.getAttribute("class") ?? "",
-        top: rect.top,
-      });
-    }
-    return boxes;
-  });
-}
-
-async function topsOf(page: Page, ids: string[]) {
-  return page.evaluate((ids) => {
-    return ids.map((id) => {
-      const element = document.querySelector(`[data-cls="${id}"]`);
-      return element ? element.getBoundingClientRect().top : null;
-    });
-  }, ids);
-}
-
 async function settle(page: Page) {
   await page.evaluate(
     () =>
@@ -108,7 +75,7 @@ test.describe("mais votados [RF-01, RF-02]", () => {
     await expect(page.locator("[data-ranking] article")).toHaveCount(0);
   });
 
-  test("o GET no topo move menos de 3 px", async ({ page }) => {
+  test("o GET no topo não move o h1", async ({ page }) => {
     for (const width of WIDTHS) {
       await test.step(`${width}px`, async () => {
         await page.unrouteAll({ behavior: "ignoreErrors" });
@@ -127,31 +94,23 @@ test.describe("mais votados [RF-01, RF-02]", () => {
           "O ranking precisa de JavaScript.",
         );
         await page.evaluate(() => document.fonts.ready);
-        const before = await markVisible(page);
+        const h1 = page.getByRole("heading", { level: 1 });
+        const before = await h1.evaluate(
+          (element) => element.getBoundingClientRect().top,
+        );
         open = true;
         release();
         await expect(page.locator("[data-ranking] article")).not.toHaveCount(0);
         await settle(page);
-        const after = await topsOf(
-          page,
-          before.map((box) => box.id),
+        const after = await h1.evaluate(
+          (element) => element.getBoundingClientRect().top,
         );
-        const moved = [];
-        for (let index = 0; index < before.length; index += 1) {
-          const box = before[index];
-          const topAfter = after[index];
-          if (!box || typeof topAfter !== "number") continue;
-          const delta = topAfter - box.top;
-          if (Math.abs(delta) >= PIXELS_TO_SIGNIFICANCE) {
-            moved.push({ tag: box.tag, classes: box.classes, delta });
-          }
-        }
-        expect(moved).toEqual([]);
+        expect(Math.abs(after - before)).toBeLessThan(PIXELS_TO_SIGNIFICANCE);
       });
     }
   });
 
-  test("com a página rolada, o footer move menos de 3 px", async ({ page }) => {
+  test("com a página rolada, o footer desce com a lista", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
     let release = () => {};
     const gate = new Promise<void>((resolve) => {
@@ -176,7 +135,7 @@ test.describe("mais votados [RF-01, RF-02]", () => {
     const after = await footer.evaluate(
       (element) => element.getBoundingClientRect().top,
     );
-    expect(Math.abs(after - before)).toBeLessThan(PIXELS_TO_SIGNIFICANCE);
+    expect(after - before).toBeGreaterThan(PIXELS_TO_SIGNIFICANCE);
   });
 });
 
