@@ -198,7 +198,13 @@ test.describe("header e footer", () => {
       const linkCenter = link.y + link.height / 2;
       expect(Math.abs(linkCenter - markCenter), String(width)).toBeLessThan(1);
       const right = await contentRight(principal(page));
-      expect(nav.x + nav.width, String(width)).toBeCloseTo(right, 0);
+      const search = await page
+        .getByRole("banner")
+        .getByRole("button", { name: /^Buscar/ })
+        .boundingBox();
+      expect(search, String(width)).not.toBeNull();
+      if (!search) return;
+      expect(search.x + search.width, String(width)).toBeCloseTo(right, 0);
     }
   });
 

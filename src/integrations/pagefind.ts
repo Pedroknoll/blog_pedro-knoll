@@ -1,10 +1,11 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import type { AstroIntegration } from "astro";
 import { close, createIndex } from "pagefind";
 
+const postGlob = "**/blog/*/index.html";
 const searchCall = "search:(term,options2={})=>wrapper.search(term,options2)";
 
 // O índice guarda a letra solta ("a", "e", "o"). Uma consulta que não existe
@@ -22,6 +23,23 @@ async function dropLoneLetterMatches(scriptPath: string): Promise<void> {
     );
   }
   await writeFile(scriptPath, source.replace(searchCall, filteredSearch));
+}
+
+async function postPageCount(directory: string): Promise<number> {
+  const entries = await readdir(join(directory, "blog"), {
+    withFileTypes: true,
+  });
+  let count = 0;
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    try {
+      await stat(join(directory, "blog", entry.name, "index.html"));
+      count += 1;
+    } catch {
+      // Pasta sem a página do post.
+    }
+  }
+  return count;
 }
 
 function failure(errors: readonly string[], fallback: string): Error {
@@ -42,12 +60,18 @@ export function pagefindIntegration(): AstroIntegration {
           if (created.errors.length > 0 || !created.index) {
             throw failure(created.errors, "O Pagefind não criou o índice.");
           }
-          const indexed = await created.index.addDirectory({ path: directory });
+          const posts = await postPageCount(directory);
+          const indexed = await created.index.addDirectory({
+            path: directory,
+            glob: postGlob,
+          });
           if (indexed.errors.length > 0) {
             throw failure(indexed.errors, "O Pagefind não indexou o site.");
           }
-          if (indexed.page_count === 0) {
-            throw new Error("O Pagefind não indexou nenhuma página.");
+          if (indexed.page_count !== posts) {
+            throw new Error(
+              `O Pagefind indexou ${indexed.page_count} páginas; o build tem ${posts} posts.`,
+            );
           }
           const written = await created.index.writeFiles({
             outputPath: join(directory, "pagefind"),

@@ -359,7 +359,9 @@ pagefind-modal {
 }
 
 :is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal .pf-result-card,
-:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal .pf-result-card:hover,
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#)
+  pagefind-modal
+  .pf-result-card:hover,
 :is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#)
   pagefind-modal
   .pf-result-card:has([data-pf-selected]),
@@ -367,8 +369,23 @@ pagefind-modal {
   pagefind-modal
   .pf-result-card:has(.pf-result-link:focus-visible) {
   background: transparent;
-  border-color: transparent;
   box-shadow: none;
+}
+
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal .pf-result-card {
+  border-color: var(--color-line);
+}
+
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#)
+  pagefind-modal
+  .pf-result-card:hover,
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#)
+  pagefind-modal
+  .pf-result-card:has([data-pf-selected]),
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#)
+  pagefind-modal
+  .pf-result-card:has(.pf-result-link:focus-visible) {
+  border-color: var(--color-accent);
 }
 
 :is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal .pf-result-excerpt {

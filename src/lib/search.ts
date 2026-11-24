@@ -46,7 +46,7 @@ export function shortcutLabel(platform: string): string {
   return applePlatform.test(platform) ? "⌘K" : "Ctrl K";
 }
 
-function isEditable(target: EventTarget | null): boolean {
+function isEditable(target: EventTarget | ShortcutTarget | null): boolean {
   if (!target || typeof target !== "object") return false;
   const node = target as ShortcutTarget;
   const tag = node.tagName?.toUpperCase();
@@ -60,7 +60,7 @@ export function isSearchShortcut(event: {
   ctrlKey: boolean;
   shiftKey: boolean;
   altKey: boolean;
-  target: EventTarget | null;
+  target: EventTarget | ShortcutTarget | null;
 }): boolean {
   if (event.altKey || event.shiftKey) return false;
   if (event.key !== "k" && event.key !== "K") return false;

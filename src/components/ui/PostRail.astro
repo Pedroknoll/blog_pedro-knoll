@@ -52,9 +52,7 @@ const published = formatPubDate(pubDate);
     <div class={rowClass}>
       <p class={labelClass}>Data</p>
       <p class="text-sm text-ink">
-        <time datetime={published.datetime}>
-          {published.text}
-        </time>
+        <time datetime={published.datetime}>{published.text}</time>
       </p>
     </div>
     <div class={rowClass}>

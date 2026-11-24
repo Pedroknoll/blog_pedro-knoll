@@ -21,7 +21,7 @@ test.describe("busca na CSP [RF-15, RNF-07]", () => {
 
     await page
       .getByRole("banner")
-      .getByRole("button", { name: "Buscar", exact: true })
+      .getByRole("button", { name: /^Buscar (⌘K|Ctrl K)$/, exact: true })
       .click();
     const input = page.getByRole("dialog").locator('input[type="search"]');
     await expect(input).toBeFocused();

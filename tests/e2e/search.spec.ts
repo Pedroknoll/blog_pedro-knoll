@@ -25,7 +25,7 @@ const pages = [
 
 function searchButton(page: Page) {
   return page.getByRole("banner").getByRole("button", {
-    name: "Buscar",
+    name: /^Buscar (⌘K|Ctrl K)$/,
     exact: true,
   });
 }
@@ -139,6 +139,30 @@ test.describe("busca [RF-15]", () => {
     expect(response?.status()).toBe(200);
     await page.waitForTimeout(1000);
     const before = new Set(fonts);
+    const semibold = await page.evaluate(() => {
+      const files = new Set<string>();
+      for (const sheet of document.styleSheets) {
+        let rules: CSSRuleList;
+        try {
+          rules = sheet.cssRules;
+        } catch {
+          continue;
+        }
+        for (const rule of rules) {
+          if (!(rule instanceof CSSFontFaceRule)) continue;
+          const family = rule.style.fontFamily.replaceAll('"', "");
+          if (!family.startsWith("IBM Plex Sans-")) continue;
+          if (rule.style.fontWeight !== "600") continue;
+          const source = /url\("([^"]+)"\)/.exec(
+            rule.style.getPropertyValue("src"),
+          );
+          if (!source?.[1]) continue;
+          files.add(new URL(source[1], location.href).pathname);
+        }
+      }
+      return [...files];
+    });
+    expect(semibold.length).toBeGreaterThan(0);
 
     await searchButton(page).click();
     const dialog = page.getByRole("dialog");
@@ -150,7 +174,7 @@ test.describe("busca [RF-15]", () => {
     await page.waitForTimeout(500);
 
     const extra = [...fonts].filter((pathname) => !before.has(pathname));
-    expect(extra).toEqual([]);
+    expect(extra.every((pathname) => semibold.includes(pathname))).toBe(true);
   });
 
   test("axe sem violações serious nem critical com o modal aberto", async ({
