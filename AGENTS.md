@@ -63,13 +63,13 @@ src/content.config.ts   collection `posts` com schema Zod 4
 src/content/posts/<slug>/index.mdx   cada post é uma pasta: texto, capa, figs/, data/, notebooks/
 src/content/posts/fixture-*/         fixtures de teste, só no build com SHOW_FIXTURES=true (T-39)
 src/assets/brand/       pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel,-404}.svg
-src/assets/brand/icones/  aceno.svg; icone-{artigo,prototipo,relogio}.svg
+src/assets/brand/icones/  aceno.svg; icone-{artigo,prototipo,relogio,fogo,voto}.svg
 src/components/ui/      .astro estáticos
 src/components/viz/     primitivas e exploráveis Svelte; sem client:* é figura estática (AGENTS.md próprio, criado antes da T-19; seção 9.8 do BRAND)
 src/lib/viz/            geometria pura
 src/components/marimo/  Notebook.astro, o botão do caderno (AGENTS.md próprio, criado antes da T-18; seções 9.6–9.7)
 src/integrations/headers.ts   gera dist/_headers no build (CSP por rota)
-src/lib/                getPublishedPosts, readingTime, seo, votes-catalog
+src/lib/                getPublishedPosts, readingTime, seo, votes-catalog, votes-client, ranking, home-lists
 src/pages/api/catalogo.json.ts   catálogo dos posts publicados; o público recebe 404 (T-121)
 worker/                 Worker só para /api/* (T-121)
 migrations/             SQL do D1, 0001_votes.sql
@@ -91,7 +91,7 @@ Sem `icon-192.png` e sem `icon-512.png`. Não há `src/components/marimo/pk.css`
 - **Componentes:** `.astro` para tudo que é estático; `.svelte` só quando houver estado no cliente. Hidratação padrão `client:visible`; `client:load` exige justificativa no PR. Exceção: em `src/components/viz/`, sem `client:*` é figura estática (0 JS); com `client:visible` é explorável.
 - **Conteúdo:** as páginas acessam posts só por `getPublishedPosts()`, nunca por `getCollection('posts')` direto (é o que esconde rascunhos quando `SHOW_DRAFTS` não é `true`). Teste de funcionalidade abre uma fixture, pelos literais de `tests/e2e/fixtures.ts`, nunca um post publicado; um laço sobre os posts publicados só confere o que vale para qualquer post (RNF-14, T-39).
 - **Slug:** é o `id` da entrada, gerado pelo `generateId` do loader (nome da pasta). Não recalcule slug nas páginas.
-- **Nomes:** identificadores de código em inglês; texto visível e rotas em pt-BR (`/sobre`, `/tags/[tag]`, `/tipos/[tipo]`). Exceções fixadas na SPEC: `/blog/[slug]` e `/page/[n]`.
+- **Nomes:** identificadores de código em inglês; texto visível e rotas em pt-BR (`/blog/`, `/artigos/`, `/prototipos/`, `/mais-votados/`, `/tags/[tag]`). A exceção fixada na SPEC é `/blog/[slug]`. `/tipos/` e `/page/[n]` não existem (T-123).
 - **Alias:** `~/` aponta para `src/`.
 - **Dados de gráfico:** importados no arquivo da figura (`figs/<Nome>.astro`) ou no MDX a partir de JSON/CSV da pasta do post; nada de `fetch` em runtime. Datas chegam como string ISO e o componente converte. Dado que pede cálculo sai do `data/build.py` do post, rodado por `uv run scripts/build-data.py <pasta do post>`: entradas em `data/raw/`, saídas e `data.lock` em `data/`; mudou a entrada ou o `build.py`, rode de novo (SPEC §8). Dependência do `build.py` fica no bloco PEP 723 dele, com o `build.py.lock` do `uv lock --script` commitado (SPEC §9).
 - **Cadernos:** complemento opcional de qualquer post: o `.py` fica em `notebooks/` na pasta do post, e o componente `Notebook`, no MDX, leva ao molab (`/wasm` por padrão; com `gpu`, a prévia estática, de onde o leitor com conta no molab roda no servidor). O blog não exporta nem hospeda caderno, e um post com caderno é `.mdx`. Detalhes na SPEC §6 e §7.
