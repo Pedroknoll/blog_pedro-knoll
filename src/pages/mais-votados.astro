@@ -1,0 +1,36 @@
+---
+import Fire from "~/assets/brand/icones/icone-fogo.svg";
+import TopVoted from "~/components/ui/TopVoted.astro";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { getPublishedPosts } from "~/lib/getPublishedPosts";
+import { pageCatalog } from "~/lib/page-catalog";
+import { absoluteUrl, pageTitle } from "~/lib/seo";
+import { site } from "~/site.config";
+
+const posts = await getPublishedPosts();
+const catalogJson = await pageCatalog(posts);
+const heading = "Mais votados";
+---
+
+<BaseLayout
+  title={pageTitle({ page: heading }, site)}
+  description="Posts com pelo menos um voto."
+  canonical={absoluteUrl(Astro.url.pathname, Astro.site)}
+  ogTitle={heading}
+  ogType="website"
+>
+  <div class="mx-auto w-full max-w-[52rem] px-4 pt-10 pb-10">
+    <h1 class="flex items-center gap-3 font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem]">
+      <Fire
+        aria-hidden="true"
+        width={24}
+        height={24}
+        class="size-6 shrink-0 text-ink"
+      />
+      {heading}
+    </h1>
+    <div class="mt-10">
+      <TopVoted catalogJson={catalogJson} headingLevel={2} layout="aligned" />
+    </div>
+  </div>
+</BaseLayout>

@@ -1,6 +1,9 @@
 ---
 import type { CollectionEntry } from "astro:content";
 
+import ArticleIcon from "~/assets/brand/icones/icone-artigo.svg";
+import FireIcon from "~/assets/brand/icones/icone-fogo.svg";
+import PrototypeIcon from "~/assets/brand/icones/icone-prototipo.svg";
 import Card from "~/components/ui/Card.astro";
 import { minutesReadOf } from "~/lib/reading-minutes";
 
@@ -9,36 +12,75 @@ interface Props {
   showHeading?: boolean;
   posts: CollectionEntry<"posts">[];
   listLabel?: string;
+  icon?: "article" | "prototype" | "fire";
+  headingLevel?: 2 | 3;
+  frame?: boolean;
+  layout?: "paired" | "columns" | "aligned" | "titles";
+  topBorder?: boolean;
 }
 
-const { heading, showHeading = true, posts, listLabel = "Posts" } = Astro.props;
+const {
+  heading,
+  showHeading = true,
+  posts,
+  listLabel = "Posts",
+  icon,
+  headingLevel = 2,
+  frame = true,
+  layout = "paired",
+  topBorder = true,
+} = Astro.props;
+
+const icons = {
+  article: ArticleIcon,
+  prototype: PrototypeIcon,
+  fire: FireIcon,
+};
+const Icon = icon ? icons[icon] : undefined;
 const items = await Promise.all(
   posts.map(async (post) => ({
-    post,
-    minutesRead: await minutesReadOf(post),
+    slug: post.id,
+    title: post.data.title,
+    date: post.data.pubDate,
+    minutes: await minutesReadOf(post),
   })),
 );
+const headingClass =
+  "font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem]";
+const titles = layout === "titles";
 ---
 
 <div
   class:list={[
-    "mx-auto w-full max-w-[52rem] px-4 pb-10",
-    showHeading && "pt-10",
+    frame && "mx-auto w-full max-w-[52rem] px-4 pb-10",
+    frame && showHeading && "pt-10",
   ]}
-  data-listing
 >
   {showHeading && (
-    <h1 class="font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem]">
+    <h1 class:list={[headingClass, Icon && "flex items-center gap-3"]}>
+      {Icon && (
+        <Icon
+          aria-hidden="true"
+          width={24}
+          height={24}
+          class="size-6 shrink-0 text-ink"
+        />
+      )}
       {heading}
     </h1>
   )}
   <ul
-    class:list={["divide-y divide-line", showHeading && "mt-10"]}
+    class:list={[
+      !titles && "divide-y divide-line border-b border-line",
+      !titles && topBorder && "border-t",
+      showHeading && "mt-10",
+    ]}
     aria-label={listLabel}
+    data-listing
   >
-    {items.map(({ post, minutesRead }) => (
-      <li class="py-8">
-        <Card post={post} minutesRead={minutesRead} />
+    {items.map((item) => (
+      <li class={titles ? "py-3 sm:py-4" : "py-5 sm:py-8"}>
+        <Card item={item} headingLevel={headingLevel} layout={layout} />
       </li>
     ))}
   </ul>

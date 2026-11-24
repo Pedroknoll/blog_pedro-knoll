@@ -73,11 +73,12 @@ async function readRail(page: Page): Promise<Rail> {
     const column = greeting?.parentElement ?? null;
     const grid = column?.parentElement ?? null;
     const hand = document.querySelector("svg:has(.pka-a)");
-    const bar = document.querySelector('nav[aria-label="Filtrar por tipo"]');
-    const list = bar?.querySelector("ul") ?? null;
+    const right = column?.nextElementSibling ?? null;
+    const band = right?.querySelector("section") ?? null;
+    const list = band?.querySelector("h2") ?? null;
     const greetingBox = greeting?.getBoundingClientRect();
-    const barBox = bar?.getBoundingClientRect();
-    const rightBox = bar?.parentElement?.getBoundingClientRect();
+    const barBox = band?.getBoundingClientRect();
+    const rightBox = right?.getBoundingClientRect();
     const columnStyle = column ? getComputedStyle(column) : null;
     return {
       columnWidth: greetingBox?.width ?? Number.NaN,

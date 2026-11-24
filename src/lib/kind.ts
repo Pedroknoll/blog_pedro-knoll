@@ -13,7 +13,7 @@ export const KIND_SLUGS: Record<Kind, string> = {
 };
 
 export function kindPath(kind: Kind): string {
-  return `/tipos/${KIND_SLUGS[kind]}/`;
+  return `/${KIND_SLUGS[kind]}/`;
 }
 
 export function kindFromSlug(slug: string): Kind | undefined {

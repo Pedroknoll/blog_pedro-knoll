@@ -95,9 +95,23 @@ test.describe("home [RF-01]", () => {
       fixtureSemTitulos.href,
     );
     await expect(recent.locator(`a[href="${fixtureMd.href}"]`)).toHaveCount(0);
+    await expect(recent.locator("[data-listing]")).toHaveCSS(
+      "border-top-width",
+      "0px",
+    );
 
     const prototypes = band(page, PROTO);
     const prototypeLinks = prototypes.locator("h3 a");
+    const prototypeList = prototypes.locator("[data-listing]");
+    await expect(prototypeList).toHaveCSS("border-top-width", "0px");
+    await expect(prototypeList).toHaveCSS("border-bottom-width", "0px");
+    await expect(prototypes.locator("time")).toHaveCount(0);
+    await expect(prototypes.locator("p.footer")).toHaveCount(0);
+    await expect(prototypes.locator("li")).toHaveCSS("border-top-width", "0px");
+    await expect(prototypes.locator("li")).toHaveCSS("padding-top", "16px");
+    await expect(
+      prototypes.locator("h2").locator("xpath=../../div[2]"),
+    ).toHaveCSS("margin-top", "8px");
     await expect(prototypeLinks).toHaveCount(1);
     await expect(prototypeLinks).toHaveAttribute("href", fixtureMd.href);
     await expect(page.locator("article img")).toHaveCount(0);
@@ -129,7 +143,18 @@ test.describe("home [RF-01]", () => {
       });
       await expect(link).toHaveCount(1);
       await expect(link).toHaveAttribute("href", item.href);
-      await expect(link).toHaveText("Todos");
+      const visible = await link.evaluate((node) =>
+        [...node.childNodes]
+          .filter(
+            (child) =>
+              !(
+                child instanceof Element && child.classList.contains("sr-only")
+              ),
+          )
+          .map((child) => child.textContent ?? "")
+          .join(""),
+      );
+      expect(visible).toBe("Todos");
     }
   });
 
@@ -164,14 +189,21 @@ test.describe("home [RF-01]", () => {
       `article:has(a[href="${fixtureMd.href}"]) [data-vote-value]`,
     );
     await expect(top).toHaveText("5");
-    const recentSame = band(page, RECENT).locator(
-      `article:has(a[href="${fixtureSemTitulos.href}"]) time`,
+    await expect(ranked.locator("time")).toHaveCount(0);
+    await expect(ranked.locator("[data-reading]")).toHaveCount(0);
+    await expect(voted.locator("[data-ranking]")).toHaveCSS(
+      "border-top-width",
+      "0px",
     );
-    const rankedSame = voted.locator(
-      `article:has(a[href="${fixtureSemTitulos.href}"]) time`,
-    );
-    await expect(rankedSame).toHaveText(
-      ((await recentSame.textContent()) ?? "").trim(),
+    const itemBorders = await voted
+      .locator("[data-ranking] li")
+      .evaluateAll((items) =>
+        items.map((item) => getComputedStyle(item).borderTopWidth),
+      );
+    expect(itemBorders).toEqual(Array.from({ length: 6 }, () => "0px"));
+    await expect(voted.locator("h2").locator("xpath=../../div[2]")).toHaveCSS(
+      "margin-top",
+      "8px",
     );
 
     await page.unrouteAll({ behavior: "ignoreErrors" });

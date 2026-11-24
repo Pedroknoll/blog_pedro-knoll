@@ -1,0 +1,29 @@
+---
+interface Props {
+  label: string;
+  href: string;
+  more: string;
+  padded?: boolean;
+  compact?: boolean;
+}
+
+const { label, href, more, padded = true, compact = false } = Astro.props;
+const linkClass =
+  "absolute top-1/2 right-0 inline-flex h-11 -translate-y-1/2 items-center font-mono text-xs tracking-[0.12em] whitespace-nowrap text-muted uppercase hover:text-accent focus-visible:text-accent";
+---
+
+<section
+  class:list={["mx-auto w-full min-w-0 max-w-[52rem] pt-10", padded && "px-4"]}
+>
+  <div class="relative border-b border-ink pb-2">
+    <h2 class="font-mono text-xs uppercase tracking-widest text-ink">
+      {label}
+    </h2>
+    <a class={linkClass} href={href}>
+      Todos<span class="sr-only">{more}</span>
+    </a>
+  </div>
+  <div class:list={[compact ? "mt-2" : "mt-6"]}>
+    <slot />
+  </div>
+</section>
