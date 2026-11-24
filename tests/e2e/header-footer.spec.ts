@@ -8,6 +8,7 @@ import {
   siteTitle,
 } from "./site-literals";
 
+const startHere = "/comece-aqui/";
 const articles = "/artigos/";
 const prototypes = "/prototipos/";
 
@@ -123,9 +124,10 @@ test.describe("header e footer", () => {
     const nav = principal(page);
     await expect(nav).toHaveCount(1);
     const links = nav.getByRole("link");
-    await expect(links).toHaveText(["Artigos", "Protótipos"]);
-    await expect(links.nth(0)).toHaveAttribute("href", articles);
-    await expect(links.nth(1)).toHaveAttribute("href", prototypes);
+    await expect(links).toHaveText(["Comece aqui", "Artigos", "Protótipos"]);
+    await expect(links.nth(0)).toHaveAttribute("href", startHere);
+    await expect(links.nth(1)).toHaveAttribute("href", articles);
+    await expect(links.nth(2)).toHaveAttribute("href", prototypes);
   });
 
   test("HF2 página atual", async ({ page }) => {
@@ -159,6 +161,7 @@ test.describe("header e footer", () => {
       expect(marked).toBe(current === null ? 0 : 1);
     }
 
+    await expectCurrent(startHere, "Comece aqui");
     await expectCurrent(articles, "Artigos");
     await expectCurrent(prototypes, "Protótipos");
     await expectCurrent("/", null);
@@ -171,7 +174,7 @@ test.describe("header e footer", () => {
     const muted = await tokenColor(page, "muted");
     const links = principal(page).getByRole("link");
     const count = await links.count();
-    expect(count).toBe(2);
+    expect(count).toBe(3);
     for (let index = 0; index < count; index += 1) {
       await expectLinkStyle(links.nth(index), mono, muted);
     }
