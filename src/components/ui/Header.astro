@@ -1,10 +1,18 @@
 ---
 import BrandSymbol from "~/assets/brand/pklog-simbolo-currentcolor.svg";
 import Wordmark from "~/components/ui/Wordmark.astro";
+import { getPublishedPosts } from "~/lib/getPublishedPosts";
+import { headerLinks, isCurrentPath } from "~/lib/nav";
+
+const links = headerLinks(await getPublishedPosts());
+const pathname = Astro.url.pathname;
+
+const linkClass =
+  "inline-flex min-h-11 items-center font-mono text-xs tracking-[0.12em] whitespace-nowrap text-muted uppercase hover:text-accent focus-visible:text-accent aria-[current=page]:text-ink aria-[current=page]:underline aria-[current=page]:decoration-2";
 ---
 
 <header class="border-b border-line bg-surface py-3">
-  <div class="mx-auto flex w-full max-w-site items-center gap-4 px-4">
+  <div class="mx-auto flex w-full max-w-site flex-wrap items-center px-4 md:flex-nowrap">
     <a
       class="inline-flex items-center gap-[0.42em] text-[1.25rem] leading-none text-ink"
       href="/"
@@ -12,5 +20,26 @@ import Wordmark from "~/components/ui/Wordmark.astro";
       <BrandSymbol aria-hidden="true" class="size-[1.55em] flex-none" />
       <Wordmark />
     </a>
+    <nav
+      aria-label="Principal"
+      class="order-last w-full min-w-0 basis-full overflow-x-auto border-t border-line p-[5px] md:order-0 md:ml-auto md:w-auto md:basis-auto md:shrink-0 md:overflow-visible md:border-t-0 md:p-0"
+    >
+      <ul class="m-0 flex list-none gap-x-5 p-0">
+        {links.map((link) => (
+          <li>
+            <a
+              class={linkClass}
+              href={link.href}
+              aria-current={
+                isCurrentPath(pathname, link.href) ? "page" : undefined
+              }
+            >
+              {link.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <div class="ml-auto shrink-0 md:ml-0"></div>
   </div>
 </header>
