@@ -54,22 +54,22 @@ const titleClass =
     </Heading>
   </article>
 ) : layout === "votes" ? (
-  <article class="relative flex min-w-0 items-baseline justify-between gap-x-3">
+  <article class="relative flex min-w-0 items-center justify-between gap-x-3">
     <Heading class:list={[titleClass, "min-w-0"]}>
       <a class={linkClass} href={href}>
         {item.title}
       </a>
     </Heading>
-    <p class="footer pointer-events-none flex shrink-0 items-baseline gap-1 font-mono text-xs text-pencil">
+    <p class="footer pointer-events-none flex shrink-0 items-center gap-1 font-mono text-xs text-pencil">
       <Vote
         aria-hidden="true"
         width={10}
         height={8}
         class="inline-block h-2 w-2.5"
       />
-      <span class="inline-block w-[3ch] text-right" role="tooltip">
+      <span data-vote-word>curtidas</span>
+      <span class="inline-block w-[3ch] text-right text-accent" role="tooltip">
         <span data-vote-value>–</span>
-        <span class="sr-only"> votos</span>
       </span>
     </p>
   </article>
@@ -85,17 +85,14 @@ const titleClass =
         <time datetime={datetime}>{text}</time>
       </p>
       <p class="footer pointer-events-none flex flex-wrap items-baseline gap-x-2 gap-y-1.5 font-mono text-xs text-pencil lg:col-start-3 lg:row-start-1">
-        <span class="whitespace-nowrap">
-          <span data-reading>
-            <Clock
-              aria-hidden="true"
-              width={12}
-              height={12}
-              class="inline-block"
-            />{" "}
-            {item.minutes} min
-          </span>
-          <span class="sr-only"> de leitura</span>
+        <span data-reading class="whitespace-nowrap">
+          <Clock
+            aria-hidden="true"
+            width={12}
+            height={12}
+            class="inline-block"
+          />{" "}
+          {item.minutes} min de leitura
         </span>
         <span class="text-line" aria-hidden="true">
           |
@@ -107,9 +104,12 @@ const titleClass =
             height={8}
             class="inline-block h-2 w-2.5"
           />
-          <span class="inline-block w-[3ch] text-right" role="tooltip">
+          <span data-vote-word>curtidas</span>
+          <span
+            class="inline-block w-[3ch] text-right text-accent"
+            role="tooltip"
+          >
             <span data-vote-value>–</span>
-            <span class="sr-only"> votos</span>
           </span>
         </span>
       </p>
@@ -126,17 +126,9 @@ const titleClass =
       </a>
     </Heading>
     <p class="footer pointer-events-none mt-2 flex flex-wrap items-baseline justify-end gap-x-2 gap-y-1.5 font-mono text-xs text-pencil sm:col-start-3 sm:row-start-1 sm:mt-0 sm:justify-start">
-      <span class="whitespace-nowrap">
-        <span data-reading>
-          <Clock
-            aria-hidden="true"
-            width={12}
-            height={12}
-            class="inline-block"
-          />{" "}
-          {item.minutes} min
-        </span>
-        <span class="sr-only"> de leitura</span>
+      <span data-reading class="whitespace-nowrap">
+        <Clock aria-hidden="true" width={12} height={12} class="inline-block" />{" "}
+        {item.minutes} min de leitura
       </span>
       <span class="text-line" aria-hidden="true">
         |
@@ -148,9 +140,12 @@ const titleClass =
           height={8}
           class="inline-block h-2 w-2.5"
         />
-        <span class="inline-block w-[3ch] text-right" role="tooltip">
+        <span data-vote-word>curtidas</span>
+        <span
+          class="inline-block w-[3ch] text-right text-accent"
+          role="tooltip"
+        >
           <span data-vote-value>–</span>
-          <span class="sr-only"> votos</span>
         </span>
       </span>
     </p>
@@ -167,17 +162,14 @@ const titleClass =
         </a>
       </Heading>
       <p class="footer pointer-events-none mt-2 flex flex-wrap items-baseline justify-end gap-x-2 gap-y-1.5 font-mono text-xs text-pencil sm:mt-3">
-        <span class="whitespace-nowrap">
-          <span data-reading>
-            <Clock
-              aria-hidden="true"
-              width={12}
-              height={12}
-              class="inline-block"
-            />{" "}
-            {item.minutes} min
-          </span>
-          <span class="sr-only"> de leitura</span>
+        <span data-reading class="whitespace-nowrap">
+          <Clock
+            aria-hidden="true"
+            width={12}
+            height={12}
+            class="inline-block"
+          />{" "}
+          {item.minutes} min de leitura
         </span>
         <span class="text-line" aria-hidden="true">
           |
@@ -189,9 +181,12 @@ const titleClass =
             height={8}
             class="inline-block h-2 w-2.5"
           />
-          <span class="inline-block w-[3ch] text-right" role="tooltip">
+          <span data-vote-word>curtidas</span>
+          <span
+            class="inline-block w-[3ch] text-right text-accent"
+            role="tooltip"
+          >
             <span data-vote-value>–</span>
-            <span class="sr-only"> votos</span>
           </span>
         </span>
       </p>
@@ -214,7 +209,10 @@ const titleClass =
         const link = article?.querySelector("a")?.getAttribute("href") ?? "";
         const slug = /^\/blog\/([a-z0-9-]+)\/$/.exec(link)?.[1];
         if (!slug || !Object.hasOwn(votes, slug)) continue;
-        node.textContent = String(votes[slug]);
+        const count = votes[slug] ?? 0;
+        node.textContent = String(count);
+        const word = article?.querySelector("[data-vote-word]");
+        if (word) word.textContent = count === 1 ? "curtida" : "curtidas";
       }
     });
   }

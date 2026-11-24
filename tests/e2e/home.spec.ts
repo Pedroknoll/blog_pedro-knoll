@@ -189,6 +189,19 @@ test.describe("home [RF-01]", () => {
       `article:has(a[href="${fixtureMd.href}"]) [data-vote-value]`,
     );
     await expect(top).toHaveText("5");
+    const topArticle = voted.locator(
+      `article:has(a[href="${fixtureMd.href}"])`,
+    );
+    await expect(topArticle.locator("[data-vote-word]")).toHaveText("curtidas");
+    await expect(topArticle.locator("[data-vote-value]")).toHaveCSS(
+      "color",
+      "rgb(31, 75, 122)",
+    );
+    const one = voted.locator(
+      `article:has(a[href="${fixtureSemTitulos.href}"])`,
+    );
+    await expect(one.locator("[data-vote-value]")).toHaveText("1");
+    await expect(one.locator("[data-vote-word]")).toHaveText("curtida");
     await expect(ranked.locator("time")).toHaveCount(0);
     await expect(ranked.locator("[data-reading]")).toHaveCount(0);
     await expect(voted.locator("[data-ranking]")).toHaveCSS(
@@ -201,6 +214,25 @@ test.describe("home [RF-01]", () => {
         items.map((item) => getComputedStyle(item).borderTopWidth),
       );
     expect(itemBorders).toEqual(Array.from({ length: 6 }, () => "0px"));
+    const item = voted.locator("[data-ranking] li").first();
+    for (const [width, padding] of [
+      [1280, "16px"],
+      [360, "12px"],
+    ] as const) {
+      await page.setViewportSize({ width, height: 800 });
+      await expect(item).toHaveCSS("padding-top", padding);
+      await expect(item).toHaveCSS("list-style-type", "none");
+      await expect(ranked.first()).toHaveCSS("align-items", "center");
+      const offset = await ranked.first().evaluate((article) => {
+        const title = article.querySelector("h3")?.getBoundingClientRect();
+        const vote = article.querySelector("p.footer")?.getBoundingClientRect();
+        if (!title || !vote) return null;
+        return Math.abs(
+          title.top + title.height / 2 - (vote.top + vote.height / 2),
+        );
+      });
+      expect(offset).toBeLessThan(1);
+    }
     await expect(voted.locator("h2").locator("xpath=../../div[2]")).toHaveCSS(
       "margin-top",
       "8px",

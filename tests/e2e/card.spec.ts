@@ -315,19 +315,14 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
         await open(page, path);
         for (const article of await listArticles(page)) {
           if (await article.evaluate(inPrototypeBand)) {
-            await expect(article.locator(".sr-only")).toHaveCount(0);
+            await expect(article.locator("[data-reading]")).toHaveCount(0);
             await expect(article.locator("time")).toHaveCount(0);
             continue;
           }
-          const hidden = article.locator(".sr-only");
-          await expect(hidden).toHaveCount(2);
-          const cardText = await article.evaluate((root) => {
-            const note = root.querySelector(".sr-only");
-            const visible = note?.previousElementSibling;
-            return `${visible?.textContent ?? ""}${note?.textContent ?? ""}`
-              .replace(/\s+/g, " ")
-              .trim();
-          });
+          const reading = article.locator("[data-reading]");
+          await expect(reading).toHaveCount(1);
+          const cardText = textOf(await reading.textContent());
+          expect(cardText).toMatch(/^\d+ min de leitura$/);
           const href =
             (await article
               .locator(titleHeading)
@@ -457,8 +452,8 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           if (!above) continue;
           if (recent) {
             expect(above.headingTop).toBeLessThan(above.dateTop);
+            expect(above.headingTop).toBeLessThan(above.footerTop);
             expect(above.dateTop).toBeLessThan(above.footerBottom);
-            expect(above.footerTop).toBeLessThan(above.dateBottom);
             continue;
           }
           expect(above.dateTop).toBeLessThan(above.headingTop);
@@ -486,12 +481,13 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
         /^(Artigo|Protótipo)$/.test((span.textContent ?? "").trim()),
       );
       if (kind) kind.textContent = "Protótipo";
-      const minutes = [...clone.querySelectorAll("span")].find((span) =>
-        /^\d+\s+min$/.test(
-          (span.textContent ?? "").replace(/\s+/g, " ").trim(),
-        ),
+      const minutes = [...clone.querySelectorAll("[data-reading]")].find(
+        (span) =>
+          /^\d+\s+min de leitura$/.test(
+            (span.textContent ?? "").replace(/\s+/g, " ").trim(),
+          ),
       );
-      if (minutes) minutes.textContent = "20 min";
+      if (minutes) minutes.textContent = "20 min de leitura";
       clone.style.position = "absolute";
       clone.style.left = "0";
       clone.style.top = "0";
@@ -554,8 +550,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           const titlesOnly = await article.evaluate(inPrototypeBand);
           if (!titlesOnly) {
             const clock = await article.evaluate((root) => {
-              const note = root.querySelector(".sr-only");
-              const span = note?.previousElementSibling;
+              const span = root.querySelector("[data-reading]");
               const svg = span?.querySelector(":scope > svg");
               if (!svg) return { ok: false, reason: "sem svg" };
               let after = "";
@@ -566,7 +561,9 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
                 after += node.textContent ?? "";
               }
               return {
-                ok: /^\d+\s+min$/.test(after.replace(/\s+/g, " ").trim()),
+                ok: /^\d+\s+min de leitura$/.test(
+                  after.replace(/\s+/g, " ").trim(),
+                ),
                 hidden: svg.getAttribute("aria-hidden"),
                 after: after.replace(/\s+/g, " ").trim(),
               };
@@ -636,15 +633,17 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await expect(clock).toHaveAttribute("aria-hidden", "true");
       await expect(clock).toHaveCSS("width", "12px");
       await expect(clock).toHaveCSS("height", "12px");
-      await expect(footer).toContainText(/\d+\s+min/);
+      await expect(footer).toContainText(/\d+\s+min de leitura/);
       const vote = footer.locator("svg").nth(1);
       await expect(vote).toHaveAttribute("aria-hidden", "true");
       await expect(vote).toHaveCSS("width", "10px");
       await expect(vote).toHaveCSS("height", "8px");
+      await expect(footer.locator("[data-vote-word]")).toHaveText("curtidas");
       const value = footer.locator("[data-vote-value]");
       await expect(value).toHaveText("–");
       const count = value.locator("xpath=..");
-      await expect(count).toHaveAccessibleName(/ votos$/);
+      await expect(count).toHaveClass(/text-accent/);
+      await expect(count).toHaveAccessibleName("–");
       const gap = await count.evaluate((element) => {
         const probe = document.createElement("span");
         const style = getComputedStyle(element);

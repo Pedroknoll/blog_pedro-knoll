@@ -23,7 +23,7 @@ const placeholder = {
   </p>
   <script is:inline type="application/json" set:html={catalogJson} />
   <template>
-    <li class="py-5 sm:py-8">
+    <li class={layout === "votes" ? "list-none py-3 sm:py-4" : "py-5 sm:py-8"}>
       <Card
         item={placeholder}
         headingLevel={headingLevel}
@@ -52,7 +52,7 @@ const placeholder = {
     const icon = line.querySelector("svg");
     line.textContent = "";
     if (icon) line.append(icon);
-    line.append(` ${minutes} min`);
+    line.append(` ${minutes} min de leitura`);
   }
 
   function fill(root: HTMLElement) {
@@ -111,7 +111,12 @@ const placeholder = {
           time.textContent = formatted.text;
         }
         setReading(fragment, post.minutes);
-        if (value) value.textContent = String(votes[post.slug] ?? 0);
+        if (value) {
+          const count = votes[post.slug] ?? 0;
+          value.textContent = String(count);
+          const word = fragment.querySelector("[data-vote-word]");
+          if (word) word.textContent = count === 1 ? "curtida" : "curtidas";
+        }
         list.append(fragment);
       }
     });
