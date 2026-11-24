@@ -9,11 +9,15 @@ export function homeLists<T extends Listed>(
 ): {
   recent: T[];
   prototypes: T[];
+  totals: { posts: number; prototypes: number };
 } {
+  const prototypes = posts.filter((post) => post.data.kind === "prototype");
   return {
     recent: posts.slice(0, LIMIT),
-    prototypes: posts
-      .filter((post) => post.data.kind === "prototype")
-      .slice(0, LIMIT),
+    prototypes: prototypes.slice(0, LIMIT),
+    totals: {
+      posts: posts.length,
+      prototypes: prototypes.length,
+    },
   };
 }

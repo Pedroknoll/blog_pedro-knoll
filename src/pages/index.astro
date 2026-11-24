@@ -12,7 +12,7 @@ import { absoluteUrl, pageTitle } from "~/lib/seo";
 import { site } from "~/site.config";
 
 const posts = await getPublishedPosts();
-const { recent, prototypes } = homeLists(posts);
+const { recent, prototypes, totals } = homeLists(posts);
 const catalogJson = await pageCatalog(posts);
 const paired = prototypes.length > 0;
 ---
@@ -29,7 +29,8 @@ const paired = prototypes.length > 0;
     <HomeSection
       label="/ RECENTES"
       href="/blog/"
-      more=" os posts recentes"
+      total={totals.posts}
+      noun={{ one: "post recente", many: "posts recentes" }}
       compact
     >
       <Listing
@@ -51,7 +52,7 @@ const paired = prototypes.length > 0;
       <HomeSection
         label="/ MAIS VOTADOS"
         href="/mais-votados/"
-        more=" os mais votados"
+        noun={{ one: "mais votado", many: "mais votados" }}
         padded={false}
         compact
       >
@@ -66,7 +67,8 @@ const paired = prototypes.length > 0;
         <HomeSection
           label="/ PROTÓTIPOS"
           href="/prototipos/"
-          more=" os protótipos"
+          total={totals.prototypes}
+          noun={{ one: "protótipo", many: "protótipos" }}
           padded={false}
           compact
         >

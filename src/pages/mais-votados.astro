@@ -1,10 +1,12 @@
 ---
 import Fire from "~/assets/brand/icones/icone-fogo.svg";
+import TagFilter from "~/components/ui/TagFilter.astro";
 import TopVoted from "~/components/ui/TopVoted.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
 import { pageCatalog } from "~/lib/page-catalog";
 import { absoluteUrl, pageTitle } from "~/lib/seo";
+import { collectTags } from "~/lib/tags";
 import { site } from "~/site.config";
 
 const posts = await getPublishedPosts();
@@ -29,6 +31,12 @@ const heading = "Mais votados";
       />
       {heading}
     </h1>
+    <TagFilter
+      tags={collectTags(posts)}
+      total={posts.length}
+      noun={{ one: "post", many: "posts" }}
+      pending
+    />
     <div class="mt-10">
       <TopVoted catalogJson={catalogJson} headingLevel={2} layout="aligned" />
     </div>

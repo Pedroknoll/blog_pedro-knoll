@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.31 · novembro de 2026 · pedroknoll.com
+Versão 1.32 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -283,7 +283,7 @@ Decisão da T-119. O card sem fólio e sem nível, e a home sem destaque, estão
 - Abaixo, duas colunas lado a lado de `lg` em diante, empilhadas abaixo de `lg`.
 - **`/ MAIS VOTADOS`:** no HTML, só a frase `O ranking precisa de JavaScript.` Com JavaScript, o script monta o top 10: posts com pelo menos 1 voto, empate pela data mais recente. Sem voto nenhum, a frase `Nenhum voto ainda.` e nenhum item; o bloco continua, para o link não sumir. `Todos` vai para `/mais-votados/`.
 - **`/ PROTÓTIPOS`:** 5 protótipos mais recentes, no HTML. O bloco não é renderizado sem protótipo publicado; nesse caso, `/ MAIS VOTADOS` ocupa a largura toda. `Todos` vai para `/prototipos/`.
-- **Total no `Todos` (entra na T-124).** O link visível é `Todos · 12`, no mesmo estilo. Em `/ RECENTES`, o 12 é o número de posts publicados; em `/ PROTÓTIPOS`, o de protótipos publicados. Os dois saem no HTML. Em `/ MAIS VOTADOS`, o script do ranking escreve o número de posts com pelo menos 1 voto, inclusive 0; sem JavaScript, o link fica `Todos`, sem número. O nome acessível inclui o número: `Todos os 12 posts recentes`, `Todos os 12 protótipos`, `Todos os 12 mais votados`.
+- **Total no `Todos` (no ar, T-124).** O link visível é `Todos · 12`, no mesmo estilo. Em `/ RECENTES`, o 12 é o número de posts publicados; em `/ PROTÓTIPOS`, o de protótipos publicados. Os dois saem no HTML. Em `/ MAIS VOTADOS`, o script do ranking escreve o número de posts com pelo menos 1 voto, inclusive 0; sem JavaScript, o link fica `Todos`, sem número. O nome acessível inclui o número: `Todos os 12 posts recentes`, `Todos os 12 protótipos`, `Todos os 12 mais votados`. Com 1 item, o nome vai para o singular: `O único post recente`, `O único protótipo`, `O único mais votado`. O texto visível continua `Todos · 1`. Com 0 em `/ MAIS VOTADOS`, o nome é `Todos os 0 mais votados`.
 - A newsletter (§9.14) fica depois das faixas, na largura da coluna da direita.
 
 **Páginas de lista (T-123).** Sem paginação e sem saudação. O item de `/tags/<tag>/` é o de `/artigos/`.
@@ -368,15 +368,16 @@ Foco visível: contorno 2 px prússia com afastamento 3 px. Links em prússia, s
 O "Voltar ao início" da página 404 parece um botão, mas continua um link (`<a>`) para `/`. Fundo tinta, texto papel, IBM Plex Mono 400 em 14 px, 44 px de altura, 20 px de respiro nas laterais. Cantos retos e sem sombra, como os botões da seção 9.6. Sem sublinhado em repouso; no hover e no foco, sublinhado com afastamento de 3 px, sem troca de cor. O foco é o da seção 9.10. No tema escuro, os mesmos tokens invertem o par: fundo claro, texto escuro.
 
 ### 9.12 Busca e filtro
-Decisão da T-119. O filtro entra na T-124 e a busca, na T-22. A barra "Filtrar por tipo" (T-63, T-64) sai na T-123. Até lá, essa barra continua.
+Decisão da T-119. O filtro está no ar (T-124). A busca entra na T-22. A barra "Filtrar por tipo" (T-63, T-64) saiu na T-123.
 
 **Filtro.** Nas quatro listas (`/blog/`, `/artigos/`, `/prototipos/`, `/mais-votados/`), abaixo do h1 e acima da contagem. Não entra na home nem em `/tags/`.
 
 - `select` nativo, uma tag por vez, com a seta do sistema. Rótulo visível `Filtrar por`. 44 px de altura, IBM Plex Mono 16 px (abaixo de 16 px, o Safari do iPhone dá zoom no toque), fundo `surface`, borda `line`, cantos de 0,375rem. Sem ícone.
 - A primeira opção é `Todas as tags` e tira `?tag=` da URL. As outras são as tags dos posts daquela lista. A escolha vai para `?tag=<slug>`.
+- Em `/mais-votados/`, o HTML traz as tags de todos os posts publicados, com o select desabilitado. Quando o ranking chega, saem as opções cujas tags não têm post votado, e só então o select habilita. Sem voto nenhum ou com a API falhando, o select continua desabilitado.
 - No HTML do build, o select sai `disabled`, já com as opções, e o script o habilita sem mudar a altura (sem CLS).
 - **Contagem:** mono 12 px, maiúsculas, lápis, com `aria-live="polite"`. `5 artigos` e `2 de 5 artigos` em `/artigos/`; `protótipo` e `protótipos` em `/prototipos/`; `post` e `posts` em `/blog/` e em `/mais-votados/`.
-- **Sem resultado:** `Nenhum post com essa tag.`, entre filetes `line`.
+- **Sem resultado:** `Nenhum post com essa tag.` não acontece, porque as opções são sempre tags da lista.
 - **Sem JavaScript:** o select fica desabilitado, a lista vem inteira e a página aponta os links de `/tags/`. Em `/mais-votados/`, sem JavaScript, só o aviso: o ranking não está no HTML.
 
 **Busca.** Sai das listas. O botão fica no header (§9.13): lupa (`icone-busca.svg`, 12 px), alvo de 44 px, nome acessível `Buscar` e a dica `⌘K` (no Windows e no Linux, `Ctrl K`).

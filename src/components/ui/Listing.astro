@@ -43,6 +43,7 @@ const items = await Promise.all(
     title: post.data.title,
     date: post.data.pubDate,
     minutes: await minutesReadOf(post),
+    tags: post.data.tags,
   })),
 );
 const headingClass =
@@ -69,6 +70,7 @@ const titles = layout === "titles";
       {heading}
     </h1>
   )}
+  <slot name="filter" />
   <ul
     class:list={[
       !titles && "divide-y divide-line border-b border-line",
@@ -79,7 +81,10 @@ const titles = layout === "titles";
     data-listing
   >
     {items.map((item) => (
-      <li class={titles ? "py-3 sm:py-4" : "py-5 sm:py-8"}>
+      <li
+        class={titles ? "py-3 sm:py-4" : "py-5 sm:py-8"}
+        data-tags={item.tags.join(" ")}
+      >
         <Card item={item} headingLevel={headingLevel} layout={layout} />
       </li>
     ))}
