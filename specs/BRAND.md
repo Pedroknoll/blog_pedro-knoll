@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.32 · novembro de 2026 · pedroknoll.com
+Versão 1.33 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -387,7 +387,7 @@ Decisão da T-119. O filtro está no ar (T-124). A busca entra na T-22. A barra 
 - A T-22 para se o Pagefind 1.5 pedir `unsafe-inline` em `style-src-elem` ou script inline. Esta seção não desenha um modal paralelo ao do Pagefind.
 
 ### 9.13 Header e footer
-Decisão da T-119. O header e o footer entram na T-113, o link "Comece aqui", na T-114, o botão de busca, na T-22, e o controle de tema, na T-24.
+Decisão da T-119. O header e o footer estão no ar (T-113). O link "Comece aqui" entra na T-114, o botão de busca na T-22 e o controle de tema na T-24.
 
 - **Header:** fundo `surface`, filete `line` embaixo, na largura do site (72rem), com 0,75rem de respiro em cima e embaixo. A assinatura (§3) fica à esquerda. Depois, nesta ordem: `Comece aqui` (`/comece-aqui/`), `Artigos`, `Protótipos`, o botão de busca (§9.12) e o controle de tema (§9.9). `Artigos` e `Protótipos` não levam ícone. Cada link em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, grafite, indo para prússia no hover e no foco, com 44 px de toque e 1,25rem entre eles; o da página atual vai para tinta, com sublinhado de 2 px e `aria-current="page"`. `Protótipos` só aparece quando há protótipo publicado: sem ele, a página não existe.
 - **De `md` em diante:** uma linha só, com a assinatura à esquerda e o resto à direita.

@@ -2,11 +2,33 @@
 import { site } from "~/site.config";
 
 const year = new Date().getFullYear();
+
+const linkClass =
+  "inline-flex min-h-11 items-center font-mono text-xs tracking-[0.12em] whitespace-nowrap text-muted uppercase hover:text-accent focus-visible:text-accent";
 ---
 
-<footer class="border-t border-line py-3 text-muted">
-  <div class="mx-auto flex w-full max-w-site items-center gap-4 px-4">
-    <p>{site.author.name}</p>
-    <p>{year}</p>
+<footer class="border-t border-line py-6 text-muted">
+  <div class="mx-auto flex w-full max-w-site flex-col px-4 sm:flex-row sm:items-center sm:justify-between">
+    <p class="font-mono text-xs text-muted uppercase">
+      <span>{site.author.name}</span>
+      {` · ${year}`}
+    </p>
+    <ul class="m-0 flex list-none gap-x-5 p-0">
+      <li>
+        <a class={linkClass} href="/rss.xml">
+          RSS
+        </a>
+      </li>
+      <li>
+        <a class={linkClass} href={site.author.github}>
+          GitHub
+        </a>
+      </li>
+      <li>
+        <a class={linkClass} href={site.author.linkedin}>
+          LinkedIn
+        </a>
+      </li>
+    </ul>
   </div>
 </footer>
