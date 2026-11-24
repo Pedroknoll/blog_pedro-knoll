@@ -1,8 +1,10 @@
 ---
 import Listing from "~/components/ui/Listing.astro";
+import TagFilter from "~/components/ui/TagFilter.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
 import { absoluteUrl, pageTitle } from "~/lib/seo";
+import { collectTags } from "~/lib/tags";
 import { site } from "~/site.config";
 
 const posts = await getPublishedPosts();
@@ -16,5 +18,12 @@ const heading = "Blog";
   ogTitle={heading}
   ogType="website"
 >
-  <Listing heading={heading} posts={posts} layout="aligned" />
+  <Listing heading={heading} posts={posts} layout="aligned">
+    <TagFilter
+      slot="filter"
+      tags={collectTags(posts)}
+      total={posts.length}
+      noun={{ one: "post", many: "posts" }}
+    />
+  </Listing>
 </BaseLayout>

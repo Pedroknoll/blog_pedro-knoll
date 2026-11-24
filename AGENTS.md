@@ -69,7 +69,7 @@ src/components/viz/     primitivas e exploráveis Svelte; sem client:* é figura
 src/lib/viz/            geometria pura
 src/components/marimo/  Notebook.astro, o botão do caderno (AGENTS.md próprio, criado antes da T-18; seções 9.6–9.7)
 src/integrations/headers.ts   gera dist/_headers no build (CSP por rota)
-src/lib/                getPublishedPosts, readingTime, seo, votes-catalog, votes-client, ranking, home-lists
+src/lib/                getPublishedPosts, readingTime, seo, votes-catalog, votes-client, ranking, home-lists, tag-filter
 src/pages/api/catalogo.json.ts   catálogo dos posts publicados; o público recebe 404 (T-121)
 worker/                 Worker só para /api/* (T-121)
 migrations/             SQL do D1, 0001_votes.sql

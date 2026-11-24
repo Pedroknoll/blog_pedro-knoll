@@ -1,46 +1,8 @@
-import fs from "node:fs";
-import path from "node:path";
-
 import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
+import { diskPosts } from "./disk-posts";
 import { homeGreeting, notFoundHeading } from "./site-literals";
-
-type DiskPost = {
-  slug: string;
-  kind: "article" | "prototype";
-  date: string;
-};
-
-function diskPosts(): DiskPost[] {
-  const root = path.resolve("src/content/posts");
-  const posts: DiskPost[] = [];
-  for (const entry of fs.readdirSync(root, { withFileTypes: true })) {
-    if (!entry.isDirectory()) continue;
-    const file = ["index.md", "index.mdx"]
-      .map((name) => path.join(root, entry.name, name))
-      .find((candidate) => fs.existsSync(candidate));
-    if (!file) continue;
-    const frontmatter = /^---\n([\s\S]*?\n)---/.exec(
-      fs.readFileSync(file, "utf8"),
-    )?.[1];
-    if (!frontmatter) throw new Error(`${entry.name}: sem frontmatter`);
-    if (/^draft:\s*true\s*$/m.test(frontmatter)) continue;
-    const kind = /^kind:\s*(article|prototype)\s*$/m.exec(frontmatter)?.[1];
-    const date = /^pubDate:\s*(\d{4}-\d{2}-\d{2})\s*$/m.exec(frontmatter)?.[1];
-    if (kind !== "article" && kind !== "prototype") {
-      throw new Error(`${entry.name}: kind ausente`);
-    }
-    if (!date) throw new Error(`${entry.name}: pubDate ausente`);
-    posts.push({ slug: entry.name, kind, date });
-  }
-  return posts.sort((left, right) => {
-    if (left.date !== right.date) return left.date < right.date ? 1 : -1;
-    if (left.slug < right.slug) return -1;
-    if (left.slug > right.slug) return 1;
-    return 0;
-  });
-}
 
 function hrefOf(slug: string) {
   return `/blog/${slug}/`;

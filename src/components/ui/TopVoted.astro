@@ -44,7 +44,23 @@ const placeholder = {
 <script>
   import { formatPubDate } from "~/lib/format-date";
   import { rankPosts, type CatalogPost } from "~/lib/ranking";
+  import { allLinkName, tagsOf } from "~/lib/tag-filter";
   import { loadVotes } from "~/lib/votes-client";
+
+  function writeHomeTotal(root: HTMLElement, total: number) {
+    const link = root
+      .closest("section")
+      ?.querySelector<HTMLElement>("[data-home-total]");
+    if (!link) return;
+    const noun = {
+      one: link.dataset.one ?? "",
+      many: link.dataset.many ?? "",
+    };
+    const visible = link.querySelector("[data-home-total-visible]");
+    const name = link.querySelector("[data-home-total-name]");
+    if (visible) visible.textContent = `Todos · ${total}`;
+    if (name) name.textContent = allLinkName(total, noun);
+  }
 
   function setReading(root: ParentNode, minutes: number) {
     const line = root.querySelector("[data-reading]");
@@ -76,11 +92,12 @@ const placeholder = {
         return;
       }
       if (!Array.isArray(catalog)) return;
-      const ranked = rankPosts(
-        catalog,
-        votes,
-        Number.isFinite(limit) ? limit : undefined,
-      );
+      const rankedAll = rankPosts(catalog, votes);
+      writeHomeTotal(root, rankedAll.length);
+      const ranked =
+        typeof limit === "number" && Number.isFinite(limit)
+          ? rankedAll.slice(0, limit)
+          : rankedAll;
       if (ranked.length === 0) {
         notice.textContent = "Nenhum voto ainda.";
         return;
@@ -96,6 +113,8 @@ const placeholder = {
       }
       for (const post of ranked) {
         const fragment = template.content.cloneNode(true) as DocumentFragment;
+        const item = fragment.querySelector("li");
+        if (item) item.dataset.tags = post.tags.join(" ");
         const link = fragment.querySelector("a");
         const time = fragment.querySelector("time");
         const value = fragment.querySelector("[data-vote-value]");
@@ -119,6 +138,9 @@ const placeholder = {
         }
         list.append(fragment);
       }
+      root.dataset.rankTags = tagsOf(rankedAll).join(" ");
+      root.dataset.rankReady = "1";
+      root.dispatchEvent(new Event("pk-ranking"));
     });
   }
 

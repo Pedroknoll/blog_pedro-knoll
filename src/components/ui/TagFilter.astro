@@ -1,0 +1,156 @@
+---
+import { countLabel, type Noun } from "~/lib/tag-filter";
+import { tagPath } from "~/lib/tags";
+
+interface Props {
+  tags: string[];
+  total: number;
+  noun: Noun;
+  pending?: boolean;
+}
+
+const { tags, total, noun, pending = false } = Astro.props;
+const count = pending ? "" : countLabel(total, total, noun);
+const linkClass =
+  "inline-flex min-h-11 items-center font-mono text-xs tracking-[0.12em] whitespace-nowrap text-muted uppercase hover:text-accent focus-visible:text-accent";
+---
+
+<div
+  class="mt-10 grid"
+  data-tag-filter
+  data-one={noun.one}
+  data-many={noun.many}
+  data-pending={pending ? "1" : undefined}
+>
+  <label class="row-start-1 font-sans text-base text-ink" for="filtro-tag">
+    Filtrar por
+  </label>
+  <select
+    id="filtro-tag"
+    class="row-start-2 mt-2 box-border h-11 w-full rounded-md border border-line bg-surface px-3 font-mono text-base text-ink"
+    disabled
+  >
+    <option value="">Todas as tags</option>
+    {tags.map((tag) => (
+      <option value={tag}>{tag}</option>
+    ))}
+  </select>
+  {!pending && (
+    <noscript class="row-start-4 mt-2">
+      <ul class="flex flex-wrap gap-x-5">
+        {tags.map((tag) => (
+          <li>
+            <a class={linkClass} href={tagPath(tag)}>
+              {tag}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </noscript>
+  )}
+  <p
+    class="row-start-3 mt-2 min-h-4 font-mono text-xs leading-4 text-pencil uppercase"
+    data-count
+    aria-live="polite"
+  >
+    {count}
+  </p>
+</div>
+
+<script>
+  import { countLabel, searchWith, selectedTag } from "~/lib/tag-filter";
+
+  function setup(root: HTMLElement) {
+    const select = root.querySelector("select");
+    const count = root.querySelector("[data-count]");
+    if (!select || !count) return;
+    const field = select;
+    const output = count;
+    const noun = {
+      one: root.dataset.one ?? "",
+      many: root.dataset.many ?? "",
+    };
+    const listSelector =
+      root.dataset.pending === "1" ? "[data-ranking]" : "[data-listing]";
+
+    function items() {
+      const list = document.querySelector(listSelector);
+      if (!list) return [];
+      return [...list.querySelectorAll<HTMLElement>("li")];
+    }
+
+    function apply(tag: string | null) {
+      const rows = items();
+      let shown = 0;
+      for (const row of rows) {
+        const tags = (row.dataset.tags ?? "").split(" ").filter(Boolean);
+        const match = tag === null || tags.includes(tag);
+        row.hidden = !match;
+        if (match) shown += 1;
+      }
+      output.textContent = countLabel(shown, rows.length, noun);
+    }
+
+    function allowed() {
+      return [...field.options]
+        .map((option) => option.value)
+        .filter((value) => value !== "");
+    }
+
+    function writeUrl(tag: string | null) {
+      const next = `${location.pathname}${searchWith(tag)}`;
+      if (`${location.pathname}${location.search}` !== next) {
+        history.replaceState(null, "", next);
+      }
+    }
+
+    function tagFromUrl() {
+      const tag = selectedTag(location.search, allowed());
+      const params = new URLSearchParams(
+        location.search.startsWith("?")
+          ? location.search.slice(1)
+          : location.search,
+      );
+      if (params.has("tag") && tag === null) writeUrl(null);
+      return tag;
+    }
+
+    function enable(tag: string | null) {
+      field.value = tag ?? "";
+      apply(tag);
+      field.disabled = false;
+    }
+
+    field.addEventListener("change", () => {
+      const tag = field.value === "" ? null : field.value;
+      writeUrl(tag);
+      apply(tag);
+    });
+
+    if (root.dataset.pending === "1") {
+      const ranking = document.querySelector<HTMLElement>("[data-top-voted]");
+      if (!ranking) return;
+      const applyRanking = () => {
+        if (ranking.dataset.rankReady !== "1") return;
+        const tags = new Set(
+          (ranking.dataset.rankTags ?? "").split(" ").filter(Boolean),
+        );
+        for (const option of [...field.options]) {
+          if (option.value !== "" && !tags.has(option.value)) option.remove();
+        }
+        enable(tagFromUrl());
+      };
+      ranking.addEventListener("pk-ranking", applyRanking);
+      applyRanking();
+      return;
+    }
+
+    enable(tagFromUrl());
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>(
+    "[data-tag-filter]",
+  )) {
+    setup(root);
+  }
+</script>

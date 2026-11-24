@@ -1,13 +1,26 @@
 ---
+import { allLinkName, type Noun } from "~/lib/tag-filter";
+
 interface Props {
   label: string;
   href: string;
-  more: string;
+  noun: Noun;
+  total?: number;
   padded?: boolean;
   compact?: boolean;
 }
 
-const { label, href, more, padded = true, compact = false } = Astro.props;
+const {
+  label,
+  href,
+  noun,
+  total,
+  padded = true,
+  compact = false,
+} = Astro.props;
+const visible = total === undefined ? "Todos" : `Todos · ${total}`;
+const accessible =
+  total === undefined ? `Todos os ${noun.many}` : allLinkName(total, noun);
 const linkClass =
   "absolute top-1/2 right-0 inline-flex h-11 -translate-y-1/2 items-center font-mono text-xs tracking-[0.12em] whitespace-nowrap text-muted uppercase hover:text-accent focus-visible:text-accent";
 ---
@@ -19,8 +32,19 @@ const linkClass =
     <h2 class="font-mono text-xs uppercase tracking-widest text-ink">
       {label}
     </h2>
-    <a class={linkClass} href={href}>
-      Todos<span class="sr-only">{more}</span>
+    <a
+      class={linkClass}
+      href={href}
+      data-home-total={total === undefined ? "" : undefined}
+      data-one={total === undefined ? noun.one : undefined}
+      data-many={total === undefined ? noun.many : undefined}
+    >
+      <span aria-hidden="true" data-home-total-visible>
+        {visible}
+      </span>
+      <span class="sr-only" data-home-total-name>
+        {accessible}
+      </span>
     </a>
   </div>
   <div class:list={[compact ? "mt-2" : "mt-6"]}>
