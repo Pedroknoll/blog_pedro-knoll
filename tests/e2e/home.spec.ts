@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
+import { diskPosts } from "./disk-posts";
 import { fixtureMd, fixtureSemTitulos } from "./fixtures";
 import { homeGreeting } from "./site-literals";
 
@@ -69,6 +70,35 @@ async function settle(page: Page) {
   );
 }
 
+function linkName(total: number, one: string, many: string) {
+  return total === 1 ? `O único ${one}` : `Todos os ${total} ${many}`;
+}
+
+async function visibleText(link: Locator) {
+  return link.evaluate((node) =>
+    [...node.childNodes]
+      .filter(
+        (child) =>
+          !(child instanceof Element && child.classList.contains("sr-only")),
+      )
+      .map((child) => child.textContent ?? "")
+      .join(""),
+  );
+}
+
+async function expectTodos(
+  page: Page,
+  label: string,
+  href: string,
+  visible: string,
+  name: string,
+) {
+  const link = band(page, label).getByRole("link", { name, exact: true });
+  await expect(link).toHaveCount(1);
+  await expect(link).toHaveAttribute("href", href);
+  expect(await visibleText(link)).toBe(visible);
+}
+
 test.describe("home [RF-01]", () => {
   test("três faixas, 5 recentes e os protótipos", async ({ page }) => {
     await page.goto("/");
@@ -118,44 +148,70 @@ test.describe("home [RF-01]", () => {
   });
 
   test("os três Todos", async ({ page }) => {
+    const posts = diskPosts();
+    const prototypes = posts.filter((post) => post.kind === "prototype");
+    expect(prototypes).toHaveLength(1);
+    const votes: Record<string, number> = { "slug-desconhecido": 4 };
+    for (const post of posts) votes[post.slug] = 2;
+    votes["fixture-md"] = 0;
+    const voted = posts.filter((post) => (votes[post.slug] ?? 0) >= 1).length;
+
+    await page.route("**/api/votes", async (route) => {
+      await route.fulfill(fulfillVotes({ votes }));
+    });
     await page.goto("/");
-    const links = [
-      {
-        label: RECENT,
-        name: "Todos os posts recentes",
-        href: "/blog/",
-      },
-      {
-        label: VOTED,
-        name: "Todos os mais votados",
-        href: "/mais-votados/",
-      },
-      {
-        label: PROTO,
-        name: "Todos os protótipos",
-        href: "/prototipos/",
-      },
-    ];
-    for (const item of links) {
-      const link = band(page, item.label).getByRole("link", {
-        name: item.name,
-        exact: true,
-      });
-      await expect(link).toHaveCount(1);
-      await expect(link).toHaveAttribute("href", item.href);
-      const visible = await link.evaluate((node) =>
-        [...node.childNodes]
-          .filter(
-            (child) =>
-              !(
-                child instanceof Element && child.classList.contains("sr-only")
-              ),
-          )
-          .map((child) => child.textContent ?? "")
-          .join(""),
-      );
-      expect(visible).toBe("Todos");
-    }
+    await expectTodos(
+      page,
+      RECENT,
+      "/blog/",
+      `Todos · ${posts.length}`,
+      linkName(posts.length, "post recente", "posts recentes"),
+    );
+    await expectTodos(
+      page,
+      PROTO,
+      "/prototipos/",
+      "Todos · 1",
+      "O único protótipo",
+    );
+    await expectTodos(
+      page,
+      VOTED,
+      "/mais-votados/",
+      `Todos · ${voted}`,
+      linkName(voted, "mais votado", "mais votados"),
+    );
+
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+    await page.route("**/api/votes", async (route) => {
+      await route.fulfill(fulfillVotes({ votes: {} }));
+    });
+    await page.goto("/");
+    await expectTodos(
+      page,
+      VOTED,
+      "/mais-votados/",
+      "Todos · 0",
+      "Todos os 0 mais votados",
+    );
+
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+    await page.route("**/api/votes", async (route) => {
+      await route.fulfill(fulfillVotes({ error: "no" }, 500));
+    });
+    const failed = page.waitForResponse(
+      (response) => response.url().includes("/api/votes"),
+      { timeout: 5_000 },
+    );
+    await page.goto("/");
+    await failed;
+    await expectTodos(
+      page,
+      VOTED,
+      "/mais-votados/",
+      "Todos",
+      "Todos os mais votados",
+    );
   });
 
   test("ranking com votos, sem votos e com a API falhando", async ({
@@ -375,5 +431,30 @@ test.describe("ranking sem JavaScript [RF-01]", () => {
     await expect(voted).toContainText("O ranking precisa de JavaScript.");
     await expect(voted.locator("[data-ranking] article")).toHaveCount(0);
     await expect(voted).not.toContainText("Nenhum voto ainda.");
+    await expectTodos(
+      page,
+      VOTED,
+      "/mais-votados/",
+      "Todos",
+      "Todos os mais votados",
+    );
+    const posts = diskPosts();
+    const prototypes = posts.filter((post) => post.kind === "prototype");
+    await expectTodos(
+      page,
+      RECENT,
+      "/blog/",
+      `Todos · ${posts.length}`,
+      linkName(posts.length, "post recente", "posts recentes"),
+    );
+    await expectTodos(
+      page,
+      PROTO,
+      "/prototipos/",
+      `Todos · ${prototypes.length}`,
+      prototypes.length === 1
+        ? "O único protótipo"
+        : linkName(prototypes.length, "protótipo", "protótipos"),
+    );
   });
 });

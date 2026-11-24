@@ -29,6 +29,7 @@ describe("homeLists", () => {
       "p3",
       "p4",
     ]);
+    expect(lists.totals).toEqual({ posts: 12, prototypes: 6 });
   });
 
   it("devolve protótipos vazios quando não há protótipo publicado", () => {
@@ -38,5 +39,6 @@ describe("homeLists", () => {
       "a0",
       "a1",
     ]);
+    expect(homeLists(posts).totals).toEqual({ posts: 2, prototypes: 0 });
   });
 });

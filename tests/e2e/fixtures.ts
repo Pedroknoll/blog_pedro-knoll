@@ -39,3 +39,4 @@ export const fixtureFormulas = {
 } as const;
 
 export const fixtureTag = "fixture";
+export const fixtureTagMath = "math";

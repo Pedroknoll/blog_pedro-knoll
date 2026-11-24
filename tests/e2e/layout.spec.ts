@@ -124,7 +124,9 @@ test("home, listas e tags só com o script do item [RNF-02]", async ({
         const executable = page.locator(
           'script:not([type="application/ld+json"]):not([type="application/json"])',
         );
-        await expect(executable).toHaveCount(path === "/" ? 2 : 1);
+        await expect(executable).toHaveCount(
+          path === "/" || path === "/blog/" ? 2 : 1,
+        );
         await expect(
           page.locator('script[type="application/json"]'),
         ).toHaveCount(path === "/" ? 1 : 0);
