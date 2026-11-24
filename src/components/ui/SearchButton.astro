@@ -1,0 +1,159 @@
+---
+import SearchIcon from "~/assets/brand/icones/icone-busca.svg";
+
+const resultTemplate = [
+  '<li class="pf-result">',
+  '<div class="pf-result-card">',
+  '<div class="pf-result-content">',
+  '<p class="pf-result-title"><a class="pf-result-link" href="{{ meta.url | default(url) | safeUrl }}">{{ meta.title }}</a></p>',
+  '<p class="pf-result-excerpt">{{+ excerpt +}}</p>',
+  "</div>",
+  "</div>",
+  "</li>",
+].join("");
+---
+
+<button
+  type="button"
+  class="invisible inline-flex h-11 shrink-0 cursor-pointer items-center gap-1 border-0 bg-transparent px-2 text-muted hover:text-accent focus-visible:text-accent"
+  aria-keyshortcuts="Meta+K Control+K"
+  aria-label="Buscar"
+  data-search-button
+>
+  <SearchIcon
+    aria-hidden="true"
+    width={12}
+    height={12}
+    class="size-3 shrink-0"
+  />
+  <span
+    aria-hidden="true"
+    class="font-mono text-xs leading-none whitespace-nowrap"
+    data-search-shortcut
+  >
+    ⌘K
+  </span>
+</button>
+<template data-search-template>
+  <pagefind-modal>
+    <pagefind-modal-header>
+      <pagefind-input placeholder="Buscar"></pagefind-input>
+    </pagefind-modal-header>
+    <pagefind-modal-body>
+      <pagefind-summary></pagefind-summary>
+      <pagefind-results>
+        <script
+          is:inline
+          type="text/pagefind-template"
+          set:html={resultTemplate}
+        />
+      </pagefind-results>
+    </pagefind-modal-body>
+  </pagefind-modal>
+</template>
+<script>
+  import {
+    highlightTitle,
+    isSearchShortcut,
+    shortcutLabel,
+  } from "~/lib/search";
+
+  const button = document.querySelector("[data-search-button]");
+  const template = document.querySelector("[data-search-template]");
+  if (
+    button instanceof HTMLButtonElement &&
+    template instanceof HTMLTemplateElement
+  ) {
+    const shortcut = button.querySelector("[data-search-shortcut]");
+    if (shortcut) shortcut.textContent = shortcutLabel(navigator.platform);
+
+    type SearchModal = HTMLElement & {
+      open: () => void;
+      isOpen: boolean;
+    };
+
+    let modal: SearchModal | null = null;
+    let opening: Promise<void> | null = null;
+
+    function stylesheetReady(link: HTMLLinkElement): Promise<void> {
+      return new Promise((resolve, reject) => {
+        link.addEventListener("load", () => resolve(), { once: true });
+        link.addEventListener(
+          "error",
+          () => reject(new Error("css da busca")),
+          { once: true },
+        );
+      });
+    }
+
+    async function loadModal(): Promise<void> {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "/pagefind/pagefind-component-ui.css";
+      const ready = stylesheetReady(link);
+      document.head.append(link);
+      await ready;
+      const url = "/pagefind/pagefind-component-ui.js";
+      await import(/* @vite-ignore */ url);
+      document.body.append(template.content.cloneNode(true));
+      const found = document.body.querySelector("pagefind-modal");
+      if (!(found instanceof HTMLElement)) return;
+      modal = found as SearchModal;
+      const results = modal.querySelector("pagefind-results");
+      let marking = false;
+      const markTitles = (): void => {
+        if (!modal || marking) return;
+        marking = true;
+        try {
+          const field = modal.querySelector('input[type="search"]');
+          const term = field instanceof HTMLInputElement ? field.value : "";
+          for (const link of modal.querySelectorAll(".pf-result-title a")) {
+            if (!(link instanceof HTMLAnchorElement)) continue;
+            const original =
+              link.dataset.searchOriginal ?? link.textContent ?? "";
+            link.dataset.searchOriginal = original;
+            const html = highlightTitle(original, term);
+            if (link.innerHTML !== html) link.innerHTML = html;
+          }
+        } finally {
+          marking = false;
+        }
+      };
+      if (results) {
+        new MutationObserver(markTitles).observe(results, {
+          childList: true,
+          subtree: true,
+        });
+      }
+    }
+
+    async function openSearch(): Promise<void> {
+      if (!modal) {
+        opening ??= loadModal().finally(() => {
+          opening = null;
+        });
+        await opening;
+      }
+      if (!modal) return;
+      button.focus();
+      modal.open();
+    }
+
+    button.addEventListener("click", () => {
+      void openSearch().catch(() => {
+        // A próxima tentativa carrega de novo.
+      });
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (!isSearchShortcut(event)) return;
+      if (modal?.isOpen) return;
+      event.preventDefault();
+      void openSearch().catch(() => {
+        // A próxima tentativa carrega de novo.
+      });
+    });
+
+    button.classList.remove("invisible");
+  }
+</script>

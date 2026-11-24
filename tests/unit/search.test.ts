@@ -1,6 +1,28 @@
 import { describe, expect, it } from "vitest";
 
-import { isSearchShortcut, shortcutLabel } from "../../src/lib/search";
+import {
+  highlightTitle,
+  isSearchShortcut,
+  shortcutLabel,
+} from "../../src/lib/search";
+
+describe("highlightTitle", () => {
+  it("marca a palavra do título que contém o termo", () => {
+    expect(highlightTitle("Fixture de Markdown", "fixture")).toBe(
+      "<mark>Fixture</mark> de Markdown",
+    );
+    expect(highlightTitle("Fixture de Markdown", "Fixtures")).toBe(
+      "<mark>Fixture</mark> de Markdown",
+    );
+  });
+
+  it("não marca termo curto nem escapa o resto", () => {
+    expect(highlightTitle("Fixture sem títulos", "se")).toBe(
+      "Fixture sem títulos",
+    );
+    expect(highlightTitle("a < b", "fixture")).toBe("a &lt; b");
+  });
+});
 
 describe("shortcutLabel", () => {
   it("no Mac e no iOS mostra ⌘K", () => {

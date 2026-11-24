@@ -312,3 +312,76 @@
   descent-override: 27.6115%;
   line-gap-override: 0%;
 }
+
+/* O CSS do Pagefind entra no DOM depois deste. Quatro ids vencem o seletor dele. */
+pagefind-modal {
+  --pf-text: var(--color-muted);
+  --pf-text-secondary: var(--color-muted);
+  --pf-text-muted: var(--color-muted);
+  --pf-background: var(--color-surface);
+  --pf-border: var(--color-line);
+  --pf-mark: var(--color-sheet);
+  --pf-border-focus: var(--color-accent);
+  --pf-outline-focus: var(--color-accent);
+  --pf-font: var(--font-sans);
+  --pf-border-radius: 0.375rem;
+  --pf-input-height: 2.75rem;
+  --pf-input-font-size: 16px;
+  --pf-result-title-font-size: 16px;
+  --pf-result-excerpt-font-size: 16px;
+  --pf-results-gap: 0.75rem;
+  --pf-hover: var(--color-sheet);
+  --pf-skeleton: var(--color-sheet);
+  --pf-shadow-sm: none;
+  --pf-icon-search: none;
+  --pf-icon-arrow: none;
+}
+
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal,
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal * {
+  font-weight: 400;
+}
+
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal .pf-input {
+  font-family: var(--font-mono);
+  font-size: 16px;
+  padding-inline-start: 0.75rem;
+}
+
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#)
+  pagefind-modal
+  .pf-input-wrapper::before {
+  content: none;
+}
+
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal .pf-result-title {
+  font-weight: 600;
+}
+
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal .pf-result-card,
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal .pf-result-card:hover,
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#)
+  pagefind-modal
+  .pf-result-card:has([data-pf-selected]),
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#)
+  pagefind-modal
+  .pf-result-card:has(.pf-result-link:focus-visible) {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal .pf-result-excerpt {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+:is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) pagefind-modal mark {
+  background-color: transparent;
+  color: inherit;
+  font-weight: 600;
+  padding-inline: 0;
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}

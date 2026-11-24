@@ -9,6 +9,7 @@ import rehypeKatex from "rehype-katex";
 import remarkMath from "remark-math";
 
 import { headersIntegration } from "./src/integrations/headers.ts";
+import { pagefindIntegration } from "./src/integrations/pagefind.ts";
 import { remarkCitations } from "./src/lib/remark-citations.mjs";
 import { remarkHasCode } from "./src/lib/remark-has-code.mjs";
 import { remarkNotebook } from "./src/lib/remark-notebook.mjs";
@@ -88,6 +89,7 @@ export default defineConfig({
     sitemap(),
     svelte(),
     headersIntegration(),
+    pagefindIntegration(),
   ],
   vite: {
     plugins: [tailwindcss()],

@@ -1,5 +1,6 @@
 ---
 import BrandSymbol from "~/assets/brand/pklog-simbolo-currentcolor.svg";
+import SearchButton from "~/components/ui/SearchButton.astro";
 import Wordmark from "~/components/ui/Wordmark.astro";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
 import { headerLinks, isCurrentPath } from "~/lib/nav";
@@ -40,6 +41,8 @@ const linkClass =
         ))}
       </ul>
     </nav>
-    <div class="ml-auto shrink-0 md:ml-0"></div>
+    <div class="ml-auto shrink-0 md:ml-0">
+      <SearchButton />
+    </div>
   </div>
 </header>

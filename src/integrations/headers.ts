@@ -137,7 +137,7 @@ export function buildHeaders(hashes: Hashes): string {
   const styles = uniqueSorted(hashes.styles);
   const csp = [
     "default-src 'none'",
-    `script-src ${["'self'", "https://static.cloudflareinsights.com", ...scripts].join(" ")}`,
+    `script-src ${["'self'", "'wasm-unsafe-eval'", "https://static.cloudflareinsights.com", ...scripts].join(" ")}`,
     "style-src 'self' 'unsafe-inline'",
     `style-src-elem ${["'self'", ...styles].join(" ")}`,
     "style-src-attr 'unsafe-inline'",

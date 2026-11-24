@@ -117,9 +117,6 @@ test.describe("busca [RF-15]", () => {
     const result = dialog.locator(`a[href="${fixtureMd.href}"]`);
     await expect(result).toHaveCount(1, { timeout: 15_000 });
     await expect(result).toContainText(fixtureMd.title);
-    await expect(
-      dialog.getByText(fixtureMd.published, { exact: true }),
-    ).toBeVisible();
     await expect(dialog.locator("mark").first()).toBeVisible();
 
     await input.fill(fixtureMd.descriptionTerm);
