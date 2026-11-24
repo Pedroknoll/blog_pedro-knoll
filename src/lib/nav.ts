@@ -7,13 +7,18 @@ const HEADER_LABELS: Record<Kind, string> = {
 
 type WithKind = { data: { kind: Kind } };
 
+const startHere = { href: "/comece-aqui/", label: "Comece aqui" };
+
 export function headerLinks<T extends WithKind>(
   posts: readonly T[],
 ): { href: string; label: string }[] {
-  return kindCounts(posts).map(({ kind }) => ({
-    href: kindPath(kind),
-    label: HEADER_LABELS[kind],
-  }));
+  return [
+    startHere,
+    ...kindCounts(posts).map(({ kind }) => ({
+      href: kindPath(kind),
+      label: HEADER_LABELS[kind],
+    })),
+  ];
 }
 
 function withTrailingSlash(path: string): string {

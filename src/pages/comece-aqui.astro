@@ -1,0 +1,25 @@
+---
+import { Content, frontmatter } from "~/content/comece-aqui.mdx";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { absoluteUrl, pageTitle } from "~/lib/seo";
+import { site } from "~/site.config";
+
+const heading = "Comece aqui";
+---
+
+<BaseLayout
+  title={pageTitle({ page: heading }, site)}
+  description={frontmatter.description}
+  canonical={absoluteUrl(Astro.url.pathname, Astro.site)}
+  ogTitle={heading}
+  ogType="website"
+>
+  <div class="mx-auto w-full max-w-[52rem] px-4 pt-10 pb-10">
+    <h1 class="font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem]">
+      {heading}
+    </h1>
+    <div class="prose prose-site mt-10 min-w-0 lg:col-start-2">
+      <Content />
+    </div>
+  </div>
+</BaseLayout>

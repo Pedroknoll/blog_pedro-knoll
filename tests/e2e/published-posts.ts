@@ -57,7 +57,13 @@ export async function pagesForTheme(page: Page): Promise<string[]> {
     throw new Error("nenhum post publicado tem lista Tags");
   }
 
-  const paths = ["/", ...posts.map((post) => post.href), tag, "/blog/"];
+  const paths = [
+    "/",
+    ...posts.map((post) => post.href),
+    tag,
+    "/comece-aqui/",
+    "/blog/",
+  ];
   expect(paths[0]).toBe("/");
   for (const post of posts) {
     expect(isPostPath(post.href)).toBe(true);

@@ -2,6 +2,8 @@
 
 Oct 6, 2026 · @Pedro Knoll · revisado em 24/11/2026
 
+**Revisão 2 de 24/11/2026:** a T-114 entrega `/comece-aqui/`. O texto é o MDX `src/content/comece-aqui.mdx`; as listas misturam posts publicados e links `https:` pelo `ReadingList`. A forma está na BRAND §9.15.
+
 **Revisão de 24/11/2026:** a T-124 entrega o filtro por tag nas quatro listas, gravado em `?tag=`, e o total no `Todos` da home. A forma está na BRAND §9.2 e §9.12.
 
 **Revisão de 23/11/2026:** a T-123 entrega as três faixas da home e as listas inteiras; saem a paginação, `/page/n/` e `/tipos/`. O `Todos` da home passa a mostrar o total da lista na T-124. A forma está na BRAND §9.2.
@@ -127,7 +129,7 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
   9. **Relacionados:** pelo tema, com as tags para desempatar (T-26).
   10. **Newsletter:** entra no escopo, com Beehiiv ou Kit, escolhido na T-116.
   11. **Header e footer:** revistos na T-109 e implementados na T-113.
-  12. **Fontes e marca:** a Caveat sai (T-108); os símbolos da marca que o site não usa ficam em `src/assets/brand/`; o nível continua no card e no post; o `author.avatar` fica, para a T-114 decidir o uso.
+  12. **Fontes e marca:** a Caveat sai (T-108); os símbolos da marca que o site não usa ficam em `src/assets/brand/`; o nível continua no card e no post; o `author.avatar` fica; o uso dele é a T-125.
   13. **Saem:** o embed de iframes (RF-20, T-29) e a reavaliação do modo inline do mdx-marimo (T-32). O i18n (T-30) fica para a próxima fase. O HSTS preload não entra; reavaliar se o domínio ganhar subdomínios ou e-mail.
 - [x] **Q21 — Revisão visual da Fase 4** (T-109; a forma está na BRAND §7, §8, §9.1 a §9.3, §9.9, §9.12 a §9.14, §10 e §11). Substituída em 19/11/2026 pela Q22 onde discordar:
   1. **Listas:** `/artigos/` e `/prototipos/`, cada uma inteira, por data, sem paginação; um tipo sem post publicado não tem página. Cada tema tem a sua página, `/temas/<slug>/`, sem página `/temas/`, com seções por tipo quando tem os dois. A barra "Filtrar por tipo" e as páginas `/tipos/` saem (T-111).
@@ -175,9 +177,9 @@ A v1 entrega 11 requisitos Must; o restante entra por ordem de prioridade sem bl
 | RF-09 | Figuras e visualizações Svelte + D3 no MDX                                            | Must       | Sem `client:*`, a figura sai como SVG no HTML, sem JavaScript; com `client:visible`, vira explorável; nos dois casos o SVG está no HTML desde o build (seção 8) |
 | RF-10 | Feed RSS e sitemap                                                                    | Must       | `/rss.xml` válido no W3C Validator; `sitemap-index.xml` gerado                                                          |
 | RF-11 | Rascunhos (`draft: true`) visíveis só em preview                                      | Must       | Build de produção exclui drafts de páginas, feed e sitemap                                                              |
-| RF-12 | SEO por post: title, description, canonical, Open Graph, JSON-LD `BlogPosting`        | Must       | O `<title>` do post é o título do post. Home `{site.title} · {autor}`, post `{título} · {site.title} · {autor}`, `/blog/` `Blog · {site.title} · {autor}`, `/artigos/` `Artigos · {site.title} · {autor}`, `/prototipos/` `Protótipos · {site.title} · {autor}`, `/mais-votados/` `Mais votados · {site.title} · {autor}`, tag `Tag: <tag> · {site.title} · {autor}`, 404 `Página não encontrada · {site.title} · {autor}`. A 404 não tem canonical nem `og:url` e leva `noindex`, porque a Cloudflare serve `/404` com status 200. `og:image` e `image` do JSON-LD só existem quando há capa, até a T-23. Validado no Rich Results Test; URLs absolutas montadas a partir de `SITE_URL` |
+| RF-12 | SEO por post: title, description, canonical, Open Graph, JSON-LD `BlogPosting`        | Must       | O `<title>` do post é o título do post. Home `{site.title} · {autor}`, post `{título} · {site.title} · {autor}`, `/blog/` `Blog · {site.title} · {autor}`, `/artigos/` `Artigos · {site.title} · {autor}`, `/prototipos/` `Protótipos · {site.title} · {autor}`, `/mais-votados/` `Mais votados · {site.title} · {autor}`, `/comece-aqui/` `Comece aqui · {site.title} · {autor}`, tag `Tag: <tag> · {site.title} · {autor}`, 404 `Página não encontrada · {site.title} · {autor}`. A 404 não tem canonical nem `og:url` e leva `noindex`, porque a Cloudflare serve `/404` com status 200. `og:image` e `image` do JSON-LD só existem quando há capa, até a T-23. Validado no Rich Results Test; URLs absolutas montadas a partir de `SITE_URL` |
 | RF-13 | ~~Link "Editar no GitHub" por post~~                                                  | Removido   | Saiu na T-106 (Q20): o site não leva ao GitHub pelo post                                                                |
-| RF-14 | Página "Comece aqui"                                                                  | Should     | Página de entrada do blog em `/comece-aqui/`, com o link em primeiro no header (BRAND §9.13), sem link para o GitHub; a estrutura sai da T-114                          |
+| RF-14 | Página "Comece aqui"                                                                  | Should     | Página de entrada em `/comece-aqui/`, com o link em primeiro no header (BRAND §9.13). O conteúdo é o MDX editável `src/content/comece-aqui.mdx`: parágrafos e seções livres, e listas de posts e de links externos pelo `ReadingList`. Um post não publicado sai da lista sem quebrar o build. Sem link para o GitHub. A forma está na BRAND §9.15 |
 | RF-15 | Busca full-text estática | Should | O Pagefind 1.5 indexa só o corpo dos posts, sem backend. O modal abre pelo botão no header ou com Cmd/Ctrl+K, em todas as páginas. O script do Pagefind carrega ao abrir. O `wasm-unsafe-eval` no site todo sai da T-22. A forma do botão e do modal está na BRAND §9.12 |
 | RF-16 | Imagem OG gerada por post quando não houver capa | Should | Com capa, a capa ganha. Sem capa, PNG 1200×630 na ficha da seção 11 do BRAND, sem fólio, tema e nível; a forma está na BRAND §11 e o gerador é hipótese da T-23 |
 | RF-17 | Tema escuro com controle segmentado, respeitando `prefers-color-scheme`               | Should     | O controle Claro/Escuro grava a escolha em `localStorage` e aplica `data-theme` na raiz. Sem escolha gravada, segue `prefers-color-scheme`. Sem flash de tema errado no carregamento |
@@ -201,7 +203,7 @@ Cada RNF tem um número verificável no CI; o que não dá para medir automatica
 | RNF-01 | Performance      | LCP < 2,0 s e CLS < 0,05 em 4G simulado (home e post sem notebook)                                                                                                      | Lighthouse CI no job `lighthouse`, contra o `dist/` do build servido localmente (`staticDistDir`), na home e em cada post publicado, sem URL escrita à mão: o `lighthouserc.cjs` monta a lista na hora, com cada pasta de `dist/blog/` que tem `index.html`. Perfil mobile padrão do Lighthouse, com throttling simulado "Slow 4G" (150 ms de RTT, 1,6 Mbps, CPU 4×), mediana de 5 execuções (T-78). As quatro categorias ≥ 95 também são asserção `error` desde a T-13. Uma segunda passada, com as mesmas asserções e 5 execuções, mede cada fixture do build de teste, sem a home (`LIGHTHOUSE_SCOPE=fixtures`, T-39)                                                                                                                                                                                                             |
 | RNF-02 | Performance      | JS inicial ≤ 50 KB gzip **por página** sem islands; cada island D3 ≤ 40 KB gzip. O blog não carrega o runtime do marimo (Q18). Os scripts do próprio site entram no JS inicial da página, a começar pelo voto (T-122), e só chamam `/api/*` da mesma origem (`connect-src 'self'`, sem mudar a CSP)                                    | `pnpm check:js` (`scripts/check-page-js.mjs` sobre a função pura `src/lib/page-js.ts`) soma, por página de `dist/`, o JS que o HTML referencia: `<script src>`, script inline executável, `modulepreload` e os imports estáticos transitivos; `import()` dinâmico não conta. Limite de 50.000 bytes gzip. Página com JS externo ou referência inexistente falha a verificação. O beacon do Web Analytics, injetado pela Cloudflare na borda, não está no `dist/` e fica fora dessa conta (T-27). Cada `astro-island` conta à parte: o `component-url`, o `renderer-url` e o `before-hydration-url`, quando há, com os imports estáticos de cada um, até 40.000 bytes gzip por island; os scripts inline que o island acrescenta contam no JS inicial da página (T-19). Um glob único sobre `dist/_astro/*.js` não serve: somaria chunks de páginas diferentes. A página de post soma o script do voto |
 | RNF-03 | Performance      | Nenhuma página do blog requisita Pyodide nem o runtime do marimo: o caderno abre no molab (Q18)                                                                         | Teste E2E da §11: post sem caderno e post com caderno não requisitam `/pyodide\|marimo/` (T-74)                                                                                                                                             |
-| RNF-04 | Acessibilidade   | WCAG 2.2 AA; gráficos D3 com `role="img"`, `aria-label` e tabela de dados alternativa. Animações da marca respeitam `prefers-reduced-motion`. Lápis não é texto menor que 24 px sobre folha clara | axe-core no Playwright, zero violações serious/critical em cada página publicada do build de teste, que tem também as fixtures (a home, cada post, uma tag e `/blog/`), no tema claro (`tests/e2e/quality.spec.ts`) e no escuro (T4 de `tests/e2e/theme.spec.ts`); E2E com `prefers-reduced-motion: reduce` nas animações da marca |
+| RNF-04 | Acessibilidade   | WCAG 2.2 AA; gráficos D3 com `role="img"`, `aria-label` e tabela de dados alternativa. Animações da marca respeitam `prefers-reduced-motion`. Lápis não é texto menor que 24 px sobre folha clara | axe-core no Playwright, zero violações serious/critical em cada página publicada do build de teste, que tem também as fixtures (a home, cada post, uma tag, `/comece-aqui/` e `/blog/`), no tema claro (`tests/e2e/quality.spec.ts`) e no escuro (T4 de `tests/e2e/theme.spec.ts`); E2E com `prefers-reduced-motion: reduce` nas animações da marca |
 | RNF-05 | SEO              | HTML semântico, um `h1` por página, URLs estáveis `/blog/[slug]`                                                                                                        | Teste de build + Lighthouse SEO ≥ 95                                                                                                                                                                                                       |
 | RNF-06 | Segurança        | Headers: CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`. Na CSP das páginas, o `script-src` admite `'self'`, os hashes do build e só a origem `https://static.cloudflareinsights.com` (Web Analytics, T-27). A resposta de `/api/*` não lê o `_headers`: o Worker repete o HSTS, o nosniff, a Referrer-Policy e a Permissions-Policy do `buildHeaders()`, e acrescenta `Content-Security-Policy: default-src 'none'; frame-ancestors 'none'`, `X-Robots-Tag: noindex` e `Cache-Control: no-store` (T-121)                                                                                   | `dist/_headers` gerado no build e conferido por teste de artefato; securityheaders.com em produção. Os quatro headers da API são comparados ao `buildHeaders()` no Vitest, e o Playwright da API lê a resposta do `wrangler dev`                                                                                                                                         |
 | RNF-07 | Segurança        | Nenhuma rota tem `wasm-unsafe-eval` nem as origens do Pyodide: o blog não hospeda caderno (Q18); o `dist/_headers` gerado tem no máximo 100 regras (limite da Cloudflare) | Teste de artefato: nenhuma rota tem `wasm-unsafe-eval`; o build falha acima de 100 regras                                                                                                                                                 |
@@ -603,10 +605,11 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 ├── src/
 │   ├── site.config.ts        # título, URL (SITE_URL) e autor
 │   ├── content.config.ts
+│   ├── content/comece-aqui.mdx   # página Comece aqui; editar é mudar só este MDX
 │   ├── content/posts/
 │   ├── assets/brand/         # símbolo e ícones; ver a árvore da marca abaixo
 │   ├── components/
-│   │   ├── ui/               # .astro: Card, TagList, PostRail, KindFilter
+│   │   ├── ui/               # .astro: Card, ReadingList, TagList, PostRail, KindFilter
 │   │   ├── viz/              # .svelte: primitivas e exploráveis; Figure.astro (AGENTS.md próprio, criado antes da T-19)
 │   │   └── marimo/           # Notebook.astro, o botão do caderno (AGENTS.md próprio, criado antes da T-18)
 │   ├── integrations/
@@ -614,6 +617,7 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   ├── layouts/              # BaseLayout, PostLayout
 │   ├── pages/
 │   │   ├── index.astro
+│   │   ├── comece-aqui.astro
 │   │   ├── page/[page].astro
 │   │   ├── blog/[slug].astro
 │   │   ├── tags/[tag].astro
@@ -621,7 +625,7 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   │   ├── rss.xml.ts
 │   │   ├── robots.txt.ts
 │   │   └── api/catalogo.json.ts   # catálogo dos posts publicados; o público recebe 404 (T-121)
-│   ├── lib/                  # getPublishedPosts, readingTime, seo; viz/ (geometria pura)
+│   ├── lib/                  # getPublishedPosts, readingTime, seo, reading-list; viz/ (geometria pura)
 │   └── styles/
 │       ├── global.css
 │       └── shiki/            # pk-claro.json, pk-escuro.json
@@ -660,7 +664,7 @@ public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-t
 - **Commits:** Conventional Commits citando o requisito, ex.: `feat(post): lateral do cabeçalho com o título ao rolar [RF-04]`.
 - **Branches:** `main` = produção; toda mudança via PR com preview. Nome de branch: `t-XX-descricao-curta`.
 - **Componentes:** `.astro` para tudo que é estático; `.svelte` só quando houver estado no cliente. Exceção: em `src/components/viz/`, o mesmo `.svelte` sem `client:*` é figura estática (0 JS) e com `client:visible` é explorável.
-- **Rotas:** em pt-BR (`/blog/`, `/artigos/`, `/prototipos/`, `/mais-votados/`, `/tags/[tag]`), com `/blog/[slug]`. `/tipos/` e `/page/n/` não existem (T-123).
+- **Rotas:** em pt-BR (`/blog/`, `/artigos/`, `/prototipos/`, `/mais-votados/`, `/comece-aqui/`, `/tags/[tag]`), com `/blog/[slug]`. `/tipos/` e `/page/n/` não existem (T-123).
 - **Alias:** `~/` aponta para `src/`.
 - **Versões:** Node LTS fixado em `.node-version`; Python fixado em `.python-version`; marimo no grupo `dev` do `pyproject.toml`, travado no `uv.lock` (0.25.2, a versão do molab em 16/11/2026, T-74), para o `marimo check` e o uso local; o caderno roda no molab, com a versão do marimo de lá (ADR-02).
 - **Mudança de spec:** PR que altera comportamento atualiza `specs/SPEC.md` no mesmo commit; o template de PR tem o campo "Requisitos afetados".

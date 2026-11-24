@@ -40,7 +40,13 @@ async function tagPathsFromPosts(
 async function discover(page: Page) {
   const posts = await publishedPosts(page);
   const tags = await tagPathsFromPosts(page, posts);
-  const lists = ["/blog/", "/artigos/", "/prototipos/", "/mais-votados/"];
+  const lists = [
+    "/comece-aqui/",
+    "/blog/",
+    "/artigos/",
+    "/prototipos/",
+    "/mais-votados/",
+  ];
   const paths = ["/", ...posts.map((post) => post.href), ...tags, ...lists];
   return { posts, tags, paths };
 }

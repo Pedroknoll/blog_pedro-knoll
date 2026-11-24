@@ -4,9 +4,12 @@ import { headerLinks, isCurrentPath } from "../../src/lib/nav";
 import { selectPublished } from "../../src/lib/published";
 import type { Kind } from "../../src/lib/kind";
 
+const startHere = { href: "/comece-aqui/", label: "Comece aqui" };
+
 describe("headerLinks", () => {
   it("só artigos dá Artigos", () => {
     expect(headerLinks([{ data: { kind: "article" } }])).toEqual([
+      startHere,
       { href: "/artigos/", label: "Artigos" },
     ]);
   });
@@ -18,6 +21,7 @@ describe("headerLinks", () => {
         { data: { kind: "article" } },
       ]),
     ).toEqual([
+      startHere,
       { href: "/artigos/", label: "Artigos" },
       { href: "/prototipos/", label: "Protótipos" },
     ]);
@@ -43,9 +47,11 @@ describe("headerLinks", () => {
       },
     ];
     expect(headerLinks(selectPublished(entries, false))).toEqual([
+      startHere,
       { href: "/artigos/", label: "Artigos" },
     ]);
     expect(headerLinks(selectPublished(entries, true))).toEqual([
+      startHere,
       { href: "/artigos/", label: "Artigos" },
       { href: "/prototipos/", label: "Protótipos" },
     ]);
