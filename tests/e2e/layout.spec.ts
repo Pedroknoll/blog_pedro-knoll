@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { fixtureMd } from "./fixtures";
-import { pagesForTheme } from "./published-posts";
+import { isPostPath, pagesForTheme } from "./published-posts";
 import { authorName, homeTitle, siteTitle, titled } from "./site-literals";
 
 const routes = ["/", fixtureMd.href] as const;
@@ -111,7 +111,7 @@ for (const path of routes) {
   });
 }
 
-test("home e tag sem script; post sem pre com dois modules e com pre com três [RNF-02]", async ({
+test("home, listas e tags só com o script do item [RNF-02]", async ({
   page,
 }) => {
   for (const path of await pagesForTheme(page)) {
@@ -120,8 +120,14 @@ test("home e tag sem script; post sem pre com dois modules e com pre com três [
       expect(response?.status()).toBe(200);
 
       const extra = page.locator('script:not([type="application/ld+json"])');
-      if (!path.startsWith("/blog/")) {
-        await expect(extra).toHaveCount(0);
+      if (!isPostPath(path)) {
+        const executable = page.locator(
+          'script:not([type="application/ld+json"]):not([type="application/json"])',
+        );
+        await expect(executable).toHaveCount(path === "/" ? 2 : 1);
+        await expect(
+          page.locator('script[type="application/json"]'),
+        ).toHaveCount(path === "/" ? 1 : 0);
         return;
       }
       const pres = await page.getByRole("article").locator("pre").count();

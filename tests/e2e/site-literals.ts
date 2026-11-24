@@ -26,7 +26,7 @@ export const kindSlugs = {
 } as const;
 
 export function kindPath(kind: keyof typeof kindSlugs): string {
-  return `/tipos/${kindSlugs[kind]}/`;
+  return `/${kindSlugs[kind]}/`;
 }
 
 export const vizStaticTitle = "Grade 5 por 5, estática";

@@ -1,9 +1,9 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { fixtureMd, fixtureMdx } from "./fixtures";
-import { authorGithub, authorLinkedin, kindPath } from "./site-literals";
+import { authorGithub, authorLinkedin, homeGreeting } from "./site-literals";
 
-const articles = kindPath("article");
+const articles = "/artigos/";
 
 type Rail = {
   columnWidth: number;
@@ -73,11 +73,12 @@ async function readRail(page: Page): Promise<Rail> {
     const column = greeting?.parentElement ?? null;
     const grid = column?.parentElement ?? null;
     const hand = document.querySelector("svg:has(.pka-a)");
-    const bar = document.querySelector('nav[aria-label="Filtrar por tipo"]');
-    const list = bar?.querySelector("ul") ?? null;
+    const right = column?.nextElementSibling ?? null;
+    const band = right?.querySelector("section") ?? null;
+    const list = band?.querySelector("h2") ?? null;
     const greetingBox = greeting?.getBoundingClientRect();
-    const barBox = bar?.getBoundingClientRect();
-    const rightBox = bar?.parentElement?.getBoundingClientRect();
+    const barBox = band?.getBoundingClientRect();
+    const rightBox = right?.getBoundingClientRect();
     const columnStyle = column ? getComputedStyle(column) : null;
     return {
       columnWidth: greetingBox?.width ?? Number.NaN,
@@ -169,9 +170,15 @@ test.describe("lateral da home [RF-01]", () => {
     }
   });
 
-  test("H2 links do autor em artigos", async ({ page }) => {
+  test("H2 artigos sem saudação", async ({ page }) => {
     await open(page, articles, 1280);
-    await expect(authorList(page)).toHaveCount(1);
+    await expect(authorList(page)).toHaveCount(0);
+    await expect(
+      page.getByRole("heading", { level: 1, name: homeGreeting, exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Artigos", exact: true }),
+    ).toHaveCount(1);
   });
 
   test("H3 grade da home", async ({ page }) => {
@@ -194,12 +201,14 @@ test.describe("lateral da home [RF-01]", () => {
       .toBeCloseTo(at1280.columnWidth, 0);
   });
 
-  test("H4 saudação sobre a barra em artigos", async ({ page }) => {
+  test("H4 artigos sem saudação e sem barra", async ({ page }) => {
     await open(page, articles, 1280);
-    const rail = await readRail(page);
-    const overlaps =
-      rail.greetingBottom > rail.barTop && rail.greetingTop < rail.barBottom;
-    expect(overlaps).toBe(true);
+    await expect(
+      page.getByRole("heading", { name: homeGreeting, exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("navigation", { name: "Filtrar por tipo", exact: true }),
+    ).toHaveCount(0);
   });
 
   test("H5 saudação gruda ao rolar", async ({ page }) => {
@@ -249,15 +258,11 @@ test.describe("lateral da home [RF-01]", () => {
   });
 
   test("H11 respiro acima da lateral", async ({ page }) => {
-    for (const path of ["/", articles]) {
-      await test.step(path, async () => {
-        await open(page, path, 1023);
-        const below = await handBelowHeader(page);
-        await page.setViewportSize({ width: 1280, height: 800 });
-        const above = await handBelowHeader(page);
-        expect.soft(above - below, `${path} mão`).toBeCloseTo(56, 0);
-      });
-    }
+    await open(page, "/", 1023);
+    const below = await handBelowHeader(page);
+    await page.setViewportSize({ width: 1280, height: 800 });
+    const above = await handBelowHeader(page);
+    expect.soft(above - below, "mão").toBeCloseTo(56, 0);
   });
 
   test("H7a header alinhado à saudação a 1440", async ({ page }) => {

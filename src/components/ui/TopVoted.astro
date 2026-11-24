@@ -1,0 +1,130 @@
+---
+import Card from "~/components/ui/Card.astro";
+
+interface Props {
+  catalogJson: string;
+  headingLevel: 2 | 3;
+  limit?: number;
+  layout?: "full" | "votes" | "aligned";
+}
+
+const { catalogJson, headingLevel, limit, layout = "full" } = Astro.props;
+const placeholder = {
+  slug: "post",
+  title: "Post",
+  date: "2000-01-01",
+  minutes: 1,
+};
+---
+
+<div data-top-voted data-limit={limit} data-layout={layout}>
+  <p data-ranking-notice class="font-sans text-base text-ink">
+    O ranking precisa de JavaScript.
+  </p>
+  <script is:inline type="application/json" set:html={catalogJson} />
+  <template>
+    <li class={layout === "votes" ? "list-none py-3 sm:py-4" : "py-5 sm:py-8"}>
+      <Card
+        item={placeholder}
+        headingLevel={headingLevel}
+        href="/blog/"
+        layout={
+          layout === "votes"
+            ? "votes"
+            : layout === "aligned"
+              ? "aligned"
+              : "paired"
+        }
+      />
+    </li>
+  </template>
+  <div data-ranking></div>
+</div>
+
+<script>
+  import { formatPubDate } from "~/lib/format-date";
+  import { rankPosts, type CatalogPost } from "~/lib/ranking";
+  import { loadVotes } from "~/lib/votes-client";
+
+  function setReading(root: ParentNode, minutes: number) {
+    const line = root.querySelector("[data-reading]");
+    if (!line) return;
+    const icon = line.querySelector("svg");
+    line.textContent = "";
+    if (icon) line.append(icon);
+    line.append(` ${minutes} min de leitura`);
+  }
+
+  function fill(root: HTMLElement) {
+    if (root.dataset.ready === "1") return;
+    root.dataset.ready = "1";
+    const raw =
+      root.querySelector('script[type="application/json"]')?.textContent ?? "";
+    const template = root.querySelector("template");
+    const list = root.querySelector("[data-ranking]");
+    const notice = root.querySelector("[data-ranking-notice]");
+    if (!template || !list || !notice) return;
+    const limit =
+      root.dataset.limit === undefined ? undefined : Number(root.dataset.limit);
+
+    void loadVotes().then((votes) => {
+      if (!votes) return;
+      let catalog: CatalogPost[];
+      try {
+        catalog = JSON.parse(raw) as CatalogPost[];
+      } catch {
+        return;
+      }
+      if (!Array.isArray(catalog)) return;
+      const ranked = rankPosts(
+        catalog,
+        votes,
+        Number.isFinite(limit) ? limit : undefined,
+      );
+      if (ranked.length === 0) {
+        notice.textContent = "Nenhum voto ainda.";
+        return;
+      }
+      notice.remove();
+      if (root.dataset.layout !== "votes") {
+        list.classList.add(
+          "divide-y",
+          "divide-line",
+          "border-y",
+          "border-line",
+        );
+      }
+      for (const post of ranked) {
+        const fragment = template.content.cloneNode(true) as DocumentFragment;
+        const link = fragment.querySelector("a");
+        const time = fragment.querySelector("time");
+        const value = fragment.querySelector("[data-vote-value]");
+        if (link) {
+          link.setAttribute("href", `/blog/${post.slug}/`);
+          link.textContent = post.title;
+        }
+        if (time) {
+          const formatted = formatPubDate(
+            new Date(`${post.date}T00:00:00.000Z`),
+          );
+          time.setAttribute("datetime", formatted.datetime);
+          time.textContent = formatted.text;
+        }
+        setReading(fragment, post.minutes);
+        if (value) {
+          const count = votes[post.slug] ?? 0;
+          value.textContent = String(count);
+          const word = fragment.querySelector("[data-vote-word]");
+          if (word) word.textContent = count === 1 ? "curtida" : "curtidas";
+        }
+        list.append(fragment);
+      }
+    });
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>(
+    "[data-top-voted]",
+  )) {
+    fill(root);
+  }
+</script>

@@ -2,7 +2,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import { fixtureMd, fixtureMdx } from "./fixtures";
-import { pagesForTheme } from "./published-posts";
+import { isPostPath, pagesForTheme } from "./published-posts";
 
 const tokens = [
   "surface",
@@ -151,7 +151,7 @@ for (const theme of ["light", "dark"] as const) {
     page,
   }) => {
     const pages = await pagesForTheme(page);
-    const posts = pages.filter((path) => path.startsWith("/blog/"));
+    const posts = pages.filter((path) => isPostPath(path));
     expect(posts).toContain(fixtureMd.href);
 
     const passed: string[] = [];
@@ -295,7 +295,7 @@ for (const theme of ["light", "dark"] as const) {
         }
       }
 
-      if (!path.startsWith("/blog/")) continue;
+      if (!isPostPath(path)) continue;
       const links = page.locator("article .prose a:not(.not-prose a)");
       const count = await links.count();
       linkTotal += count;

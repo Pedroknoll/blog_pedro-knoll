@@ -1,0 +1,41 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+import Listing from "~/components/ui/Listing.astro";
+import BaseLayout from "~/layouts/BaseLayout.astro";
+import { getPublishedPosts } from "~/lib/getPublishedPosts";
+import { KIND_SLUGS, kindCounts, postsWithKind, type Kind } from "~/lib/kind";
+import { absoluteUrl, pageTitle } from "~/lib/seo";
+import { site } from "~/site.config";
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return kindCounts(posts).map(({ kind }) => ({
+    params: { tipo: KIND_SLUGS[kind] },
+    props: { kind, posts: postsWithKind(posts, kind) },
+  }));
+}
+
+interface Props {
+  kind: Kind;
+  posts: CollectionEntry<"posts">[];
+}
+
+const { kind, posts } = Astro.props;
+const heading = kind === "article" ? "Artigos" : "Protótipos";
+---
+
+<BaseLayout
+  title={pageTitle({ page: heading }, site)}
+  description={`${heading} publicados.`}
+  canonical={absoluteUrl(Astro.url.pathname, Astro.site)}
+  ogTitle={heading}
+  ogType="website"
+>
+  <Listing
+    heading={heading}
+    posts={posts}
+    icon={kind}
+    layout={kind === "prototype" ? "aligned" : "paired"}
+  />
+</BaseLayout>

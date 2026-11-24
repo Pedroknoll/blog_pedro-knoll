@@ -2,7 +2,6 @@ import AxeBuilder from "@axe-core/playwright";
 import { expect, test, type Page } from "@playwright/test";
 
 import {
-  nextPageLink,
   publishedPosts,
   titlePostsOnPage,
   type PublishedPost,
@@ -96,20 +95,6 @@ test("E1 tags do post são links [RF-02]", async ({ page }) => {
 });
 
 test("E2 nenhum card lista tags [RF-02]", async ({ page }) => {
-  const home = await page.goto("/");
-  expect(home?.status()).toBe(200);
-
-  const paths = ["/"];
-  for (;;) {
-    const next = nextPageLink(page);
-    if ((await next.count()) === 0) break;
-    const href = await next.getAttribute("href");
-    expect(href).toBeTruthy();
-    const response = await page.goto(href ?? "");
-    expect(response?.status()).toBe(200);
-    paths.push(href ?? "");
-  }
-
   const posts = await publishedPosts(page);
   const tags: string[] = [];
   const seen = new Set<string>();
@@ -131,23 +116,14 @@ test("E2 nenhum card lista tags [RF-02]", async ({ page }) => {
   }
   expect(tags.length).toBeGreaterThan(0);
 
-  const back = await page.goto("/");
-  expect(back?.status()).toBe(200);
-  const nav = page.getByRole("navigation", {
-    name: "Filtrar por tipo",
-    exact: true,
-  });
-  await expect(nav).toHaveCount(1);
-  const hrefs = await nav
-    .getByRole("link")
-    .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
-  const tipos = hrefs.filter(
-    (href): href is string =>
-      typeof href === "string" && /^\/tipos\/[a-z0-9-]+\/$/.test(href),
-  );
-  expect(tipos.length).toBeGreaterThan(0);
-
-  for (const path of [...paths, ...tags, ...tipos]) {
+  for (const path of [
+    "/",
+    "/blog/",
+    "/artigos/",
+    "/prototipos/",
+    "/mais-votados/",
+    ...tags,
+  ]) {
     await test.step(path, async () => {
       const response = await page.goto(path);
       expect(response?.status()).toBe(200);
@@ -234,7 +210,7 @@ test("E5 tag inexistente responde 404 [RF-02]", async ({ page }) => {
   ).toHaveCount(1);
 });
 
-test("E6 página de tag sem script e com um h1 fora do banner [RF-02]", async ({
+test("E6 página de tag com o script do item e um h1 fora do banner [RF-02]", async ({
   page,
 }) => {
   const tagged = await publishedPostsWithTags(page);
@@ -248,8 +224,10 @@ test("E6 página de tag sem script e com um h1 fora do banner [RF-02]", async ({
       await expect(banner).toHaveCount(1);
       await expect(banner.locator("h1")).toHaveCount(0);
       await expect(
-        page.locator('script:not([type="application/ld+json"])'),
-      ).toHaveCount(0);
+        page.locator(
+          'script:not([type="application/ld+json"]):not([type="application/json"])',
+        ),
+      ).toHaveCount(1);
 
       const results = await new AxeBuilder({ page }).analyze();
       const blocking = results.violations.filter(

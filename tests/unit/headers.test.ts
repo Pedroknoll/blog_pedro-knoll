@@ -30,6 +30,13 @@ function directivesOf(policy: string): Record<string, string> {
 }
 
 describe("extractHashes", () => {
+  it("application/json não gera hash", () => {
+    const body = '{"slug":"a < b"}';
+    const classic = "var n = 1;";
+    const html = `<script type="application/json">${body}</script><script>${classic}</script>`;
+    expect(extractHashes(html).scripts).toEqual([token(classic)]);
+  });
+
   it("ignora src e ld+json", () => {
     const html = [
       '<script src="/app.js">var fromSrc = 1;</script>',

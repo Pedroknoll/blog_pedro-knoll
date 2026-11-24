@@ -1,6 +1,6 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-import { nextPageLink, titlePostsOnPage } from "./published-posts";
+import { publishedPosts } from "./published-posts";
 import { KIND_LABELS } from "../../src/lib/kind";
 
 const MONTHS = [
@@ -19,6 +19,7 @@ const MONTHS = [
 ] as const;
 
 const KIND = new RegExp(`^(${Object.values(KIND_LABELS).join("|")})$`);
+const titleHeading = ":is(h2, h3)";
 
 function dateFromDatetime(datetime: string): string {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datetime);
@@ -60,8 +61,8 @@ async function open(page: Page, path: string) {
 async function tagHrefsFromPosts(page: Page): Promise<string[]> {
   const hrefs: string[] = [];
   const seen = new Set<string>();
-  for (const post of await publishedHrefs(page)) {
-    await open(page, post);
+  for (const post of await publishedPosts(page)) {
+    await open(page, post.href);
     const links = page
       .getByRole("list", { name: "Tags", exact: true })
       .getByRole("link");
@@ -79,53 +80,18 @@ async function tagHrefsFromPosts(page: Page): Promise<string[]> {
   return hrefs;
 }
 
-async function tagPathFromNav(page: Page): Promise<string> {
-  const tags = await tagHrefsFromPosts(page);
-  return tags[0] ?? "";
-}
-
 async function listingPaths(page: Page): Promise<string[]> {
-  await open(page, "/");
-  return ["/", await tagPathFromNav(page)];
+  const tags = await tagHrefsFromPosts(page);
+  return ["/", "/blog/", tags[0] ?? ""];
 }
 
 async function listingSurfaces(page: Page): Promise<string[]> {
-  await open(page, "/");
-  const paths = ["/"];
-  for (;;) {
-    const next = nextPageLink(page);
-    if ((await next.count()) === 0) break;
-    const href = await next.getAttribute("href");
-    expect(href).toBeTruthy();
-    await open(page, href ?? "");
-    paths.push(href ?? "");
-  }
   const tags = await tagHrefsFromPosts(page);
-  await open(page, "/");
-  const nav = page.getByRole("navigation", {
-    name: "Filtrar por tipo",
-    exact: true,
-  });
-  await expect(nav).toHaveCount(1);
-  const hrefs = await nav
-    .getByRole("link")
-    .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
-  const tipos = hrefs.filter(
-    (href): href is string =>
-      typeof href === "string" && /^\/tipos\/[a-z0-9-]+\/$/.test(href),
-  );
-  expect(tipos.length).toBeGreaterThan(0);
-  return [...paths, ...tags, ...tipos];
-}
-
-function postsList(page: Page) {
-  return page.getByRole("list", { name: /^Posts$|^Posts do tipo / });
+  return ["/", "/blog/", "/artigos/", "/prototipos/", ...tags];
 }
 
 async function listArticles(page: Page): Promise<Locator[]> {
-  const list = postsList(page);
-  await expect(list).toHaveCount(1);
-  const items = list.locator(":scope > li").locator("article");
+  const items = page.locator("[data-listing] article");
   const count = await items.count();
   expect(count).toBeGreaterThan(0);
   const articles: Locator[] = [];
@@ -140,23 +106,8 @@ async function cardsOn(page: Page): Promise<Locator[]> {
 }
 
 async function publishedHrefs(page: Page): Promise<string[]> {
-  const hrefs: string[] = [];
-  const seen = new Set<string>();
-  await open(page, "/");
-  for (;;) {
-    for (const post of await titlePostsOnPage(page)) {
-      if (seen.has(post.href)) continue;
-      seen.add(post.href);
-      hrefs.push(post.href);
-    }
-    const next = nextPageLink(page);
-    if ((await next.count()) === 0) break;
-    const href = await next.getAttribute("href");
-    expect(href).toBeTruthy();
-    await open(page, href ?? "");
-  }
-  expect(hrefs.length).toBeGreaterThan(0);
-  return hrefs;
+  const posts = await publishedPosts(page);
+  return posts.map((post) => post.href);
 }
 
 async function expectDateLine(container: Locator) {
@@ -167,8 +118,7 @@ async function expectDateLine(container: Locator) {
   await expect(time).toHaveText(dateFromDatetime(datetime));
   await expect(time.locator("xpath=..")).toHaveText(dateFromDatetime(datetime));
 
-  const kind = container.getByText(KIND);
-  await expect(kind).toHaveText(KIND);
+  await expect(container.getByText(KIND)).toHaveCount(0);
   await expect(container.getByText(/Fól\./)).toHaveCount(0);
   await expect(
     container.getByText(/Iniciante|Intermediário|Avançado/),
@@ -183,12 +133,31 @@ async function animationNames(svg: Locator): Promise<string[]> {
   );
 }
 
+function inRecentBand(root: Element) {
+  const label = root.closest("section")?.querySelector("h2");
+  return (
+    (label?.textContent ?? "").replace(/\s+/g, " ").trim() === "/ RECENTES"
+  );
+}
+
+function inPrototypeBand(root: Element) {
+  const label = root.closest("section")?.querySelector("h2");
+  return (
+    (label?.textContent ?? "").replace(/\s+/g, " ").trim() === "/ PROTÓTIPOS"
+  );
+}
+
 test.describe("card e cabeçalho [RF-01, RF-04]", () => {
   test("C1 data e tipo nos cards, sem fólio e sem nível", async ({ page }) => {
     for (const path of await listingPaths(page)) {
       await test.step(path, async () => {
         await open(page, path);
         for (const article of await cardsOn(page)) {
+          if (await article.evaluate(inPrototypeBand)) {
+            await expect(article.locator("time")).toHaveCount(0);
+            await expect(article.locator("p.footer")).toHaveCount(0);
+            continue;
+          }
           await expectDateLine(article);
         }
       });
@@ -199,7 +168,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     for (const path of await listingPaths(page)) {
       await test.step(path, async () => {
         await open(page, path);
-        const headings = page.locator("article h2");
+        const headings = page.locator(`article ${titleHeading}`);
         const count = await headings.count();
         expect(count).toBeGreaterThan(0);
         for (let index = 0; index < count; index += 1) {
@@ -284,16 +253,17 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await test.step(href, async () => {
         await open(page, href);
         const header = page.getByRole("article").locator("header");
-        await page.setViewportSize({ width: 1280, height: 800 });
-        await expect(header.locator("svg:visible")).toHaveCount(0);
-
-        await page.setViewportSize({ width: 360, height: 800 });
         const tipo = header
           .locator("[data-post-rail] > div")
           .nth(1)
           .locator("> div")
           .filter({ has: page.getByText("Tipo", { exact: true }) });
         const svg = tipo.locator("svg");
+        await page.setViewportSize({ width: 1280, height: 800 });
+        await expect(svg).toHaveCount(1);
+        await expect(svg).toBeHidden();
+
+        await page.setViewportSize({ width: 360, height: 800 });
         await expect(svg).toHaveCount(1);
         await expect(svg).toBeVisible();
         await expect(svg).toHaveAttribute("aria-hidden", "true");
@@ -310,7 +280,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     for (const path of await listingPaths(page)) {
       await open(page, path);
       for (const article of await cardsOn(page)) {
-        const link = article.locator("h2").getByRole("link");
+        const link = article.locator(titleHeading).getByRole("link");
         await expect(link).toHaveCount(1);
         const href = (await link.getAttribute("href")) ?? "";
         expect(href).toMatch(/^\/blog\/[a-z0-9-]+\/$/);
@@ -329,7 +299,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
         );
         await open(page, card.listing);
         const link = page
-          .locator("article h2")
+          .locator(`article ${titleHeading}`)
           .getByRole("link")
           .filter({ hasText: title });
         await expect(link).toHaveCount(1);
@@ -344,18 +314,18 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await test.step(path, async () => {
         await open(page, path);
         for (const article of await listArticles(page)) {
-          const hidden = article.locator(".sr-only");
-          await expect(hidden).toHaveCount(1);
-          const cardText = await article.evaluate((root) => {
-            const note = root.querySelector(".sr-only");
-            const visible = note?.previousElementSibling;
-            return `${visible?.textContent ?? ""}${note?.textContent ?? ""}`
-              .replace(/\s+/g, " ")
-              .trim();
-          });
+          if (await article.evaluate(inPrototypeBand)) {
+            await expect(article.locator("[data-reading]")).toHaveCount(0);
+            await expect(article.locator("time")).toHaveCount(0);
+            continue;
+          }
+          const reading = article.locator("[data-reading]");
+          await expect(reading).toHaveCount(1);
+          const cardText = textOf(await reading.textContent());
+          expect(cardText).toMatch(/^\d+ min de leitura$/);
           const href =
             (await article
-              .locator("h2")
+              .locator(titleHeading)
               .getByRole("link")
               .getAttribute("href")) ?? "";
           expect(href).toMatch(/^\/blog\/[a-z0-9-]+\/$/);
@@ -395,9 +365,11 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await test.step(`${path} 1280`, async () => {
         await open(page, path);
         for (const article of await listArticles(page)) {
+          if (await article.evaluate(inPrototypeBand)) continue;
+          const recent = await article.evaluate(inRecentBand);
           const placed = await article.evaluate((root) => {
             const date = root.querySelector("time")?.parentElement;
-            const heading = root.querySelector("h2");
+            const heading = root.querySelector(":is(h2, h3)");
             if (!date || !heading) return null;
             const dateBox = date.getBoundingClientRect();
             const headingBox = heading.getBoundingClientRect();
@@ -409,9 +381,12 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
             const fontSize = Number.parseFloat(
               getComputedStyle(document.documentElement).fontSize,
             );
+            const footer = root.querySelector("p.footer");
+            const footerBox = footer?.getBoundingClientRect();
             return {
               dateRight: dateBox.right,
               headingLeft: headingBox.left,
+              headingRight: headingBox.right,
               track,
               expectedTrack: 6.5 * fontSize,
               dateCenter: (dateBox.top + dateBox.bottom) / 2,
@@ -419,6 +394,10 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
                 ? (heading.parentElement.getBoundingClientRect().top +
                     heading.parentElement.getBoundingClientRect().bottom) /
                   2
+                : Number.NaN,
+              footerLeft: footerBox?.left ?? Number.NaN,
+              footerCenter: footerBox
+                ? (footerBox.top + footerBox.bottom) / 2
                 : Number.NaN,
             };
           });
@@ -428,6 +407,15 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           expect(
             Math.abs(placed.track - placed.expectedTrack),
           ).toBeLessThanOrEqual(1);
+          if (recent) {
+            expect(placed.footerLeft).toBeGreaterThanOrEqual(
+              placed.headingRight,
+            );
+            expect(
+              Math.abs(placed.dateCenter - placed.footerCenter),
+            ).toBeLessThanOrEqual(1);
+            continue;
+          }
           expect(
             Math.abs(placed.dateCenter - placed.textCenter),
             "data centrada no texto",
@@ -441,20 +429,33 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await test.step(`${path} 360`, async () => {
         await open(page, path);
         for (const article of await listArticles(page)) {
+          if (await article.evaluate(inPrototypeBand)) continue;
+          const recent = await article.evaluate(inRecentBand);
           const above = await article.evaluate((root) => {
             const date = root.querySelector("time")?.parentElement;
-            const heading = root.querySelector("h2");
+            const heading = root.querySelector(":is(h2, h3)");
             if (!date || !heading) return null;
             const dateBox = date.getBoundingClientRect();
             const headingBox = heading.getBoundingClientRect();
+            const footer = root
+              .querySelector("p.footer")
+              ?.getBoundingClientRect();
             return {
               dateTop: dateBox.top,
               dateBottom: dateBox.bottom,
               headingTop: headingBox.top,
+              footerTop: footer?.top ?? Number.NaN,
+              footerBottom: footer?.bottom ?? Number.NaN,
             };
           });
           expect(above).not.toBeNull();
           if (!above) continue;
+          if (recent) {
+            expect(above.headingTop).toBeLessThan(above.dateTop);
+            expect(above.headingTop).toBeLessThan(above.footerTop);
+            expect(above.dateTop).toBeLessThan(above.footerBottom);
+            continue;
+          }
           expect(above.dateTop).toBeLessThan(above.headingTop);
           expect(above.dateBottom).toBeLessThanOrEqual(above.headingTop + 1);
         }
@@ -480,12 +481,13 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
         /^(Artigo|Protótipo)$/.test((span.textContent ?? "").trim()),
       );
       if (kind) kind.textContent = "Protótipo";
-      const minutes = [...clone.querySelectorAll("span")].find((span) =>
-        /^\d+\s+min$/.test(
-          (span.textContent ?? "").replace(/\s+/g, " ").trim(),
-        ),
+      const minutes = [...clone.querySelectorAll("[data-reading]")].find(
+        (span) =>
+          /^\d+\s+min de leitura$/.test(
+            (span.textContent ?? "").replace(/\s+/g, " ").trim(),
+          ),
       );
-      if (minutes) minutes.textContent = "20 min";
+      if (minutes) minutes.textContent = "20 min de leitura";
       clone.style.position = "absolute";
       clone.style.left = "0";
       clone.style.top = "0";
@@ -545,28 +547,32 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await test.step(path, async () => {
         await open(page, path);
         for (const article of await listArticles(page)) {
-          const clock = await article.evaluate((root) => {
-            const note = root.querySelector(".sr-only");
-            const span = note?.previousElementSibling;
-            const svg = span?.querySelector(":scope > svg");
-            if (!svg) return { ok: false, reason: "sem svg" };
-            let after = "";
-            for (let node = svg.nextSibling; node; node = node.nextSibling) {
-              if (node.nodeType === Node.ELEMENT_NODE) {
-                return { ok: false, reason: "elemento depois do svg" };
+          const titlesOnly = await article.evaluate(inPrototypeBand);
+          if (!titlesOnly) {
+            const clock = await article.evaluate((root) => {
+              const span = root.querySelector("[data-reading]");
+              const svg = span?.querySelector(":scope > svg");
+              if (!svg) return { ok: false, reason: "sem svg" };
+              let after = "";
+              for (let node = svg.nextSibling; node; node = node.nextSibling) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                  return { ok: false, reason: "elemento depois do svg" };
+                }
+                after += node.textContent ?? "";
               }
-              after += node.textContent ?? "";
-            }
-            return {
-              ok: /^\d+\s+min$/.test(after.replace(/\s+/g, " ").trim()),
-              hidden: svg.getAttribute("aria-hidden"),
-              after: after.replace(/\s+/g, " ").trim(),
-            };
-          });
-          expect(clock.ok, JSON.stringify(clock)).toBe(true);
-          expect(clock.hidden).toBe("true");
+              return {
+                ok: /^\d+\s+min de leitura$/.test(
+                  after.replace(/\s+/g, " ").trim(),
+                ),
+                hidden: svg.getAttribute("aria-hidden"),
+                after: after.replace(/\s+/g, " ").trim(),
+              };
+            });
+            expect(clock.ok, JSON.stringify(clock)).toBe(true);
+            expect(clock.hidden).toBe("true");
+          }
 
-          const link = article.locator("h2").getByRole("link");
+          const link = article.locator(titleHeading).getByRole("link");
           const rest = await link.evaluate((element) => {
             const style = getComputedStyle(element);
             return {
@@ -584,112 +590,123 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     }
   });
 
-  test("C17 resumo em 16px com entrelinha de cerca de 25,6px", async ({
+  test("C18 título em 22px abaixo de sm e 26px de sm em diante", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 360, height: 800 });
-    await open(page, "/");
-    const articles = await listArticles(page);
-    expect(articles.length).toBeGreaterThan(1);
-    for (const article of articles) {
-      const summary = article.locator("h2 + p");
-      await expect(summary).toHaveCount(1);
-      const measured = await summary.evaluate((element) => {
-        const style = getComputedStyle(element);
-        return { fontSize: style.fontSize, lineHeight: style.lineHeight };
-      });
-      expect(fontSizePx(measured.fontSize)).toBe(16);
-      const lineHeight = fontSizePx(measured.lineHeight);
-      expect(Math.abs(lineHeight - 25.6)).toBeLessThanOrEqual(0.5);
-    }
-  });
-
-  test("C18 título da lista em 28px", async ({ page }) => {
-    await open(page, "/");
-    for (const width of [360, 1280]) {
-      await page.setViewportSize({ width, height: 800 });
+    await open(page, "/blog/");
+    const cases = [
+      { width: 360, size: 22, line: 26.4 },
+      { width: 1280, size: 26, line: 31.2 },
+    ];
+    for (const item of cases) {
+      await page.setViewportSize({ width: item.width, height: 800 });
       const articles = await listArticles(page);
-      expect(articles.length, String(width)).toBeGreaterThan(0);
+      expect(articles.length, String(item.width)).toBeGreaterThan(0);
       for (const article of articles) {
-        const measured = await article.locator("h2").evaluate((element) => {
-          const style = getComputedStyle(element);
-          return { fontSize: style.fontSize, lineHeight: style.lineHeight };
-        });
-        expect(fontSizePx(measured.fontSize), String(width)).toBe(28);
-        const lineHeight = fontSizePx(measured.lineHeight);
-        expect(Math.abs(lineHeight - 33.6), String(width)).toBeLessThanOrEqual(
-          0.5,
+        const measured = await article
+          .locator(titleHeading)
+          .evaluate((element) => {
+            const style = getComputedStyle(element);
+            return { fontSize: style.fontSize, lineHeight: style.lineHeight };
+          });
+        expect(fontSizePx(measured.fontSize), String(item.width)).toBe(
+          item.size,
         );
+        const lineHeight = fontSizePx(measured.lineHeight);
+        expect(
+          Math.abs(lineHeight - item.line),
+          String(item.width),
+        ).toBeLessThanOrEqual(0.5);
       }
     }
   });
 
-  test("C19 clique no resumo abre o post desse card", async ({ page }) => {
-    await page.setViewportSize({ width: 360, height: 800 });
-    await open(page, "/");
-    const article = (await listArticles(page))[0];
-    expect(article).toBeTruthy();
-    if (!article) return;
-
-    const link = article.locator("h2").getByRole("link");
-    const href = (await link.getAttribute("href")) ?? "";
-    expect(href).toMatch(/^\/blog\/[a-z0-9-]+\/$/);
-    const linkBox = await link.boundingBox();
-    const articleBox = await article.boundingBox();
-    expect(linkBox).not.toBeNull();
-    expect(articleBox).not.toBeNull();
-    if (!linkBox || !articleBox) return;
-    expect(linkBox.height).toBeLessThan(articleBox.height / 2);
-
-    const kind = article.getByText(KIND);
-    const reading = article.locator("p.footer span.text-pencil", {
-      hasText: /\d+\s+min/,
-    });
-    for (const piece of [kind, reading]) {
-      await piece.scrollIntoViewIfNeeded();
-      const hit = await piece.evaluate((element) => {
-        const rect = element.getBoundingClientRect();
-        const target = document.elementFromPoint(
-          rect.left + rect.width / 2,
-          rect.top + rect.height / 2,
-        );
-        const titleLink = element.closest("article")?.querySelector("h2 a");
-        return {
-          link: target === titleLink,
-          tag: target?.tagName ?? "",
-        };
+  test("linha de baixo com relógio, voto e vão de 3ch", async ({ page }) => {
+    await open(page, "/blog/");
+    const articles = await listArticles(page);
+    expect(articles.length).toBeGreaterThan(0);
+    for (const article of articles) {
+      const footer = article.locator("p.footer");
+      await expect(footer).toHaveCount(1);
+      await expect(footer).toContainText("|");
+      const clock = footer.locator("svg").first();
+      await expect(clock).toHaveAttribute("aria-hidden", "true");
+      await expect(clock).toHaveCSS("width", "12px");
+      await expect(clock).toHaveCSS("height", "12px");
+      await expect(footer).toContainText(/\d+\s+min de leitura/);
+      const vote = footer.locator("svg").nth(1);
+      await expect(vote).toHaveAttribute("aria-hidden", "true");
+      await expect(vote).toHaveCSS("width", "10px");
+      await expect(vote).toHaveCSS("height", "8px");
+      await expect(footer.locator("[data-vote-word]")).toHaveText("curtidas");
+      const value = footer.locator("[data-vote-value]");
+      await expect(value).toHaveText("–");
+      const count = value.locator("xpath=..");
+      await expect(count).toHaveClass(/text-accent/);
+      await expect(count).toHaveAccessibleName("–");
+      const gap = await count.evaluate((element) => {
+        const probe = document.createElement("span");
+        const style = getComputedStyle(element);
+        probe.style.font = style.font;
+        probe.textContent = "000";
+        probe.style.position = "absolute";
+        probe.style.visibility = "hidden";
+        document.body.append(probe);
+        const expected = probe.getBoundingClientRect().width;
+        probe.remove();
+        return Math.abs(element.getBoundingClientRect().width - expected);
       });
-      expect(hit.link, hit.tag).toBe(true);
-      const box = await piece.boundingBox();
-      expect(box).not.toBeNull();
-      if (!box) return;
-      await Promise.all([
-        page.waitForURL((url) => url.pathname === href),
-        page.mouse.click(box.x + box.width / 2, box.y + box.height / 2),
-      ]);
-      await page.setViewportSize({ width: 360, height: 800 });
-      await open(page, "/");
+      expect(gap).toBeLessThanOrEqual(1);
+    }
+  });
+
+  test("GET com 0 mostra 0 e GET 500 mantém –", async ({ page }) => {
+    const slugs = [
+      "fixture-md",
+      "fixture-mdx",
+      "fixture-sem-titulos",
+      "fixture-formulas",
+      "2026-10-como-o-blog-e-feito",
+      "2026-10-por-que-este-blog",
+    ];
+    await page.route("**/api/votes", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          votes: Object.fromEntries(slugs.map((slug) => [slug, 0])),
+        }),
+      });
+    });
+    await open(page, "/blog/");
+    const zeros = page.locator("[data-listing] [data-vote-value]");
+    await expect(zeros.first()).toHaveText("0");
+    const zeroCount = await zeros.count();
+    expect(zeroCount).toBeGreaterThan(0);
+    for (let index = 0; index < zeroCount; index += 1) {
+      await expect(zeros.nth(index)).toHaveText("0");
     }
 
-    const returned = page
-      .locator('ul[aria-label="Posts"] > li article')
-      .filter({ has: page.locator(`a[href="${href}"]`) });
-    await expect(returned).toHaveCount(1);
-    const returnedSummary = returned.locator("h2 + p");
-    await returnedSummary.scrollIntoViewIfNeeded();
-    await returned.locator("h2").getByRole("link").focus();
-    await expect(returned.locator("h2").getByRole("link")).toBeFocused();
-    const summaryBox = await returnedSummary.boundingBox();
-    expect(summaryBox).not.toBeNull();
-    if (!summaryBox) return;
-
-    await Promise.all([
-      page.waitForURL((url) => url.pathname === href),
-      page.mouse.click(
-        summaryBox.x + summaryBox.width / 2,
-        summaryBox.y + summaryBox.height / 2,
-      ),
-    ]);
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+    await page.route("**/api/votes", async (route) => {
+      await route.fulfill({
+        status: 500,
+        contentType: "application/json",
+        body: "{}",
+      });
+    });
+    const failed = page.waitForResponse(
+      (response) => response.url().includes("/api/votes"),
+      { timeout: 5_000 },
+    );
+    await open(page, "/blog/");
+    await failed;
+    const dashes = page.locator("[data-listing] [data-vote-value]");
+    const dashCount = await dashes.count();
+    expect(dashCount).toBeGreaterThan(0);
+    for (let index = 0; index < dashCount; index += 1) {
+      await expect(dashes.nth(index)).toHaveText("–");
+    }
   });
 
   test("C20 vão vertical quando o rodapé quebra", async ({ page }) => {
@@ -711,7 +728,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       };
       if (!wraps()) {
         let width = Math.floor(block.getBoundingClientRect().width);
-        while (width > 120 && !wraps()) {
+        while (width > 8 && !wraps()) {
           width -= 16;
           block.style.width = `${width}px`;
         }

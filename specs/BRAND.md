@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.30 · novembro de 2026 · pedroknoll.com
+Versão 1.31 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -220,7 +220,7 @@ Títulos com `text-wrap: balance`.
 - **Exceção:** a mão da saudação (`aceno.svg`) é **16 × 16**, com contorno `--contorno-px` e corpo `--ouro`. Use em 16, 32 ou 48 px.
 - **Animação quadro a quadro** (decisão): só o aceno, dois quadros alternando 4 vezes, depois pausa (3,2 s, contínuo). Conceito, Tutorial e Playbook saíram da lista e da animação (T-119, T-120).
 - **Onde anima:** só a mão da saudação. O aceno usa classes com prefixo `pka-`.
-- **Ícones (decisão da T-119):** `icone-artigo.svg` (folha) e `icone-prototipo.svg` (frasco), dos tipos (§8), no h1 de `/artigos/` e de `/prototipos/` e na linha Tipo da tabela do post abaixo de `lg`; `icone-fogo.svg`, no h1 de `/mais-votados/`; `icone-voto.svg`, à esquerda da contagem no item; `icone-busca.svg` (lupa), no botão de busca do header (§9.13); `icone-sol.svg` e `icone-lua.svg`, do controle de tema (§9.9). Todos com 12 × 12, uma cor, só parados, sem versão animada. O desenho está no apêndice. A folha e o frasco estão na árvore (T-120); a lupa entra na T-22; o sol e a lua, na T-24; o fogo e o voto, na T-123. O `icone-filtro.svg` não entra: o filtro é um `select` nativo (T-124).
+- **Ícones (decisão da T-119):** `icone-artigo.svg` (folha) e `icone-prototipo.svg` (frasco), dos tipos (§8), no h1 de `/artigos/` e de `/prototipos/` e na linha Tipo da tabela do post abaixo de `lg`; `icone-fogo.svg`, no h1 de `/mais-votados/`; `icone-voto.svg` (triângulo de 10×8), à esquerda da contagem no item; `icone-busca.svg` (lupa), no botão de busca do header (§9.13); `icone-sol.svg` e `icone-lua.svg`, do controle de tema (§9.9). Todos com 12 × 12, uma cor, só parados, sem versão animada. O desenho está no apêndice. A folha e o frasco estão na árvore (T-120); a lupa entra na T-22; o sol e a lua, na T-24; o fogo e o voto, na T-123. O `icone-filtro.svg` não entra: o filtro é um `select` nativo (T-124).
 - **Relógio** (`icone-relogio.svg`): 12 × 12, só parado, sem versão animada. Entra na linha do item, antes do tempo de leitura (§9.2).
 - Todas as animações respeitam `prefers-reduced-motion: reduce` (ficam paradas).
 
@@ -265,26 +265,28 @@ A SPEC §6 fecha o schema, sem `folio`, `level` e `featured` (T-120). Chaves em 
 - A newsletter não entra na saudação. Na home, fica depois das listas, na coluna da direita (§9.2). No post, fica no fim (§9.14). Entra na T-116. Até lá, a home não tem esse bloco.
 
 ### 9.2 Item e páginas de lista
-Decisão da T-119. O card sem fólio e sem nível, e a home sem destaque, estão no ar (T-120). Entram na T-123 a home, com as três listas, e as quatro rotas.
+Decisão da T-119. O card sem fólio e sem nível, e a home sem destaque, estão no ar (T-120). A home com as três listas e as quatro rotas estão no ar (T-123).
 
 - Um `article` em grade. De `sm` em diante, duas colunas, com 2rem de vão, centradas na vertical: a da data, com 6,5rem, e a do texto. Abaixo de `sm`, uma coluna só.
 - **Data:** mono 12 px, lápis, no formato `17.nov.2026`. Na coluna de 6,5rem de `sm` em diante; acima do título, abaixo de `sm`.
 - **Título:** fonte de display 600, entrelinha 1,2, com `text-wrap: balance`. 22 px abaixo de `sm` e 26 px de `sm` em diante. A linha de baixo fica 0,5rem abaixo do título no celular e 0,75rem de `sm` em diante.
-- **Linha de baixo,** alinhada à direita da coluna do texto, em mono 12 px, lápis: tempo de leitura (relógio parado de 12 px + `8 min`), `|` na cor da linha, ícone de upvote (`icone-voto.svg`, 12 px) e a contagem. A contagem no HTML é `–`, num vão de 3 caracteres, para o número da API não empurrar o tempo de leitura. Sem resumo, capa, tipo, tema, nível, tag nem hachura.
+- **Linha de baixo,** em mono 12 px, lápis: tempo de leitura (relógio parado de 12 px + `8 min de leitura`), `|` na cor da linha, o triângulo de upvote (`icone-voto.svg`, 10×8, o mesmo do botão Curtir), a palavra `curtidas` (`curtida` quando o número é 1) e a contagem em acento. A contagem no HTML é `–`, num vão de 3 caracteres, para o número da API não empurrar o tempo de leitura. Sem resumo, capa, tipo, tema, nível, tag nem hachura.
+- **Onde as colunas mudam (T-123).** Em `/artigos/` e em `/tags/[tag]/`, o item é o de cima: de `sm` em diante, data numa coluna de 6,5rem e o texto na outra, centrados na vertical; abaixo de `sm`, a data fica acima do título e a linha de baixo, à direita, 0,5rem abaixo do título (0,75rem de `sm` em diante). Em `/blog/`, `/prototipos/` e `/mais-votados/`, de `sm` em diante são três colunas centradas na vertical: data (6,5rem), título e a linha de baixo; abaixo de `sm`, a data fica acima do título e a linha de baixo continua embaixo. Na home, `/ RECENTES` usa as três colunas só de `lg` em diante; abaixo de `lg`, o título fica em cima e a data, a leitura e os votos ficam na mesma linha. `/ PROTÓTIPOS` na home mostra só o título, sem data, sem leitura, sem votos e sem filete. `/ MAIS VOTADOS` na home mostra o título e a contagem, sem data, sem leitura e sem filete.
 - Título sem sublinhado e sem troca de cor, em repouso, no hover e no foco. O item inteiro é tocável: o link do título se estica sobre o item (`after:absolute after:inset-0`, com o `article` em `relative`) e dá retorno em acento no toque (`active:text-accent`). A linha de baixo não intercepta o toque (`pointer-events-none`).
 - Hover, no modelo do claude.dev: com o ponteiro sobre um item da listagem, os outros caem para opacidade 0,35, com transição curta. Só com mouse (`hover: hover` e `pointer: fine`); o foco do teclado faz o mesmo. Sem transição com `prefers-reduced-motion`. Exceção à seção 9.10 (T-63).
-- A lista separa os itens com divisória `divide-line`, com filete também em cima do primeiro e embaixo do último. O respiro é só vertical: 1,25rem em cima e embaixo abaixo de `sm`, e 2rem de `sm` em diante. Sem borda, sem sombra e sem capa.
+- A lista separa os itens com divisória `divide-line`, com filete também em cima do primeiro e embaixo do último. O respiro é só vertical: 1,25rem em cima e embaixo abaixo de `sm`, e 2rem de `sm` em diante. Sem borda, sem sombra e sem capa. Exceções da home (T-123): `/ RECENTES` não tem o filete de cima; `/ PROTÓTIPOS` não tem filete e o respiro do item é 0,75rem abaixo de `sm` e 1rem de `sm` em diante; `/ MAIS VOTADOS` não tem filete.
 
-**Home (T-119; entra na T-123).**
+**Home (T-123).**
 
 - A saudação (§9.1) à esquerda, de `lg` em diante. Na coluna da direita, duas faixas. Sem destaque, sem paginação, sem barra de tipos e sem busca.
 - **`/ RECENTES`**, na largura da coluna: 5 posts, os dois tipos, por data, no HTML. O rótulo é mono 12 px, maiúsculas, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete. `Todos`, à direita do rótulo, no estilo dos links do header (§9.13), vai para `/blog/`.
 - Abaixo, duas colunas lado a lado de `lg` em diante, empilhadas abaixo de `lg`.
 - **`/ MAIS VOTADOS`:** no HTML, só a frase `O ranking precisa de JavaScript.` Com JavaScript, o script monta o top 10: posts com pelo menos 1 voto, empate pela data mais recente. Sem voto nenhum, a frase `Nenhum voto ainda.` e nenhum item; o bloco continua, para o link não sumir. `Todos` vai para `/mais-votados/`.
 - **`/ PROTÓTIPOS`:** 5 protótipos mais recentes, no HTML. O bloco não é renderizado sem protótipo publicado; nesse caso, `/ MAIS VOTADOS` ocupa a largura toda. `Todos` vai para `/prototipos/`.
+- **Total no `Todos` (entra na T-124).** O link visível é `Todos · 12`, no mesmo estilo. Em `/ RECENTES`, o 12 é o número de posts publicados; em `/ PROTÓTIPOS`, o de protótipos publicados. Os dois saem no HTML. Em `/ MAIS VOTADOS`, o script do ranking escreve o número de posts com pelo menos 1 voto, inclusive 0; sem JavaScript, o link fica `Todos`, sem número. O nome acessível inclui o número: `Todos os 12 posts recentes`, `Todos os 12 protótipos`, `Todos os 12 mais votados`.
 - A newsletter (§9.14) fica depois das faixas, na largura da coluna da direita.
 
-**Páginas de lista (T-119; entram na T-123).** Sem paginação e sem saudação. O item é o mesmo, também em `/tags/<tag>/`.
+**Páginas de lista (T-123).** Sem paginação e sem saudação. O item de `/tags/<tag>/` é o de `/artigos/`.
 
 - **`/blog/`:** h1 `Blog`, sem ícone. A lista inteira, os dois tipos, por data.
 - **`/artigos/` e `/prototipos/`:** h1 `Artigos` ou `Protótipos`, na escala do h1 de página (§5), com folha ou frasco em 24 px, em tinta, antes do nome. A lista inteira do tipo, por data. Um tipo sem post publicado não tem página.
@@ -695,14 +697,14 @@ Só parados, sem versão animada (§7). A folha e o frasco estão em `src/assets
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
-  <path d="M5 1h2v1h-2zM4 2h4v1h-4zM3 3h2v1h-2zM7 3h2v1h-2zM2 4h2v2h-2zM5 4h2v2h-2zM8 4h2v2h-2zM1 6h4v1h-4zM7 6h4v1h-4zM1 7h10v1h-10zM2 8h8v1h-8zM3 9h6v1h-6zM4 10h4v1h-4zM5 11h2v1h-2z"/>
+  <path d="M6 0h1v1h-1zM5 1h2v1h-2zM4 2h1v1h-1zM6 2h2v1h-2zM3 3h1v1h-1zM5 3h3v1h-3zM2 4h1v1h-1zM4 4h4v1h-4zM2 5h6v1h-6zM1 6h7v1h-7zM1 7h8v1h-8zM2 8h7v1h-7zM3 9h5v1h-5zM4 10h3v1h-3z"/>
 </svg>
 ```
 
 `icone-voto.svg`
 
 ```svg
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
-  <path d="M5 1h2v1h-2zM4 2h4v1h-4zM3 3h6v1h-6zM2 4h2v1h-2zM5 4h2v4h-2zM8 4h2v1h-2z"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 8" width="10" height="8" fill="currentColor">
+  <path d="M5 0 10 8H0Z"/>
 </svg>
 ```

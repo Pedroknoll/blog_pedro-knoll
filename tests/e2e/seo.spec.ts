@@ -1,8 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 
-import { KIND_LABELS, KINDS } from "../../src/lib/kind";
-import { nextPageLink, publishedPosts } from "./published-posts";
-import { authorName, homeTitle, kindSlugs, titled } from "./site-literals";
+import { isPostPath, publishedPosts } from "./published-posts";
+import { authorName, homeTitle, titled } from "./site-literals";
 
 function normalize(text: string | null) {
   return (text ?? "").replace(/\s+/g, " ").trim();
@@ -38,48 +37,12 @@ async function tagPathsFromPosts(
   return tags;
 }
 
-async function listingPagePaths(page: Page) {
-  const paths: string[] = [];
-  await page.goto("/");
-  for (;;) {
-    const next = nextPageLink(page);
-    if ((await next.count()) === 0) break;
-    const href = await next.getAttribute("href");
-    if (!href || !/^\/page\/[0-9]+\/$/.test(href)) {
-      throw new Error(`Próxima sem /page/n/: ${href}`);
-    }
-    paths.push(href);
-    await next.click();
-  }
-  return paths;
-}
-
 async function discover(page: Page) {
   const posts = await publishedPosts(page);
   const tags = await tagPathsFromPosts(page, posts);
-  await visit(page, "/");
-  const nav = page.getByRole("navigation", {
-    name: "Filtrar por tipo",
-    exact: true,
-  });
-  await expect(nav).toHaveCount(1);
-  const hrefs = await nav
-    .getByRole("link")
-    .evaluateAll((links) => links.map((link) => link.getAttribute("href")));
-  const tipos = hrefs.filter(
-    (href): href is string =>
-      typeof href === "string" && /^\/tipos\/[a-z0-9-]+\/$/.test(href),
-  );
-  expect(tipos.length).toBeGreaterThan(0);
-  const pages = await listingPagePaths(page);
-  const paths = [
-    "/",
-    ...posts.map((post) => post.href),
-    ...tags,
-    ...tipos,
-    ...pages,
-  ];
-  return { posts, tags, pages, paths };
+  const lists = ["/blog/", "/artigos/", "/prototipos/", "/mais-votados/"];
+  const paths = ["/", ...posts.map((post) => post.href), ...tags, ...lists];
+  return { posts, tags, paths };
 }
 
 async function canonicalHref(page: Page) {
@@ -174,14 +137,6 @@ test("E1 title [RF-12]", async ({ page }) => {
       await expect(page).toHaveTitle(homeTitle);
       continue;
     }
-    if (path.startsWith("/tipos/")) {
-      const slug = /^\/tipos\/([a-z0-9-]+)\/$/.exec(path)?.[1];
-      const kind = KINDS.find((item) => kindSlugs[item] === slug);
-      expect(kind, path).toBeTruthy();
-      if (!kind) continue;
-      await expect(page).toHaveTitle(titled(`Tipo: ${KIND_LABELS[kind]}`));
-      continue;
-    }
     await expect(page.locator("h1")).toHaveCount(1);
     const heading = normalize(await page.locator("h1").innerText());
     await expect(page).toHaveTitle(titled(heading));
@@ -217,7 +172,7 @@ test("E3 Open Graph [RF-12]", async ({ page }) => {
 
   for (const path of paths) {
     await visit(page, path);
-    const isPost = path.startsWith("/blog/");
+    const isPost = isPostPath(path);
     await expect(page.locator('meta[property="og:type"]')).toHaveAttribute(
       "content",
       isPost ? "article" : "website",
@@ -281,7 +236,7 @@ test("E4 JSON-LD [RF-12]", async ({ page }) => {
     await visit(page, path);
     await expect(page.locator("main")).toHaveCount(1);
     const script = page.locator('script[type="application/ld+json"]');
-    if (!path.startsWith("/blog/")) {
+    if (!isPostPath(path)) {
       await expect(script).toHaveCount(0);
       continue;
     }

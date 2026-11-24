@@ -27,7 +27,7 @@ describe("kind", () => {
       article: "artigos",
       prototype: "prototipos",
     });
-    expect(kindPath("article")).toBe("/tipos/artigos/");
+    expect(kindPath("article")).toBe("/artigos/");
     const slugs = KINDS.map((kind) => KIND_SLUGS[kind]);
     expect(new Set(slugs).size).toBe(slugs.length);
     for (const slug of slugs) expect(slug).toMatch(slugPattern);
@@ -35,7 +35,7 @@ describe("kind", () => {
 
   it("kindPath termina com barra", () => {
     for (const kind of KINDS) {
-      expect(kindPath(kind)).toBe(`/tipos/${KIND_SLUGS[kind]}/`);
+      expect(kindPath(kind)).toBe(`/${KIND_SLUGS[kind]}/`);
     }
   });
 

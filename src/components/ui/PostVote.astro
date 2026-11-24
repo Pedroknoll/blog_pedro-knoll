@@ -1,4 +1,6 @@
 ---
+import Vote from "~/assets/brand/icones/icone-voto.svg";
+
 interface Props {
   slug: string;
   class?: string;
@@ -18,10 +20,12 @@ const { slug, class: className } = Astro.props;
       data-vote-button
       class="inline-flex h-9 shrink-0 items-center gap-2 rounded-lg border border-line bg-surface px-3 text-sm text-ink hover:bg-sheet"
     >
-      <span
+      <Vote
         aria-hidden="true"
-        class="box-content inline-block h-0 w-0 shrink-0 border-x-[5px] border-b-8 border-x-transparent border-b-current"
-      ></span>
+        width={10}
+        height={8}
+        class="inline-block h-2 w-2.5 shrink-0"
+      />
       <span data-vote-label>Curtir</span>
       <span data-vote-count class="inline-block w-[3ch] text-right text-accent">
         <span data-vote-value>–</span>
