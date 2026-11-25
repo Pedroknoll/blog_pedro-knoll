@@ -1,0 +1,99 @@
+---
+// Índice do post (RF-26, T-129, BRAND §9.3). Só de `lg` em diante, dentro da
+// lateral, e só com 2 h2 ou mais (quem decide é o PostRail). Sem JavaScript,
+// os links funcionam, sem progresso e sem seção ativa.
+import Clock from "~/assets/brand/icones/icone-relogio.svg";
+import { formatMinutes } from "~/lib/format-minutes";
+
+export interface TocHeading {
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: TocHeading[];
+  minutesRead?: number;
+}
+
+const { headings, minutesRead } = Astro.props;
+const minutesText =
+  typeof minutesRead === "number" ? formatMinutes(minutesRead) : undefined;
+---
+
+<nav aria-label="Neste artigo" data-post-toc class="font-sans text-ink">
+  <div class="flex items-baseline justify-between gap-x-4 pb-2">
+    <span
+      data-toc-label
+      aria-hidden="true"
+      class="font-mono text-xs tracking-widest text-ink uppercase"
+    >
+      / NESTE ARTIGO
+    </span>
+    <span
+      data-toc-percent
+      aria-hidden="true"
+      class="inline-block w-[4ch] text-right font-mono text-xs text-ink tabular-nums"
+    ></span>
+  </div>
+  <div data-toc-bar class="h-0.5 overflow-hidden bg-line">
+    {/* transform no style, e não `scale-x-0`: no Tailwind 4 a classe usa `scale`, que se soma ao transform do script. */}
+    <div
+      data-toc-fill
+      class="h-full origin-left bg-ink"
+      style="transform: scaleX(0)"
+    ></div>
+  </div>
+  <ol>
+    {headings.map((heading, index) => (
+      <li class="border-b border-line">
+        <a
+          href={`#${heading.slug}`}
+          class="grid grid-cols-[2ch_minmax(0,1fr)] gap-x-3 px-2 py-2.5 text-[0.9375rem] leading-snug text-ink hover:bg-sheet aria-[current=location]:bg-sheet"
+        >
+          <span
+            data-toc-number
+            aria-hidden="true"
+            class="pt-px font-mono text-xs leading-snug text-muted"
+          >
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          {/* A cópia invisível em 600 reserva a altura do item ativo (sem CLS). */}
+          <span class="grid">
+            <span
+              data-toc-title
+              class="col-start-1 row-start-1 font-normal in-aria-[current=location]:font-semibold"
+            >
+              {heading.text}
+            </span>
+            <span
+              aria-hidden="true"
+              class="invisible col-start-1 row-start-1 font-semibold"
+            >
+              {heading.text}
+            </span>
+          </span>
+        </a>
+      </li>
+    ))}
+  </ol>
+  {minutesText && (
+    <p
+      data-toc-reading
+      class="mt-3 flex items-center gap-1.5 px-2 font-mono text-xs text-muted"
+    >
+      <Clock
+        aria-hidden="true"
+        width={12}
+        height={12}
+        class="inline-block shrink-0"
+      />
+      <span data-toc-minutes>{`${minutesText} de leitura`}</span>
+    </p>
+  )}
+</nav>
+
+<script>
+  import { initPostToc } from "~/lib/post-toc";
+
+  initPostToc();
+</script>

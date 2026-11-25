@@ -18,8 +18,12 @@ interface Props {
 }
 
 const { post } = Astro.props;
-const { Content, remarkPluginFrontmatter } = await render(post);
+const { Content, headings, remarkPluginFrontmatter } = await render(post);
 const { minutesRead, hasCode } = remarkPluginFrontmatter;
+// O índice (RF-26) lista só os h2 do texto; o apêndice fica fora do Content.
+const tocHeadings = headings
+  .filter((heading) => heading.depth === 2)
+  .map(({ slug, text }) => ({ slug, text }));
 const appendix = postAppendix(post.data.references, post.data.appendices);
 ---
 
@@ -28,6 +32,7 @@ const appendix = postAppendix(post.data.references, post.data.appendices);
   minutesRead={typeof minutesRead === "number" ? minutesRead : undefined}
   hasCode={hasCode === true}
   appendix={appendix}
+  tocHeadings={tocHeadings}
 >
   <Content />
 </PostLayout>

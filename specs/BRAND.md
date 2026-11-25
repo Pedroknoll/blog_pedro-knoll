@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.39 · novembro de 2026 · pedroknoll.com
+Versão 1.40 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -327,7 +327,7 @@ Decisão da T-126 (Q23), que substitui a da T-119, e da T-131 (Q24) nas listas i
 - **Lateral (T-131):** de `lg` em diante, na grade da home (§9.1: 15rem, 6rem de vão, `max-w-site`), uma lateral sticky com o h1, logo abaixo a linha de contagem (mono 12 px, maiúsculas, lápis) e, abaixo dela, o filtro (§9.12). A lista fica na coluna da direita. Abaixo de `lg`, a lateral fica em cima da lista.
 
 ### 9.3 Cabeçalho do post (página do post)
-Decisão da T-126 (Q23), que substitui a da T-63 à T-120. O cabeçalho entrou na T-128; o índice entra na T-129 e o bloco de voto e compartilhar na T-130 (§9.14). Até a T-130, no ar: de `lg` em diante, o voto da T-122 sozinho na lateral, sticky, na altura do começo do texto; abaixo de `lg`, no fim do texto.
+Decisão da T-126 (Q23), que substitui a da T-63 à T-120. O cabeçalho entrou na T-128, o índice na T-129, e o bloco de voto e compartilhar entra na T-130 (§9.14). Até a T-130, no ar: de `lg` em diante, o voto da T-122 na lateral, abaixo do índice (sozinho no post sem índice), sticky junto com ele, na altura do começo do texto; abaixo de `lg`, no fim do texto.
 
 - **Título e linha fina, na coluna do texto:** deixam de ocupar a largura toda. O cabeçalho tem a largura da prosa (65ch na fonte e no tamanho do texto), e o filete acaba onde o texto acaba. h1 na escala do post (§5), com `text-wrap: balance`; abaixo, a linha fina em grafite, até ~52 caracteres. Se a escala de 80 px não couber na coluna, a T-128 para e pergunta.
 - **Metadados,** logo abaixo da linha fina, numa linha: a foto do autor (28 px, redonda, contorno de 1 px em `line`, decorativa) e `Pedro Knoll` · a data (`21.out.2026`) · o relógio e `6 minutos` · o tipo, `Artigo` ou `Protótipo`. O nome fica em IBM Plex Sans, tinta; a data, os minutos e o tipo em IBM Plex Mono 14 px, grafite; os `·` são decorativos (T-128). Abaixo, as tags em etiquetas com contorno `line`, texto em tinta, IBM Plex Mono 12 px e cantos de 0,25rem, cada uma com link para `/tags/<tag>/`. Um filete de 1 px em tinta fecha o cabeçalho (decisão do autor na T-128, pelo mockup); ele é a sentinela do bloco de voto (§9.14). Entre o filete e o texto, 2,5rem.
@@ -335,12 +335,12 @@ Decisão da T-126 (Q23), que substitui a da T-63 à T-120. O cabeçalho entrou n
 - **Abaixo de `lg`:** sem lateral. O mesmo cabeçalho, rolando com o texto; o voto e o compartilhar ficam no fim do texto (§9.14). Sem índice.
 - **Lateral, de `lg` em diante:** à esquerda, com 15rem e vão de 4rem até o texto. Na altura do cabeçalho, vazia. Abaixo, o índice e o bloco de voto e compartilhar (§9.14).
 
-**Índice** (SPEC RF-26; entra na T-129). De `lg` em diante, na lateral, um `nav` com nome acessível `Neste artigo`.
+**Índice** (SPEC RF-26; T-129). De `lg` em diante, na lateral, um `nav` com nome acessível `Neste artigo`.
 
 - **Topo:** o rótulo `/ NESTE ARTIGO` em mono 12 px, maiúsculas, tinta, e, à direita, a porcentagem lida (`42%`), com `aria-hidden`. O filete embaixo do rótulo é a barra de progresso: 2 px em `line`, preenchida em tinta conforme a leitura.
-- **Itens:** um por h2, numerados `01`, `02`… em mono, com o título do h2 como link para a âncora, separados por divisórias `line`. A seção atual fica com o fundo `sheet` (o do hover, §9.2), o título em 600 e `aria-current="location"`.
-- **Fim:** o relógio e `N minutos de leitura`.
-- **Posição:** o topo do índice fica na altura do primeiro h2 do texto, e o índice fica sticky no topo ao rolar. As duas coisas saem do layout em CSS (grid e sticky), sem JavaScript que meça e desloque a página (CLS, SPEC RNF-01).
+- **Itens:** um por h2, numerados `01`, `02`… em mono 12 px grafite, com o título do h2 em IBM Plex Sans 15 px, tinta, como link para a âncora, separados por divisórias `line`. A seção atual fica com o fundo `sheet` (o do hover, §9.2), o título em IBM Plex Sans 600 e `aria-current="location"`; uma cópia invisível do título em 600 reserva a altura, para o item não mudar de tamanho. O 600 acrescenta uma face nos posts com índice, dentro do teto de post do `font-budget.spec.ts` (T-129: de 3 arquivos e 57.112 bytes para 4 e 81.364).
+- **Fim:** o relógio e `N minutos de leitura`, em mono 12 px grafite.
+- **Posição:** o topo do índice fica na altura do começo do texto, logo abaixo do filete que fecha o cabeçalho (decisão do autor na T-129, no lugar da altura do primeiro h2), e o índice fica sticky no topo ao rolar. As duas coisas saem do layout em CSS (grid e sticky), sem JavaScript que meça e desloque a página (CLS, SPEC RNF-01).
 - **Movimento:** a barra e a seção ativa mudam sem animar o layout. Com `prefers-reduced-motion`, sem rolagem suave.
 - **Sem JavaScript:** os links de âncora funcionam, sem progresso e sem seção ativa.
 - **Sem índice:** abaixo de `lg` e em post com menos de 2 h2.
@@ -439,7 +439,7 @@ Decisão da T-119. O header e o footer estão no ar (T-113). O link "Comece aqui
 - **Footer:** filete `line` em cima, na largura do site, com 1,5rem de respiro. Numa linha, `Pedro Knoll · 2026`, em mono 12 px, maiúsculas, grafite, à esquerda, e `RSS`, `GitHub` e `LinkedIn` à direita, no estilo dos links do header. Abaixo de `sm`, as duas partes se empilham.
 
 ### 9.14 Fim do post
-Decisão da T-126 (Q23), que substitui a da T-119 no voto e no compartilhar. O bloco de voto e compartilhar entra na T-130, que absorve a T-115; os relacionados entram na T-26 e a newsletter na T-116. O estilo da faixa do apêndice é revisto na T-117. Até a T-130, no ar, o voto da T-122: de `lg` em diante, sozinho na lateral, sticky, na altura do começo do texto (T-128); abaixo de `lg`, no fim da coluna do texto, com o texto `Votar` (T-127).
+Decisão da T-126 (Q23), que substitui a da T-119 no voto e no compartilhar. O bloco de voto e compartilhar entra na T-130, que absorve a T-115; os relacionados entram na T-26 e a newsletter na T-116. O estilo da faixa do apêndice é revisto na T-117. Até a T-130, no ar, o voto da T-122: de `lg` em diante, na lateral, abaixo do índice (T-129), sticky, na altura do começo do texto (T-128); abaixo de `lg`, no fim da coluna do texto, com o texto `Votar` (T-127).
 
 - **Ordem na coluna do texto:** abaixo de `lg`, o bloco de voto e compartilhar, a faixa do apêndice (§9.3, só quando o post tem referências ou apêndices), os posts relacionados, a newsletter e o footer. De `lg` em diante, o bloco sai do fim do texto e vai para a lateral.
 - **Bloco de voto e compartilhar, de `lg` em diante:** mínimo, na lateral, abaixo do índice (§9.3), sticky na borda de baixo da tela. Aparece, com opacidade e um leve deslize (só `opacity` e `transform`), quando o filete que fecha o cabeçalho do post sai da tela (`IntersectionObserver`). Com `prefers-reduced-motion`, aparece sem animação. Ao chegar ao rodapé, o índice e o bloco sobem juntos, sem se sobrepor, só pelo layout em CSS (grid e sticky), sem JavaScript que meça.

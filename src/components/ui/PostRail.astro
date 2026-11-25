@@ -1,16 +1,23 @@
 ---
+import PostToc, { type TocHeading } from "~/components/ui/PostToc.astro";
 import PostVote from "~/components/ui/PostVote.astro";
 
 interface Props {
   slug: string;
+  headings: TocHeading[];
+  minutesRead?: number;
 }
 
-const { slug } = Astro.props;
+const { slug, headings, minutesRead } = Astro.props;
+// Post com menos de 2 h2 não tem índice (RF-26). Até a T-130, o voto fica
+// abaixo do índice, sticky junto com ele.
+const hasToc = headings.length >= 2;
 ---
 
 <div
   class="max-lg:hidden lg:sticky lg:top-30 lg:col-start-1 lg:row-start-2 lg:mt-10 lg:block lg:min-w-0 lg:self-start"
   data-post-rail
 >
-  <PostVote slug={slug} />
+  {hasToc && <PostToc headings={headings} minutesRead={minutesRead} />}
+  <PostVote slug={slug} class={hasToc ? "mt-8" : undefined} />
 </div>

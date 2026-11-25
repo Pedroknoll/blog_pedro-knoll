@@ -135,8 +135,10 @@ test("home, listas e tags só com o script do item [RNF-02]", async ({
         return;
       }
       const pres = await page.getByRole("article").locator("pre").count();
-      // O post não tem mais o script do título na lateral (T-128).
-      const modules = pres === 0 ? 2 : 3;
+      // O post não tem mais o script do título na lateral (T-128). O índice
+      // (T-129) soma um módulo no post com 2 h2 ou mais.
+      const toc = (await page.locator("[data-post-toc]").count()) === 0 ? 0 : 1;
+      const modules = (pres === 0 ? 2 : 3) + toc;
       await expect(page.locator('script[type="module"]')).toHaveCount(modules);
 
       const plain = page.locator("script:not([type])");
