@@ -273,7 +273,7 @@ Decisão da T-126 (Q23); entra na T-125. Até lá, no ar, a forma da T-69: a mã
 - A newsletter não entra na saudação. Na home, fica depois das listas, na coluna da direita (§9.2). No post, fica no fim (§9.14). Entra na T-116. Até lá, a home não tem esse bloco.
 
 ### 9.2 Item e páginas de lista
-Decisão da T-126 (Q23), que substitui a da T-119. A home entra na T-125; as listas inteiras e a Comece aqui, na T-131. Até lá, no ar, o item da T-123: data, título e uma linha de baixo com o tempo (`8 min de leitura`), o triângulo, `curtidas` e a contagem em acento; e o hover em que os outros itens caem para 0,35 de opacidade.
+Decisão da T-126 (Q23), que substitui a da T-119. A home entra na T-125; as listas inteiras e a Comece aqui, na T-131. Até lá, no ar, o item da T-123: data, título e uma linha de baixo com o tempo (`8 min de leitura`), o triângulo, `votos` e a contagem em acento; e o hover em que os outros itens caem para 0,35 de opacidade.
 
 **Item** (`/ RECENTES` da home, `/blog/`, `/artigos/`, `/prototipos/`, `/tags/<tag>/` e Comece aqui, §9.15):
 
@@ -422,7 +422,7 @@ Decisão da T-119. O header e o footer estão no ar (T-113). O link "Comece aqui
 - **Footer:** filete `line` em cima, na largura do site, com 1,5rem de respiro. Numa linha, `Pedro Knoll · 2026`, em mono 12 px, maiúsculas, grafite, à esquerda, e `RSS`, `GitHub` e `LinkedIn` à direita, no estilo dos links do header. Abaixo de `sm`, as duas partes se empilham.
 
 ### 9.14 Fim do post
-Decisão da T-126 (Q23), que substitui a da T-119 no voto e no compartilhar. O bloco de voto e compartilhar entra na T-130, que absorve a T-115; os relacionados entram na T-26 e a newsletter na T-116. O estilo da faixa do apêndice é revisto na T-117. Até a T-130, no ar, o voto da T-122: de `lg` em diante, no fim da coluna de metadados; abaixo de `lg`, no fim da coluna do texto; o texto `Curtir` até a T-127.
+Decisão da T-126 (Q23), que substitui a da T-119 no voto e no compartilhar. O bloco de voto e compartilhar entra na T-130, que absorve a T-115; os relacionados entram na T-26 e a newsletter na T-116. O estilo da faixa do apêndice é revisto na T-117. Até a T-130, no ar, o voto da T-122: de `lg` em diante, no fim da coluna de metadados; abaixo de `lg`, no fim da coluna do texto, com o texto `Votar` (T-127).
 
 - **Ordem na coluna do texto:** abaixo de `lg`, o bloco de voto e compartilhar, a faixa do apêndice (§9.3, só quando o post tem referências ou apêndices), os posts relacionados, a newsletter e o footer. De `lg` em diante, o bloco sai do fim do texto e vai para a lateral.
 - **Bloco de voto e compartilhar, de `lg` em diante:** mínimo, na lateral, abaixo do índice (§9.3), sticky na borda de baixo da tela. Aparece, com opacidade e um leve deslize (só `opacity` e `transform`), quando o filete que fecha o cabeçalho do post sai da tela (`IntersectionObserver`). Com `prefers-reduced-motion`, aparece sem animação. Ao chegar ao rodapé, o índice e o bloco sobem juntos, sem se sobrepor, só pelo layout em CSS (grid e sticky), sem JavaScript que meça.
@@ -439,7 +439,7 @@ Decisão da T-114. Está no ar. O item de post muda na T-131 (T-126, Q23).
 
 - **h1** `Comece aqui`, fixo, na escala do h1 das listas (§9.2), sem ícone. É o rótulo do header.
 - **Prosa** na coluna de texto do post (§5): parágrafos, seções `##` e links. O texto mora em `src/content/comece-aqui.mdx`. Editar a página é mudar esse arquivo: dá para acrescentar, tirar e reordenar seções, e pôr uma lista em qualquer uma.
-- **Item de post:** o item de `/ RECENTES` (§9.2), com data, título e tempo de leitura, sem votos. O título é h3. Até a T-131, no ar, data, título, minutos e curtidas.
+- **Item de post:** o item de `/ RECENTES` (§9.2), com data, título e tempo de leitura, sem votos. O título é h3. Até a T-131, no ar, data, título, minutos e votos.
 - **Item externo:** a mesma grade. No lugar da data, o nome da fonte, em mono 12 px, lápis; sem fonte informada, o domínio sem `www.`. O título no mesmo estilo do item. No lugar do tempo de leitura, `↗` em lápis, decorativo (`aria-hidden`). O nome acessível do link é o título mais "(site externo)". O link abre na mesma aba.
 - A lista some se nenhum item sobrar. Um slug que não está nos posts publicados sai da lista, sem quebrar o build. Link externo que não é `https:` quebra o build.
 - Sem foto e sem link para o GitHub.

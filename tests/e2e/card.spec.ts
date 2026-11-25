@@ -638,7 +638,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await expect(vote).toHaveAttribute("aria-hidden", "true");
       await expect(vote).toHaveCSS("width", "10px");
       await expect(vote).toHaveCSS("height", "8px");
-      await expect(footer.locator("[data-vote-word]")).toHaveText("curtidas");
+      await expect(footer.locator("[data-vote-word]")).toHaveText("votos");
       const value = footer.locator("[data-vote-value]");
       await expect(value).toHaveText("–");
       const count = value.locator("xpath=..");

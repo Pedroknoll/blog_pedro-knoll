@@ -248,7 +248,7 @@ test.describe("home [RF-01]", () => {
     const topArticle = voted.locator(
       `article:has(a[href="${fixtureMd.href}"])`,
     );
-    await expect(topArticle.locator("[data-vote-word]")).toHaveText("curtidas");
+    await expect(topArticle.locator("[data-vote-word]")).toHaveText("votos");
     await expect(topArticle.locator("[data-vote-value]")).toHaveCSS(
       "color",
       "rgb(31, 75, 122)",
@@ -257,7 +257,7 @@ test.describe("home [RF-01]", () => {
       `article:has(a[href="${fixtureSemTitulos.href}"])`,
     );
     await expect(one.locator("[data-vote-value]")).toHaveText("1");
-    await expect(one.locator("[data-vote-word]")).toHaveText("curtida");
+    await expect(one.locator("[data-vote-word]")).toHaveText("voto");
     await expect(ranked.locator("time")).toHaveCount(0);
     await expect(ranked.locator("[data-reading]")).toHaveCount(0);
     await expect(voted.locator("[data-ranking]")).toHaveCSS(

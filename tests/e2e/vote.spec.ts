@@ -136,14 +136,14 @@ test.describe("voto com JavaScript [RF-25]", () => {
       await test.step(`${width}px`, async () => {
         await openFixture(page, width);
         await expect(
-          visibleVote(page).getByRole("button", { name: "Curtir" }),
+          visibleVote(page).getByRole("button", { name: "Votar" }),
         ).toBeVisible();
         expect(await lineHeight(page)).toBe(36);
       });
     }
   });
 
-  test("o GET com 7 mostra Curtir e a contagem", async ({ page }) => {
+  test("o GET com 7 mostra Votar e a contagem", async ({ page }) => {
     await page.route("**/api/votes", async (route) => {
       await route.fulfill(fulfillVotes({ votes: { [SLUG]: 7 } }));
     });
@@ -152,12 +152,46 @@ test.describe("voto com JavaScript [RF-25]", () => {
       await test.step(`${width}px`, async () => {
         await openFixture(page, width);
         const vote = visibleVote(page);
-        await expect(
-          vote.getByRole("button", { name: "Curtir" }),
-        ).toBeVisible();
+        await expect(vote.getByRole("button", { name: "Votar" })).toBeVisible();
         await expect(vote.locator("[data-vote-count]")).toContainText("7");
         await expect(vote.locator("[data-vote-count] .sr-only")).toHaveText(
           "votos",
+        );
+      });
+    }
+  });
+
+  test("a contagem do botão fica em tinta [BRAND §4, §9.14]", async ({
+    page,
+  }) => {
+    await page.route("**/api/votes", async (route) => {
+      await route.fulfill(fulfillVotes({ votes: { [SLUG]: 7 } }));
+    });
+
+    for (const width of WIDTHS) {
+      await test.step(`${width}px`, async () => {
+        await openFixture(page, width);
+        const count = visibleVote(page).locator("[data-vote-count]");
+        await expect(count).toContainText("7");
+        await expect(count).toHaveCSS("color", "rgb(42, 33, 24)");
+      });
+    }
+  });
+
+  test("com 1 voto, o leitor de tela ouve voto no singular", async ({
+    page,
+  }) => {
+    await page.route("**/api/votes", async (route) => {
+      await route.fulfill(fulfillVotes({ votes: { [SLUG]: 1 } }));
+    });
+
+    for (const width of WIDTHS) {
+      await test.step(`${width}px`, async () => {
+        await openFixture(page, width);
+        const vote = visibleVote(page);
+        await expect(vote.locator("[data-vote-count]")).toContainText("1");
+        await expect(vote.locator("[data-vote-count] .sr-only")).toHaveText(
+          "voto",
         );
       });
     }
@@ -172,15 +206,13 @@ test.describe("voto com JavaScript [RF-25]", () => {
       await test.step(`${width}px`, async () => {
         await openFixture(page, width);
         const vote = visibleVote(page);
-        await expect(
-          vote.getByRole("button", { name: "Curtir" }),
-        ).toBeVisible();
+        await expect(vote.getByRole("button", { name: "Votar" })).toBeVisible();
         await expect(vote.locator("[data-vote-count]")).toContainText("–");
       });
     }
   });
 
-  test("o POST 200 vira Curtido e o reload abre assim", async ({ page }) => {
+  test("o POST 200 vira Votado e o reload abre assim", async ({ page }) => {
     const posted: { contentType: string; body: unknown }[] = [];
     await page.route("**/api/votes", async (route) => {
       const request = route.request();
@@ -205,11 +237,11 @@ test.describe("voto com JavaScript [RF-25]", () => {
         }
         await openFixture(page, width);
         const vote = visibleVote(page);
-        const button = vote.getByRole("button", { name: "Curtir" });
+        const button = vote.getByRole("button", { name: "Votar" });
         await expect(vote.locator("[data-vote-count]")).toContainText("7");
         await button.click();
         await expect(
-          vote.getByRole("button", { name: "Curtido" }),
+          vote.getByRole("button", { name: "Votado" }),
         ).toBeDisabled();
         await expect(vote.locator("[data-vote-count]")).toContainText("8");
       });
@@ -226,11 +258,11 @@ test.describe("voto com JavaScript [RF-25]", () => {
 
     await page.reload();
     const again = visibleVote(page);
-    await expect(again.getByRole("button", { name: "Curtido" })).toBeDisabled();
+    await expect(again.getByRole("button", { name: "Votado" })).toBeDisabled();
     await expect(again.locator("[data-vote-count]")).toContainText("7");
   });
 
-  test("POST 403 e 429 voltam a Curtir sem gravar", async ({ page }) => {
+  test("POST 403 e 429 voltam a Votar sem gravar", async ({ page }) => {
     for (const status of [403, 429]) {
       await test.step(String(status), async () => {
         await page.unrouteAll({ behavior: "ignoreErrors" });
@@ -243,12 +275,12 @@ test.describe("voto com JavaScript [RF-25]", () => {
         });
         await openFixture(page, 1280);
         const vote = visibleVote(page);
-        const button = vote.getByRole("button", { name: "Curtir" });
+        const button = vote.getByRole("button", { name: "Votar" });
         const count = vote.locator("[data-vote-count]");
         await expect(count).toContainText("7");
         await button.click();
         await expect(button).toBeEnabled();
-        await expect(button.locator("[data-vote-label]")).toHaveText("Curtir");
+        await expect(button.locator("[data-vote-label]")).toHaveText("Votar");
         await expect(count).toContainText("7");
         expect(await page.evaluate(() => localStorage.length)).toBe(0);
       });
@@ -273,7 +305,7 @@ test.describe("voto com JavaScript [RF-25]", () => {
 
         await openFixture(page, width);
         const vote = visibleVote(page);
-        const button = vote.getByRole("button", { name: "Curtir" });
+        const button = vote.getByRole("button", { name: "Votar" });
         await button.scrollIntoViewIfNeeded();
         await expect(button).toBeVisible();
         const count = vote.locator("[data-vote-count]");

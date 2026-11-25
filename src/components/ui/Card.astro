@@ -67,7 +67,7 @@ const titleClass =
         height={8}
         class="inline-block h-2 w-2.5"
       />
-      <span data-vote-word>curtidas</span>
+      <span data-vote-word>votos</span>
       <span class="inline-block w-[3ch] text-right text-accent" role="tooltip">
         <span data-vote-value>–</span>
       </span>
@@ -104,7 +104,7 @@ const titleClass =
             height={8}
             class="inline-block h-2 w-2.5"
           />
-          <span data-vote-word>curtidas</span>
+          <span data-vote-word>votos</span>
           <span
             class="inline-block w-[3ch] text-right text-accent"
             role="tooltip"
@@ -140,7 +140,7 @@ const titleClass =
           height={8}
           class="inline-block h-2 w-2.5"
         />
-        <span data-vote-word>curtidas</span>
+        <span data-vote-word>votos</span>
         <span
           class="inline-block w-[3ch] text-right text-accent"
           role="tooltip"
@@ -181,7 +181,7 @@ const titleClass =
             height={8}
             class="inline-block h-2 w-2.5"
           />
-          <span data-vote-word>curtidas</span>
+          <span data-vote-word>votos</span>
           <span
             class="inline-block w-[3ch] text-right text-accent"
             role="tooltip"
@@ -212,7 +212,7 @@ const titleClass =
         const count = votes[slug] ?? 0;
         node.textContent = String(count);
         const word = article?.querySelector("[data-vote-word]");
-        if (word) word.textContent = count === 1 ? "curtida" : "curtidas";
+        if (word) word.textContent = count === 1 ? "voto" : "votos";
       }
     });
   }
