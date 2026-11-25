@@ -152,9 +152,7 @@ test.describe("voto com JavaScript [RF-25]", () => {
       await test.step(`${width}px`, async () => {
         await openFixture(page, width);
         const vote = visibleVote(page);
-        await expect(
-          vote.getByRole("button", { name: "Votar" }),
-        ).toBeVisible();
+        await expect(vote.getByRole("button", { name: "Votar" })).toBeVisible();
         await expect(vote.locator("[data-vote-count]")).toContainText("7");
         await expect(vote.locator("[data-vote-count] .sr-only")).toHaveText(
           "votos",
@@ -208,9 +206,7 @@ test.describe("voto com JavaScript [RF-25]", () => {
       await test.step(`${width}px`, async () => {
         await openFixture(page, width);
         const vote = visibleVote(page);
-        await expect(
-          vote.getByRole("button", { name: "Votar" }),
-        ).toBeVisible();
+        await expect(vote.getByRole("button", { name: "Votar" })).toBeVisible();
         await expect(vote.locator("[data-vote-count]")).toContainText("–");
       });
     }

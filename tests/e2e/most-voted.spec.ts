@@ -65,9 +65,7 @@ test.describe("mais votados [RF-01, RF-02]", () => {
       await expect(value).toHaveText(/^[1-9]\d*$/);
     }
     await expect(items.nth(0).locator("[data-vote-value]")).toHaveText("4");
-    await expect(items.nth(0).locator("[data-vote-word]")).toHaveText(
-      "votos",
-    );
+    await expect(items.nth(0).locator("[data-vote-word]")).toHaveText("votos");
     await expect(items.nth(0).locator("[data-reading]")).toContainText(
       "min de leitura",
     );
