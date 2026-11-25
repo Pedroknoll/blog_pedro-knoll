@@ -140,6 +140,15 @@ import SearchIcon from "~/assets/brand/icones/icone-busca.svg";
         await opening;
       }
       if (!modal) return;
+      const dialog = modal.querySelector("dialog");
+      if (dialog?.open) return;
+      // O `isOpen` do modal só vira false no evento `close`, que chega alguns
+      // ms depois de o <dialog> fechar; até lá, o `open()` não faz nada (T-132).
+      if (modal.isOpen && dialog) {
+        await new Promise<void>((resolve) => {
+          dialog.addEventListener("close", () => resolve(), { once: true });
+        });
+      }
       searchButton.focus();
       modal.open();
     }
@@ -152,7 +161,7 @@ import SearchIcon from "~/assets/brand/icones/icone-busca.svg";
 
     document.addEventListener("keydown", (event) => {
       if (!isSearchShortcut(event)) return;
-      if (modal?.isOpen) return;
+      if (modal?.querySelector("dialog")?.open) return;
       event.preventDefault();
       void openSearch().catch(() => {
         // A próxima tentativa carrega de novo.
