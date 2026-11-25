@@ -1,0 +1,75 @@
+---
+import Clock from "~/assets/brand/icones/icone-relogio.svg";
+import TagList from "~/components/ui/TagList.astro";
+import { formatPubDate } from "~/lib/format-date";
+import { formatMinutes } from "~/lib/format-minutes";
+import { KIND_LABELS, type Kind } from "~/lib/kind";
+import { site } from "~/site.config";
+
+interface Props {
+  title: string;
+  description: string;
+  pubDate: Date;
+  minutesRead?: number;
+  kind: Kind;
+  tags: string[];
+}
+
+const { title, description, pubDate, minutesRead, kind, tags } = Astro.props;
+const published = formatPubDate(pubDate);
+const minutesText =
+  typeof minutesRead === "number" ? formatMinutes(minutesRead) : undefined;
+---
+
+{/* 65ch na fonte e no tamanho da prosa: o filete acaba onde o texto acaba. */}
+<header
+  data-post-header
+  class="max-w-[65ch] min-w-0 border-b border-ink pb-10 font-sans text-lg lg:col-start-2 lg:row-start-1"
+>
+  <h1
+    class="font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem] lg:text-[3.5rem] lg:leading-[1.02]"
+    data-pagefind-meta="title"
+  >
+    {title}
+  </h1>
+  <p data-post-deck class="mt-4 max-w-[52ch] text-lg text-muted lg:text-xl">
+    {description}
+  </p>
+  <div
+    data-post-meta
+    class="mt-6 flex flex-wrap items-center gap-x-2.5 gap-y-2 font-mono text-sm text-muted"
+  >
+    <img
+      src={site.author.avatar}
+      alt=""
+      width="28"
+      height="28"
+      class="block size-7 shrink-0 rounded-full border border-line"
+    />
+    <span class="font-sans text-ink">{site.author.name}</span>
+    <span aria-hidden="true">·</span>
+    <time datetime={published.datetime}>{published.text}</time>
+    {minutesText && (
+      <>
+        <span aria-hidden="true">·</span>
+        <span
+          data-reading
+          title={`${minutesText} de leitura`}
+          class="inline-flex items-center gap-1.5 whitespace-nowrap"
+        >
+          <Clock
+            aria-hidden="true"
+            width={12}
+            height={12}
+            class="inline-block shrink-0"
+          />
+          <span>{minutesText}</span>
+          <span class="sr-only">{" de leitura"}</span>
+        </span>
+      </>
+    )}
+    <span aria-hidden="true">·</span>
+    <span data-post-kind>{KIND_LABELS[kind]}</span>
+  </div>
+  <TagList class="mt-4 flex flex-wrap gap-2" tags={tags} />
+</header>
