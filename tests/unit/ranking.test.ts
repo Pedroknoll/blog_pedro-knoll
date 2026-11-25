@@ -6,6 +6,7 @@ function post(slug: string, date: string, title = slug): CatalogPost {
   return {
     slug,
     title,
+    description: `Resumo de ${slug}`,
     date,
     kind: "article",
     minutes: 4,

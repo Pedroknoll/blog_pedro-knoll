@@ -12,6 +12,7 @@ type CatalogSource = {
   minutes: number;
   data: {
     title: string;
+    description: string;
     pubDate: Date;
     kind: string;
     tags: readonly string[];
@@ -26,6 +27,7 @@ export function listCatalog(
   const entries = selectPublished(posts, showDrafts).map((post) => ({
     slug: post.id,
     title: post.data.title,
+    description: post.data.description,
     date: formatPubDate(post.data.pubDate).datetime,
     kind: post.data.kind,
     minutes: post.minutes,

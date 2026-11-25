@@ -265,7 +265,7 @@ test.describe("filtro sem JavaScript [RF-02]", () => {
       await test.step(group.path, async () => {
         await page.goto(group.path);
         await expect(page.getByLabel("Filtrar por")).toBeDisabled();
-        await expect(page.locator("[data-listing] h2")).toHaveCount(
+        await expect(page.locator("[data-listing] article")).toHaveCount(
           group.posts.length,
         );
         await expect(page.locator("[data-count]")).toHaveText(

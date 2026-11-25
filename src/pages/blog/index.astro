@@ -1,5 +1,6 @@
 ---
-import Listing from "~/components/ui/Listing.astro";
+import ListPage from "~/components/ui/ListPage.astro";
+import PostList from "~/components/ui/PostList.astro";
 import TagFilter from "~/components/ui/TagFilter.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
@@ -18,12 +19,13 @@ const heading = "Blog";
   ogTitle={heading}
   ogType="website"
 >
-  <Listing heading={heading} posts={posts} layout="aligned">
+  <ListPage heading={heading}>
     <TagFilter
-      slot="filter"
+      slot="aside"
       tags={collectTags(posts)}
       total={posts.length}
       noun={{ one: "post", many: "posts" }}
     />
-  </Listing>
+    <PostList posts={posts} />
+  </ListPage>
 </BaseLayout>

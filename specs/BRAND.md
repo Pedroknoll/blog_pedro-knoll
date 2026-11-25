@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.37 · novembro de 2026 · pedroknoll.com
+Versão 1.38 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -227,7 +227,7 @@ Títulos com `text-wrap: balance`.
 - **Onde anima:** só a mão da saudação. O aceno usa classes com prefixo `pka-`.
 - **Ícones (decisão da T-119):** `icone-artigo.svg` (folha) e `icone-prototipo.svg` (frasco), dos tipos (§8), no h1 de `/artigos/` e de `/prototipos/` e, até a T-128, na linha Tipo da tabela do post abaixo de `lg`; `icone-fogo.svg`, no h1 de `/mais-votados/`; `icone-voto.svg` (triângulo de 10×8), à esquerda da contagem; `icone-busca.svg` (lupa), no botão de busca do header (§9.13); `icone-rss.svg`, no `Assinar via RSS` da saudação (§9.1, T-125); `icone-sol.svg` e `icone-lua.svg`, do controle de tema (§9.9). Todos com 12 × 12, uma cor, só parados, sem versão animada. O desenho está no apêndice. A folha, o frasco, a lupa e o RSS estão na árvore (T-120, T-22, T-125); o sol e a lua, na T-24; o fogo e o voto, na T-123. O `icone-filtro.svg` não entra: o filtro é um `select` nativo (T-124).
 - **Relógio** (`icone-relogio.svg`): 12 × 12, só parado, sem versão animada. Entra antes do tempo de leitura: no item (§9.2), na linha de metadados do post e no fim do índice (§9.3).
-- **Voto** (`icone-voto.svg`): no botão `Votar` (§9.14) e no `▲ N votos` de Mais votados (§9.2). Da T-131 em diante, o item das outras listas não tem votos (T-126, Q23).
+- **Voto** (`icone-voto.svg`): no botão `Votar` (§9.14) e no `▲ N votos` de Mais votados e do item das listas inteiras (§9.2, T-131, Q24). O item de Recentes não tem votos (T-126, Q23).
 - Todas as animações respeitam `prefers-reduced-motion: reduce` (ficam paradas).
 
 ---
@@ -274,20 +274,35 @@ Decisão da T-126 (Q23); no ar desde a T-125.
 - A newsletter não entra na saudação. Na home, fica depois das listas, na coluna da direita (§9.2). No post, fica no fim (§9.14). Entra na T-116. Até lá, a home não tem esse bloco.
 
 ### 9.2 Item e páginas de lista
-Decisão da T-126 (Q23), que substitui a da T-119. A home está no ar (T-125); as listas inteiras e a Comece aqui entram na T-131. Até lá, nelas, o item da T-123: data, título e uma linha de baixo com o tempo (`8 min de leitura`), o triângulo, `votos` e a contagem em acento; e o hover em que os outros itens caem para 0,35 de opacidade.
+Decisão da T-126 (Q23), que substitui a da T-119, e da T-131 (Q24) nas listas inteiras e em `/mais-votados/`. No ar desde a T-125 (home) e a T-131 (listas e Comece aqui).
 
-**Item** (`/ RECENTES` da home, `/blog/`, `/artigos/`, `/prototipos/`, `/tags/<tag>/` e Comece aqui, §9.15):
+**Item de Recentes** (`/ RECENTES` da home e Comece aqui, §9.15):
 
 - Um `article` em grade. De `sm` em diante, três colunas centradas na vertical: a data (6,5rem), o título e, à direita, uma coluna só com o tempo de leitura. Abaixo de `sm`, os três empilhados: data, título e tempo.
 - **Data:** mono 12 px, lápis, no formato `21.out.2026`.
-- **NOVO:** nos posts publicados nos últimos 7 dias. Mono 12 px, maiúsculas, grafite; abaixo da data de `sm` em diante e ao lado dela abaixo de `sm`. É calculado no navegador a partir do `datetime` do item, com o lugar reservado no HTML, para o rótulo não deslocar a página. Sem JavaScript, sem rótulo.
+- **NOVO:** nos posts publicados nos últimos 7 dias. Mono 12 px, maiúsculas, grafite; abaixo da data de `sm` em diante e ao lado dela abaixo de `sm`. É calculado no navegador a partir do `datetime` do item, com o lugar reservado no HTML, para o rótulo não deslocar a página. Sem JavaScript, sem rótulo. De `sm` em diante, a data, o título e o tempo ficam no centro vertical do item, e o `NOVO` pende abaixo da data, sem mudar esse centro (T-131).
 - **Título:** fonte de display 600, entrelinha 1,2, com `text-wrap: balance`. 20 px abaixo de `sm` e 26 px de `sm` em diante.
 - **Tempo:** o relógio parado de 12 px e `11 minutos` (`1 minuto` no singular), em mono 12 px, lápis. "de leitura" vai só no texto para leitor de tela e no `title`. Sem votos, resumo, capa, tipo, tema, nível, tag nem hachura.
 - **Toque:** o item inteiro é tocável: o link do título se estica sobre o item (`after:absolute after:inset-0`, com o `article` em `relative`). O tempo não intercepta o toque (`pointer-events-none`).
 - **Hover:** com o ponteiro sobre o item, fundo `sheet` na linha e título em `accent`, sem sublinhado (pedido do autor na T-125, exceção à §9.10). No foco do teclado, o mesmo, com o contorno da §9.10. Sobre o `sheet`, a data e o tempo passam de lápis a grafite, porque lápis não é texto pequeno sobre folha clara (§4, T-125). Sem transição com `prefers-reduced-motion`. Saem a queda dos outros itens para 0,35 de opacidade e a exceção à §9.10.
 - A lista separa os itens com divisória `divide-line`. O respiro é só vertical: 1,25rem em cima e embaixo abaixo de `sm`, e 2rem de `sm` em diante. Sem borda, sem sombra e sem capa.
 
-**Item de Mais votados** (`/ MAIS VOTADOS` da home e `/mais-votados/`): a posição (`01`, `02`…) em mono, o título e `▲ N votos` (`icone-voto.svg`, o número e `votos`, ou `voto` com 1), em tinta, não lápis: o voto é o dado principal. Sem data e sem tempo de leitura. Os itens saem do script do ranking.
+**Item das listas inteiras** (`/blog/`, `/artigos/`, `/prototipos/`, `/tags/<tag>/` e `/mais-votados/`; T-131, Q24):
+
+- Um `article` em grade. De `sm` em diante, colunas: a data (6,5rem, como no item de Recentes), em `/prototipos/` a miniatura (6rem), o título com a descrição embaixo e, à direita, uma coluna de 7,5rem com o tempo e, embaixo, os votos. A coluna da direita tem largura fixa, para os votos não mudarem a largura do título quando aparecem. Vão de 1,5rem entre as colunas. Abaixo de `sm`: a data com o `NOVO` ao lado, o título, a descrição e uma linha com o tempo, `·` e os votos; em `/prototipos/`, a miniatura fica à esquerda do título, da descrição e dessa linha.
+- **Data:** como no item de Recentes: `21.out.2026`, mono 12 px, lápis.
+- **NOVO:** como no item de Recentes: abaixo da data de `sm` em diante e ao lado dela abaixo de `sm`.
+- **Alinhamento vertical:** de `sm` em diante, as colunas ficam no centro vertical do item (`align-items: center`): a linha da data, a miniatura, o bloco do título com a descrição e a linha do tempo. O `NOVO` e os votos pendem logo abaixo da data e do tempo, fora dessa conta, para não mudarem o centro quando aparecem (T-131).
+- **Título:** como no item de Recentes (20 px abaixo de `sm`, 26 px de `sm` em diante).
+- **Descrição:** a `description` do post, em até 2 linhas (`line-clamp`), em Plex Sans 16 px, entrelinha 1,5, grafite.
+- **Tempo:** o relógio parado de 12 px e `11 minutos`, como no item de Recentes.
+- **Votos:** `▲ N votos` (`icone-voto.svg`, o número e `votos`, ou `voto` com 1), mono 12 px, na cor do tempo. Só aparecem com 1 voto ou mais: com 0, sem JavaScript ou com a API falhando, não há linha de votos. Não interceptam o toque.
+- **Miniatura** (só em `/prototipos/`): o `cover` do post, recortado, decorativo, 96×72 de `sm` em diante e 72×54 abaixo. Sem `cover`, o bloco `sheet` da faixa de Protótipos da home, na mesma medida. Sem hachura.
+- **Toque, hover e foco:** como no item de Recentes. Sem tags, tipo nem hachura.
+- **Rótulo:** a lista abre com `/ LISTAGEM`, no estilo do cabeçalho das faixas da home (mono 12 px em maiúsculas sobre um filete de 1 px em tinta; abaixo de `sm`, 15 px e filete de 2 px), e o título do post é h3. O lado direito da linha do rótulo fica vazio, para a ordenação (T-133). Os itens se separam por `divide-line`, com um filete em `line` no fim da lista.
+- Em `/mais-votados/`, o mesmo rótulo e o mesmo item, montado pelo script do ranking, sem miniatura e sem a posição: a ordem é o ranking.
+
+**Item de Mais votados** (`/ MAIS VOTADOS` da home): a posição (`01`, `02`…) em mono, o título e `▲ N votos` (`icone-voto.svg`, o número e `votos`, ou `voto` com 1), em tinta, não lápis: o voto é o dado principal. Sem data e sem tempo de leitura. Os itens saem do script do ranking.
 
 **Item de Protótipos** (`/ PROTÓTIPOS` da home): miniatura de 72×54 à esquerda, o título e a `description` do post em até 2 linhas (`line-clamp`), sem tags. A miniatura é o `cover` do post, recortado, decorativa. Sem `cover`, um bloco `sheet` decorativo com a mesma medida. Sem campo novo no schema.
 
@@ -303,13 +318,13 @@ Decisão da T-126 (Q23), que substitui a da T-119. A home está no ar (T-125); a
 - **Colunas de `lg` em diante:** em `/ MAIS VOTADOS` e `/ PROTÓTIPOS`, que dividem a largura, o título do item fica em 20 px e a `description` em 14 px; entre `sm` e `lg`, o título fica em 22 px. `/ RECENTES` mantém os 26 px (T-125).
 - A newsletter (§9.14) fica depois das faixas, na largura da coluna da direita.
 
-**Páginas de lista (T-123).** Sem paginação e sem saudação. Da T-131 em diante, o item é o de cima; em `/mais-votados/`, o de Mais votados.
+**Páginas de lista (T-123).** Sem paginação e sem saudação. O item é o das listas inteiras (T-131).
 
 - **`/blog/`:** h1 `Blog`, sem ícone. A lista inteira, os dois tipos, por data.
 - **`/artigos/` e `/prototipos/`:** h1 `Artigos` ou `Protótipos`, na escala do h1 de página (§5), com folha ou frasco em 24 px, em tinta, antes do nome. A lista inteira do tipo, por data. Um tipo sem post publicado não tem página.
 - **`/mais-votados/`:** h1 `Mais votados`, com `icone-fogo.svg` em 24 px, em tinta. O ranking não está no HTML. Sem JavaScript, só o aviso `O ranking precisa de JavaScript.` Com JavaScript, os posts com pelo menos 1 voto, empate pela data mais recente.
-- **`/tags/<tag>/`:** h1 `Tag: <nome>`. Sem o select.
-- Abaixo do h1 das quatro listas, o filtro (§9.12) e a linha de contagem.
+- **`/tags/<tag>/`:** h1 `Tag: <nome>`. Sem o select; só a contagem.
+- **Lateral (T-131):** de `lg` em diante, na grade da home (§9.1: 15rem, 6rem de vão, `max-w-site`), uma lateral sticky com o h1, logo abaixo a linha de contagem (mono 12 px, maiúsculas, lápis) e, abaixo dela, o filtro (§9.12). A lista fica na coluna da direita. Abaixo de `lg`, a lateral fica em cima da lista.
 
 ### 9.3 Cabeçalho do post (página do post)
 Decisão da T-126 (Q23), que substitui a da T-63 à T-120. O cabeçalho entra na T-128; o índice, na T-129; o bloco de voto e compartilhar, na T-130 (§9.14). Até a T-128, no ar: o título na largura toda; de `lg` em diante, a lateral com `/ ARTIGO` ou `/ PROTÓTIPO`, a tabela de chave e valor (data, leitura, autor e tags) e o voto, e o título que aparece acima da lateral ao rolar; abaixo de `lg`, a mesma tabela, com o tipo na primeira linha.
@@ -437,12 +452,12 @@ Decisão da T-126 (Q23), que substitui a da T-119 no voto e no compartilhar. O b
 - **Newsletter:** na coluna do texto, depois dos relacionados, e na home, depois das faixas (§9.2). Um bloco com fundo `sheet` e cantos de 0,375rem; o título `Receba os próximos posts por e-mail.` na fonte de display 600; o campo de e-mail no tamanho do campo da busca (§9.12); o botão `Receber`, com fundo tinta, texto papel, IBM Plex Mono e cantos de 0,375rem. A forma final do campo depende do formulário do Kit (T-116).
 
 ### 9.15 Comece aqui
-Decisão da T-114. Está no ar. O item de post muda na T-131 (T-126, Q23).
+Decisão da T-114. Está no ar. O item de post é o de Recentes desde a T-131 (Q23).
 
 - **h1** `Comece aqui`, fixo, na escala do h1 das listas (§9.2), sem ícone. É o rótulo do header.
 - **Prosa** na coluna de texto do post (§5): parágrafos, seções `##` e links. O texto mora em `src/content/comece-aqui.mdx`. Editar a página é mudar esse arquivo: dá para acrescentar, tirar e reordenar seções, e pôr uma lista em qualquer uma.
-- **Item de post:** o item de `/ RECENTES` (§9.2), com data, título e tempo de leitura, sem votos. O título é h3. Até a T-131, no ar, data, título, minutos e votos.
-- **Item externo:** a mesma grade. No lugar da data, o nome da fonte, em mono 12 px, lápis; sem fonte informada, o domínio sem `www.`. O título no mesmo estilo do item. No lugar do tempo de leitura, `↗` em lápis, decorativo (`aria-hidden`). O nome acessível do link é o título mais "(site externo)". O link abre na mesma aba.
+- **Item de post:** o item de `/ RECENTES` (§9.2), com data, `NOVO`, título e tempo de leitura, sem votos e sem descrição. O título é h3.
+- **Item externo:** a mesma grade e o mesmo hover. No lugar da data, o nome da fonte, em mono 12 px, lápis; sem fonte informada, o domínio sem `www.`. O título no mesmo estilo do item. No lugar do tempo de leitura, `↗` em lápis, decorativo (`aria-hidden`). O nome acessível do link é o título mais "(site externo)". O link abre na mesma aba.
 - A lista some se nenhum item sobrar. Um slug que não está nos posts publicados sai da lista, sem quebrar o build. Link externo que não é `https:` quebra o build.
 - Sem foto e sem link para o GitHub.
 

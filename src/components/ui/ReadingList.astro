@@ -41,9 +41,9 @@ const visible = rows.filter((row) => row !== null);
     data-reading-list
   >
     {visible.map((row) => (
-      <li class="py-5 sm:py-8">
+      <li>
         {row.kind === "post" ? (
-          <Card item={row.item} headingLevel={3} layout="aligned" />
+          <Card item={row.item} headingLevel={3} layout="recent" />
         ) : (
           <ExternalItem
             href={row.href}

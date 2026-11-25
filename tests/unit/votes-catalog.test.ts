@@ -22,6 +22,7 @@ describe("listCatalog", () => {
       minutes: 8,
       data: {
         title: "A < B",
+        description: "Resumo com <tag>",
         pubDate: new Date("2024-05-01T00:00:00.000Z"),
         kind: "article" as const,
         tags: ["b", "c"],
@@ -33,6 +34,7 @@ describe("listCatalog", () => {
       minutes: 4,
       data: {
         title: "Rascunho",
+        description: "Resumo do rascunho",
         pubDate: new Date("2024-06-01T00:00:00.000Z"),
         kind: "prototype" as const,
         tags: ["so-rascunho"],
@@ -44,6 +46,7 @@ describe("listCatalog", () => {
       minutes: 3,
       data: {
         title: "Antigo",
+        description: "Resumo antigo",
         pubDate: new Date("2020-01-01T00:00:00.000Z"),
         kind: "prototype" as const,
         tags: [],
@@ -52,13 +55,14 @@ describe("listCatalog", () => {
     },
   ];
 
-  it("tem os seis campos, escapa < e segue selectPublished", () => {
+  it("tem os sete campos, escapa < e segue selectPublished", () => {
     const json = listCatalog(posts, false);
     expect(json.includes("<")).toBe(false);
     expect(json).toContain("\\u003c");
     const parsed = JSON.parse(json) as {
       slug: string;
       title: string;
+      description: string;
       date: string;
       kind: string;
       minutes: number;
@@ -68,6 +72,7 @@ describe("listCatalog", () => {
       {
         slug: "novo",
         title: "A < B",
+        description: "Resumo com <tag>",
         date: "2024-05-01",
         kind: "article",
         minutes: 8,
@@ -76,6 +81,7 @@ describe("listCatalog", () => {
       {
         slug: "antigo",
         title: "Antigo",
+        description: "Resumo antigo",
         date: "2020-01-01",
         kind: "prototype",
         minutes: 3,

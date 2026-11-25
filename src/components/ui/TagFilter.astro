@@ -9,6 +9,9 @@ interface Props {
   pending?: boolean;
 }
 
+// Na lateral das listas inteiras (T-131): a contagem logo abaixo do h1 e,
+// abaixo dela, o filtro. A página de tag tem só a contagem, sem este
+// componente (ListPage, `count`).
 const { tags, total, noun, pending = false } = Astro.props;
 const count = pending ? "" : countLabel(total, total, noun);
 const linkClass =
@@ -16,18 +19,25 @@ const linkClass =
 ---
 
 <div
-  class="mt-10 grid"
+  class="mt-3 grid"
   data-tag-filter
   data-one={noun.one}
   data-many={noun.many}
   data-pending={pending ? "1" : undefined}
 >
-  <label class="row-start-1 font-sans text-base text-ink" for="filtro-tag">
+  <p
+    class="row-start-1 min-h-4 font-mono text-xs leading-4 tracking-[0.12em] text-pencil uppercase"
+    data-count
+    aria-live="polite"
+  >
+    {count}
+  </p>
+  <label class="row-start-2 mt-5 font-sans text-base text-ink" for="filtro-tag">
     Filtrar por
   </label>
   <select
     id="filtro-tag"
-    class="row-start-2 mt-2 box-border h-11 w-full rounded-md border border-line bg-surface px-3 font-mono text-base text-ink"
+    class="row-start-3 mt-2 box-border h-11 w-full rounded-md border border-line bg-surface px-3 font-mono text-base text-ink"
     disabled
   >
     <option value="">Todas as tags</option>
@@ -48,13 +58,6 @@ const linkClass =
       </ul>
     </noscript>
   )}
-  <p
-    class="row-start-3 mt-2 min-h-4 font-mono text-xs leading-4 text-pencil uppercase"
-    data-count
-    aria-live="polite"
-  >
-    {count}
-  </p>
 </div>
 
 <script>

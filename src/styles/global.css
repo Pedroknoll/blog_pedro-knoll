@@ -232,23 +232,6 @@
   }
 }
 
-@media (hover: hover) and (pointer: fine) {
-  [data-listing][data-dim]:has(article:hover) article:not(:hover) {
-    opacity: 0.35;
-  }
-}
-
-[data-listing][data-dim]:has(article :focus-visible)
-  article:not(:has(:focus-visible)) {
-  opacity: 0.35;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  [data-listing][data-dim] article {
-    transition: opacity 150ms;
-  }
-}
-
 @font-face {
   font-family: "Metric Sans";
   src:

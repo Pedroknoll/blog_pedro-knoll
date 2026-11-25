@@ -165,9 +165,8 @@ test("E4 página de tag lista os posts na ordem de publicação [RF-02]", async 
     expect(hrefs).toHaveLength(expected.length);
     expect([...hrefs].sort(byName)).toEqual([...expected].sort(byName));
 
-    const cards = page
-      .getByRole("list", { name: "Posts", exact: true })
-      .locator(":scope > li");
+    // Os posts ficam em listas por ano (T-131, Q24).
+    const cards = page.locator("[data-listing] li");
     expect(await cards.count()).toBe(hrefs.length);
 
     const rows: { datetime: string; slug: string }[] = [];
