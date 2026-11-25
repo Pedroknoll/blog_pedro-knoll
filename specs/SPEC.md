@@ -1,6 +1,8 @@
 # Spec — Blog técnico estilo Hugging Face (Astro + marimo + Cloudflare)
 
-Oct 6, 2026 · @Pedro Knoll · revisado em 24/11/2026
+Oct 6, 2026 · @Pedro Knoll · revisado em 25/11/2026
+
+**Revisão de 25/11/2026:** a T-126 registra a Q23, as decisões dos mockups da home e da página do post. Mudam agora a §2, a nota do RF-05, o RF-23 (voto e compartilhar num bloco da lateral), o RF-26 (índice do post, novo) e a §11. O RF-25 muda na T-127, o RF-01 na T-125, o RF-04 na T-128, e o RF-02, o RF-14 e a §6 na T-131 (decisão 1A). A forma está na BRAND 1.36.
 
 **Revisão 3 de 24/11/2026:** a T-22 entrega a busca. O Pagefind 1.6.0 (Component UI, desde a 1.5) indexa só o corpo dos posts. O `script-src` do site todo inclui `'wasm-unsafe-eval'`. A forma está na BRAND §9.12.
 
@@ -61,7 +63,7 @@ Este documento é a fonte de verdade da implementação (spec-driven): cada requ
 
 ## 2. Premissas e decisões em aberto
 
-A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/11, 10/11, 16/11, 17/11, 18/11 e 19/11 já estão incorporadas, e nenhuma decisão segue em aberto.
+A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/11, 10/11, 16/11, 17/11, 18/11, 19/11 e 25/11 já estão incorporadas, e nenhuma decisão segue em aberto.
 
 ### Premissas assumidas
 
@@ -133,7 +135,7 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
   11. **Header e footer:** revistos na T-109 e implementados na T-113.
   12. **Fontes e marca:** a Caveat sai (T-108); os símbolos da marca que o site não usa ficam em `src/assets/brand/`; o nível continua no card e no post; o `author.avatar` fica; o uso dele é a T-125.
   13. **Saem:** o embed de iframes (RF-20, T-29) e a reavaliação do modo inline do mdx-marimo (T-32). O i18n (T-30) fica para a próxima fase. O HSTS preload não entra; reavaliar se o domínio ganhar subdomínios ou e-mail.
-- [x] **Q21 — Revisão visual da Fase 4** (T-109; a forma está na BRAND §7, §8, §9.1 a §9.3, §9.9, §9.12 a §9.14, §10 e §11). Substituída em 19/11/2026 pela Q22 onde discordar:
+- [x] **Q21 — Revisão visual da Fase 4** (T-109; a forma está na BRAND §7, §8, §9.1 a §9.3, §9.9, §9.12 a §9.14, §10 e §11). Substituída em 19/11/2026 pela Q22 e em 25/11/2026 pela Q23 onde discordar:
   1. **Listas:** `/artigos/` e `/prototipos/`, cada uma inteira, por data, sem paginação; um tipo sem post publicado não tem página. Cada tema tem a sua página, `/temas/<slug>/`, sem página `/temas/`, com seções por tipo quando tem os dois. A barra "Filtrar por tipo" e as páginas `/tipos/` saem (T-111).
   2. **Home:** a saudação e todos os posts, dos dois tipos, paginados (RF-03 sem mudança). Sem destaque: o `featured` fica no schema, sem efeito (ajusta o item 3 da Q20). A saudação fica só na home.
   3. **Card:** sem resumo e sem tipo; o tema, sem link, é cortado com reticências quando não cabe (T-111).
@@ -147,7 +149,7 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
 
 ### Decisões de 19/11/2026
 
-- [x] **Q22 — Refatoração da Fase 4** (T-118; substitui a Q20 e a Q21 onde discordar):
+- [x] **Q22 — Refatoração da Fase 4** (T-118; substitui a Q20 e a Q21 onde discordar). Substituída em 25/11/2026 pela Q23 onde discordar:
   1. **Modelo:** saem `folio`, `level`, `featured` e o campo `theme`, que não entra. O `kind` passa a `article` e `prototype` (Artigo e Protótipo). Os dois posts publicados, hoje `concept`, viram `article`. O rascunho `2026-10-rascunho-de-teste` vira `prototype`. A `fixture-md` vira `prototype` e as outras três fixtures ficam `article`. A prova de tipo só com rascunho é um teste do Vitest; o cenário "Rascunhos" da §11 continua no E2E só para o post. Entram a folha e o frasco, em tinta. Na T-120, o topo da lateral diz `/ ARTIGO` ou `/ PROTÓTIPO`, e a coluna do texto fica só com o filete, alinhado ao da lateral. A palavra "fólio" sai; o post é "post" (T-120).
   2. **Card e destaque:** o card de produção perde o fólio e o nível, e a home perde o destaque. O RF-01 muda nesse ponto na T-120. O resto do RF-01, as três listas, muda na T-123.
   3. **Home e listas:** a saudação fica à esquerda a partir de `lg`. A home tem 5 recentes, o top 10 e 5 protótipos, cada lista com "Todos". A lista Protótipos não aparece quando não há protótipo publicado. As listas inteiras são `/blog/`, `/artigos/`, `/prototipos/` e `/mais-votados/`. O item é título, data, votos e tempo de leitura, também em `/tags/<tag>/`. Saem a paginação (o RF-03 e a exceção da Q10), `/page/n/` e `/tipos/`, que passam a 404, sem `_redirects`. Um tipo sem post publicado não tem página. `/tipos/` sai do sitemap (T-123).
@@ -161,6 +163,20 @@ A spec parte de seis premissas; as respostas de 06/10, 09/10, 14/10, 22/10, 09/1
   11. **Seguem no fim:** a forma está na BRAND 1.29 (§0, §1, §4, §6, §7, §8, §9.1 a §9.3, §9.12 a §9.14, §10 e §11; T-119). Cores das figuras (T-76) e tema escuro com sol e lua (T-24). Giscus (T-28) e o spike do Workers Previews (T-31).
   12. **Decisão 1A:** requisito já entregue muda no PR que muda o código. O handoff desta tarefa lista qual. Posts novos só depois da T-120.
 
+### Decisões de 25/11/2026
+
+- [x] **Q23 — Home e página do post** (T-126; mockups fora do repositório; substitui a Q20, a Q21 e a Q22 onde discordar). Só é decisão o que está aqui e na BRAND 1.36; tamanhos, pesos, hexes e textos do mockup que não aparecem nelas não são. O header e o footer não mudam:
+  1. **Saudação:** a foto do autor (`site.author.avatar`, `public/avatar.jpg`), redonda, acima do h1: 88 px de `lg` em diante e 72 px abaixo, com alt `Foto de Pedro Knoll`. É o uso do avatar da Q20 item 12. O h1 é `Olá, eu sou o Pedro.`, com só "Pedro" em negrito, e a mão (`aceno.svg`) no fim, decorativa. Substitui `Bem-vindo ao pk.log`. Abaixo, `Aqui documento meus aprendizados e experimentos sobre Inteligência Artificial.` O RSS sai da fileira de links e vira um link com contorno, `Assinar via RSS`; o GitHub e o LinkedIn ficam na fileira (T-125).
+  2. **Faixas da home:** o rótulo e o link à direita ficam na mesma linha de base. O link é `Todos os N posts →`, `Todos os N protótipos →` e `Ver ranking →`, este sem número, sempre em `accent` (T-125).
+  3. **Item:** em Recentes e nas listas inteiras (`/blog/`, `/artigos/`, `/prototipos/`, `/tags/<tag>/`) e na Comece aqui, data, título e o tempo de leitura (relógio + `11 minutos`), sem votos e sem resumo. `NOVO` nos posts publicados nos últimos 7 dias, calculado no navegador a partir do `datetime`, com o lugar reservado no HTML; sem JavaScript, sem rótulo. Os votos ficam só em Mais votados, na home e em `/mais-votados/`: posição (01, 02…), título e `▲ N votos`, sem tempo de leitura. Protótipos, na home: miniatura de 72×54 recortada do `cover` (sem capa, um bloco neutro decorativo), título e a `description` em até 2 linhas, sem campo novo no schema (T-125 na home; T-131 nas listas e na Comece aqui).
+  4. **Cor:** `accent` só no que é interativo: links, título no hover (com sublinhado) e foco. Nenhuma outra cor de destaque na interface além da mão. O hover do item é fundo `sheet` na linha e título em `accent` sublinhado; sai a queda dos outros itens para 0,35 de opacidade.
+  5. **Cabeçalho do post:** o título e a linha fina ficam na coluna do texto. Logo abaixo, numa linha, a foto do autor (28 px) com o nome, a data, o tempo de leitura e o tipo (`Artigo` ou `Protótipo`); abaixo, as tags em etiquetas com contorno, cada uma com link para `/tags/<tag>/`; um filete fecha o cabeçalho. Saem da lateral a tabela de chave e valor e o rótulo `/ ARTIGO` ou `/ PROTÓTIPO`. Sai o título que aparecia acima da lateral ao rolar (T-128).
+  6. **Índice:** volta como o RF-26, e não como reabertura do RF-05 (T-129).
+  7. **Voto e compartilhar:** de `lg` em diante, num bloco mínimo na lateral, sticky na borda de baixo da tela; abaixo de `lg`, no fim do texto (RF-23, T-130). Substitui o lugar do compartilhar e do voto da Q20 item 8, da Q21 item 9 e da Q22 item 7. Não muda o resto do fim do post: apêndice, relacionados e newsletter.
+  8. **Vocabulário do voto:** `Votar`, `Votado` e `votos` substituem `Curtir`, `Curtido` e `curtidas` em todo lugar (T-127).
+  9. **Restrições:** o alinhamento do índice com o primeiro h2 e o "subir junto" no rodapé saem do layout em CSS (grid e sticky), sem JavaScript que meça e desloque a página (CLS, RNF-01). O que aparece ao rolar usa só opacidade e transform; com `prefers-reduced-motion`, sem animação e sem rolagem suave. Os scripts novos (progresso, seção ativa, aparecimento do bloco, `NOVO`) contam no `check:js` (RNF-02). A foto leva largura e altura no HTML; a T-125 mede o LCP da home. Nenhuma face de fonte nova: o h1 da saudação usa a IBM Plex Sans 400 e a Plex Sans Condensed 600, que a home já carrega, e o teto de 3 arquivos e 61.000 bytes e o `font-budget.spec.ts` não mudam.
+  10. **Decisão 1A:** o RF-25 muda na T-127, o RF-01 na T-125, o RF-04 na T-128, e o RF-02, o RF-14 e a §6 na T-131. O RF-23 e o RF-26, ainda não entregues, mudam agora.
+
 ## 3. Requisitos funcionais
 
 A v1 entrega 11 requisitos Must; o restante entra por ordem de prioridade sem bloquear o lançamento. Os itens espelham o que o HF Blog oferece hoje, menos a camada social.
@@ -172,7 +188,7 @@ A v1 entrega 11 requisitos Must; o restante entra por ordem de prioridade sem bl
 | RF-02 | Listas por tipo e páginas `/tags/[tag]` | Must       | `/blog/` lista os dois tipos. `/artigos/` e `/prototipos/` existem quando o tipo tem post publicado; senão, 404. Não há `/tipos/` nem barra de tipos. `/tags/[tag]/` existe para cada tag de post publicado; tag inexistente é 404. As listas são inteiras, sem paginação. As quatro listas têm um `select` nativo, uma tag por vez, gravada em `?tag=`. Sem JavaScript, a lista inteira e os links de `/tags/`; em `/mais-votados/`, sem JavaScript, só o aviso. A forma está na BRAND §9.12 |
 | RF-03 | ~~Paginação da listagem~~                                                             | Removido   | Saiu na T-123: as listas são inteiras. `/page/n/` responde 404, sem `_redirects`. A exceção da Q10 sai junto |
 | RF-04 | Página do post com título, autor, tipo, data `21.out.2026` e tempo de leitura | Must       | O cabeçalho traz o tipo, a data, a leitura, o autor e as tags, sem fólio, sem nível e sem "Atualizado em"; o `updatedDate` continua no schema, no JSON-LD (`dateModified`) e no `og:updated_time`. O título fica em cima. De `lg` em diante, a lateral abre com `/ ARTIGO` ou `/ PROTÓTIPO` e a coluna do texto fica só com o filete, alinhado ao da lateral; o título aparece acima da lateral quando o `h1` e a linha fina saem da tela, como melhoria progressiva, sem deslocar a página; a linha Tipo fica só para leitor de tela. Abaixo de `lg`, o tipo é a primeira linha da tabela, com a folha ou o frasco. Sem JavaScript, a lateral mostra `/ ARTIGO` ou `/ PROTÓTIPO`. Quando o post tem `references` ou `appendices`, o fim do post tem a área de apêndice, com os apêndices do autor (Apêndice A, B…) e a lista numerada de referências. No texto, a citação `[@chave]` vira `[n]`, com link para a referência e nome acessível `Referência n`, sem JavaScript. Chave citada sem referência, referência não citada, citação dentro de link e chave repetida quebram o build. Post sem os dois campos não muda |
-| RF-05 | ~~TOC lateral fixa (h2–h3) com seção ativa destacada~~                                | Removido   | Saiu na T-63: o post não tem sumário; a lateral do cabeçalho é parte do RF-04                                           |
+| RF-05 | ~~TOC lateral fixa (h2–h3) com seção ativa destacada~~                                | Removido   | Saiu na T-63: o post não tem sumário; a lateral do cabeçalho é parte do RF-04. O índice da Q23 é o RF-26                |
 | RF-06 | Syntax highlighting com botão copiar                                                  | Must       | Shiki em build time, temas `pk-claro` e `pk-escuro`. Uma cerca com a meta `title=<arquivo>` depois da linguagem (```` ```py title=fol-001_embeddings.py ````) mostra o nome do arquivo na barra do bloco; sem `title=`, a barra não mostra nome. O botão diz Copiar e vira Copiado por 1,5 s; o `aria-label` é `Copiar código` e vira `Código copiado` junto com o texto, para o nome acessível conter o rótulo visível (WCAG 2.5.3). A barra existe com ou sem `title=` e com ou sem JavaScript; o nome do arquivo sai do build |
 | RF-07 | Matemática LaTeX inline e em bloco                                                    | Must       | `remark-math` + `rehype-katex` no processador `unified()`, render no build                                              |
 | RF-08 | Caderno marimo do post, aberto no molab                                              | Must       | O componente `Notebook`, no MDX, leva ao molab com o caminho do arquivo no repositório e a ref do build (`main` em produção e o commit do PR no preview): `/wasm` (navegador) por padrão e, com `gpu`, a prévia estática, de onde o leitor com conta no molab roda no servidor com GPU (Q19). O build falha se o arquivo não existir. A página do post não carrega Pyodide nem o runtime do marimo; o blog não exporta caderno (Q18) |
@@ -190,9 +206,10 @@ A v1 entrega 11 requisitos Must; o restante entra por ordem de prioridade sem bl
 | RF-20 | ~~Embed de Hugging Face Spaces e iframes genéricos~~                                  | Removido   | Saiu na T-106 (Q20)                                                                                                     |
 | RF-21 | ~~Artigos da comunidade com login e upvote~~ | Substituído | Substituído pelo RF-25 (T-118, Q22) |
 | RF-22 | `Callout` com `variant` `note`, `caution` ou `result`                                 | Should     | Rótulos visíveis `// NOTA DE BANCADA`, `[!] CUIDADO` e `= RESULTADO`, tudo em tinta                                    |
-| RF-23 | Compartilhar no fim do post                                                           | Should     | X, LinkedIn e e-mail por links com o título e a URL do post, sem script de terceiro; "Copiar link" por script do próprio site, que vira "Link copiado" por 1,5 s; no fim da coluna do texto, antes da faixa do apêndice (BRAND §9.14, T-115) |
+| RF-23 | Voto e compartilhar no post | Should | De `lg` em diante, um bloco mínimo na lateral, abaixo do índice (RF-26), sticky na borda de baixo da tela. Ele aparece, com opacidade e um leve deslize por transform, quando o filete que fecha o cabeçalho do post sai da tela (`IntersectionObserver`, sem ouvir o scroll); com `prefers-reduced-motion`, aparece sem animação. Em cima, um fio em `line`, sem rótulo. Na primeira linha, o botão de voto (RF-25): `▲ Votar N`, que vira `Votado N`, sem desfazer. Abaixo, `Compartilhar` numa linha e, na de baixo, `X`, `LinkedIn`, `E-mail` e `Copiar link`. X, LinkedIn e e-mail são links com o título e a URL do post (o e-mail por `mailto:`), sem script de terceiro; `Copiar link` é um botão criado pelo script do próprio site, que vira `Link copiado` por 1,5 s, com o `aria-label` junto. Sem "copiar markdown". Ao chegar ao rodapé, o índice e o bloco sobem juntos, sem se sobrepor, só pelo layout em CSS, sem JavaScript que meça. Abaixo de `lg`, o bloco fica no fim da coluna do texto, antes da faixa do apêndice, sem sticky e sem animação. Sem JavaScript, o bloco aparece parado, com o aviso do voto e os três links. O script conta no `check:js` (RNF-02). A forma está na BRAND §9.14 (T-130) |
 | RF-24 | Inscrição na newsletter | Should | Formulário HTML do próprio site para https://app.kit.com/forms/<id>/subscriptions, sem o script do Kit, no fim do post e na home. O `form-action` e o DNS saem da T-116 |
 | RF-25 | Upvotes anônimos | Should | Uma linha por par (hash do IP, slug), sem cookie e sem desfazer. O hash do IPv6 é o do prefixo /64 e o do IPv4 é o do endereço inteiro. O `localStorage` só muda o botão para Curtido; limpar o storage não soma de novo se o IP for o mesmo, e dois leitores no mesmo NAT dividem um voto por post. A gravação só acontece em pedroknoll.com, com Origin https://pedroknoll.com e Content-Type application/json; no preview e no workers.dev a API só lê. O slug é conferido contra o catálogo dos posts publicados e o slug desconhecido não é gravado. O top 10 só lista posts com pelo menos 1 voto, com desempate pela data mais recente. Sem JavaScript, um aviso. O teto diário por hash é 20 votos novos, no dia UTC: o índice da tabela conta uma linha escrita a mais, e 20 pares novos são 40 linhas naquele hash (T-121). A API é a T-121. O botão (BRAND §9.14) mostra `Curtir` e a contagem; sem API, a contagem fica em `–`. Um POST que falha volta a `Curtir` sem gravar o `localStorage`. O CLS da contagem é o Playwright, com `page.route`, abaixo de 3 px |
+| RF-26 | Índice do post na lateral | Should | De `lg` em diante, na lateral, um `nav` com nome acessível `Neste artigo`. No topo, o rótulo `/ NESTE ARTIGO` e, à direita, a porcentagem lida, com `aria-hidden`; o filete embaixo do rótulo é a barra de progresso, 2 px em `line`, preenchida em tinta. Um item por h2, numerado `01`, `02`…, com link para a âncora do h2 e divisórias entre os itens; a seção atual tem fundo `sheet`, título em 600 e `aria-current="location"`. No fim, o relógio e `N minutos de leitura`. O topo do índice fica na altura do primeiro h2 do texto, e o índice fica sticky no topo ao rolar; as duas coisas saem do layout em CSS (grid e sticky), sem JavaScript que meça ou desloque a página (CLS, RNF-01). Sem rolagem suave com `prefers-reduced-motion`. Sem JavaScript, os links funcionam, sem progresso e sem seção ativa. Abaixo de `lg`, o índice não aparece. Post com menos de 2 h2 não tem índice. O script do progresso e da seção ativa conta no `check:js` (RNF-02). A forma está na BRAND §9.3 (T-129) |
 
 
 ## 4. Requisitos não-funcionais
@@ -836,7 +853,27 @@ Funcionalidade: Figura estática [RF-09, RNF-02]
     Então o SVG está no HTML
     E a figura não está dentro de um astro-island
 
+Funcionalidade: Índice do post [RF-26, RNF-01]
+  Cenário: índice sem JavaScript
+    Dado um post com pelo menos 2 h2, numa largura de lg em diante
+    Quando JavaScript está desabilitado
+    Então o nav "Neste artigo" tem um link por h2, na ordem do texto
+    E cada link leva à âncora do seu h2
+    E nenhum item tem aria-current
+
+  Cenário: o índice não desloca o texto
+    Dado um post com pelo menos 2 h2, numa largura de lg em diante
+    Quando o script do índice roda
+    Então o primeiro h2 e o topo do índice não mudam de posição em 3 px ou mais
+
+  Cenário: post sem índice
+    Dado um post com menos de 2 h2
+    Quando a página carrega
+    Então o nav "Neste artigo" não existe
+
 ```
+
+Os cenários do índice são da T-129: os dois primeiros na `fixture-mdx` (4 h2) e o "post sem índice" na `fixture-sem-titulos` (só parágrafos).
 
 A prova de tipo só com rascunho está no Vitest (`tests/unit/kind.test.ts`): o cenário Rascunhos acima continua no E2E para o post não aparecer na home, nas listas e nas tags.
 
