@@ -134,7 +134,7 @@ const placeholder = {
           const count = votes[post.slug] ?? 0;
           value.textContent = String(count);
           const word = fragment.querySelector("[data-vote-word]");
-          if (word) word.textContent = count === 1 ? "curtida" : "curtidas";
+          if (word) word.textContent = count === 1 ? "voto" : "votos";
         }
         list.append(fragment);
       }

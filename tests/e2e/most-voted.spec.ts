@@ -66,7 +66,7 @@ test.describe("mais votados [RF-01, RF-02]", () => {
     }
     await expect(items.nth(0).locator("[data-vote-value]")).toHaveText("4");
     await expect(items.nth(0).locator("[data-vote-word]")).toHaveText(
-      "curtidas",
+      "votos",
     );
     await expect(items.nth(0).locator("[data-reading]")).toContainText(
       "min de leitura",
@@ -78,7 +78,7 @@ test.describe("mais votados [RF-01, RF-02]", () => {
       .locator("[data-vote-word]")
       .allTextContents();
     expect(words.length).toBeGreaterThan(0);
-    expect(words.every((word) => word === "curtida")).toBe(true);
+    expect(words.every((word) => word === "voto")).toBe(true);
 
     await page.unrouteAll({ behavior: "ignoreErrors" });
     await page.route("**/api/votes", async (route) => {

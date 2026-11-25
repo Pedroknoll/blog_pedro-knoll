@@ -148,9 +148,9 @@ test.describe("votos na API [RF-25]", () => {
         answer.url().includes("/api/votes") &&
         answer.request().method() === "POST",
     );
-    await vote.getByRole("button", { name: "Curtir" }).click();
+    await vote.getByRole("button", { name: "Votar" }).click();
     const body = (await (await posted).json()) as { votes: number };
-    await expect(vote.getByRole("button", { name: "Curtido" })).toBeDisabled();
+    await expect(vote.getByRole("button", { name: "Votado" })).toBeDisabled();
     await expect(vote.locator("[data-vote-count]")).toContainText(
       String(body.votes),
     );

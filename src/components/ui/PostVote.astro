@@ -26,10 +26,10 @@ const { slug, class: className } = Astro.props;
         height={8}
         class="inline-block h-2 w-2.5 shrink-0"
       />
-      <span data-vote-label>Curtir</span>
-      <span data-vote-count class="inline-block w-[3ch] text-right text-accent">
+      <span data-vote-label>Votar</span>
+      <span data-vote-count class="inline-block w-[3ch] text-right text-ink">
         <span data-vote-value>–</span>
-        <span class="sr-only"> votos</span>
+        <span data-vote-unit class="sr-only"> votos</span>
       </span>
     </button>
   </div>
@@ -56,13 +56,15 @@ const { slug, class: className } = Astro.props;
       try {
         localStorage.setItem(storageKey(slug), "1");
       } catch {
-        // A página já mostra Curtido; o próximo carregamento volta a Curtir.
+        // A página já mostra Votado; o próximo carregamento volta a Votar.
       }
     }
 
     function setCount(count: HTMLElement, value: string) {
       const node = count.querySelector("[data-vote-value]");
       if (node) node.textContent = value;
+      const unit = count.querySelector("[data-vote-unit]");
+      if (unit) unit.textContent = value === "1" ? " voto" : " votos";
     }
 
     function showReady(block: Block) {
@@ -77,7 +79,7 @@ const { slug, class: className } = Astro.props;
 
     function showVoted(block: Block) {
       const label = labelOf(block);
-      if (label) label.textContent = "Curtido";
+      if (label) label.textContent = "Votado";
       block.button.disabled = true;
     }
 
@@ -118,7 +120,7 @@ const { slug, class: className } = Astro.props;
 
       for (const [slug, blocks] of found) {
         const voted = readVoted(slug);
-        // O GET também preenche a contagem com Curtido. locked só impede
+        // O GET também preenche a contagem com Votado. locked só impede
         // que um GET atrasado cubra o número do POST desta visita.
         let locked = false;
         for (const block of blocks) {
@@ -162,7 +164,7 @@ const { slug, class: className } = Astro.props;
               if (locked) return;
               for (const block of blocks) {
                 const label = labelOf(block);
-                if (label) label.textContent = "Curtir";
+                if (label) label.textContent = "Votar";
                 block.button.disabled = false;
               }
             });
