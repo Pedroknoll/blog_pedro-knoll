@@ -227,7 +227,7 @@ test("E6 página de tag com o script do item e um h1 fora do banner [RF-02]", as
         page.locator(
           'script:not([type="application/ld+json"]):not([type="application/json"])',
         ),
-      ).toHaveCount(1);
+      ).toHaveCount(2);
 
       const results = await new AxeBuilder({ page }).analyze();
       const blocking = results.violations.filter(

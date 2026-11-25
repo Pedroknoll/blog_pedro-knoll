@@ -10,6 +10,13 @@ import {
 } from "../../src/integrations/headers.ts";
 import { KINDS } from "../../src/lib/kind";
 import {
+  directiveValue,
+  policyOf,
+  readCspViolations,
+  serveDocument,
+  watchCsp,
+} from "./csp";
+import {
   fixtureFormulas,
   fixtureMd,
   fixtureMdx,
@@ -133,33 +140,12 @@ type CspHit = {
   count: number;
 };
 
-type CspViolation = {
-  directive: string;
-  sample: string;
-};
-
-type CspWindow = Window & {
-  __cspViolations?: CspViolation[];
-};
-
-function policyOf(text: string, pathname: string): string {
-  const values = effectiveHeaders(text, pathname).get(
-    "content-security-policy",
-  );
-  expect(values, pathname).toHaveLength(1);
-  return values?.[0] ?? "";
-}
-
-function directiveValue(policy: string, name: string): string {
-  const prefix = `${name} `;
-  const part = policy.split("; ").find((item) => item.startsWith(prefix));
-  return part?.slice(prefix.length) ?? "";
-}
-
 function assertArtifact(text: string, pathname: string): void {
   const applied = effectiveHeaders(text, pathname);
   const policy = policyOf(text, pathname);
-  expect(policy, pathname).not.toContain("wasm-unsafe-eval");
+  expect(directiveValue(policy, "script-src"), pathname).toContain(
+    "'wasm-unsafe-eval'",
+  );
   expect(policy, pathname).toContain("frame-ancestors 'self'");
   expect(applied.get("strict-transport-security"), pathname).toEqual([
     "max-age=63072000; includeSubDomains",
@@ -182,51 +168,6 @@ function faviconStyleHashes(svg: string): string[] {
       return `'sha256-${digest}'`;
     },
   );
-}
-
-async function serveDocument(
-  page: Page,
-  pathname: string,
-  csp: string,
-): Promise<void> {
-  await page.route("**/*", async (route) => {
-    const request = route.request();
-    const url = new URL(request.url());
-    if (request.resourceType() !== "document" || url.pathname !== pathname) {
-      await route.continue();
-      return;
-    }
-    const response = await route.fetch();
-    await route.fulfill({
-      response,
-      headers: {
-        ...response.headers(),
-        "content-security-policy": csp,
-      },
-    });
-  });
-}
-
-async function watchCsp(page: Page): Promise<void> {
-  await page.addInitScript(() => {
-    const view = window as CspWindow;
-    if (view.__cspViolations) return;
-    const found: CspViolation[] = [];
-    view.__cspViolations = found;
-    document.addEventListener("securitypolicyviolation", (event) => {
-      found.push({
-        directive: event.effectiveDirective,
-        sample: event.sample,
-      });
-    });
-  });
-}
-
-async function readCspViolations(page: Page): Promise<CspViolation[]> {
-  return page.evaluate(() => {
-    const view = window as CspWindow;
-    return view.__cspViolations ?? [];
-  });
 }
 
 type DiskPost = {

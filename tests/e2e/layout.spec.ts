@@ -124,8 +124,10 @@ test("home, listas e tags só com o script do item [RNF-02]", async ({
         const executable = page.locator(
           'script:not([type="application/ld+json"]):not([type="application/json"])',
         );
+        // Comece aqui repete o script do card: o script da busca no layout
+        // impede o Astro de juntar os scripts que vêm do MDX.
         await expect(executable).toHaveCount(
-          path === "/" || path === "/blog/" ? 2 : 1,
+          path === "/" || path === "/blog/" || path === "/comece-aqui/" ? 3 : 2,
         );
         await expect(
           page.locator('script[type="application/json"]'),
@@ -133,7 +135,7 @@ test("home, listas e tags só com o script do item [RNF-02]", async ({
         return;
       }
       const pres = await page.getByRole("article").locator("pre").count();
-      const modules = pres === 0 ? 2 : 3;
+      const modules = pres === 0 ? 3 : 4;
       await expect(page.locator('script[type="module"]')).toHaveCount(modules);
 
       const plain = page.locator("script:not([type])");
