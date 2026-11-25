@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.34 · novembro de 2026 · pedroknoll.com
+Versão 1.35 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -21,6 +21,7 @@ src/assets/brand/icones/aceno.svg
 src/assets/brand/icones/icone-artigo.svg
 src/assets/brand/icones/icone-prototipo.svg
 src/assets/brand/icones/icone-relogio.svg
+src/assets/brand/icones/icone-busca.svg
 src/styles/shiki/pk-claro.json
 src/styles/shiki/pk-escuro.json
 public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-touch-icon.png
@@ -28,7 +29,7 @@ public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-t
 
 `icon-192.png` e `icon-512.png` não entram no repositório. Sem manifesto PWA.
 
-Lupa, sol, lua, fogo e voto estão só no apêndice, até a tarefa que cria o arquivo.
+Sol, lua, fogo e voto estão só no apêndice, até a tarefa que cria o arquivo. A lupa está na árvore (T-22).
 
 ---
 
@@ -220,7 +221,7 @@ Títulos com `text-wrap: balance`.
 - **Exceção:** a mão da saudação (`aceno.svg`) é **16 × 16**, com contorno `--contorno-px` e corpo `--ouro`. Use em 16, 32 ou 48 px.
 - **Animação quadro a quadro** (decisão): só o aceno, dois quadros alternando 4 vezes, depois pausa (3,2 s, contínuo). Conceito, Tutorial e Playbook saíram da lista e da animação (T-119, T-120).
 - **Onde anima:** só a mão da saudação. O aceno usa classes com prefixo `pka-`.
-- **Ícones (decisão da T-119):** `icone-artigo.svg` (folha) e `icone-prototipo.svg` (frasco), dos tipos (§8), no h1 de `/artigos/` e de `/prototipos/` e na linha Tipo da tabela do post abaixo de `lg`; `icone-fogo.svg`, no h1 de `/mais-votados/`; `icone-voto.svg` (triângulo de 10×8), à esquerda da contagem no item; `icone-busca.svg` (lupa), no botão de busca do header (§9.13); `icone-sol.svg` e `icone-lua.svg`, do controle de tema (§9.9). Todos com 12 × 12, uma cor, só parados, sem versão animada. O desenho está no apêndice. A folha e o frasco estão na árvore (T-120); a lupa entra na T-22; o sol e a lua, na T-24; o fogo e o voto, na T-123. O `icone-filtro.svg` não entra: o filtro é um `select` nativo (T-124).
+- **Ícones (decisão da T-119):** `icone-artigo.svg` (folha) e `icone-prototipo.svg` (frasco), dos tipos (§8), no h1 de `/artigos/` e de `/prototipos/` e na linha Tipo da tabela do post abaixo de `lg`; `icone-fogo.svg`, no h1 de `/mais-votados/`; `icone-voto.svg` (triângulo de 10×8), à esquerda da contagem no item; `icone-busca.svg` (lupa), no botão de busca do header (§9.13); `icone-sol.svg` e `icone-lua.svg`, do controle de tema (§9.9). Todos com 12 × 12, uma cor, só parados, sem versão animada. O desenho está no apêndice. A folha, o frasco e a lupa estão na árvore (T-120, T-22); o sol e a lua, na T-24; o fogo e o voto, na T-123. O `icone-filtro.svg` não entra: o filtro é um `select` nativo (T-124).
 - **Relógio** (`icone-relogio.svg`): 12 × 12, só parado, sem versão animada. Entra na linha do item, antes do tempo de leitura (§9.2).
 - Todas as animações respeitam `prefers-reduced-motion: reduce` (ficam paradas).
 
@@ -368,7 +369,7 @@ Foco visível: contorno 2 px prússia com afastamento 3 px. Links em prússia, s
 O "Voltar ao início" da página 404 parece um botão, mas continua um link (`<a>`) para `/`. Fundo tinta, texto papel, IBM Plex Mono 400 em 14 px, 44 px de altura, 20 px de respiro nas laterais. Cantos retos e sem sombra, como os botões da seção 9.6. Sem sublinhado em repouso; no hover e no foco, sublinhado com afastamento de 3 px, sem troca de cor. O foco é o da seção 9.10. No tema escuro, os mesmos tokens invertem o par: fundo claro, texto escuro.
 
 ### 9.12 Busca e filtro
-Decisão da T-119. O filtro está no ar (T-124). A busca entra na T-22. A barra "Filtrar por tipo" (T-63, T-64) saiu na T-123.
+Decisão da T-119. O filtro está no ar (T-124). A busca está no ar (T-22). A barra "Filtrar por tipo" (T-63, T-64) saiu na T-123.
 
 **Filtro.** Nas quatro listas (`/blog/`, `/artigos/`, `/prototipos/`, `/mais-votados/`), abaixo do h1 e acima da contagem. Não entra na home nem em `/tags/`.
 
@@ -380,14 +381,14 @@ Decisão da T-119. O filtro está no ar (T-124). A busca entra na T-22. A barra 
 - **Sem resultado:** `Nenhum post com essa tag.` não acontece, porque as opções são sempre tags da lista.
 - **Sem JavaScript:** o select fica desabilitado, a lista vem inteira e a página aponta os links de `/tags/`. Em `/mais-votados/`, sem JavaScript, só o aviso: o ranking não está no HTML.
 
-**Busca.** Sai das listas. O botão fica no header (§9.13): lupa (`icone-busca.svg`, 12 px), alvo de 44 px, nome acessível `Buscar` e a dica `⌘K` (no Windows e no Linux, `Ctrl K`).
+**Busca.** Sai das listas. O botão fica no header (§9.13): lupa (`icone-busca.svg`, 12 px), alvo de 44 px, nome acessível `Buscar ⌘K` (no Windows e no Linux, `Buscar Ctrl K`). Sem JavaScript, o lugar fica reservado e invisível.
 
-- O modal é um diálogo. O campo é `input type="search"`, 44 px, IBM Plex Mono 16 px, borda `line`, cantos de 0,375rem, fundo `surface`, placeholder `Buscar`, em grafite. Cada resultado traz título, data e trecho do texto, em Plex Sans 16 px, grafite, com o termo marcado em fundo `sheet`, sem negrito (a página não carrega a Plex Sans 600).
+- O modal é um diálogo. O campo é `input type="search"`, 44 px, IBM Plex Mono 16 px, borda `line`, cantos de 0,375rem, fundo `surface`, placeholder `Buscar`, em grafite. Cada resultado traz título e trecho, em Plex Sans 16 px, grafite, sem data. O título é 600. O termo, no título e no trecho, é 600 e sublinhado, sem fundo. O cartão tem borda `line`, fundo transparente e cantos de 0,375rem.
 - Abre pelo botão ou por Cmd/Ctrl+K, em todas as páginas. O índice cobre só o corpo dos posts (SPEC RF-15).
-- A T-22 para se o Pagefind 1.5 pedir `unsafe-inline` em `style-src-elem` ou script inline. Esta seção não desenha um modal paralelo ao do Pagefind.
+- O Pagefind 1.6.0 não pediu `unsafe-inline` em `style-src-elem`. O modelo do resultado é `text/pagefind-template` e só entra no DOM ao abrir. Esta seção não desenha um modal paralelo ao do Pagefind.
 
 ### 9.13 Header e footer
-Decisão da T-119. O header e o footer estão no ar (T-113). O link "Comece aqui" está no ar (T-114). O botão de busca entra na T-22 e o controle de tema na T-24.
+Decisão da T-119. O header e o footer estão no ar (T-113). O link "Comece aqui" está no ar (T-114). O botão de busca está no ar (T-22) e o controle de tema entra na T-24.
 
 - **Header:** fundo `surface`, filete `line` embaixo, na largura do site (72rem), com 0,75rem de respiro em cima e embaixo. A assinatura (§3) fica à esquerda. Depois, nesta ordem: `Comece aqui` (`/comece-aqui/`), `Artigos`, `Protótipos`, o botão de busca (§9.12) e o controle de tema (§9.9). `Artigos` e `Protótipos` não levam ícone. Cada link em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, grafite, indo para prússia no hover e no foco, com 44 px de toque e 1,25rem entre eles; o da página atual vai para tinta, com sublinhado de 2 px e `aria-current="page"`. `Protótipos` só aparece quando há protótipo publicado: sem ele, a página não existe.
 - **De `md` em diante:** uma linha só, com a assinatura à esquerda e o resto à direita.
@@ -440,7 +441,7 @@ Um colega experiente puxando a cadeira ao lado, com uma pitada de inventor curio
 | Página 404 | Esta página foi arrancada do caderno. · texto: O endereço pode ter mudado, ou esta página ainda não foi escrita. O resto do caderno continua aqui. · link: Voltar ao início · notas da ilustração: estava aqui · nó não encontrado |
 | Botão de código | Copiar → Copiado |
 | Botão de tema | ícones de sol e lua · nomes acessíveis: Claro · Escuro |
-| Busca | Buscar · ⌘K |
+| Busca | Buscar ⌘K · no Windows e no Linux, Buscar Ctrl K |
 | Filtro | Filtrar por · primeira opção: Todas as tags |
 | Contagem | 5 artigos · 2 de 5 artigos |
 | Lista sem resultado | Nenhum post com essa tag. |
@@ -662,7 +663,7 @@ Desde a T-44 o arquivo não tem `<style>`, `role` nem `aria-label`: as classes `
 
 ### Ícones (T-119) · `src/assets/brand/icones/`
 
-Só parados, sem versão animada (§7). A folha e o frasco estão em `src/assets/brand/icones/` (T-120). A lupa entra na T-22, o sol e a lua na T-24, o fogo e o voto na T-123. O filtro não entra.
+Só parados, sem versão animada (§7). A folha, o frasco e a lupa estão em `src/assets/brand/icones/` (T-120, T-22). O sol e a lua entram na T-24, o fogo e o voto na T-123. O filtro não entra.
 
 `icone-artigo.svg`
 
