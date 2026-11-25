@@ -77,7 +77,7 @@ async function readRail(page: Page): Promise<Rail> {
     const greeting = document.querySelector("h1")?.parentElement ?? null;
     const column = greeting?.parentElement ?? null;
     const grid = column?.parentElement ?? null;
-    const hand = document.querySelector("svg:has(.pka-a)");
+    const hand = document.querySelector('img[src="/avatar.jpg"]');
     const right = column?.nextElementSibling ?? null;
     const band = right?.querySelector("section") ?? null;
     const list = band?.querySelector("h2") ?? null;
@@ -111,8 +111,8 @@ async function readRail(page: Page): Promise<Rail> {
 async function handBelowHeader(page: Page): Promise<number> {
   return page.evaluate(() => {
     const header = document.querySelector("header");
-    const hand = document.querySelector("svg:has(.pka-a)");
-    if (!header || !hand) throw new Error("sem header ou mão");
+    const hand = document.querySelector('img[src="/avatar.jpg"]');
+    if (!header || !hand) throw new Error("sem header ou foto");
     return (
       hand.getBoundingClientRect().top - header.getBoundingClientRect().bottom
     );
@@ -138,19 +138,23 @@ test.describe("lateral da home [RF-01]", () => {
     await expect(authorLinks).toHaveCount(1);
 
     const links = authorLinks.getByRole("link");
-    const texts = await links.evaluateAll((nodes) =>
-      nodes.map((node) => node.textContent),
+    await expect(links.nth(0)).toHaveAccessibleName("GitHub");
+    await expect(links.nth(1)).toHaveAccessibleName("LinkedIn");
+    const arrows = await links.evaluateAll((nodes) =>
+      nodes.map(
+        (node) =>
+          node.querySelector('[aria-hidden="true"]')?.textContent?.trim() ?? "",
+      ),
     );
-    expect(texts).toEqual(["RSS", "GitHub", "LinkedIn"]);
-    await expect(links.nth(0)).toHaveAttribute("href", "/rss.xml");
-    await expect(links.nth(1)).toHaveAttribute("href", authorGithub);
-    await expect(links.nth(2)).toHaveAttribute("href", authorLinkedin);
-    await expect(links.nth(0)).toHaveAccessibleName("RSS");
+    expect(arrows).toEqual(["↗", "↗"]);
+    await expect(links.nth(0)).toHaveAttribute("href", authorGithub);
+    await expect(links.nth(1)).toHaveAttribute("href", authorLinkedin);
+    await expect(authorLinks.locator('a[href="/rss.xml"]')).toHaveCount(0);
 
     const mono = await variableFamily(page, "--font-plex-mono");
-    const muted = await page.evaluate(() => {
+    const ink = await page.evaluate(() => {
       const probe = document.createElement("span");
-      probe.style.color = "var(--color-muted)";
+      probe.style.color = "var(--color-ink)";
       document.body.append(probe);
       const color = getComputedStyle(probe).color;
       probe.remove();
@@ -163,16 +167,78 @@ test.describe("lateral da home [RF-01]", () => {
         await link.evaluate((node) => getComputedStyle(node).fontFamily),
       );
       expect(family).toBe(mono);
-      await expect(link).toHaveCSS("font-size", "12px");
+      await expect(link).toHaveCSS("font-size", "14px");
       const color = await link.evaluate((node) => getComputedStyle(node).color);
-      expect(color).toBe(muted);
-      await expect(link).toHaveCSS("text-transform", "uppercase");
+      expect(color).toBe(ink);
+      await expect(link).toHaveCSS("text-transform", "none");
       const height = await link.evaluate(
         (node) => node.getBoundingClientRect().height,
       );
       expect(height).toBeGreaterThanOrEqual(44);
       expect(await link.getAttribute("target")).toBeNull();
     }
+  });
+
+  test("H12 Assinar via RSS com contorno", async ({ page }) => {
+    await open(page, "/", 1280);
+    const main = page.getByRole("main");
+    const rss = main.getByRole("link", {
+      name: "Assinar via RSS",
+      exact: true,
+    });
+    await expect(rss).toHaveCount(1);
+    await expect(rss).toHaveAttribute("href", "/rss.xml");
+    expect(await rss.getAttribute("target")).toBeNull();
+    const rssBox = await rss.boundingBox();
+    const listBox = await authorList(page).boundingBox();
+    expect(
+      rssBox && listBox ? rssBox.y + rssBox.height : NaN,
+    ).toBeLessThanOrEqual(listBox?.y ?? NaN);
+
+    const mono = await variableFamily(page, "--font-plex-mono");
+    for (const width of [1280, 360] as const) {
+      await page.setViewportSize({ width, height: 800 });
+      const measured = await rss.evaluate((node) => {
+        const style = getComputedStyle(node);
+        const probe = document.createElement("span");
+        probe.style.color = "var(--color-ink)";
+        document.body.append(probe);
+        const ink = getComputedStyle(probe).color;
+        probe.remove();
+        return {
+          family: style.fontFamily,
+          weight: style.fontWeight,
+          color: style.color,
+          borderWidth: style.borderTopWidth,
+          borderStyle: style.borderTopStyle,
+          borderColor: style.borderTopColor,
+          background: style.backgroundColor,
+          radius: style.borderTopLeftRadius,
+          height: node.getBoundingClientRect().height,
+          decoration: style.textDecorationLine,
+          ink,
+        };
+      });
+      const where = String(width);
+      expect.soft(firstFamily(measured.family), where).toBe(mono);
+      expect.soft(measured.weight, where).toBe("400");
+      expect.soft(measured.color, where).toBe(measured.ink);
+      expect.soft(measured.borderWidth, where).toBe("1px");
+      expect.soft(measured.borderStyle, where).toBe("solid");
+      expect.soft(measured.borderColor, where).toBe(measured.ink);
+      expect.soft(measured.background, where).toBe("rgba(0, 0, 0, 0)");
+      expect.soft(measured.radius, where).toBe("6px");
+      expect.soft(measured.height, where).toBeGreaterThanOrEqual(44);
+      expect.soft(measured.decoration, where).toBe("none");
+    }
+    const icon = rss.locator("svg");
+    await expect(icon).toHaveCount(1);
+    await expect(icon).toHaveAttribute("aria-hidden", "true");
+    const iconBox = await icon.boundingBox();
+    expect(iconBox?.width).toBe(12);
+    expect(iconBox?.height).toBe(12);
+    await rss.hover();
+    await expect(rss).toHaveCSS("text-decoration-line", "underline");
   });
 
   test("H2 artigos sem saudação", async ({ page }) => {
@@ -196,7 +262,7 @@ test.describe("lateral da home [RF-01]", () => {
       .toBeCloseTo(0, 0);
     expect.soft(at1280.listInset, "1280 barra encostada").toBeCloseTo(0, 0);
     expect
-      .soft(Math.abs(at1280.handTop - at1280.listTop), "1280 mão")
+      .soft(Math.abs(at1280.handTop - at1280.listTop), "1280 foto")
       .toBeLessThanOrEqual(1);
 
     await page.setViewportSize({ width: 1024, height: 800 });
@@ -267,7 +333,7 @@ test.describe("lateral da home [RF-01]", () => {
     const below = await handBelowHeader(page);
     await page.setViewportSize({ width: 1280, height: 800 });
     const above = await handBelowHeader(page);
-    expect.soft(above - below, "mão").toBeCloseTo(56, 0);
+    expect.soft(above - below, "foto").toBeCloseTo(56, 0);
   });
 
   test("H7a header alinhado à saudação a 1440", async ({ page }) => {

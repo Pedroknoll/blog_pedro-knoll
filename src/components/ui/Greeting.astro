@@ -1,36 +1,60 @@
 ---
 import Aceno from "~/assets/brand/icones/aceno.svg";
-import Wordmark from "~/components/ui/Wordmark.astro";
+import Rss from "~/assets/brand/icones/icone-rss.svg";
 import { site } from "~/site.config";
 
 const linkClass =
-  "inline-flex min-h-11 items-center font-mono text-xs tracking-[0.12em] whitespace-nowrap text-muted uppercase hover:text-accent focus-visible:text-accent";
+  "inline-flex min-h-11 items-center gap-1.5 font-mono text-sm whitespace-nowrap text-ink hover:text-accent focus-visible:text-accent";
 ---
 
 <div class="mx-auto w-full max-w-[52rem] px-4 pt-10">
-  <Aceno aria-hidden="true" class="mb-4 block size-12 max-[560px]:size-8" />
-  <h1 class="text-balance font-display text-[clamp(2.4rem,4.4vw,3.5rem)] leading-[1.1] font-semibold not-italic text-ink lg:text-[2.25rem]">
-    <span class="lg:whitespace-nowrap">Bem-vindo ao</span>{" "}
-    <Wordmark class="max-[560px]:block lg:block" />
+  <img
+    src={site.author.avatar}
+    alt="Foto de Pedro Knoll"
+    width="88"
+    height="88"
+    class="mb-6 block size-18 rounded-full border border-line lg:size-22"
+  />
+  <h1 class="font-sans text-[clamp(2.4rem,4.4vw,3.5rem)] leading-[1.1] font-normal text-balance not-italic text-ink lg:text-[2.25rem]">
+    <span class="block" data-greeting-line>
+      Olá, eu sou
+    </span>{" "}
+    <span class="block" data-greeting-line>
+      o{" "}
+      <span data-greeting-name class="font-display font-semibold not-italic">
+        Pedro
+      </span>
+      .
+      <Aceno
+        aria-hidden="true"
+        class="ml-[0.25em] inline-block size-8 align-[-0.125em]"
+      />
+    </span>
   </h1>
   <p class="mt-4 max-w-[46ch] font-sans text-[1.125rem] leading-[1.55] font-normal text-muted">
-    Olá, eu sou o Pedro. Aqui documento meus aprendizados e experimentos sobre
-    Inteligência Artificial.
+    Aqui documento meus aprendizados e experimentos sobre Inteligência
+    Artificial.
   </p>
-  <ul aria-label="Links do autor" class="mt-6 flex flex-wrap gap-x-6">
-    <li>
-      <a class={linkClass} href="/rss.xml">
-        RSS
-      </a>
-    </li>
+  <p class="mt-6">
+    <a
+      class="inline-flex min-h-11 items-center gap-2.5 rounded-md border border-ink px-5 font-mono text-sm font-normal text-ink no-underline underline-offset-3 hover:underline focus-visible:underline"
+      href="/rss.xml"
+    >
+      <Rss aria-hidden="true" width={12} height={12} class="size-3 shrink-0" />
+      Assinar via RSS
+    </a>
+  </p>
+  <ul aria-label="Links do autor" class="mt-3 flex flex-wrap gap-x-6">
     <li>
       <a class={linkClass} href={site.author.github}>
         GitHub
+        <span aria-hidden="true">↗</span>
       </a>
     </li>
     <li>
       <a class={linkClass} href={site.author.linkedin}>
         LinkedIn
+        <span aria-hidden="true">↗</span>
       </a>
     </li>
   </ul>

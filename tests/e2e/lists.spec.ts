@@ -181,7 +181,8 @@ test.describe("toque [RF-01]", () => {
     expect(media.fine).toBe(false);
     expect(media.none).toBe(true);
     const placement = await page.evaluate(() => {
-      const selector = "[data-listing]:has(article:hover) article:not(:hover)";
+      const selector =
+        "[data-listing][data-dim]:has(article:hover) article:not(:hover)";
       const found: string[] = [];
       const visit = (rules: CSSRuleList, condition: string) => {
         for (const rule of Array.from(rules)) {

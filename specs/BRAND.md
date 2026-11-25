@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.36 · novembro de 2026 · pedroknoll.com
+Versão 1.37 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -22,6 +22,7 @@ src/assets/brand/icones/icone-artigo.svg
 src/assets/brand/icones/icone-prototipo.svg
 src/assets/brand/icones/icone-relogio.svg
 src/assets/brand/icones/icone-busca.svg
+src/assets/brand/icones/icone-rss.svg
 src/styles/shiki/pk-claro.json
 src/styles/shiki/pk-escuro.json
 public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-touch-icon.png
@@ -40,8 +41,8 @@ Sol, lua, fogo e voto estão só no apêndice, até a tarefa que cria o arquivo.
 | Nome | **pk.log** | Decisão. Sempre minúsculo, sem espaço, com o ponto. |
 | Endereço | **pedroknoll.com** | Decisão. O domínio leva o nome completo; a marca, as iniciais. |
 | Autor | **Pedro Knoll** | Assinatura à mão no certificado e nas peças gráficas; no site, fora das páginas até uma tarefa medir (T-52). |
-| Saudação (headline da home) | **Olá, eu sou o Pedro. 👋** | Decisão da T-126 (Q23); entra na T-125. Só "Pedro" em negrito. A mão é o ícone em pixel `aceno.svg`, no fim do h1, nunca o emoji do sistema. No ar até a T-125: `Bem-vindo ao pk.log`, com a mão acima do h1. |
-| Texto de apresentação | **Aqui documento meus aprendizados e experimentos sobre Inteligência Artificial.** | Decisão. Vem logo abaixo da saudação. No ar até a T-125, abre com `Olá, eu sou o Pedro.` |
+| Saudação (headline da home) | **Olá, eu sou o Pedro. 👋** | Decisão da T-126 (Q23); no ar desde a T-125. Só "Pedro" em negrito. A mão é o ícone em pixel `aceno.svg`, no fim do h1, nunca o emoji do sistema. |
+| Texto de apresentação | **Aqui documento meus aprendizados e experimentos sobre Inteligência Artificial.** | Decisão. Vem logo abaixo da saudação. |
 | Descrição curta | **Aprendizados e experimentos em IA** | Para bio, avatar, meta description, assinatura vertical. |
 | Título de página (`<title>`) | `{Título} · pk.log · Pedro Knoll` | Sugestão. "log" é palavra comum; o nome completo ajuda a busca. |
 
@@ -157,7 +158,7 @@ Fundo **sempre liso**, sem textura, sem vinheta.
 ### Regras de cor (decisões)
 - **Proporção em qualquer peça:** papel ~68%, tinta ~20%, prússia ~7%, latão + sanguínea + verdete ≤ 5% somados.
 - **Latão e verdete ficam só no código (§9.5); a sanguínea fica só na função.** Nunca marcam tipo, avisos, erros, sucesso ou resultados, e nunca são fundo de página. Os tipos ficam em tinta (§8).
-- **Prússia só no que é interativo** (decisão da T-126, Q23): links, título no hover (com sublinhado) e foco. Na interface, nenhuma outra cor de destaque além da mão; a contagem do voto e os metadados ficam em tinta, grafite ou lápis. O ponto da assinatura e o nó do símbolo continuam prússia: são a marca, e o header não muda.
+- **Prússia só no que é interativo** (decisão da T-126, Q23): links, título no hover (sem sublinhado nos itens da lista, T-125) e foco. Na interface, nenhuma outra cor de destaque além da mão; a contagem do voto e os metadados ficam em tinta, grafite ou lápis. O ponto da assinatura e o nó do símbolo continuam prússia: são a marca, e o header não muda.
 - **Ouro-pigmento** aparece só na mão da saudação, sempre com contorno em tinta (amarelo puro some sobre o fundo claro).
 - **Pergaminho** (`#EADFC8`, com `--folha #DFD2B6`, `--grafite #5A4D3C`, `--lapis #8E7E64`, `--latao #765514`, `--sanguinea #9E3526`, `--verdete #2B6454`) é um tom mais fundo **só para peças gráficas**: slides, posts de rede social, capas, certificado. Nunca no blog.
 - **Nomes na interface:** o controle de tema mostra um sol e uma lua (§9.9), e os nomes dos dois botões, para o leitor de tela, são **Claro** e **Escuro** (T-109). "Velino" e "cianotipia" são nomes internos.
@@ -197,7 +198,7 @@ As três famílias entram pela Fonts API do Astro (`fontProviders.fontsource()`)
 
 **Escala (px):** display 64 · h1 44 · h2 30 · h3 22 (Plex Sans 600) · texto 18 · rótulo 12. O h1 de página (post, tag e 404) fica em 36 px abaixo de `sm` (640 px) e em 44 px de `sm` em diante; a saudação da home tem tamanho próprio (§9.1). O rótulo usa letter-spacing de 0,1em (T-51). Exceção da home abaixo de `sm` (T-126, Q23): o rótulo de seção fica em 15 px, ainda em Plex Mono 400, e o título do item em 20 px (§9.2).
 
-**Saudação mista (decisão da T-126, Q23; entra na T-125).** O h1 da saudação é IBM Plex Sans 400, e só "Pedro" vai na fonte de display, IBM Plex Sans Condensed 600. As duas faces já são carregadas na home: sem face nova, e o teto de 3 arquivos e 61.000 bytes não muda.
+**Saudação mista (decisão da T-126, Q23; no ar desde a T-125).** O h1 da saudação é IBM Plex Sans 400, e só "Pedro" vai na fonte de display, IBM Plex Sans Condensed 600. As duas faces já são carregadas na home: sem face nova, e o teto de 3 arquivos e 61.000 bytes não muda.
 Títulos com `text-wrap: balance`.
 
 **Fonte de display (decisão, 04/11/2026, T-63).** A IBM Plex Sans Condensed 600 substitui a Cormorant Garamond em tudo que usa o token de display: assinatura, saudação, card, h1 de página, h2 da prosa e 404. É da mesma superfamília do texto e dos rótulos. O arquivo latin tem 19.816 bytes, contra 23.396 da Cormorant: a home e a tag caem de 60.692 para 57.112 bytes, sem mudar o teto de 61.000. A troca entrou na T-60, com o arquivo de 19.816 bytes medido no build.
@@ -221,10 +222,10 @@ Títulos com `text-wrap: balance`.
 
 - **Grade 12 × 12, uma cor (`currentColor`), cantos retos, sem suavização** (`shape-rendering: crispEdges`).
 - Use em **12, 24, 36 ou 48 px** (múltiplos de 12) para não borrar.
-- **Exceção:** a mão da saudação (`aceno.svg`) é **16 × 16**, com contorno `--contorno-px` e corpo `--ouro`. Use em 16, 32 ou 48 px. Da T-125 em diante, fica no fim do h1 da saudação, depois do ponto; a T-125 escolhe o tamanho pela altura da linha (§9.1).
+- **Exceção:** a mão da saudação (`aceno.svg`) é **16 × 16**, com contorno `--contorno-px` e corpo `--ouro`. Use em 16, 32 ou 48 px. Fica no fim do h1 da saudação, depois do ponto, em 32 px em todas as larguras (T-125, §9.1).
 - **Animação quadro a quadro** (decisão): só o aceno, dois quadros alternando 4 vezes, depois pausa (3,2 s, contínuo). Conceito, Tutorial e Playbook saíram da lista e da animação (T-119, T-120).
 - **Onde anima:** só a mão da saudação. O aceno usa classes com prefixo `pka-`.
-- **Ícones (decisão da T-119):** `icone-artigo.svg` (folha) e `icone-prototipo.svg` (frasco), dos tipos (§8), no h1 de `/artigos/` e de `/prototipos/` e, até a T-128, na linha Tipo da tabela do post abaixo de `lg`; `icone-fogo.svg`, no h1 de `/mais-votados/`; `icone-voto.svg` (triângulo de 10×8), à esquerda da contagem; `icone-busca.svg` (lupa), no botão de busca do header (§9.13); `icone-sol.svg` e `icone-lua.svg`, do controle de tema (§9.9). Todos com 12 × 12, uma cor, só parados, sem versão animada. O desenho está no apêndice. A folha, o frasco e a lupa estão na árvore (T-120, T-22); o sol e a lua, na T-24; o fogo e o voto, na T-123. O `icone-filtro.svg` não entra: o filtro é um `select` nativo (T-124).
+- **Ícones (decisão da T-119):** `icone-artigo.svg` (folha) e `icone-prototipo.svg` (frasco), dos tipos (§8), no h1 de `/artigos/` e de `/prototipos/` e, até a T-128, na linha Tipo da tabela do post abaixo de `lg`; `icone-fogo.svg`, no h1 de `/mais-votados/`; `icone-voto.svg` (triângulo de 10×8), à esquerda da contagem; `icone-busca.svg` (lupa), no botão de busca do header (§9.13); `icone-rss.svg`, no `Assinar via RSS` da saudação (§9.1, T-125); `icone-sol.svg` e `icone-lua.svg`, do controle de tema (§9.9). Todos com 12 × 12, uma cor, só parados, sem versão animada. O desenho está no apêndice. A folha, o frasco, a lupa e o RSS estão na árvore (T-120, T-22, T-125); o sol e a lua, na T-24; o fogo e o voto, na T-123. O `icone-filtro.svg` não entra: o filtro é um `select` nativo (T-124).
 - **Relógio** (`icone-relogio.svg`): 12 × 12, só parado, sem versão animada. Entra antes do tempo de leitura: no item (§9.2), na linha de metadados do post e no fim do índice (§9.3).
 - **Voto** (`icone-voto.svg`): no botão `Votar` (§9.14) e no `▲ N votos` de Mais votados (§9.2). Da T-131 em diante, o item das outras listas não tem votos (T-126, Q23).
 - Todas as animações respeitam `prefers-reduced-motion: reduce` (ficam paradas).
@@ -262,18 +263,18 @@ A SPEC §6 fecha o schema, sem `folio`, `level` e `featured` (T-120). Chaves em 
 ## 9. Componentes
 
 ### 9.1 Saudação (home)
-Decisão da T-126 (Q23); entra na T-125. Até lá, no ar, a forma da T-69: a mão sozinha numa linha acima do h1 `Bem-vindo ao pk.log`, com o nome na marcação da assinatura, e a fileira `RSS`, `GitHub` e `LinkedIn`.
+Decisão da T-126 (Q23); no ar desde a T-125.
 
 - **Foto:** `site.author.avatar` (`public/avatar.jpg`), redonda, acima do h1: 88 px de `lg` em diante e 72 px abaixo, com contorno de 1 px em `line` e alt `Foto de Pedro Knoll`. Largura e altura no HTML: a foto pode virar o elemento de LCP da home, e a T-125 mede no Lighthouse.
-- **h1:** `Olá, eu sou o Pedro.`, em IBM Plex Sans 400, com só "Pedro" em IBM Plex Sans Condensed 600 (§5). O tamanho é o da T-44 e da T-69: `clamp(2.4rem, 4.4vw, 3.5rem)` abaixo de `lg` (no máximo 56 px) e 36 px de `lg` em diante. A mão (`aceno.svg`) fica no fim do h1, depois do ponto, decorativa (`aria-hidden`), em 16, 32 ou 48 px (§7). A quebra de linha não pode depender da fonte: a troca da fonte reserva pela da marca não pode mover o h1 (T-44, CLS).
+- **h1:** `Olá, eu sou o Pedro.`, em IBM Plex Sans 400, com só "Pedro" em IBM Plex Sans Condensed 600 (§5). O tamanho é o da T-44 e da T-69: `clamp(2.4rem, 4.4vw, 3.5rem)` abaixo de `lg` (no máximo 56 px) e 36 px de `lg` em diante. A mão (`aceno.svg`) fica no fim do h1, depois do ponto, decorativa (`aria-hidden`), em 32 px (§7). A quebra de linha não pode depender da fonte: a troca da fonte reserva pela da marca não pode mover o h1 (T-44, CLS). Por isso a quebra é fixa no HTML, em duas linhas: `Olá, eu sou` e `o Pedro.` com a mão (T-125).
 - **Texto:** `Aqui documento meus aprendizados e experimentos sobre Inteligência Artificial.`, em Plex Sans 18 px, entrelinha 1,55, cor grafite, máximo ~46 caracteres por linha (T-63, T-64).
-- **Links do autor,** logo abaixo do texto: `GitHub` e `LinkedIn`, em texto e sem ícone, em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, em grafite, indo para prússia no hover e no foco, com 44 px de altura para o toque e na mesma aba (T-69).
-- **RSS:** sai da fileira e vira `Assinar via RSS`, um link para `/rss.xml` com aparência de botão, com contorno (§9.11), na mesma aba.
+- **Links do autor,** abaixo do `Assinar via RSS`: `GitHub ↗` e `LinkedIn ↗`, em IBM Plex Mono 14 px, em caixa normal, sem letter-spacing, em tinta, indo para prússia no hover e no foco, com 44 px de altura para o toque e na mesma aba. A seta é decorativa (`aria-hidden`): o nome acessível é só `GitHub` e `LinkedIn` (T-125).
+- **RSS:** sai da fileira e vira `Assinar via RSS`, um link para `/rss.xml` com aparência de botão, com contorno (§9.11) e o ícone de RSS (`icone-rss.svg`, 12 px) antes do texto, na mesma aba, logo abaixo do texto e acima dos links do autor (T-125).
 - Lateral, de `lg` em diante, só na home: a saudação vira uma coluna de 15rem à esquerda, sticky no topo da tela, com 6rem de vão até a coluna das listas. O conteúdo do site fica em 72rem (token `--container-site`, utilidade `max-w-site`), e o header e o footer alinham a essa largura, na mesma margem das laterais da home e do post. Abaixo de `lg`, a saudação e os links ficam em cima das listas e rolam com a página (T-69). De `lg` em diante, o contêiner da lateral e das listas ganha 56 px de respiro em cima, somados aos 40 px da saudação (T-70).
 - A newsletter não entra na saudação. Na home, fica depois das listas, na coluna da direita (§9.2). No post, fica no fim (§9.14). Entra na T-116. Até lá, a home não tem esse bloco.
 
 ### 9.2 Item e páginas de lista
-Decisão da T-126 (Q23), que substitui a da T-119. A home entra na T-125; as listas inteiras e a Comece aqui, na T-131. Até lá, no ar, o item da T-123: data, título e uma linha de baixo com o tempo (`8 min de leitura`), o triângulo, `votos` e a contagem em acento; e o hover em que os outros itens caem para 0,35 de opacidade.
+Decisão da T-126 (Q23), que substitui a da T-119. A home está no ar (T-125); as listas inteiras e a Comece aqui entram na T-131. Até lá, nelas, o item da T-123: data, título e uma linha de baixo com o tempo (`8 min de leitura`), o triângulo, `votos` e a contagem em acento; e o hover em que os outros itens caem para 0,35 de opacidade.
 
 **Item** (`/ RECENTES` da home, `/blog/`, `/artigos/`, `/prototipos/`, `/tags/<tag>/` e Comece aqui, §9.15):
 
@@ -283,7 +284,7 @@ Decisão da T-126 (Q23), que substitui a da T-119. A home entra na T-125; as lis
 - **Título:** fonte de display 600, entrelinha 1,2, com `text-wrap: balance`. 20 px abaixo de `sm` e 26 px de `sm` em diante.
 - **Tempo:** o relógio parado de 12 px e `11 minutos` (`1 minuto` no singular), em mono 12 px, lápis. "de leitura" vai só no texto para leitor de tela e no `title`. Sem votos, resumo, capa, tipo, tema, nível, tag nem hachura.
 - **Toque:** o item inteiro é tocável: o link do título se estica sobre o item (`after:absolute after:inset-0`, com o `article` em `relative`). O tempo não intercepta o toque (`pointer-events-none`).
-- **Hover:** com o ponteiro sobre o item, fundo `sheet` na linha e título em `accent`, com sublinhado (§9.10). No foco do teclado, o mesmo, com o contorno da §9.10. Sem transição com `prefers-reduced-motion`. Saem a queda dos outros itens para 0,35 de opacidade e a exceção à §9.10.
+- **Hover:** com o ponteiro sobre o item, fundo `sheet` na linha e título em `accent`, sem sublinhado (pedido do autor na T-125, exceção à §9.10). No foco do teclado, o mesmo, com o contorno da §9.10. Sobre o `sheet`, a data e o tempo passam de lápis a grafite, porque lápis não é texto pequeno sobre folha clara (§4, T-125). Sem transição com `prefers-reduced-motion`. Saem a queda dos outros itens para 0,35 de opacidade e a exceção à §9.10.
 - A lista separa os itens com divisória `divide-line`. O respiro é só vertical: 1,25rem em cima e embaixo abaixo de `sm`, e 2rem de `sm` em diante. Sem borda, sem sombra e sem capa.
 
 **Item de Mais votados** (`/ MAIS VOTADOS` da home e `/mais-votados/`): a posição (`01`, `02`…) em mono, o título e `▲ N votos` (`icone-voto.svg`, o número e `votos`, ou `voto` com 1), em tinta, não lápis: o voto é o dado principal. Sem data e sem tempo de leitura. Os itens saem do script do ranking.
@@ -299,6 +300,7 @@ Decisão da T-126 (Q23), que substitui a da T-119. A home entra na T-125; as lis
 - **`/ MAIS VOTADOS`:** no HTML, só a frase `O ranking precisa de JavaScript.` Com JavaScript, o script monta o top 10, com o item de Mais votados: posts com pelo menos 1 voto, empate pela data mais recente. Sem voto nenhum, a frase `Nenhum voto ainda.` e nenhum item; o bloco continua, para o link não sumir.
 - **`/ PROTÓTIPOS`:** 5 protótipos mais recentes, no HTML, com o item de Protótipos. O bloco não é renderizado sem protótipo publicado; nesse caso, `/ MAIS VOTADOS` ocupa a largura toda.
 - **Abaixo de `sm`:** o título do item em 20 px nas três faixas, e mais espaço entre as faixas.
+- **Colunas de `lg` em diante:** em `/ MAIS VOTADOS` e `/ PROTÓTIPOS`, que dividem a largura, o título do item fica em 20 px e a `description` em 14 px; entre `sm` e `lg`, o título fica em 22 px. `/ RECENTES` mantém os 26 px (T-125).
 - A newsletter (§9.14) fica depois das faixas, na largura da coluna da direita.
 
 **Páginas de lista (T-123).** Sem paginação e sem saudação. Da T-131 em diante, o item é o de cima; em `/mais-votados/`, o de Mais votados.
@@ -392,7 +394,7 @@ Foco visível: contorno 2 px prússia com afastamento 3 px. Links em prússia, s
 ### 9.11 Link com cara de botão (página 404)
 O "Voltar ao início" da página 404 parece um botão, mas continua um link (`<a>`) para `/`. Fundo tinta, texto papel, IBM Plex Mono 400 em 14 px, 44 px de altura, 20 px de respiro nas laterais. Cantos retos e sem sombra, como os botões da seção 9.6. Sem sublinhado em repouso; no hover e no foco, sublinhado com afastamento de 3 px, sem troca de cor. O foco é o da seção 9.10. No tema escuro, os mesmos tokens invertem o par: fundo claro, texto escuro.
 
-**Variante com contorno (T-126, Q23; entra na T-125).** O `Assinar via RSS` da saudação (§9.1) é a mesma forma sem fundo: borda de 1 px em tinta, texto em tinta, IBM Plex Mono 400, 44 px de altura e cantos retos. Continua um link (`<a>`), com o mesmo hover e o mesmo foco.
+**Variante com contorno (T-126, Q23; no ar desde a T-125).** O `Assinar via RSS` da saudação (§9.1) é a mesma forma sem fundo: borda de 1 px em tinta, texto em tinta, IBM Plex Mono 400 em 14 px, 44 px de altura e cantos de 0,375rem, com o ícone de RSS (`icone-rss.svg`, 12 px, `aria-hidden`) antes do texto. Os cantos arredondados são só desta variante; o botão da 404 continua reto (T-125). Continua um link (`<a>`), com o mesmo hover e o mesmo foco.
 
 ### 9.12 Busca e filtro
 Decisão da T-119. O filtro está no ar (T-124). A busca está no ar (T-22). A barra "Filtrar por tipo" (T-63, T-64) saiu na T-123.
@@ -697,7 +699,7 @@ Desde a T-44 o arquivo não tem `<style>`, `role` nem `aria-label`: as classes `
 
 ### Ícones (T-119) · `src/assets/brand/icones/`
 
-Só parados, sem versão animada (§7). A folha, o frasco e a lupa estão em `src/assets/brand/icones/` (T-120, T-22). O sol e a lua entram na T-24, o fogo e o voto na T-123. O filtro não entra.
+Só parados, sem versão animada (§7). A folha, o frasco, a lupa e o RSS estão em `src/assets/brand/icones/` (T-120, T-22, T-125). O sol e a lua entram na T-24, o fogo e o voto na T-123. O filtro não entra.
 
 `icone-artigo.svg`
 
@@ -720,6 +722,14 @@ Só parados, sem versão animada (§7). A folha, o frasco e a lupa estão em `sr
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
   <path d="M2 0h4v1h-4zM1 1h1v1h-1zM6 1h1v1h-1zM0 2h1v1h-1zM7 2h1v1h-1zM0 3h1v1h-1zM7 3h1v1h-1zM0 4h1v1h-1zM7 4h1v1h-1zM0 5h1v1h-1zM7 5h1v1h-1zM1 6h1v1h-1zM6 6h2v1h-2zM2 7h4v1h-4zM7 7h2v1h-2zM8 8h2v1h-2zM9 9h2v1h-2zM10 10h2v1h-2zM11 11h1v1h-1z"/>
+</svg>
+```
+
+`icone-rss.svg`
+
+```svg
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12" width="12" height="12" fill="currentColor" shape-rendering="crispEdges">
+  <path d="M1 1h2v1h-2zM3 2h2v1h-2zM5 3h1v1h-1zM1 4h2v1h-2zM6 4h1v1h-1zM3 5h1v1h-1zM7 5h1v1h-1zM4 6h1v1h-1zM8 6h1v1h-1zM5 7h1v1h-1zM8 7h1v1h-1zM5 8h1v1h-1zM9 8h1v1h-1zM1 9h2v1h-2zM6 9h1v1h-1zM9 9h1v1h-1zM1 10h2v1h-2zM6 10h1v1h-1zM9 10h1v1h-1z"/>
 </svg>
 ```
 

@@ -5,7 +5,7 @@ interface Props {
   catalogJson: string;
   headingLevel: 2 | 3;
   limit?: number;
-  layout?: "full" | "votes" | "aligned";
+  layout?: "full" | "ranked" | "aligned";
 }
 
 const { catalogJson, headingLevel, limit, layout = "full" } = Astro.props;
@@ -23,14 +23,14 @@ const placeholder = {
   </p>
   <script is:inline type="application/json" set:html={catalogJson} />
   <template>
-    <li class={layout === "votes" ? "list-none py-3 sm:py-4" : "py-5 sm:py-8"}>
+    <li class={layout === "ranked" ? "list-none" : "py-5 sm:py-8"}>
       <Card
         item={placeholder}
         headingLevel={headingLevel}
         href="/blog/"
         layout={
-          layout === "votes"
-            ? "votes"
+          layout === "ranked"
+            ? "ranked"
             : layout === "aligned"
               ? "aligned"
               : "paired"
@@ -44,23 +44,8 @@ const placeholder = {
 <script>
   import { formatPubDate } from "~/lib/format-date";
   import { rankPosts, type CatalogPost } from "~/lib/ranking";
-  import { allLinkName, tagsOf } from "~/lib/tag-filter";
+  import { tagsOf } from "~/lib/tag-filter";
   import { loadVotes } from "~/lib/votes-client";
-
-  function writeHomeTotal(root: HTMLElement, total: number) {
-    const link = root
-      .closest("section")
-      ?.querySelector<HTMLElement>("[data-home-total]");
-    if (!link) return;
-    const noun = {
-      one: link.dataset.one ?? "",
-      many: link.dataset.many ?? "",
-    };
-    const visible = link.querySelector("[data-home-total-visible]");
-    const name = link.querySelector("[data-home-total-name]");
-    if (visible) visible.textContent = `Todos · ${total}`;
-    if (name) name.textContent = allLinkName(total, noun);
-  }
 
   function setReading(root: ParentNode, minutes: number) {
     const line = root.querySelector("[data-reading]");
@@ -93,7 +78,6 @@ const placeholder = {
       }
       if (!Array.isArray(catalog)) return;
       const rankedAll = rankPosts(catalog, votes);
-      writeHomeTotal(root, rankedAll.length);
       const ranked =
         typeof limit === "number" && Number.isFinite(limit)
           ? rankedAll.slice(0, limit)
@@ -103,7 +87,7 @@ const placeholder = {
         return;
       }
       notice.remove();
-      if (root.dataset.layout !== "votes") {
+      if (root.dataset.layout !== "ranked") {
         list.classList.add(
           "divide-y",
           "divide-line",
@@ -111,8 +95,10 @@ const placeholder = {
           "border-line",
         );
       }
-      for (const post of ranked) {
+      for (const [index, post] of ranked.entries()) {
         const fragment = template.content.cloneNode(true) as DocumentFragment;
+        const position = fragment.querySelector("[data-rank-position]");
+        if (position) position.textContent = String(index + 1).padStart(2, "0");
         const item = fragment.querySelector("li");
         if (item) item.dataset.tags = post.tags.join(" ");
         const link = fragment.querySelector("a");
