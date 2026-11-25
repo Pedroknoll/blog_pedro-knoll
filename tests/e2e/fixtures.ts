@@ -1,6 +1,8 @@
 export const fixtureMd = {
   href: "/blog/fixture-md/",
   title: "Fixture de Markdown",
+  description:
+    "Post de prova em Markdown, com títulos aninhados, código, fórmula, referências e apêndice.",
   published: "02.jan.2000",
   updated: "09.jan.2000",
   keys: ["chave-a", "chave-b"],

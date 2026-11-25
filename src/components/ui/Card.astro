@@ -1,20 +1,26 @@
 ---
+import type { ImageMetadata } from "astro";
+import { Image } from "astro:assets";
+
 import Clock from "~/assets/brand/icones/icone-relogio.svg";
 import Vote from "~/assets/brand/icones/icone-voto.svg";
 import { formatPubDate } from "~/lib/format-date";
+import { thumbnailOf } from "~/lib/home-lists";
 
 interface Item {
   slug: string;
   title: string;
   date: Date | string;
   minutes: number;
+  description?: string;
+  cover?: ImageMetadata;
 }
 
 interface Props {
   item: Item;
   headingLevel?: 2 | 3;
   href?: string;
-  layout?: "paired" | "columns" | "aligned" | "titles" | "votes";
+  layout?: "paired" | "aligned" | "recent" | "ranked" | "prototype";
 }
 
 const {
@@ -33,7 +39,7 @@ function asDate(value: Date | string): Date {
 }
 
 const showMeta =
-  layout === "paired" || layout === "columns" || layout === "aligned";
+  layout === "paired" || layout === "recent" || layout === "aligned";
 const formatted = showMeta ? formatPubDate(asDate(item.date)) : null;
 const text = formatted?.text ?? "";
 const datetime = formatted?.datetime ?? "";
@@ -43,77 +49,127 @@ const linkClass =
   "text-ink no-underline active:text-accent after:absolute after:inset-0";
 const titleClass =
   "font-display text-[1.375rem] leading-[1.2] font-semibold text-balance text-ink not-italic sm:text-[1.625rem]";
+
+// Itens da home (BRAND §9.2, T-125): o hover pinta a linha de `sheet` e o
+// título vai para `accent` sublinhado; a data e o tempo passam de lápis a
+// grafite sobre o `sheet` (BRAND §4: lápis não é texto pequeno sobre folha).
+const homeTitleClass =
+  "font-display text-[1.25rem] leading-[1.2] font-semibold text-balance text-ink not-italic sm:text-[1.625rem]";
+// Mais votados e Protótipos dividem a largura de `lg` em diante: título e
+// descrição menores nessas colunas (T-125).
+const columnTitleClass =
+  "font-display text-[1.25rem] leading-[1.2] font-semibold text-balance text-ink not-italic sm:text-[1.375rem] lg:text-[1.25rem]";
+const homeLinkClass =
+  "text-ink no-underline group-hover:text-accent group-focus-within:text-accent active:text-accent after:absolute after:inset-0";
+const homeItemClass =
+  "group relative -mx-3 px-3 hover:bg-sheet focus-within:bg-sheet motion-safe:transition-colors";
+const homeMetaClass =
+  "font-mono text-xs text-pencil group-hover:text-muted group-focus-within:text-muted";
+const minutesText = `${item.minutes} ${item.minutes === 1 ? "minuto" : "minutos"}`;
+const thumbnail = thumbnailOf(item.cover);
 ---
 
-{layout === "titles" ? (
-  <article class="relative">
-    <Heading class={titleClass}>
-      <a class={linkClass} href={href}>
-        {item.title}
-      </a>
-    </Heading>
+{layout === "prototype" ? (
+  <article class:list={[homeItemClass, "flex items-start gap-x-4 py-4"]}>
+    {thumbnail.kind === "cover" ? (
+      <Image
+        src={thumbnail.cover}
+        alt=""
+        width={72}
+        height={54}
+        densities={[1, 2]}
+        fit="cover"
+        class="h-[54px] w-[72px] shrink-0 object-cover"
+      />
+    ) : (
+      <div aria-hidden="true" class="h-[54px] w-[72px] shrink-0 bg-sheet" />
+    )}
+    <div class="min-w-0">
+      <Heading class={columnTitleClass}>
+        <a class={homeLinkClass} href={href}>
+          {item.title}
+        </a>
+      </Heading>
+      <p
+        data-description
+        class="mt-1 line-clamp-2 font-sans text-base leading-[1.5] text-muted lg:text-sm"
+      >
+        {item.description}
+      </p>
+    </div>
   </article>
-) : layout === "votes" ? (
-  <article class="relative flex min-w-0 items-center justify-between gap-x-3">
-    <Heading class:list={[titleClass, "min-w-0"]}>
-      <a class={linkClass} href={href}>
+) : layout === "ranked" ? (
+  <article
+    class:list={[
+      homeItemClass,
+      "flex min-w-0 items-center gap-x-4 py-3 sm:py-4",
+    ]}
+  >
+    <span
+      data-rank-position
+      class="w-[2ch] shrink-0 font-mono text-xs text-muted"
+    >
+      00
+    </span>
+    <Heading class:list={[columnTitleClass, "min-w-0 flex-1"]}>
+      <a class={homeLinkClass} href={href}>
         {item.title}
       </a>
     </Heading>
-    <p class="footer pointer-events-none flex shrink-0 items-center gap-1 font-mono text-xs text-pencil">
+    <p
+      data-votes
+      class="pointer-events-none flex shrink-0 items-center gap-1 font-mono text-xs text-ink"
+    >
       <Vote
         aria-hidden="true"
         width={10}
         height={8}
         class="inline-block h-2 w-2.5"
       />
+      <span data-vote-value class="inline-block w-[3ch] text-right">
+        –
+      </span>{" "}
       <span data-vote-word>votos</span>
-      <span class="inline-block w-[3ch] text-right text-accent" role="tooltip">
-        <span data-vote-value>–</span>
-      </span>
     </p>
   </article>
-) : layout === "columns" ? (
-  <article class="relative grid gap-y-2 sm:gap-y-3 lg:grid-cols-[6.5rem_minmax(0,1fr)_auto] lg:items-center lg:gap-x-8 lg:gap-y-0">
-    <Heading class:list={[titleClass, "lg:col-start-2 lg:row-start-1"]}>
-      <a class={linkClass} href={href}>
+) : layout === "recent" ? (
+  <article
+    class:list={[
+      homeItemClass,
+      "grid gap-y-2 py-5 sm:grid-cols-[6.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-8 sm:gap-y-0 sm:py-8",
+    ]}
+  >
+    <p
+      class:list={[
+        homeMetaClass,
+        "flex items-baseline gap-x-3 sm:col-start-1 sm:row-start-1 sm:block",
+      ]}
+    >
+      <time datetime={datetime}>{text}</time>
+      <span data-novo class="text-muted uppercase sm:block sm:h-[1lh]" />
+    </p>
+    <Heading class:list={[homeTitleClass, "sm:col-start-2 sm:row-start-1"]}>
+      <a class={homeLinkClass} href={href}>
         {item.title}
       </a>
     </Heading>
-    <div class="flex min-w-0 flex-wrap items-baseline gap-x-3 gap-y-1.5 lg:contents">
-      <p class="font-mono text-xs text-pencil lg:col-start-1 lg:row-start-1">
-        <time datetime={datetime}>{text}</time>
-      </p>
-      <p class="footer pointer-events-none flex flex-wrap items-baseline gap-x-2 gap-y-1.5 font-mono text-xs text-pencil lg:col-start-3 lg:row-start-1">
-        <span data-reading class="whitespace-nowrap">
-          <Clock
-            aria-hidden="true"
-            width={12}
-            height={12}
-            class="inline-block"
-          />{" "}
-          {item.minutes} min de leitura
-        </span>
-        <span class="text-line" aria-hidden="true">
-          |
-        </span>
-        <span class="inline-flex items-baseline gap-1 whitespace-nowrap">
-          <Vote
-            aria-hidden="true"
-            width={10}
-            height={8}
-            class="inline-block h-2 w-2.5"
-          />
-          <span data-vote-word>votos</span>
-          <span
-            class="inline-block w-[3ch] text-right text-accent"
-            role="tooltip"
-          >
-            <span data-vote-value>–</span>
-          </span>
-        </span>
-      </p>
-    </div>
+    <p
+      data-reading
+      title={`${minutesText} de leitura`}
+      class:list={[
+        homeMetaClass,
+        "pointer-events-none flex items-center gap-1.5 whitespace-nowrap sm:col-start-3 sm:row-start-1",
+      ]}
+    >
+      <Clock
+        aria-hidden="true"
+        width={12}
+        height={12}
+        class="inline-block shrink-0"
+      />
+      <span>{minutesText}</span>
+      <span class="sr-only">{" de leitura"}</span>
+    </p>
   </article>
 ) : layout === "aligned" ? (
   <article class="relative grid gap-y-0 sm:grid-cols-[6.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-8">
@@ -195,11 +251,18 @@ const titleClass =
 )}
 
 <script>
+  import { isNew } from "~/lib/novo";
   import { loadVotes } from "~/lib/votes-client";
 
   const view = window as Window & { __pkVoteItem?: boolean };
   if (!view.__pkVoteItem) {
     view.__pkVoteItem = true;
+    const now = new Date();
+    for (const label of document.querySelectorAll<HTMLElement>("[data-novo]")) {
+      const datetime =
+        label.closest("article")?.querySelector("time")?.dateTime ?? "";
+      if (isNew(datetime, now)) label.textContent = "NOVO";
+    }
     void loadVotes().then((votes) => {
       if (!votes) return;
       for (const node of document.querySelectorAll<HTMLElement>(

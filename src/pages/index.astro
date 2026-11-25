@@ -6,7 +6,7 @@ import Listing from "~/components/ui/Listing.astro";
 import TopVoted from "~/components/ui/TopVoted.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
-import { homeLists } from "~/lib/home-lists";
+import { homeLinks, homeLists } from "~/lib/home-lists";
 import { pageCatalog } from "~/lib/page-catalog";
 import { absoluteUrl, pageTitle } from "~/lib/seo";
 import { site } from "~/site.config";
@@ -14,6 +14,7 @@ import { site } from "~/site.config";
 const posts = await getPublishedPosts();
 const { recent, prototypes, totals } = homeLists(posts);
 const catalogJson = await pageCatalog(posts);
+const links = homeLinks(totals);
 const paired = prototypes.length > 0;
 ---
 
@@ -26,33 +27,28 @@ const paired = prototypes.length > 0;
 >
   <HomeColumns>
     <Greeting slot="greeting" />
-    <HomeSection
-      label="/ RECENTES"
-      href="/blog/"
-      total={totals.posts}
-      noun={{ one: "post recente", many: "posts recentes" }}
-      compact
-    >
+    <HomeSection label="/ RECENTES" href="/blog/" link={links.posts} compact>
       <Listing
         heading="Recentes"
         showHeading={false}
         frame={false}
         posts={recent}
         headingLevel={3}
-        layout="columns"
+        layout="recent"
         topBorder={false}
+        dim={false}
       />
     </HomeSection>
     <div
       class:list={[
-        "mt-10 px-4 pb-10",
+        "mt-4 px-4 pb-10 sm:mt-10",
         paired && "lg:grid lg:grid-cols-2 lg:gap-x-16",
       ]}
     >
       <HomeSection
         label="/ MAIS VOTADOS"
         href="/mais-votados/"
-        noun={{ one: "mais votado", many: "mais votados" }}
+        link={links.ranking}
         padded={false}
         compact
       >
@@ -60,15 +56,14 @@ const paired = prototypes.length > 0;
           catalogJson={catalogJson}
           headingLevel={3}
           limit={10}
-          layout="votes"
+          layout="ranked"
         />
       </HomeSection>
       {paired && (
         <HomeSection
           label="/ PROTÓTIPOS"
           href="/prototipos/"
-          total={totals.prototypes}
-          noun={{ one: "protótipo", many: "protótipos" }}
+          link={links.prototypes}
           padded={false}
           compact
         >
@@ -78,7 +73,8 @@ const paired = prototypes.length > 0;
             frame={false}
             posts={prototypes}
             headingLevel={3}
-            layout="titles"
+            layout="prototype"
+            dim={false}
           />
         </HomeSection>
       )}

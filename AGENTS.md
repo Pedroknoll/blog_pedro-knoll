@@ -64,20 +64,20 @@ src/content/posts/<slug>/index.mdx   cada post é uma pasta: texto, capa, figs/,
 src/content/comece-aqui.mdx          a página Comece aqui; editar é mudar só este MDX
 src/content/posts/fixture-*/         fixtures de teste, só no build com SHOW_FIXTURES=true (T-39)
 src/assets/brand/       pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel,-404}.svg
-src/assets/brand/icones/  aceno.svg; icone-{artigo,prototipo,relogio,fogo,voto,busca}.svg
+src/assets/brand/icones/  aceno.svg; icone-{artigo,prototipo,relogio,fogo,voto,busca,rss}.svg
 src/components/ui/      .astro estáticos
 src/components/viz/     primitivas e exploráveis Svelte; sem client:* é figura estática (AGENTS.md próprio, criado antes da T-19; seção 9.8 do BRAND)
 src/lib/viz/            geometria pura
 src/components/marimo/  Notebook.astro, o botão do caderno (AGENTS.md próprio, criado antes da T-18; seções 9.6–9.7)
 src/integrations/headers.ts   gera dist/_headers no build (CSP por rota)
 src/integrations/pagefind.ts  indexa dist/blog/*/index.html no fim do build (T-22)
-src/lib/                getPublishedPosts, readingTime, seo, votes-catalog, votes-client, ranking, home-lists, tag-filter, reading-list, search
+src/lib/                getPublishedPosts, readingTime, seo, votes-catalog, votes-client, ranking, home-lists, novo, tag-filter, reading-list, search
 src/pages/api/catalogo.json.ts   catálogo dos posts publicados; o público recebe 404 (T-121)
 worker/                 Worker só para /api/* (T-121)
 migrations/             SQL do D1, 0001_votes.sql
 src/styles/shiki/       pk-claro.json, pk-escuro.json
 scripts/build-data.py   acha e roda o data/build.py de cada post e grava o data.lock; o pnpm check:data confere o lock (T-73, T-79)
-public/                 favicon.svg, favicon.ico, favicon-16.png, favicon-32.png, apple-touch-icon.png
+public/                 avatar.jpg (foto do autor, T-125), favicon.svg, favicon.ico, favicon-16.png, favicon-32.png, apple-touch-icon.png
 tests/                  vitest (unit) e playwright (e2e); literais das fixtures em tests/e2e/fixtures.ts
 .cursor/skills/         novo-post e as skills de bloco do post: post-prosa, post-figura, post-dados, post-caderno (T-80)
 ```
@@ -99,7 +99,7 @@ Sem `icon-192.png` e sem `icon-512.png`. Não há `src/components/marimo/pk.css`
 - **Cadernos:** complemento opcional de qualquer post: o `.py` fica em `notebooks/` na pasta do post, e o componente `Notebook`, no MDX, leva ao molab (`/wasm` por padrão; com `gpu`, a prévia estática, de onde o leitor com conta no molab roda no servidor). O blog não exporta nem hospeda caderno, e um post com caderno é `.mdx`. Detalhes na SPEC §6 e §7.
 - **Cores:** só a lista fechada do CSS global: `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `grid`, `grid-strong`. Sem nome paralelo `--papel` / `--prussia`. Sem `dark:` e sem `@custom-variant dark`. Hex de desenho só em `src/assets/brand/`. As variáveis de `src/styles/global.css` e os JSON do Shiki também carregam hex, porque são a definição da paleta e o tema não lê variável CSS; componente, página e layout não.
 - **Fontes:** Fonts API do Astro, `fontProviders.fontsource`, três famílias (IBM Plex Sans Condensed, IBM Plex Sans, IBM Plex Mono). Tokens `--font-display`, `--font-sans` e `--font-mono`. As variáveis de família (`--font-plex-condensed`, `--font-plex-sans`, `--font-plex-mono`) só aparecem no `astro.config.mjs`, no `BaseLayout.astro`, no bloco `@theme inline` do `global.css` e nos testes E2E, que leem a família pela variável. Componente e página usam o token; a IBM Plex Sans entra no texto e a IBM Plex Mono no código pela troca de `--font-sans` e `--font-mono`. Sem pacote `@fontsource` instalado à mão e sem Google Fonts. O Astro acrescenta um sufixo de hash ao nome da família; use sempre o token ou a variável do `cssVariable`, nunca o nome da família escrito à mão. A IBM Plex Mono entra só no peso 400. Tarefa que acrescenta face de fonte numa página mede antes e depois com o Lighthouse. Mudar a lista ou os tetos do `font-budget.spec.ts` é decisão de escopo.
-- **Ícones:** import default do `.svg` como componente Astro. Animação no CSS global. Versão parada em lista. `prefers-reduced-motion`. O aceno da saudação fica fora do `h1`, acima dele, e leva `aria-hidden` (T-69).
+- **Ícones:** import default do `.svg` como componente Astro. Animação no CSS global. Versão parada em lista. `prefers-reduced-motion`. O aceno da saudação fica no fim do `h1`, depois do ponto, e leva `aria-hidden` (T-125).
 - **Fonte de display:** IBM Plex Sans Condensed, só o peso 600 normal, sem itálico declarado; um trecho em itálico num título usa o itálico sintetizado. Sem tamanho mínimo próprio (T-60). Outra face nas páginas só depois de uma tarefa medir.
 - **AGENTS aninhados:** marimo recebe as seções 9.6–9.7 e o que a T-97 ensinou (`specs/spikes/T-97-molab.md`); viz recebe a seção 9.8.
 

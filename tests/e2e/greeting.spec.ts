@@ -11,12 +11,8 @@ const h1Sizes = {
   360: 38.4,
 } as const;
 
-const waveSizes = {
-  1280: 48,
-  560: 48,
-  559: 32,
-  360: 32,
-} as const;
+const waveSize = 32;
+const avatarAlt = "Foto de Pedro Knoll";
 
 function normalizeFamily(value: string): string {
   return value.replace(/\s*,\s*/g, ",").trim();
@@ -56,23 +52,19 @@ test.describe("saudação [RF-01, RNF-04]", () => {
     const observed = await page.evaluate(() => {
       const normalize = (value: string) => value.replace(/\s+/g, " ").trim();
       const h1 = document.querySelector("h1");
-      const nomes = [...(h1?.querySelectorAll(".nome") ?? [])];
-      const blog =
-        [...document.querySelectorAll("h1")]
-          .map((heading) => normalize(heading.textContent ?? ""))
-          .find((value) => value === "Blog") ?? "";
+      const names = [...(h1?.querySelectorAll("[data-greeting-name]") ?? [])];
       return {
         text: normalize(h1?.textContent ?? ""),
-        nomeCount: nomes.length,
-        nomeText: normalize(nomes[0]?.textContent ?? ""),
-        blog,
+        nameCount: names.length,
+        nameText: normalize(names[0]?.textContent ?? ""),
+        wordmarks: h1?.querySelectorAll(".nome").length ?? -1,
       };
     });
 
     expect.soft(observed.text).toBe(homeGreeting);
-    expect.soft(observed.nomeCount).toBe(1);
-    expect.soft(observed.nomeText).toBe("pk.log");
-    expect.soft(observed.blog).toBe("");
+    expect.soft(observed.nameCount).toBe(1);
+    expect.soft(observed.nameText).toBe("Pedro");
+    expect.soft(observed.wordmarks).toBe(0);
 
     await expect(
       page.getByRole("heading", {
@@ -83,28 +75,55 @@ test.describe("saudação [RF-01, RNF-04]", () => {
     ).toHaveCount(1);
   });
 
-  test("G2 aceno fora do h1", async ({ page }) => {
+  test("G2 aceno no fim do h1", async ({ page }) => {
     await open(page, "/", 1280);
-    await expect(page.locator("h1 svg")).toHaveCount(0);
+    await expect(page.locator("h1 svg:has(.pka-a)")).toHaveCount(1);
+    await expect(page.locator("svg:has(.pka-a)")).toHaveCount(1);
 
     const observed = await page.evaluate(() => {
       const h1 = document.querySelector("h1");
-      const sibling = h1?.previousElementSibling;
       const hand = document.querySelector("svg:has(.pka-a)");
+      const handBox = hand?.getBoundingClientRect();
+      let after = "";
+      let textRight = Number.NEGATIVE_INFINITY;
+      if (h1 && hand) {
+        const walker = document.createTreeWalker(h1, NodeFilter.SHOW_TEXT);
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+          if (hand.contains(node)) continue;
+          const position = hand.compareDocumentPosition(node);
+          if (position & Node.DOCUMENT_POSITION_FOLLOWING) {
+            after += node.textContent ?? "";
+            continue;
+          }
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          for (const rect of range.getClientRects()) {
+            const line = hand.closest("[data-greeting-line]");
+            if (handBox && line?.contains(node)) {
+              textRight = Math.max(textRight, rect.right);
+            }
+          }
+        }
+      }
       return {
-        siblingTag: sibling?.tagName.toLowerCase() ?? "",
+        after: after.trim(),
+        handLeft: handBox?.left ?? Number.NaN,
+        textRight,
         ariaHidden: hand?.getAttribute("aria-hidden") ?? "null",
         role: hand?.getAttribute("role") ?? "null",
         ariaLabel: hand?.getAttribute("aria-label") ?? "null",
         styleCount: hand?.querySelectorAll("style").length ?? -1,
+        previousImage: h1?.previousElementSibling?.tagName.toLowerCase() ?? "",
       };
     });
 
-    expect.soft(observed.siblingTag).toBe("svg");
+    expect.soft(observed.after).toBe("");
+    expect.soft(observed.handLeft).toBeGreaterThanOrEqual(observed.textRight);
     expect.soft(observed.ariaHidden).toBe("true");
     expect.soft(observed.role).toBe("null");
     expect.soft(observed.ariaLabel).toBe("null");
     expect.soft(observed.styleCount).toBe(0);
+    expect.soft(observed.previousImage).toBe("img");
   });
 
   test("G3 família, peso e tamanho do h1", async ({ page }) => {
@@ -116,36 +135,47 @@ test.describe("saudação [RF-01, RNF-04]", () => {
         await page.setViewportSize({ width, height: 800 });
         const measured = await page.evaluate(() => {
           const h1 = document.querySelector("h1");
+          const name = h1?.querySelector("[data-greeting-name]");
           const style = h1 ? getComputedStyle(h1) : null;
-          const variable = getComputedStyle(document.documentElement)
-            .getPropertyValue("--font-plex-condensed")
-            .trim();
+          const nameStyle = name ? getComputedStyle(name) : null;
+          const root = getComputedStyle(document.documentElement);
           return {
             family: style?.fontFamily ?? "",
-            variable,
+            sans: root.getPropertyValue("--font-plex-sans").trim(),
             weight: style?.fontWeight ?? "",
             fontStyle: style?.fontStyle ?? "",
             fontSize: style?.fontSize ?? "",
+            nameFamily: nameStyle?.fontFamily ?? "",
+            condensed: root.getPropertyValue("--font-plex-condensed").trim(),
+            nameWeight: nameStyle?.fontWeight ?? "",
+            nameStyle: nameStyle?.fontStyle ?? "",
+            nameSize: nameStyle?.fontSize ?? "",
           };
         });
         const where = String(width);
         expect
-          .soft(familyPrefix(measured.family, measured.variable), where)
-          .toBe(normalizeFamily(measured.variable));
-        expect.soft(measured.weight, where).toBe("600");
+          .soft(familyPrefix(measured.family, measured.sans), where)
+          .toBe(normalizeFamily(measured.sans));
+        expect.soft(measured.weight, where).toBe("400");
         expect.soft(measured.fontStyle, where).toBe("normal");
         expect
           .soft(closeTo(measured.fontSize, h1Sizes[width]), where)
           .toBe(h1Sizes[width]);
+        expect
+          .soft(familyPrefix(measured.nameFamily, measured.condensed), where)
+          .toBe(normalizeFamily(measured.condensed));
+        expect.soft(measured.nameWeight, where).toBe("600");
+        expect.soft(measured.nameStyle, where).toBe("normal");
+        expect.soft(measured.nameSize, where).toBe(measured.fontSize);
       });
     }
   });
 
-  test("G4 tamanho e alinhamento do aceno", async ({ page }) => {
+  test("G4 tamanho do aceno", async ({ page }) => {
     await open(page, "/", 1280);
     await expect(page.locator("svg:has(.pka-a)")).toHaveCount(1);
 
-    for (const width of [1280, 560, 559, 360] as const) {
+    for (const width of [1280, 1024, 1023, 560, 559, 360] as const) {
       await test.step(String(width), async () => {
         await page.setViewportSize({ width, height: 800 });
         const measured = await page.evaluate(() => {
@@ -154,18 +184,56 @@ test.describe("saudação [RF-01, RNF-04]", () => {
           return {
             width: style?.width ?? "",
             height: style?.height ?? "",
-            display: style?.display ?? "",
-            marginBottom: style?.marginBottom ?? "",
           };
         });
         const where = String(width);
-        const size = waveSizes[width];
-        expect.soft(closeTo(measured.width, size), where).toBe(size);
-        expect.soft(closeTo(measured.height, size), where).toBe(size);
-        if (width === 1280) {
-          expect.soft(measured.display, where).toBe("block");
-          expect.soft(closeTo(measured.marginBottom, 16), where).toBe(16);
-        }
+        expect.soft(closeTo(measured.width, waveSize), where).toBe(waveSize);
+        expect.soft(closeTo(measured.height, waveSize), where).toBe(waveSize);
+      });
+    }
+  });
+
+  test("G10 foto do autor acima do h1", async ({ page }) => {
+    await open(page, "/", 1280);
+    const photo = page.getByRole("img", { name: avatarAlt, exact: true });
+    await expect(photo).toHaveCount(1);
+    await expect(photo).toHaveAttribute("src", "/avatar.jpg");
+    await expect(photo).toHaveAttribute("width", /^\d+$/);
+    await expect(photo).toHaveAttribute("height", /^\d+$/);
+
+    for (const width of [1280, 1024, 1023, 360] as const) {
+      await test.step(String(width), async () => {
+        await page.setViewportSize({ width, height: 800 });
+        const measured = await photo.evaluate((element) => {
+          const style = getComputedStyle(element);
+          const probe = document.createElement("span");
+          probe.style.borderColor = "var(--color-line)";
+          probe.style.borderStyle = "solid";
+          document.body.append(probe);
+          const line = getComputedStyle(probe).borderTopColor;
+          probe.remove();
+          const h1 = document.querySelector("h1");
+          return {
+            width: element.getBoundingClientRect().width,
+            height: element.getBoundingClientRect().height,
+            radius: style.borderTopLeftRadius,
+            borderWidth: style.borderTopWidth,
+            borderColor: style.borderTopColor,
+            line,
+            bottom: element.getBoundingClientRect().bottom,
+            h1Top: h1?.getBoundingClientRect().top ?? Number.NaN,
+          };
+        });
+        const where = String(width);
+        const size = width >= 1024 ? 88 : 72;
+        expect.soft(Math.abs(measured.width - size), where).toBeLessThan(0.5);
+        expect.soft(Math.abs(measured.height - size), where).toBeLessThan(0.5);
+        expect
+          .soft(Number.parseFloat(measured.radius), where)
+          .toBeGreaterThanOrEqual(size / 2);
+        expect.soft(measured.borderWidth, where).toBe("1px");
+        expect.soft(measured.borderColor, where).toBe(measured.line);
+        expect.soft(measured.bottom, where).toBeLessThanOrEqual(measured.h1Top);
       });
     }
   });
@@ -328,60 +396,40 @@ test.describe("saudação [RF-01, RNF-04]", () => {
     expect.soft(greetingHeadings).toBe(0);
   });
 
-  test("G9 quebra de lg em diante", async ({ page }) => {
+  test("G9 h1 sempre em duas linhas fixas", async ({ page }) => {
     await open(page, "/", 1280);
-    let linesAt1280 = "";
 
     for (const width of [1280, 1024, 1023, 560, 559, 412, 360] as const) {
       await test.step(String(width), async () => {
         await page.setViewportSize({ width, height: 800 });
-        await expect(
-          page.getByRole("heading", {
-            level: 1,
-            name: homeGreeting,
-            exact: true,
-          }),
-        ).toHaveCount(1);
-
         const measured = await page.evaluate(() => {
+          const normalize = (value: string) =>
+            value.replace(/\s+/g, " ").trim();
           const h1 = document.querySelector("h1");
-          const nome = h1?.querySelector(".nome");
+          const lines = [
+            ...(h1?.querySelectorAll(":scope > [data-greeting-line]") ?? []),
+          ];
+          const lineHeight = h1
+            ? Number.parseFloat(getComputedStyle(h1).lineHeight)
+            : Number.NaN;
           return {
-            nomeTop: nome?.getBoundingClientRect().top ?? Number.NaN,
-            h1Top: h1?.getBoundingClientRect().top ?? Number.NaN,
-            nomeDisplay: nome ? getComputedStyle(nome).display : "",
-            fontSize: h1 ? getComputedStyle(h1).fontSize : "",
+            texts: lines.map((line) => normalize(line.textContent ?? "")),
+            heights: lines.map((line) => line.getBoundingClientRect().height),
+            tops: lines.map((line) => line.getBoundingClientRect().top),
+            displays: lines.map((line) => getComputedStyle(line).display),
+            lineHeight,
+            h1Height: h1?.getBoundingClientRect().height ?? Number.NaN,
           };
         });
-
-        const fontSize = /^(-?\d+(?:\.\d+)?)px$/.exec(measured.fontSize.trim());
-        const h1Number = fontSize?.[1] ? Number(fontSize[1]) : Number.NaN;
-        const lines =
-          measured.nomeTop - measured.h1Top >= 0.5 * h1Number ? "duas" : "uma";
         const where = String(width);
-        if (width === 1280) linesAt1280 = lines;
-        const expected =
-          width === 1280
-            ? "duas"
-            : width === 1024
-              ? linesAt1280
-              : width === 1023 || width === 560
-                ? "uma"
-                : "duas";
-        expect.soft(lines, where).toBe(expected);
-
-        if (width === 1280) {
-          expect.soft(measured.nomeDisplay, where).toBe("block");
-          const bemVindo = page.locator("h1 span", {
-            hasText: /^Bem-vindo ao$/,
-          });
-          await expect.soft(bemVindo, where).toHaveCount(1);
-          if ((await bemVindo.count()) === 1) {
-            await expect
-              .soft(bemVindo, where)
-              .toHaveCSS("white-space", "nowrap");
-          }
+        expect.soft(measured.texts, where).toEqual(["Olá, eu sou", "o Pedro."]);
+        expect.soft(measured.displays, where).toEqual(["block", "block"]);
+        for (const height of measured.heights) {
+          expect.soft(height, where).toBeLessThan(measured.lineHeight * 1.5);
         }
+        expect
+          .soft(measured.h1Height, where)
+          .toBeLessThan(measured.lineHeight * 2.5);
       });
     }
   });

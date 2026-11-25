@@ -11,6 +11,10 @@ kind: prototype
 
 tags: [fixture, md]
 
+cover: ./cover.png
+
+coverAlt: "Fundo preto com texto"
+
 references:
   - key: chave-a
     authors:

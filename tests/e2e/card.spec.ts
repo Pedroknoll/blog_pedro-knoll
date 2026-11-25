@@ -133,17 +133,11 @@ async function animationNames(svg: Locator): Promise<string[]> {
   );
 }
 
-function inRecentBand(root: Element) {
+// A home tem itens próprios desde a T-125 (BRAND §9.2, home.spec.ts).
+function inHomeBand(root: Element) {
   const label = root.closest("section")?.querySelector("h2");
-  return (
-    (label?.textContent ?? "").replace(/\s+/g, " ").trim() === "/ RECENTES"
-  );
-}
-
-function inPrototypeBand(root: Element) {
-  const label = root.closest("section")?.querySelector("h2");
-  return (
-    (label?.textContent ?? "").replace(/\s+/g, " ").trim() === "/ PROTÓTIPOS"
+  return /^\/ [A-ZÁÉÍÓÚÂÊÔÃÕÇ ]+$/.test(
+    (label?.textContent ?? "").replace(/\s+/g, " ").trim(),
   );
 }
 
@@ -153,11 +147,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await test.step(path, async () => {
         await open(page, path);
         for (const article of await cardsOn(page)) {
-          if (await article.evaluate(inPrototypeBand)) {
-            await expect(article.locator("time")).toHaveCount(0);
-            await expect(article.locator("p.footer")).toHaveCount(0);
-            continue;
-          }
+          if (await article.evaluate(inHomeBand)) continue;
           await expectDateLine(article);
         }
       });
@@ -177,17 +167,21 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
             const variable = getComputedStyle(document.documentElement)
               .getPropertyValue("--font-plex-condensed")
               .trim();
+            const label = element.closest("section")?.querySelector("h2");
             return {
               family: style.fontFamily,
               variable,
               weight: style.fontWeight,
               fontSize: style.fontSize,
+              home: /^\/ /.test((label?.textContent ?? "").trim()),
             };
           });
           expect(familyPrefix(measured.family, measured.variable)).toBe(
             normalizeFamily(measured.variable),
           );
           expect(measured.weight).toBe("600");
+          // Os tamanhos dos itens da home estão no home.spec.ts (T-125).
+          if (measured.home) continue;
           expect(fontSizePx(measured.fontSize)).toBeGreaterThanOrEqual(22);
         }
       });
@@ -314,11 +308,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await test.step(path, async () => {
         await open(page, path);
         for (const article of await listArticles(page)) {
-          if (await article.evaluate(inPrototypeBand)) {
-            await expect(article.locator("[data-reading]")).toHaveCount(0);
-            await expect(article.locator("time")).toHaveCount(0);
-            continue;
-          }
+          if (await article.evaluate(inHomeBand)) continue;
           const reading = article.locator("[data-reading]");
           await expect(reading).toHaveCount(1);
           const cardText = textOf(await reading.textContent());
@@ -348,7 +338,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
   });
 
   test("C9 nenhum card com capa", async ({ page }) => {
-    const paths = ["/", ...(await tagHrefsFromPosts(page))];
+    const paths = await tagHrefsFromPosts(page);
     for (const path of paths) {
       await test.step(path, async () => {
         await open(page, path);
@@ -365,8 +355,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await test.step(`${path} 1280`, async () => {
         await open(page, path);
         for (const article of await listArticles(page)) {
-          if (await article.evaluate(inPrototypeBand)) continue;
-          const recent = await article.evaluate(inRecentBand);
+          if (await article.evaluate(inHomeBand)) continue;
           const placed = await article.evaluate((root) => {
             const date = root.querySelector("time")?.parentElement;
             const heading = root.querySelector(":is(h2, h3)");
@@ -407,15 +396,6 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           expect(
             Math.abs(placed.track - placed.expectedTrack),
           ).toBeLessThanOrEqual(1);
-          if (recent) {
-            expect(placed.footerLeft).toBeGreaterThanOrEqual(
-              placed.headingRight,
-            );
-            expect(
-              Math.abs(placed.dateCenter - placed.footerCenter),
-            ).toBeLessThanOrEqual(1);
-            continue;
-          }
           expect(
             Math.abs(placed.dateCenter - placed.textCenter),
             "data centrada no texto",
@@ -429,8 +409,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await test.step(`${path} 360`, async () => {
         await open(page, path);
         for (const article of await listArticles(page)) {
-          if (await article.evaluate(inPrototypeBand)) continue;
-          const recent = await article.evaluate(inRecentBand);
+          if (await article.evaluate(inHomeBand)) continue;
           const above = await article.evaluate((root) => {
             const date = root.querySelector("time")?.parentElement;
             const heading = root.querySelector(":is(h2, h3)");
@@ -450,12 +429,6 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           });
           expect(above).not.toBeNull();
           if (!above) continue;
-          if (recent) {
-            expect(above.headingTop).toBeLessThan(above.dateTop);
-            expect(above.headingTop).toBeLessThan(above.footerTop);
-            expect(above.dateTop).toBeLessThan(above.footerBottom);
-            continue;
-          }
           expect(above.dateTop).toBeLessThan(above.headingTop);
           expect(above.dateBottom).toBeLessThanOrEqual(above.headingTop + 1);
         }
@@ -465,7 +438,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
 
   test("C12 rodapé não abre nem fecha linha com pipe", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
-    await open(page, "/");
+    await open(page, "/blog/");
     const widths = await page.evaluate(() => ({
       scrollWidth: document.documentElement.scrollWidth,
       clientWidth: document.documentElement.clientWidth,
@@ -547,30 +520,28 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
       await test.step(path, async () => {
         await open(page, path);
         for (const article of await listArticles(page)) {
-          const titlesOnly = await article.evaluate(inPrototypeBand);
-          if (!titlesOnly) {
-            const clock = await article.evaluate((root) => {
-              const span = root.querySelector("[data-reading]");
-              const svg = span?.querySelector(":scope > svg");
-              if (!svg) return { ok: false, reason: "sem svg" };
-              let after = "";
-              for (let node = svg.nextSibling; node; node = node.nextSibling) {
-                if (node.nodeType === Node.ELEMENT_NODE) {
-                  return { ok: false, reason: "elemento depois do svg" };
-                }
-                after += node.textContent ?? "";
+          if (await article.evaluate(inHomeBand)) continue;
+          const clock = await article.evaluate((root) => {
+            const span = root.querySelector("[data-reading]");
+            const svg = span?.querySelector(":scope > svg");
+            if (!svg) return { ok: false, reason: "sem svg" };
+            let after = "";
+            for (let node = svg.nextSibling; node; node = node.nextSibling) {
+              if (node.nodeType === Node.ELEMENT_NODE) {
+                return { ok: false, reason: "elemento depois do svg" };
               }
-              return {
-                ok: /^\d+\s+min de leitura$/.test(
-                  after.replace(/\s+/g, " ").trim(),
-                ),
-                hidden: svg.getAttribute("aria-hidden"),
-                after: after.replace(/\s+/g, " ").trim(),
-              };
-            });
-            expect(clock.ok, JSON.stringify(clock)).toBe(true);
-            expect(clock.hidden).toBe("true");
-          }
+              after += node.textContent ?? "";
+            }
+            return {
+              ok: /^\d+\s+min de leitura$/.test(
+                after.replace(/\s+/g, " ").trim(),
+              ),
+              hidden: svg.getAttribute("aria-hidden"),
+              after: after.replace(/\s+/g, " ").trim(),
+            };
+          });
+          expect(clock.ok, JSON.stringify(clock)).toBe(true);
+          expect(clock.hidden).toBe("true");
 
           const link = article.locator(titleHeading).getByRole("link");
           const rest = await link.evaluate((element) => {
@@ -711,7 +682,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
 
   test("C20 vão vertical quando o rodapé quebra", async ({ page }) => {
     await page.setViewportSize({ width: 360, height: 800 });
-    await open(page, "/");
+    await open(page, "/blog/");
     const footer = page.locator("article p.footer").first();
     await expect(footer).toBeVisible();
     const measured = await footer.evaluate((node) => {
