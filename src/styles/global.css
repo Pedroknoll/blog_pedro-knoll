@@ -402,3 +402,27 @@ pagefind-modal {
   text-decoration: underline;
   text-underline-offset: 0.12em;
 }
+
+/* Abaixo de 640 px o Pagefind ocupa a tela. O cartão deixa a página em volta. */
+@media (max-width: 640px) {
+  :is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) dialog.pf-modal[open] {
+    top: 8dvh;
+    right: 0.75rem;
+    bottom: auto;
+    left: 0.75rem;
+    width: auto;
+    height: auto;
+    max-width: none;
+    max-height: min(78dvh, 800px);
+    margin: 0;
+    border: 1px solid var(--color-line);
+    border-radius: 0.375rem;
+    box-sizing: border-box;
+  }
+
+  :is(*, #\#):is(*, #\#):is(*, #\#):is(*, #\#) dialog.pf-modal::backdrop {
+    background: color-mix(in srgb, var(--color-surface) 55%, transparent);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+}

@@ -69,6 +69,41 @@ test.describe("busca [RF-15]", () => {
     }
   });
 
+  test("a 360 px o diálogo deixa a página visível em volta", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 360, height: 800 });
+    const response = await page.goto("/");
+    expect(response?.status()).toBe(200);
+    await searchButton(page).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toBeVisible({ timeout: 15_000 });
+    const box = await dialog.boundingBox();
+    expect(box).not.toBeNull();
+    if (!box) return;
+    expect(box.x).toBeGreaterThan(8);
+    expect(box.y).toBeGreaterThan(40);
+    expect(box.x + box.width).toBeLessThan(352);
+    expect(box.y + box.height).toBeLessThan(760);
+    const veil = await dialog.evaluate((node) => {
+      const style = getComputedStyle(node, "::backdrop");
+      const color = style.backgroundColor;
+      const slash = color.match(/\/\s*([\d.]+%?)\)/);
+      const comma = color.match(/rgba?\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)/);
+      let alpha = 1;
+      if (slash) {
+        alpha = slash[1].endsWith("%")
+          ? Number(slash[1].slice(0, -1)) / 100
+          : Number(slash[1]);
+      } else if (comma) {
+        alpha = Number(comma[1]);
+      }
+      return { alpha, filter: style.backdropFilter };
+    });
+    expect(veil.filter).toContain("blur");
+    expect(veil.alpha).toBeLessThan(1);
+  });
+
   test("o script só carrega ao abrir, o Esc devolve o foco e o atalho abre", async ({
     page,
   }) => {
