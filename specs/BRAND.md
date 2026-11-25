@@ -280,7 +280,7 @@ Decisão da T-126 (Q23), que substitui a da T-119, e da T-131 (Q24) nas listas i
 
 - Um `article` em grade. De `sm` em diante, três colunas centradas na vertical: a data (6,5rem), o título e, à direita, uma coluna só com o tempo de leitura. Abaixo de `sm`, os três empilhados: data, título e tempo.
 - **Data:** mono 12 px, lápis, no formato `21.out.2026`.
-- **NOVO:** nos posts publicados nos últimos 7 dias. Mono 12 px, maiúsculas, grafite; abaixo da data de `sm` em diante e ao lado dela abaixo de `sm`. É calculado no navegador a partir do `datetime` do item, com o lugar reservado no HTML, para o rótulo não deslocar a página. Sem JavaScript, sem rótulo.
+- **NOVO:** nos posts publicados nos últimos 7 dias. Mono 12 px, maiúsculas, grafite; abaixo da data de `sm` em diante e ao lado dela abaixo de `sm`. É calculado no navegador a partir do `datetime` do item, com o lugar reservado no HTML, para o rótulo não deslocar a página. Sem JavaScript, sem rótulo. De `sm` em diante, a data, o título e o tempo ficam no centro vertical do item, e o `NOVO` pende abaixo da data, sem mudar esse centro (T-131).
 - **Título:** fonte de display 600, entrelinha 1,2, com `text-wrap: balance`. 20 px abaixo de `sm` e 26 px de `sm` em diante.
 - **Tempo:** o relógio parado de 12 px e `11 minutos` (`1 minuto` no singular), em mono 12 px, lápis. "de leitura" vai só no texto para leitor de tela e no `title`. Sem votos, resumo, capa, tipo, tema, nível, tag nem hachura.
 - **Toque:** o item inteiro é tocável: o link do título se estica sobre o item (`after:absolute after:inset-0`, com o `article` em `relative`). O tempo não intercepta o toque (`pointer-events-none`).
@@ -292,6 +292,7 @@ Decisão da T-126 (Q23), que substitui a da T-119, e da T-131 (Q24) nas listas i
 - Um `article` em grade. De `sm` em diante, colunas: a data (6,5rem, como no item de Recentes), em `/prototipos/` a miniatura (6rem), o título com a descrição embaixo e, à direita, uma coluna de 7,5rem com o tempo e, embaixo, os votos. A coluna da direita tem largura fixa, para os votos não mudarem a largura do título quando aparecem. Vão de 1,5rem entre as colunas. Abaixo de `sm`: a data com o `NOVO` ao lado, o título, a descrição e uma linha com o tempo, `·` e os votos; em `/prototipos/`, a miniatura fica à esquerda do título, da descrição e dessa linha.
 - **Data:** como no item de Recentes: `21.out.2026`, mono 12 px, lápis.
 - **NOVO:** como no item de Recentes: abaixo da data de `sm` em diante e ao lado dela abaixo de `sm`.
+- **Alinhamento vertical:** de `sm` em diante, as colunas ficam no centro vertical do item (`align-items: center`): a linha da data, a miniatura, o bloco do título com a descrição e a linha do tempo. O `NOVO` e os votos pendem logo abaixo da data e do tempo, fora dessa conta, para não mudarem o centro quando aparecem (T-131).
 - **Título:** como no item de Recentes (20 px abaixo de `sm`, 26 px de `sm` em diante).
 - **Descrição:** a `description` do post, em até 2 linhas (`line-clamp`), em Plex Sans 16 px, entrelinha 1,5, grafite.
 - **Tempo:** o relógio parado de 12 px e `11 minutos`, como no item de Recentes.

@@ -69,11 +69,13 @@ const thumbnail = thumbnailOf(item.cover);
 // com o NOVO, o título, a descrição e uma linha com o tempo e os votos; com
 // miniatura, ela fica à esquerda do texto. De `sm` em diante, colunas: a
 // data, a miniatura, o título com a descrição e, à direita, o tempo e os
-// votos, um embaixo do outro. A coluna da direita tem largura fixa, para os
-// votos não mudarem a largura do título quando aparecem.
+// votos. As colunas ficam no centro vertical do item; o NOVO e os votos
+// pendem abaixo da data e do tempo (absolutos), para não mudarem esse centro
+// quando aparecem. A coluna da direita tem largura fixa, para os votos não
+// mudarem a largura do título.
 const listGrid = thumb
-  ? "grid-cols-[72px_minmax(0,1fr)] gap-x-4 [grid-template-areas:'date_date'_'thumb_title'_'thumb_desc'_'thumb_meta'] sm:grid-cols-[6.5rem_6rem_minmax(0,1fr)_7.5rem] sm:grid-rows-[auto_1fr] sm:gap-x-6 sm:[grid-template-areas:'date_thumb_title_meta'_'date_thumb_desc_meta']"
-  : "[grid-template-areas:'date'_'title'_'desc'_'meta'] sm:grid-cols-[6.5rem_minmax(0,1fr)_7.5rem] sm:grid-rows-[auto_1fr] sm:gap-x-6 sm:[grid-template-areas:'date_title_meta'_'date_desc_meta']";
+  ? "grid-cols-[72px_minmax(0,1fr)] gap-x-4 [grid-template-areas:'date_date'_'thumb_title'_'thumb_desc'_'thumb_meta'] sm:grid-cols-[6.5rem_6rem_minmax(0,1fr)_7.5rem] sm:items-center sm:gap-x-6 sm:[grid-template-areas:'date_thumb_title_meta'_'date_thumb_desc_meta']"
+  : "[grid-template-areas:'date'_'title'_'desc'_'meta'] sm:grid-cols-[6.5rem_minmax(0,1fr)_7.5rem] sm:items-center sm:gap-x-6 sm:[grid-template-areas:'date_title_meta'_'date_desc_meta']";
 ---
 
 {layout === "prototype" ? (
@@ -149,11 +151,14 @@ const listGrid = thumb
     <p
       class:list={[
         homeMetaClass,
-        "flex items-baseline gap-x-3 sm:col-start-1 sm:row-start-1 sm:block",
+        "flex items-baseline gap-x-3 sm:relative sm:col-start-1 sm:row-start-1 sm:block",
       ]}
     >
       <time datetime={datetime}>{text}</time>
-      <span data-novo class="text-muted uppercase sm:block sm:h-[1lh]" />
+      <span
+        data-novo
+        class="text-muted uppercase sm:absolute sm:top-full sm:left-0"
+      />
     </p>
     <Heading class:list={[homeTitleClass, "sm:col-start-2 sm:row-start-1"]}>
       <a class={homeLinkClass} href={href}>
@@ -183,11 +188,14 @@ const listGrid = thumb
     <p
       class:list={[
         homeMetaClass,
-        "flex items-baseline gap-x-3 [grid-area:date] sm:block",
+        "flex items-baseline gap-x-3 [grid-area:date] sm:relative sm:block",
       ]}
     >
       <time datetime={datetime}>{text}</time>
-      <span data-novo class="text-muted uppercase sm:block sm:h-[1lh]" />
+      <span
+        data-novo
+        class="text-muted uppercase sm:absolute sm:top-full sm:left-0"
+      />
     </p>
     {thumb &&
       (thumbnail.kind === "cover" ? (
@@ -199,13 +207,13 @@ const listGrid = thumb
           height={72}
           densities={[1, 2]}
           fit="cover"
-          class="mt-2 h-[54px] w-[72px] self-start object-cover [grid-area:thumb] sm:mt-0 sm:h-[72px] sm:w-24"
+          class="mt-2 h-[54px] w-[72px] self-start object-cover sm:self-center [grid-area:thumb] sm:mt-0 sm:h-[72px] sm:w-24"
         />
       ) : (
         <div
           data-thumb
           aria-hidden="true"
-          class="mt-2 h-[54px] w-[72px] self-start bg-sheet [grid-area:thumb] sm:mt-0 sm:h-[72px] sm:w-24"
+          class="mt-2 h-[54px] w-[72px] self-start bg-sheet sm:self-center [grid-area:thumb] sm:mt-0 sm:h-[72px] sm:w-24"
         />
       ))}
     <Heading class:list={[homeTitleClass, "mt-2 [grid-area:title] sm:mt-0"]}>
@@ -222,7 +230,7 @@ const listGrid = thumb
     <p
       class:list={[
         homeMetaClass,
-        "pointer-events-none mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 [grid-area:meta] sm:mt-1 sm:flex-col sm:items-start sm:self-start",
+        "pointer-events-none mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 [grid-area:meta] sm:relative sm:mt-0 sm:block",
       ]}
     >
       <span
@@ -243,7 +251,7 @@ const listGrid = thumb
         data-votes
         data-votes-optional
         hidden
-        class="inline-flex items-center gap-x-2 whitespace-nowrap"
+        class="inline-flex items-center gap-x-2 whitespace-nowrap sm:absolute sm:top-full sm:left-0 sm:mt-1"
       >
         <span aria-hidden="true" class="sm:hidden">
           ·

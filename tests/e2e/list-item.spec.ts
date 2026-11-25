@@ -187,13 +187,97 @@ test.describe("listas inteiras [RF-02]", () => {
             expect(Math.abs(votes.top - reading.top)).toBeLessThan(3);
             expect(votes.left).toBeGreaterThan(reading.right);
           } else {
+            // A altura de cada coluna é do teste "colunas centradas".
             expect(date.right).toBeLessThanOrEqual(title.left);
-            expect(Math.abs(date.top - title.top)).toBeLessThan(12);
             expect(reading.left).toBeGreaterThanOrEqual(title.right);
             expect(reading.left).toBeGreaterThanOrEqual(description.right);
-            expect(Math.abs(reading.top - title.top)).toBeLessThan(12);
             expect(votes.top).toBeGreaterThanOrEqual(reading.bottom - 1);
             expect(Math.abs(votes.left - reading.left)).toBeLessThanOrEqual(1);
+          }
+        });
+      }
+    }
+  });
+
+  test("de sm em diante, as colunas centradas na altura do item", async ({
+    page,
+  }) => {
+    // A data, o bloco do título (com a descrição), a miniatura e o tempo ficam
+    // no centro vertical do item; o NOVO e os votos pendem abaixo, sem mudar
+    // esse centro (T-131). Vale também para a faixa / RECENTES da home.
+    await page.route("**/api/votes", (route) =>
+      route.fulfill(
+        votesBody(
+          Object.fromEntries(diskPosts().map((post) => [post.slug, 3])),
+        ),
+      ),
+    );
+    await page.clock.setFixedTime(new Date("2000-01-05T12:00:00Z"));
+    for (const width of [640, 1280]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const listPath of [
+        "/",
+        "/blog/",
+        "/prototipos/",
+        "/mais-votados/",
+      ]) {
+        await test.step(`${listPath} ${width}px`, async () => {
+          await open(page, listPath);
+          const scope =
+            listPath === "/"
+              ? page.locator("section").filter({
+                  has: page.locator("h2", { hasText: "/ RECENTES" }),
+                })
+              : page.locator("[data-list-section]");
+          const items = scope.locator("article");
+          await expect(items.first()).toBeVisible();
+          if (listPath !== "/") {
+            await expect(items.first().locator("[data-votes]")).toBeVisible();
+          }
+          const count = await items.count();
+          for (let index = 0; index < count; index += 1) {
+            const centers = await items.nth(index).evaluate((root) => {
+              const middle = (node: Element | null) => {
+                if (!node) return null;
+                const rect = node.getBoundingClientRect();
+                return (rect.top + rect.bottom) / 2;
+              };
+              const style = getComputedStyle(root);
+              const box = root.getBoundingClientRect();
+              const content =
+                (box.top +
+                  Number.parseFloat(style.paddingTop) +
+                  box.bottom -
+                  Number.parseFloat(style.paddingBottom)) /
+                2;
+              const title = root.querySelector(":is(h2, h3)");
+              const description = root.querySelector("[data-description]");
+              const block =
+                title && description
+                  ? (title.getBoundingClientRect().top +
+                      description.getBoundingClientRect().bottom) /
+                    2
+                  : middle(title);
+              return {
+                content,
+                date: middle(root.querySelector("time")),
+                block,
+                reading: middle(root.querySelector("[data-reading]")),
+                thumb: middle(root.querySelector("[data-thumb]")),
+                novo: (
+                  root.querySelector("[data-novo]")?.textContent ?? ""
+                ).trim(),
+              };
+            });
+            const label = `${listPath} ${width}px #${index} ${JSON.stringify(centers)}`;
+            for (const key of ["date", "block", "reading", "thumb"] as const) {
+              const value = centers[key];
+              if (value === null) continue;
+              expect(
+                Math.abs(value - centers.content),
+                `${label} ${key}`,
+              ).toBeLessThanOrEqual(1.5);
+            }
           }
         });
       }
