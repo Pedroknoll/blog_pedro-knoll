@@ -1,10 +1,12 @@
 ---
 import type { CollectionEntry } from "astro:content";
 
-import Listing from "~/components/ui/Listing.astro";
+import ListPage from "~/components/ui/ListPage.astro";
+import PostList from "~/components/ui/PostList.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
 import { absoluteUrl, pageTitle } from "~/lib/seo";
+import { countLabel } from "~/lib/tag-filter";
 import { collectTags, postsWithTag } from "~/lib/tags";
 import { site } from "~/site.config";
 
@@ -37,5 +39,13 @@ const heading = `Tag: ${tag}`;
   ogTitle={heading}
   ogType="website"
 >
-  <Listing heading={heading} posts={posts} />
+  <ListPage
+    heading={heading}
+    count={countLabel(posts.length, posts.length, {
+      one: "post",
+      many: "posts",
+    })}
+  >
+    <PostList posts={posts} />
+  </ListPage>
 </BaseLayout>

@@ -4,7 +4,7 @@ import { Image } from "astro:assets";
 
 import Clock from "~/assets/brand/icones/icone-relogio.svg";
 import Vote from "~/assets/brand/icones/icone-voto.svg";
-import { formatPubDate } from "~/lib/format-date";
+import { formatPubDate, formatShortDate } from "~/lib/format-date";
 import { thumbnailOf } from "~/lib/home-lists";
 
 interface Item {
@@ -20,14 +20,16 @@ interface Props {
   item: Item;
   headingLevel?: 2 | 3;
   href?: string;
-  layout?: "stacked" | "recent" | "ranked" | "prototype";
+  layout?: "list" | "recent" | "ranked" | "prototype";
+  thumb?: boolean;
 }
 
 const {
   item,
   headingLevel = 2,
   href: hrefProp,
-  layout = "stacked",
+  layout = "list",
+  thumb = false,
 } = Astro.props;
 
 function asDate(value: Date | string): Date {
@@ -38,15 +40,19 @@ function asDate(value: Date | string): Date {
   return new Date(value);
 }
 
-const showMeta = layout === "stacked" || layout === "recent";
+const showMeta = layout === "list" || layout === "recent";
 const formatted = showMeta ? formatPubDate(asDate(item.date)) : null;
-const text = formatted?.text ?? "";
+const text =
+  layout === "list"
+    ? formatShortDate(asDate(item.date))
+    : (formatted?.text ?? "");
 const datetime = formatted?.datetime ?? "";
 const href = hrefProp ?? `/blog/${item.slug}/`;
 const Heading = headingLevel === 3 ? "h3" : "h2";
-// Itens da home (BRAND §9.2, T-125) e das listas inteiras (T-131, Q24): o hover pinta a linha de `sheet` e o
-// título vai para `accent` sublinhado; a data e o tempo passam de lápis a
-// grafite sobre o `sheet` (BRAND §4: lápis não é texto pequeno sobre folha).
+// Itens da home (BRAND §9.2, T-125) e das listas inteiras (T-131, Q24): o
+// hover pinta a linha de `sheet` e o título vai para `accent`; a data e o
+// tempo passam de lápis a grafite sobre o `sheet` (BRAND §4: lápis não é
+// texto pequeno sobre folha).
 const homeTitleClass =
   "font-display text-[1.25rem] leading-[1.2] font-semibold text-balance text-ink not-italic sm:text-[1.625rem]";
 // Mais votados e Protótipos dividem a largura de `lg` em diante: título e
@@ -61,6 +67,16 @@ const homeMetaClass =
   "font-mono text-xs text-pencil group-hover:text-muted group-focus-within:text-muted";
 const minutesText = `${item.minutes} ${item.minutes === 1 ? "minuto" : "minutos"}`;
 const thumbnail = thumbnailOf(item.cover);
+
+// Item das listas inteiras (T-131, Q24). Abaixo de `sm`, empilhado: a data
+// com o NOVO, o título, a descrição e uma linha com o tempo e os votos; com
+// miniatura, ela fica à esquerda do texto. De `sm` em diante, colunas: a
+// data, a miniatura, o título com a descrição e, à direita, o tempo e os
+// votos, um embaixo do outro. A coluna da direita tem largura fixa, para os
+// votos não mudarem a largura do título quando aparecem.
+const listGrid = thumb
+  ? "grid-cols-[72px_minmax(0,1fr)] gap-x-4 [grid-template-areas:'date_date'_'thumb_title'_'thumb_desc'_'thumb_meta'] sm:grid-cols-[4.5rem_6rem_minmax(0,1fr)_7.5rem] sm:grid-rows-[auto_1fr] sm:gap-x-6 sm:[grid-template-areas:'date_thumb_title_meta'_'date_thumb_desc_meta']"
+  : "[grid-template-areas:'date'_'title'_'desc'_'meta'] sm:grid-cols-[4.5rem_minmax(0,1fr)_7.5rem] sm:grid-rows-[auto_1fr] sm:gap-x-6 sm:[grid-template-areas:'date_title_meta'_'date_desc_meta']";
 ---
 
 {layout === "prototype" ? (
@@ -166,53 +182,87 @@ const thumbnail = thumbnailOf(item.cover);
     </p>
   </article>
 ) : (
-  <article class:list={[homeItemClass, "flex flex-col py-5 sm:py-8"]}>
-    <p class={homeMetaClass}>
+  <article class:list={[homeItemClass, "grid py-5 sm:py-6", listGrid]}>
+    <p
+      class:list={[
+        homeMetaClass,
+        "flex items-baseline gap-x-3 [grid-area:date] sm:block",
+      ]}
+    >
       <time datetime={datetime}>{text}</time>
-      <span data-novo class="ml-3 text-muted uppercase" />
+      <span data-novo class="text-muted uppercase sm:block sm:h-[1lh]" />
     </p>
-    <Heading class:list={[homeTitleClass, "mt-2"]}>
+    {thumb &&
+      (thumbnail.kind === "cover" ? (
+        <Image
+          data-thumb
+          src={thumbnail.cover}
+          alt=""
+          width={96}
+          height={72}
+          densities={[1, 2]}
+          fit="cover"
+          class="mt-2 h-[54px] w-[72px] self-start object-cover [grid-area:thumb] sm:mt-0 sm:h-[72px] sm:w-24"
+        />
+      ) : (
+        <div
+          data-thumb
+          aria-hidden="true"
+          class="mt-2 h-[54px] w-[72px] self-start bg-sheet [grid-area:thumb] sm:mt-0 sm:h-[72px] sm:w-24"
+        />
+      ))}
+    <Heading class:list={[homeTitleClass, "mt-2 [grid-area:title] sm:mt-0"]}>
       <a class={homeLinkClass} href={href}>
         {item.title}
       </a>
     </Heading>
     <p
       data-description
-      class="mt-2 font-sans text-base leading-[1.5] text-muted"
+      class="mt-1.5 line-clamp-2 font-sans text-base leading-[1.5] text-muted [grid-area:desc]"
     >
       {item.description}
     </p>
     <p
-      data-reading
-      title={`${minutesText} de leitura`}
       class:list={[
         homeMetaClass,
-        "pointer-events-none mt-3 flex items-center gap-1.5 whitespace-nowrap",
+        "pointer-events-none mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 [grid-area:meta] sm:mt-1 sm:flex-col sm:items-start sm:self-start",
       ]}
     >
-      <Clock
-        aria-hidden="true"
-        width={12}
-        height={12}
-        class="inline-block shrink-0"
-      />
-      <span>{minutesText}</span>
-      <span class="sr-only">{" de leitura"}</span>
-    </p>
-    <p
-      data-votes
-      class="pointer-events-none mt-1.5 flex items-center gap-1 font-mono text-xs text-ink"
-    >
-      <Vote
-        aria-hidden="true"
-        width={10}
-        height={8}
-        class="inline-block h-2 w-2.5"
-      />
-      <span data-vote-value class="inline-block w-[3ch] text-right">
-        –
-      </span>{" "}
-      <span data-vote-word>votos</span>
+      <span
+        data-reading
+        title={`${minutesText} de leitura`}
+        class="inline-flex items-center gap-1.5 whitespace-nowrap"
+      >
+        <Clock
+          aria-hidden="true"
+          width={12}
+          height={12}
+          class="inline-block shrink-0"
+        />
+        <span>{minutesText}</span>
+        <span class="sr-only">{" de leitura"}</span>
+      </span>
+      <span
+        data-votes
+        data-votes-optional
+        hidden
+        class="inline-flex items-center gap-x-2 whitespace-nowrap"
+      >
+        <span aria-hidden="true" class="sm:hidden">
+          ·
+        </span>
+        <span class="inline-flex items-center gap-1.5">
+          <Vote
+            aria-hidden="true"
+            width={10}
+            height={8}
+            class="inline-block h-2 w-2.5"
+          />
+          <span>
+            <span data-vote-value>–</span> <span data-vote-word>votos</span>
+          </span>
+        </span>
+      </span>
     </p>
   </article>
 )}
@@ -241,6 +291,9 @@ const thumbnail = thumbnailOf(item.cover);
         if (!slug || !Object.hasOwn(votes, slug)) continue;
         const count = votes[slug] ?? 0;
         node.textContent = String(count);
+        // Nas listas inteiras, os votos só aparecem com 1 ou mais (Q24).
+        const box = node.closest<HTMLElement>("[data-votes-optional]");
+        if (box) box.hidden = count < 1;
         const word = article?.querySelector("[data-vote-word]");
         if (word) word.textContent = count === 1 ? "voto" : "votos";
       }

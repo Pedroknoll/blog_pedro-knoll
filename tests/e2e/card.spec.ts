@@ -110,15 +110,29 @@ async function publishedHrefs(page: Page): Promise<string[]> {
   return posts.map((post) => post.href);
 }
 
+// Nas listas inteiras, a data vai sem o ano, que está no rótulo do grupo
+// (`21 out`); o NOVO divide a linha com ela (BRAND §9.2, T-131, Q24).
+function shortDateFromDatetime(datetime: string): string {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datetime);
+  const month = match ? MONTHS[Number(match[2]) - 1] : undefined;
+  if (!match?.[3] || !month) return datetime;
+  return `${match[3]} ${month}`;
+}
+
 async function expectDateLine(container: Locator) {
   const time = container.locator("time");
   await expect(time).toHaveCount(1);
   const datetime = (await time.getAttribute("datetime")) ?? "";
   expect(datetime).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-  await expect(time).toHaveText(dateFromDatetime(datetime));
-  // O NOVO divide a linha com a data (BRAND §9.2, T-131).
+  const short = await container.evaluate((root) =>
+    Boolean(root.closest("[data-year-group]")),
+  );
+  const date = short
+    ? shortDateFromDatetime(datetime)
+    : dateFromDatetime(datetime);
+  await expect(time).toHaveText(date);
   await expect(time.locator("xpath=..")).toHaveText(
-    new RegExp(`^${dateFromDatetime(datetime).replaceAll(".", "\\.")}(NOVO)?$`),
+    new RegExp(`^${date.replaceAll(".", "\\.")}(NOVO)?$`),
   );
 
   await expect(container.getByText(KIND)).toHaveCount(0);
@@ -359,7 +373,8 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
   // O C11, o C12, o C14, o C18, o C20 e a linha de baixo eram do item da
   // T-123; o item empilhado está no list-item.spec.ts (T-131, Q24).
 
-  test("GET com 0 mostra 0 e GET 500 mantém –", async ({ page }) => {
+  test("GET com 0 e GET 500 deixam os votos escondidos", async ({ page }) => {
+    // Os votos só aparecem com 1 ou mais (T-131, Q24).
     const slugs = [
       "fixture-md",
       "fixture-mdx",
@@ -377,13 +392,19 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
         }),
       });
     });
+    const loaded = page.waitForResponse((response) =>
+      response.url().includes("/api/votes"),
+    );
     await open(page, "/blog/");
-    const zeros = page.locator("[data-listing] [data-vote-value]");
-    await expect(zeros.first()).toHaveText("0");
-    const zeroCount = await zeros.count();
+    await loaded;
+    const boxes = page.locator("[data-listing] [data-votes]");
+    const zeroCount = await boxes.count();
     expect(zeroCount).toBeGreaterThan(0);
     for (let index = 0; index < zeroCount; index += 1) {
-      await expect(zeros.nth(index)).toHaveText("0");
+      await expect(boxes.nth(index)).toBeHidden();
+      await expect(boxes.nth(index).locator("[data-vote-value]")).toHaveText(
+        "0",
+      );
     }
 
     await page.unrouteAll({ behavior: "ignoreErrors" });
@@ -400,11 +421,10 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     );
     await open(page, "/blog/");
     await failed;
-    const dashes = page.locator("[data-listing] [data-vote-value]");
-    const dashCount = await dashes.count();
+    const dashCount = await boxes.count();
     expect(dashCount).toBeGreaterThan(0);
     for (let index = 0; index < dashCount; index += 1) {
-      await expect(dashes.nth(index)).toHaveText("–");
+      await expect(boxes.nth(index)).toBeHidden();
     }
   });
 });

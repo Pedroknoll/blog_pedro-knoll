@@ -1,0 +1,55 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+import Card from "~/components/ui/Card.astro";
+import { minutesReadOf } from "~/lib/reading-minutes";
+
+// Lista inteira agrupada por ano, pela data UTC (T-131, Q24, BRAND §9.2):
+// cada grupo tem o rótulo `/ 2026` sobre um filete, como as faixas da home,
+// e o título do post é h3. O filtro (TagFilter) esconde o grupo vazio.
+
+interface Props {
+  posts: CollectionEntry<"posts">[];
+  thumb?: boolean;
+}
+
+const { posts, thumb = false } = Astro.props;
+const items = await Promise.all(
+  posts.map(async (post) => ({
+    slug: post.id,
+    title: post.data.title,
+    date: post.data.pubDate,
+    minutes: await minutesReadOf(post),
+    tags: post.data.tags,
+    description: post.data.description,
+    cover: post.data.cover,
+  })),
+);
+const groups: { year: number; items: typeof items }[] = [];
+for (const item of items) {
+  const year = item.date.getUTCFullYear();
+  const last = groups.at(-1);
+  if (last && last.year === year) last.items.push(item);
+  else groups.push({ year, items: [item] });
+}
+---
+
+<div data-listing class="grid gap-y-14 sm:gap-y-10">
+  {groups.map((group) => (
+    <section data-year-group>
+      <h2 class="border-b-2 border-ink pb-2 font-mono text-[15px] tracking-widest text-ink uppercase sm:border-b sm:text-xs">
+        / {group.year}
+      </h2>
+      <ul
+        class="divide-y divide-line border-b border-line"
+        aria-label={`Posts de ${group.year}`}
+      >
+        {group.items.map((item) => (
+          <li data-tags={item.tags.join(" ")}>
+            <Card item={item} headingLevel={3} layout="list" thumb={thumb} />
+          </li>
+        ))}
+      </ul>
+    </section>
+  ))}
+</div>

@@ -5,10 +5,10 @@ interface Props {
   catalogJson: string;
   headingLevel: 2 | 3;
   limit?: number;
-  layout?: "ranked" | "stacked";
+  layout?: "ranked" | "list";
 }
 
-const { catalogJson, headingLevel, limit, layout = "stacked" } = Astro.props;
+const { catalogJson, headingLevel, limit, layout = "list" } = Astro.props;
 const placeholder = {
   slug: "post",
   title: "Post",
@@ -37,7 +37,8 @@ const placeholder = {
 </div>
 
 <script>
-  import { formatPubDate } from "~/lib/format-date";
+  import { formatPubDate, formatShortDate } from "~/lib/format-date";
+  import { isNew } from "~/lib/novo";
   import { rankPosts, type CatalogPost } from "~/lib/ranking";
   import { tagsOf } from "~/lib/tag-filter";
   import { loadVotes } from "~/lib/votes-client";
@@ -108,18 +109,27 @@ const placeholder = {
           link.textContent = post.title;
         }
         if (time) {
-          const formatted = formatPubDate(
-            new Date(`${post.date}T00:00:00.000Z`),
-          );
+          const date = new Date(`${post.date}T00:00:00.000Z`);
+          const formatted = formatPubDate(date);
           time.setAttribute("datetime", formatted.datetime);
-          time.textContent = formatted.text;
+          // O item das listas inteiras leva a data sem o ano (T-131).
+          time.textContent =
+            root.dataset.layout === "list"
+              ? formatShortDate(date)
+              : formatted.text;
         }
+        const novo = fragment.querySelector("[data-novo]");
+        if (novo && isNew(post.date, new Date())) novo.textContent = "NOVO";
         setReading(fragment, post.minutes);
         if (value) {
           const count = votes[post.slug] ?? 0;
           value.textContent = String(count);
           const word = fragment.querySelector("[data-vote-word]");
           if (word) word.textContent = count === 1 ? "voto" : "votos";
+          const box = fragment.querySelector<HTMLElement>(
+            "[data-votes-optional]",
+          );
+          if (box) box.hidden = count < 1;
         }
         list.append(fragment);
       }

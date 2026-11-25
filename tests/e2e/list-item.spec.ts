@@ -1,13 +1,43 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
-import { fixtureMd, fixtureTag } from "./fixtures";
+import { diskPosts } from "./disk-posts";
+import { fixtureMd, fixtureTag, fixtureTagMath } from "./fixtures";
 
-// Item das listas inteiras (Q24, T-131, BRAND §9.2): data, título, descrição,
-// tempo de leitura e votos, um abaixo do outro, em todas as larguras.
+// Listas inteiras (Q24, T-131, BRAND §9.2): lateral com o h1, a contagem e o
+// filtro; posts agrupados por ano; o item com a data sem ano, o título, a
+// descrição em até 2 linhas, o tempo e os votos (só com 1 ou mais). Em
+// /prototipos/, a miniatura. Em /mais-votados/, o mesmo item, sem anos.
 
+const MONTHS = [
+  "jan",
+  "fev",
+  "mar",
+  "abr",
+  "mai",
+  "jun",
+  "jul",
+  "ago",
+  "set",
+  "out",
+  "nov",
+  "dez",
+];
 const LISTS = ["/blog/", "/artigos/", "/prototipos/", `/tags/${fixtureTag}/`];
 const WIDTHS = [360, 1280] as const;
 const PIXELS_TO_SIGNIFICANCE = 3;
+
+function shortDate(datetime: string): string {
+  const [, month, day] = datetime.split("-");
+  return `${day} ${MONTHS[Number(month) - 1]}`;
+}
+
+function votesBody(votes: Record<string, number>, status = 200) {
+  return {
+    status,
+    contentType: "application/json",
+    body: status === 200 ? JSON.stringify({ votes }) : "{}",
+  };
+}
 
 async function open(page: Page, path: string) {
   const response = await page.goto(path);
@@ -29,17 +59,25 @@ async function tokenColor(page: Page, token: string, property = "color") {
   );
 }
 
-type Box = { top: number; bottom: number; left: number };
+type Box = { top: number; bottom: number; left: number; right: number };
 
 async function partsOf(article: Locator) {
   return article.evaluate((root) => {
     const box = (node: Element | null | undefined): Box | null => {
-      if (!node) return null;
+      if (!node || !(node instanceof HTMLElement || node instanceof SVGElement))
+        return null;
       const rect = node.getBoundingClientRect();
-      return { top: rect.top, bottom: rect.bottom, left: rect.left };
+      if (rect.width === 0 && rect.height === 0) return null;
+      return {
+        top: rect.top,
+        bottom: rect.bottom,
+        left: rect.left,
+        right: rect.right,
+      };
     };
     return {
       date: box(root.querySelector("time")),
+      thumb: box(root.querySelector("[data-thumb]")),
       title: box(root.querySelector(":is(h2, h3)")),
       description: box(root.querySelector("[data-description]")),
       reading: box(root.querySelector("[data-reading]")),
@@ -48,65 +86,143 @@ async function partsOf(article: Locator) {
   });
 }
 
-async function expectStacked(article: Locator, label: string) {
-  const parts = await partsOf(article);
-  const order = [
-    parts.date,
-    parts.title,
-    parts.description,
-    parts.reading,
-    parts.votes,
-  ];
-  for (const part of order) expect(part, label).not.toBeNull();
-  const boxes = order as Box[];
-  for (let index = 1; index < boxes.length; index += 1) {
-    const previous = boxes[index - 1];
-    const current = boxes[index];
-    if (!previous || !current) continue;
-    expect(current.top, `${label} parte ${index}`).toBeGreaterThanOrEqual(
-      previous.bottom - 1,
-    );
-  }
-  const left = boxes[0]?.left ?? 0;
-  for (const part of boxes) {
-    expect(Math.abs(part.left - left), label).toBeLessThanOrEqual(1);
-  }
-}
-
-test.describe("item das listas inteiras [RF-02]", () => {
-  test("data, título, descrição, tempo e votos, um abaixo do outro", async ({
+test.describe("listas inteiras [RF-02]", () => {
+  test("agrupadas por ano, com a data sem ano e o título em h3", async ({
     page,
   }) => {
+    const posts = diskPosts();
+    await open(page, "/blog/");
+    const years = [...new Set(posts.map((post) => post.date.slice(0, 4)))];
+    const groups = page.locator("[data-listing] [data-year-group]");
+    await expect(groups).toHaveCount(years.length);
+    for (const [index, year] of years.entries()) {
+      const group = groups.nth(index);
+      await expect(group.locator("h2")).toHaveText(`/ ${year}`);
+      await expect(group.getByRole("list")).toHaveAccessibleName(
+        `Posts de ${year}`,
+      );
+      const expected = posts.filter((post) => post.date.startsWith(year));
+      const times = group.locator("article time");
+      await expect(times).toHaveCount(expected.length);
+      for (const [row, post] of expected.entries()) {
+        await expect(times.nth(row)).toHaveAttribute("datetime", post.date);
+        await expect(times.nth(row)).toHaveText(shortDate(post.date));
+      }
+      await expect(group.locator("article h3")).toHaveCount(expected.length);
+    }
+    await expect(page.locator("[data-listing] article h2")).toHaveCount(0);
+  });
+
+  test("lateral com h1, contagem e filtro de lg em diante", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    for (const listPath of ["/blog/", "/artigos/", "/prototipos/"]) {
+      await test.step(listPath, async () => {
+        await open(page, listPath);
+        const h1 = await page.locator("h1").boundingBox();
+        const count = await page.locator("[data-count]").boundingBox();
+        const select = await page.locator("#filtro-tag").boundingBox();
+        const list = await page.locator("[data-listing]").boundingBox();
+        if (!h1 || !count || !select || !list) throw new Error("sem caixa");
+        expect(count.y).toBeGreaterThan(h1.y);
+        expect(select.y).toBeGreaterThan(count.y);
+        expect(select.x + select.width).toBeLessThanOrEqual(list.x);
+        expect(Math.abs(list.y - h1.y)).toBeLessThan(40);
+      });
+    }
+    await page.setViewportSize({ width: 360, height: 800 });
+    await open(page, "/blog/");
+    const select = await page.locator("#filtro-tag").boundingBox();
+    const list = await page.locator("[data-listing]").boundingBox();
+    if (!select || !list) throw new Error("sem caixa");
+    expect(list.y).toBeGreaterThan(select.y + select.height);
+  });
+
+  test("/tags/<tag>/ tem a contagem e não tem filtro", async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await open(page, `/tags/${fixtureTag}/`);
+    await expect(page.locator("#filtro-tag")).toHaveCount(0);
+    const tagged = diskPosts().filter((post) => post.tags.includes(fixtureTag));
+    await expect(page.locator("[data-count]")).toHaveText(
+      `${tagged.length} posts`,
+    );
+  });
+
+  test("o filtro esconde o ano que fica vazio", async ({ page }) => {
+    const posts = diskPosts();
+    const years = new Set(
+      posts
+        .filter((post) => post.tags.includes(fixtureTagMath))
+        .map((post) => post.date.slice(0, 4)),
+    );
+    await open(page, `/blog/?tag=${fixtureTagMath}`);
+    await expect(page.getByLabel("Filtrar por")).toHaveValue(fixtureTagMath);
+    const groups = page.locator("[data-year-group]");
+    const count = await groups.count();
+    for (let index = 0; index < count; index += 1) {
+      const group = groups.nth(index);
+      const year = ((await group.locator("h2").textContent()) ?? "").slice(2);
+      if (years.has(year)) await expect(group).toBeVisible();
+      else await expect(group).toBeHidden();
+    }
+    await page.getByLabel("Filtrar por").selectOption("");
+    for (let index = 0; index < count; index += 1) {
+      await expect(groups.nth(index)).toBeVisible();
+    }
+  });
+
+  test("item em colunas de sm em diante e empilhado abaixo", async ({
+    page,
+  }) => {
+    await page.route("**/api/votes", (route) =>
+      route.fulfill(
+        votesBody(
+          Object.fromEntries(diskPosts().map((post) => [post.slug, 10])),
+        ),
+      ),
+    );
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: 800 });
       for (const listPath of LISTS) {
         await test.step(`${listPath} ${width}px`, async () => {
           await open(page, listPath);
-          const articles = page.locator("[data-listing] article");
-          const count = await articles.count();
-          expect(count).toBeGreaterThan(0);
-          for (let index = 0; index < count; index += 1) {
-            await expectStacked(articles.nth(index), `${listPath} #${index}`);
+          const item = page.locator("[data-listing] article").first();
+          await expect(item.locator("[data-votes]")).toBeVisible();
+          const parts = await partsOf(item);
+          const { date, title, description, reading, votes } = parts;
+          if (!date || !title || !description || !reading || !votes) {
+            throw new Error(JSON.stringify(parts));
+          }
+          expect(description.top).toBeGreaterThanOrEqual(title.bottom - 1);
+          if (width === 360) {
+            expect(title.top).toBeGreaterThanOrEqual(date.bottom - 1);
+            expect(reading.top).toBeGreaterThanOrEqual(description.bottom - 1);
+            expect(Math.abs(votes.top - reading.top)).toBeLessThan(3);
+            expect(votes.left).toBeGreaterThan(reading.right);
+          } else {
+            expect(date.right).toBeLessThanOrEqual(title.left);
+            expect(Math.abs(date.top - title.top)).toBeLessThan(12);
+            expect(reading.left).toBeGreaterThanOrEqual(title.right);
+            expect(reading.left).toBeGreaterThanOrEqual(description.right);
+            expect(Math.abs(reading.top - title.top)).toBeLessThan(12);
+            expect(votes.top).toBeGreaterThanOrEqual(reading.bottom - 1);
+            expect(Math.abs(votes.left - reading.left)).toBeLessThanOrEqual(1);
           }
         });
       }
     }
   });
 
-  test("descrição do post, tempo em minutos e votos em tinta", async ({
-    page,
-  }) => {
+  test("descrição em até 2 linhas e tempo em minutos", async ({ page }) => {
     await open(page, "/blog/");
     const item = page
       .locator("[data-listing] article")
       .filter({ has: page.locator(`a[href="${fixtureMd.href}"]`) });
-    await expect(item).toHaveCount(1);
-    await expect(item.locator("[data-description]")).toHaveText(
-      fixtureMd.description,
-    );
-
+    const description = item.locator("[data-description]");
+    await expect(description).toHaveText(fixtureMd.description);
+    await expect(description).toHaveCSS("-webkit-line-clamp", "2");
     const reading = item.locator("[data-reading]");
-    await expect(reading).toHaveCount(1);
     const shown = (
       await reading.evaluate((node) => {
         const clone = node.cloneNode(true) as HTMLElement;
@@ -120,16 +236,53 @@ test.describe("item das listas inteiras [RF-02]", () => {
       .trim();
     expect(shown).toMatch(/^(1 minuto|(?:[02-9]|\d{2,}) minutos)$/);
     await expect(reading).toHaveAttribute("title", `${shown} de leitura`);
-    const clock = reading.locator("svg");
-    await expect(clock).toHaveAttribute("aria-hidden", "true");
-    await expect(clock).toHaveCSS("width", "12px");
-
-    const ink = await tokenColor(page, "--color-ink");
-    const votes = item.locator("[data-votes]");
-    await expect(votes).toHaveCSS("color", ink);
-    await expect(votes.locator("svg")).toHaveAttribute("aria-hidden", "true");
-    await expect(votes.locator("[data-vote-word]")).toHaveText(/^votos?$/);
+    await expect(reading.locator("svg")).toHaveAttribute("aria-hidden", "true");
     await expect(item.locator("[data-rank-position]")).toHaveCount(0);
+  });
+
+  test("votos só com 1 ou mais", async ({ page }) => {
+    const slug = fixtureMd.href.split("/")[2] ?? "";
+    const others = diskPosts()
+      .map((post) => post.slug)
+      .filter((other) => other !== slug);
+    await page.route("**/api/votes", (route) =>
+      route.fulfill(
+        votesBody({
+          [slug]: 1,
+          ...Object.fromEntries(others.map((other) => [other, 0])),
+        }),
+      ),
+    );
+    await open(page, "/blog/");
+    const items = page.locator("[data-listing] article");
+    const target = items.filter({
+      has: page.locator(`a[href="${fixtureMd.href}"]`),
+    });
+    await expect(target.locator("[data-votes]")).toBeVisible();
+    await expect(target.locator("[data-vote-value]")).toHaveText("1");
+    await expect(target.locator("[data-vote-word]")).toHaveText("voto");
+    const rest = items.filter({
+      hasNot: page.locator(`a[href="${fixtureMd.href}"]`),
+    });
+    const count = await rest.count();
+    expect(count).toBeGreaterThan(0);
+    for (let index = 0; index < count; index += 1) {
+      await expect(rest.nth(index).locator("[data-votes]")).toBeHidden();
+    }
+
+    await page.unrouteAll({ behavior: "ignoreErrors" });
+    await page.route("**/api/votes", (route) =>
+      route.fulfill(votesBody({}, 500)),
+    );
+    const failed = page.waitForResponse((response) =>
+      response.url().includes("/api/votes"),
+    );
+    await open(page, "/blog/");
+    await failed;
+    const all = await items.count();
+    for (let index = 0; index < all; index += 1) {
+      await expect(items.nth(index).locator("[data-votes]")).toBeHidden();
+    }
   });
 
   test("título em 20 px abaixo de sm e 26 px de sm em diante", async ({
@@ -141,12 +294,51 @@ test.describe("item das listas inteiras [RF-02]", () => {
     ] as const) {
       await page.setViewportSize({ width, height: 800 });
       await open(page, "/blog/");
-      const headings = page.locator("[data-listing] article h2");
+      const headings = page.locator("[data-listing] article h3");
       const count = await headings.count();
       expect(count).toBeGreaterThan(0);
       for (let index = 0; index < count; index += 1) {
         await expect(headings.nth(index)).toHaveCSS("font-size", size);
       }
+    }
+  });
+
+  test("miniatura só em /prototipos/", async ({ page }) => {
+    for (const [width, size] of [
+      [360, { width: 72, height: 54 }],
+      [1280, { width: 96, height: 72 }],
+    ] as const) {
+      await page.setViewportSize({ width, height: 800 });
+      await open(page, "/prototipos/");
+      const items = page.locator("[data-listing] article");
+      const count = await items.count();
+      expect(count).toBeGreaterThan(0);
+      for (let index = 0; index < count; index += 1) {
+        const item = items.nth(index);
+        const thumb = item.locator("[data-thumb]");
+        await expect(thumb).toHaveCount(1);
+        const box = await thumb.boundingBox();
+        expect(Math.round(box?.width ?? 0)).toBe(size.width);
+        expect(Math.round(box?.height ?? 0)).toBe(size.height);
+        const parts = await partsOf(item);
+        if (!parts.thumb || !parts.title || !parts.date) {
+          throw new Error("sem caixa");
+        }
+        expect(parts.thumb.right).toBeLessThanOrEqual(parts.title.left);
+        if (width === 1280) {
+          expect(parts.date.right).toBeLessThanOrEqual(parts.thumb.left);
+        } else {
+          expect(parts.thumb.top).toBeGreaterThanOrEqual(parts.date.bottom - 1);
+        }
+      }
+      const withCover = items
+        .filter({ has: page.locator(`a[href="${fixtureMd.href}"]`) })
+        .locator("img[data-thumb]");
+      await expect(withCover).toHaveAttribute("alt", "");
+    }
+    for (const listPath of ["/blog/", "/artigos/", `/tags/${fixtureTag}/`]) {
+      await open(page, listPath);
+      await expect(page.locator("[data-listing] [data-thumb]")).toHaveCount(0);
     }
   });
 
@@ -166,7 +358,7 @@ test.describe("item das listas inteiras [RF-02]", () => {
         const articles = page.locator("[data-listing] article");
         expect(await articles.count()).toBeGreaterThanOrEqual(2);
         const item = articles.first();
-        const link = item.locator("h2 a");
+        const link = item.locator("h3 a");
         await expect(item).not.toHaveCSS("background-color", sheet);
         await item.hover();
         await expect(item).toHaveCSS("background-color", sheet);
@@ -181,10 +373,6 @@ test.describe("item das listas inteiras [RF-02]", () => {
         await link.focus();
         await expect(item).toHaveCSS("background-color", sheet);
         await expect(link).toHaveCSS("color", accent);
-        const focused = await articles.evaluateAll((nodes) =>
-          nodes.map((node) => getComputedStyle(node).opacity),
-        );
-        expect(focused.every((value) => value === "1")).toBe(true);
         await link.blur();
       });
     }
@@ -225,85 +413,94 @@ test.describe("item das listas inteiras [RF-02]", () => {
 
   test("os votos e o NOVO não movem a lista", async ({ page }) => {
     for (const width of WIDTHS) {
-      await test.step(`${width}px`, async () => {
-        await page.unrouteAll({ behavior: "ignoreErrors" });
-        let release = () => {};
-        const gate = new Promise<void>((resolve) => {
-          release = resolve;
-        });
-        let opened = false;
-        await page.route("**/api/votes", async (route) => {
-          if (!opened) await gate;
-          await route.fulfill({
-            status: 200,
-            contentType: "application/json",
-            body: JSON.stringify({ votes: { "fixture-md": 120 } }),
+      for (const listPath of ["/blog/", "/prototipos/"]) {
+        await test.step(`${listPath} ${width}px`, async () => {
+          await page.unrouteAll({ behavior: "ignoreErrors" });
+          let release = () => {};
+          const gate = new Promise<void>((resolve) => {
+            release = resolve;
           });
+          let opened = false;
+          await page.route("**/api/votes", async (route) => {
+            if (!opened) await gate;
+            await route.fulfill(
+              votesBody({ [fixtureMd.href.split("/")[2] ?? ""]: 120 }),
+            );
+          });
+          await page.setViewportSize({ width, height: 800 });
+          await open(page, listPath);
+          await page.evaluate(() => document.fonts.ready);
+          const items = page.locator("[data-listing] article");
+          const tops = () =>
+            items.evaluateAll((nodes) =>
+              nodes.map((node) => {
+                const rect = node.getBoundingClientRect();
+                return { top: rect.top, height: rect.height };
+              }),
+            );
+          const before = await tops();
+          opened = true;
+          release();
+          await expect(
+            page.locator(
+              `[data-listing] article:has(a[href="${fixtureMd.href}"]) [data-vote-value]`,
+            ),
+          ).toHaveText("120");
+          const after = await tops();
+          expect(after.length).toBe(before.length);
+          for (let index = 0; index < after.length; index += 1) {
+            const a = before[index];
+            const b = after[index];
+            if (!a || !b) continue;
+            expect(Math.abs(a.top - b.top)).toBeLessThan(
+              PIXELS_TO_SIGNIFICANCE,
+            );
+            expect(Math.abs(a.height - b.height)).toBeLessThan(
+              PIXELS_TO_SIGNIFICANCE,
+            );
+          }
         });
-        await page.setViewportSize({ width, height: 800 });
-        await open(page, "/blog/");
-        await page.evaluate(() => document.fonts.ready);
-        const items = page.locator("[data-listing] article");
-        const tops = () =>
-          items.evaluateAll((nodes) =>
-            nodes.map((node) => {
-              const rect = node.getBoundingClientRect();
-              return { top: rect.top, height: rect.height };
-            }),
-          );
-        const before = await tops();
-        opened = true;
-        release();
-        await expect(
-          page.locator(
-            `[data-listing] article:has(a[href="${fixtureMd.href}"]) [data-vote-value]`,
-          ),
-        ).toHaveText("120");
-        const after = await tops();
-        expect(after.length).toBe(before.length);
-        for (let index = 0; index < after.length; index += 1) {
-          const a = before[index];
-          const b = after[index];
-          if (!a || !b) continue;
-          expect(Math.abs(a.top - b.top)).toBeLessThan(PIXELS_TO_SIGNIFICANCE);
-          expect(Math.abs(a.height - b.height)).toBeLessThan(
-            PIXELS_TO_SIGNIFICANCE,
-          );
-        }
-      });
+      }
     }
   });
 });
 
-test.describe("item de /mais-votados/ [RF-02]", () => {
-  test("o ranking usa o item empilhado, sem posição", async ({ page }) => {
-    await page.route("**/api/votes", async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ votes: { "fixture-md": 2, "fixture-mdx": 1 } }),
-      });
-    });
+test.describe("/mais-votados/ [RF-02]", () => {
+  test("lateral e o item das listas, sem anos e sem posição", async ({
+    page,
+  }) => {
+    await page.route("**/api/votes", (route) =>
+      route.fulfill(votesBody({ "fixture-md": 2, "fixture-mdx": 1 })),
+    );
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: 800 });
       await open(page, "/mais-votados/");
       const items = page.locator("[data-ranking] article");
       await expect(items).toHaveCount(2);
+      await expect(page.locator("[data-year-group]")).toHaveCount(0);
       await expect(items.locator("[data-rank-position]")).toHaveCount(0);
+      await expect(items.locator("[data-thumb]")).toHaveCount(0);
       const first = items.first();
       await expect(first.locator("h2 a")).toHaveAttribute(
         "href",
         fixtureMd.href,
       );
+      await expect(first.locator("time")).toHaveText("02 jan");
       await expect(first.locator("[data-description]")).toHaveText(
         fixtureMd.description,
       );
       await expect(first.locator("[data-reading]")).toContainText(
         /^\s*\d+ minutos?/,
       );
+      await expect(first.locator("[data-votes]")).toBeVisible();
       await expect(first.locator("[data-vote-value]")).toHaveText("2");
       await expect(items.nth(1).locator("[data-vote-word]")).toHaveText("voto");
-      await expectStacked(first, `/mais-votados/ ${width}px`);
+      if (width === 1280) {
+        const h1 = await page.locator("h1").boundingBox();
+        const list = await page.locator("[data-top-voted]").boundingBox();
+        if (!h1 || !list) throw new Error("sem caixa");
+        expect(h1.x + h1.width).toBeLessThanOrEqual(list.x);
+      }
     }
   });
 });

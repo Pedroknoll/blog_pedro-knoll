@@ -1,42 +1,20 @@
 ---
 import type { CollectionEntry } from "astro:content";
 
-import ArticleIcon from "~/assets/brand/icones/icone-artigo.svg";
-import FireIcon from "~/assets/brand/icones/icone-fogo.svg";
-import PrototypeIcon from "~/assets/brand/icones/icone-prototipo.svg";
 import Card from "~/components/ui/Card.astro";
 import { minutesReadOf } from "~/lib/reading-minutes";
 
+// Faixas `/ RECENTES` e `/ PROTÓTIPOS` da home (T-125). As listas inteiras
+// usam o PostList (T-131).
+
 interface Props {
-  heading: string;
-  showHeading?: boolean;
   posts: CollectionEntry<"posts">[];
-  listLabel?: string;
-  icon?: "article" | "prototype" | "fire";
-  headingLevel?: 2 | 3;
-  frame?: boolean;
-  layout?: "stacked" | "recent" | "prototype";
+  listLabel: string;
+  layout: "recent" | "prototype";
   topBorder?: boolean;
 }
 
-const {
-  heading,
-  showHeading = true,
-  posts,
-  listLabel = "Posts",
-  icon,
-  headingLevel = 2,
-  frame = true,
-  layout = "stacked",
-  topBorder = true,
-} = Astro.props;
-
-const icons = {
-  article: ArticleIcon,
-  prototype: PrototypeIcon,
-  fire: FireIcon,
-};
-const Icon = icon ? icons[icon] : undefined;
+const { posts, listLabel, layout, topBorder = true } = Astro.props;
 const items = await Promise.all(
   posts.map(async (post) => ({
     slug: post.id,
@@ -48,44 +26,20 @@ const items = await Promise.all(
     cover: post.data.cover,
   })),
 );
-const headingClass =
-  "font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem]";
 const titles = layout === "prototype";
 ---
 
-<div
+<ul
   class:list={[
-    frame && "mx-auto w-full max-w-[52rem] px-4 pb-10",
-    frame && showHeading && "pt-10",
+    !titles && "divide-y divide-line border-b border-line",
+    !titles && topBorder && "border-t",
   ]}
+  aria-label={listLabel}
+  data-listing
 >
-  {showHeading && (
-    <h1 class:list={[headingClass, Icon && "flex items-center gap-3"]}>
-      {Icon && (
-        <Icon
-          aria-hidden="true"
-          width={24}
-          height={24}
-          class="size-6 shrink-0 text-ink"
-        />
-      )}
-      {heading}
-    </h1>
-  )}
-  <slot name="filter" />
-  <ul
-    class:list={[
-      !titles && "divide-y divide-line border-b border-line",
-      !titles && topBorder && "border-t",
-      showHeading && "mt-10",
-    ]}
-    aria-label={listLabel}
-    data-listing
-  >
-    {items.map((item) => (
-      <li data-tags={item.tags.join(" ")}>
-        <Card item={item} headingLevel={headingLevel} layout={layout} />
-      </li>
-    ))}
-  </ul>
-</div>
+  {items.map((item) => (
+    <li data-tags={item.tags.join(" ")}>
+      <Card item={item} headingLevel={3} layout={layout} />
+    </li>
+  ))}
+</ul>

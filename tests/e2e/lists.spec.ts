@@ -15,7 +15,7 @@ async function open(page: Page, listPath: string) {
 
 async function listedHrefs(page: Page) {
   return page
-    .locator("[data-listing] :is(h2, h3) a")
+    .locator("[data-listing] article :is(h2, h3) a")
     .evaluateAll((nodes) => nodes.map((anchor) => anchor.getAttribute("href")));
 }
 
@@ -43,8 +43,12 @@ async function expectListPage(
   await expect(
     page.getByRole("navigation", { name: "Paginação", exact: true }),
   ).toHaveCount(0);
-  await expect(page.locator("[data-listing] h3")).toHaveCount(0);
-  const headings = page.locator("[data-listing] h2");
+  // O h2 é o ano do grupo e o h3, o título do post (T-131, Q24).
+  await expect(page.locator("[data-listing] article h2")).toHaveCount(0);
+  await expect(
+    page.locator("[data-listing] > [data-year-group] > h2"),
+  ).toHaveCount(await page.locator("[data-year-group]").count());
+  const headings = page.locator("[data-listing] article h3");
   await expect(headings).toHaveCount(slugs.length);
   expect(await listedHrefs(page)).toEqual(slugs.map(hrefOf));
 

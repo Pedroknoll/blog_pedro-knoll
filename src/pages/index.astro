@@ -29,11 +29,8 @@ const paired = prototypes.length > 0;
     <Greeting slot="greeting" />
     <HomeSection label="/ RECENTES" href="/blog/" link={links.posts} compact>
       <Listing
-        heading="Recentes"
-        showHeading={false}
-        frame={false}
         posts={recent}
-        headingLevel={3}
+        listLabel="Posts"
         layout="recent"
         topBorder={false}
       />
@@ -66,14 +63,7 @@ const paired = prototypes.length > 0;
           padded={false}
           compact
         >
-          <Listing
-            heading="Protótipos"
-            showHeading={false}
-            frame={false}
-            posts={prototypes}
-            headingLevel={3}
-            layout="prototype"
-          />
+          <Listing posts={prototypes} listLabel="Posts" layout="prototype" />
         </HomeSection>
       )}
     </div>
