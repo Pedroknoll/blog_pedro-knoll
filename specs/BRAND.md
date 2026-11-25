@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.35 · novembro de 2026 · pedroknoll.com
+Versão 1.36 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -40,8 +40,8 @@ Sol, lua, fogo e voto estão só no apêndice, até a tarefa que cria o arquivo.
 | Nome | **pk.log** | Decisão. Sempre minúsculo, sem espaço, com o ponto. |
 | Endereço | **pedroknoll.com** | Decisão. O domínio leva o nome completo; a marca, as iniciais. |
 | Autor | **Pedro Knoll** | Assinatura à mão no certificado e nas peças gráficas; no site, fora das páginas até uma tarefa medir (T-52). |
-| Saudação (headline da home) | **👋 Bem-vindo ao pk.log** | Decisão. A mão é o ícone em pixel `aceno.svg`, nunca o emoji do sistema. |
-| Texto de apresentação | **Olá, eu sou o Pedro. Aqui documento meus aprendizados e experimentos sobre Inteligência Artificial.** | Decisão. Vem logo abaixo da saudação. |
+| Saudação (headline da home) | **Olá, eu sou o Pedro. 👋** | Decisão da T-126 (Q23); entra na T-125. Só "Pedro" em negrito. A mão é o ícone em pixel `aceno.svg`, no fim do h1, nunca o emoji do sistema. No ar até a T-125: `Bem-vindo ao pk.log`, com a mão acima do h1. |
+| Texto de apresentação | **Aqui documento meus aprendizados e experimentos sobre Inteligência Artificial.** | Decisão. Vem logo abaixo da saudação. No ar até a T-125, abre com `Olá, eu sou o Pedro.` |
 | Descrição curta | **Aprendizados e experimentos em IA** | Para bio, avatar, meta description, assinatura vertical. |
 | Título de página (`<title>`) | `{Título} · pk.log · Pedro Knoll` | Sugestão. "log" é palavra comum; o nome completo ajuda a busca. |
 
@@ -145,7 +145,7 @@ Fundo **sempre liso**, sem textura, sem vinheta.
 | `--grafite` | `#5E5345` | `#A9BACB` | Texto secundário. |
 | `--lapis` | `#7B6F5A` | `#869EB6` | Metadados. Não é texto menor que 24 px sobre folha clara. Comentário de código não usa lápis. |
 | `--linha` | `rgba(60,40,20,.16)` | `rgba(232,238,243,.18)` | Bordas e divisórias. |
-| `--prussia` | `#1F4B7A` | `#8DB8E8` | **Cor principal.** Links, foco, nó do símbolo, ponto do nome. |
+| `--prussia` | `#1F4B7A` | `#8DB8E8` | **Cor principal.** Links, título do item no hover, foco, nó do símbolo, ponto do nome. |
 | `--latao` | `#84601A` | `#D9B85C` | Número no código (§9.5). |
 | `--sanguinea` | `#A3392A` | `#EE8A74` | Função no código (Shiki, §9.5). |
 | `--verdete` | `#2E6B5A` | `#7CC7AE` | Texto (string) no código (§9.5). |
@@ -157,6 +157,7 @@ Fundo **sempre liso**, sem textura, sem vinheta.
 ### Regras de cor (decisões)
 - **Proporção em qualquer peça:** papel ~68%, tinta ~20%, prússia ~7%, latão + sanguínea + verdete ≤ 5% somados.
 - **Latão e verdete ficam só no código (§9.5); a sanguínea fica só na função.** Nunca marcam tipo, avisos, erros, sucesso ou resultados, e nunca são fundo de página. Os tipos ficam em tinta (§8).
+- **Prússia só no que é interativo** (decisão da T-126, Q23): links, título no hover (com sublinhado) e foco. Na interface, nenhuma outra cor de destaque além da mão; a contagem do voto e os metadados ficam em tinta, grafite ou lápis. O ponto da assinatura e o nó do símbolo continuam prússia: são a marca, e o header não muda.
 - **Ouro-pigmento** aparece só na mão da saudação, sempre com contorno em tinta (amarelo puro some sobre o fundo claro).
 - **Pergaminho** (`#EADFC8`, com `--folha #DFD2B6`, `--grafite #5A4D3C`, `--lapis #8E7E64`, `--latao #765514`, `--sanguinea #9E3526`, `--verdete #2B6454`) é um tom mais fundo **só para peças gráficas**: slides, posts de rede social, capas, certificado. Nunca no blog.
 - **Nomes na interface:** o controle de tema mostra um sol e uma lua (§9.9), e os nomes dos dois botões, para o leitor de tela, são **Claro** e **Escuro** (T-109). "Velino" e "cianotipia" são nomes internos.
@@ -194,7 +195,9 @@ As três famílias entram pela Fonts API do Astro (`fontProviders.fontsource()`)
 - Sem tamanho mínimo próprio. A regra dos 28 px e as exceções de 22 px (título do card, número do fólio, assinatura) existiam porque a Cormorant ficava frágil em tamanho pequeno, e saíram com ela. Os tamanhos de hoje ficam; a escala nova é das T-64 e T-65.
 - O h3 a 22 px continua IBM Plex Sans 600.
 
-**Escala (px):** display 64 · h1 44 · h2 30 · h3 22 (Plex Sans 600) · texto 18 · rótulo 12. O h1 de página (post, tag e 404) fica em 36 px abaixo de `sm` (640 px) e em 44 px de `sm` em diante; a saudação da home tem tamanho próprio (§9.1). O rótulo usa letter-spacing de 0,1em (T-51).
+**Escala (px):** display 64 · h1 44 · h2 30 · h3 22 (Plex Sans 600) · texto 18 · rótulo 12. O h1 de página (post, tag e 404) fica em 36 px abaixo de `sm` (640 px) e em 44 px de `sm` em diante; a saudação da home tem tamanho próprio (§9.1). O rótulo usa letter-spacing de 0,1em (T-51). Exceção da home abaixo de `sm` (T-126, Q23): o rótulo de seção fica em 15 px, ainda em Plex Mono 400, e o título do item em 20 px (§9.2).
+
+**Saudação mista (decisão da T-126, Q23; entra na T-125).** O h1 da saudação é IBM Plex Sans 400, e só "Pedro" vai na fonte de display, IBM Plex Sans Condensed 600. As duas faces já são carregadas na home: sem face nova, e o teto de 3 arquivos e 61.000 bytes não muda.
 Títulos com `text-wrap: balance`.
 
 **Fonte de display (decisão, 04/11/2026, T-63).** A IBM Plex Sans Condensed 600 substitui a Cormorant Garamond em tudo que usa o token de display: assinatura, saudação, card, h1 de página, h2 da prosa e 404. É da mesma superfamília do texto e dos rótulos. O arquivo latin tem 19.816 bytes, contra 23.396 da Cormorant: a home e a tag caem de 60.692 para 57.112 bytes, sem mudar o teto de 61.000. A troca entrou na T-60, com o arquivo de 19.816 bytes medido no build.
@@ -218,11 +221,12 @@ Títulos com `text-wrap: balance`.
 
 - **Grade 12 × 12, uma cor (`currentColor`), cantos retos, sem suavização** (`shape-rendering: crispEdges`).
 - Use em **12, 24, 36 ou 48 px** (múltiplos de 12) para não borrar.
-- **Exceção:** a mão da saudação (`aceno.svg`) é **16 × 16**, com contorno `--contorno-px` e corpo `--ouro`. Use em 16, 32 ou 48 px.
+- **Exceção:** a mão da saudação (`aceno.svg`) é **16 × 16**, com contorno `--contorno-px` e corpo `--ouro`. Use em 16, 32 ou 48 px. Da T-125 em diante, fica no fim do h1 da saudação, depois do ponto; a T-125 escolhe o tamanho pela altura da linha (§9.1).
 - **Animação quadro a quadro** (decisão): só o aceno, dois quadros alternando 4 vezes, depois pausa (3,2 s, contínuo). Conceito, Tutorial e Playbook saíram da lista e da animação (T-119, T-120).
 - **Onde anima:** só a mão da saudação. O aceno usa classes com prefixo `pka-`.
-- **Ícones (decisão da T-119):** `icone-artigo.svg` (folha) e `icone-prototipo.svg` (frasco), dos tipos (§8), no h1 de `/artigos/` e de `/prototipos/` e na linha Tipo da tabela do post abaixo de `lg`; `icone-fogo.svg`, no h1 de `/mais-votados/`; `icone-voto.svg` (triângulo de 10×8), à esquerda da contagem no item; `icone-busca.svg` (lupa), no botão de busca do header (§9.13); `icone-sol.svg` e `icone-lua.svg`, do controle de tema (§9.9). Todos com 12 × 12, uma cor, só parados, sem versão animada. O desenho está no apêndice. A folha, o frasco e a lupa estão na árvore (T-120, T-22); o sol e a lua, na T-24; o fogo e o voto, na T-123. O `icone-filtro.svg` não entra: o filtro é um `select` nativo (T-124).
-- **Relógio** (`icone-relogio.svg`): 12 × 12, só parado, sem versão animada. Entra na linha do item, antes do tempo de leitura (§9.2).
+- **Ícones (decisão da T-119):** `icone-artigo.svg` (folha) e `icone-prototipo.svg` (frasco), dos tipos (§8), no h1 de `/artigos/` e de `/prototipos/` e, até a T-128, na linha Tipo da tabela do post abaixo de `lg`; `icone-fogo.svg`, no h1 de `/mais-votados/`; `icone-voto.svg` (triângulo de 10×8), à esquerda da contagem; `icone-busca.svg` (lupa), no botão de busca do header (§9.13); `icone-sol.svg` e `icone-lua.svg`, do controle de tema (§9.9). Todos com 12 × 12, uma cor, só parados, sem versão animada. O desenho está no apêndice. A folha, o frasco e a lupa estão na árvore (T-120, T-22); o sol e a lua, na T-24; o fogo e o voto, na T-123. O `icone-filtro.svg` não entra: o filtro é um `select` nativo (T-124).
+- **Relógio** (`icone-relogio.svg`): 12 × 12, só parado, sem versão animada. Entra antes do tempo de leitura: no item (§9.2), na linha de metadados do post e no fim do índice (§9.3).
+- **Voto** (`icone-voto.svg`): no botão `Votar` (§9.14) e no `▲ N votos` de Mais votados (§9.2). Da T-131 em diante, o item das outras listas não tem votos (T-126, Q23).
 - Todas as animações respeitam `prefers-reduced-motion: reduce` (ficam paradas).
 
 ---
@@ -240,7 +244,7 @@ Um eixo: **tipo** (formato). Não tem cor: o tipo se distingue pelo ícone.
 | **Artigo** | tinta | folha (`icone-artigo.svg`) | Explica uma ideia ou conta um aprendizado, do problema ao resultado. |
 | **Protótipo** | tinta | frasco (`icone-prototipo.svg`) | Mostra algo construído e funcionando: o que faz, como foi feito e onde quebra. |
 
-Os tipos não têm estrutura nem layout próprios (SPEC Q22). O tipo aparece no h1 de `/artigos/` e de `/prototipos/` (ícone de 24 px, em tinta), na linha Tipo da tabela do post abaixo de `lg` (ícone de 12 px, §9.3) e na imagem OG (§11). De `lg` em diante, o topo da lateral diz `/ ARTIGO` ou `/ PROTÓTIPO`, sem ícone, e a coluna do texto fica só com o filete. O header não leva o ícone (§9.13). O item não mostra o tipo.
+Os tipos não têm estrutura nem layout próprios (SPEC Q22). O tipo aparece no h1 de `/artigos/` e de `/prototipos/` (ícone de 24 px, em tinta), na linha de metadados do post, em texto (`Artigo` ou `Protótipo`, §9.3), e na imagem OG (§11). Até a T-128, no ar, o post mostra o tipo na linha Tipo da tabela abaixo de `lg` (ícone de 12 px) e, de `lg` em diante, no topo da lateral (`/ ARTIGO` ou `/ PROTÓTIPO`); os dois saem na T-128 (T-126, Q23). O header não leva o ícone (§9.13). O item não mostra o tipo.
 
 Qualquer tipo pode ter cadernos marimo (§9.6).
 
@@ -258,36 +262,46 @@ A SPEC §6 fecha o schema, sem `folio`, `level` e `featured` (T-120). Chaves em 
 ## 9. Componentes
 
 ### 9.1 Saudação (home)
-- `<h1>` na fonte de display 600, `clamp(2.4rem, 4.4vw, 3.5rem)` abaixo de `lg` (no máximo 56 px, abaixo do display de 64 px da seção 5; T-44) e 36 px de `lg` em diante (T-69). A mão (`aceno.svg`) fica fora do `h1`, sozinha numa linha acima dele, decorativa (`aria-hidden`): 48 px, e 32 px abaixo de 560 px, com 1rem até o título (T-69).
-- O nome dentro da saudação usa a mesma marcação da assinatura (`<em>pk</em><span class="ponto">.</span><span class="ext">log</span>`), sem quebrar linha dentro do nome. Abaixo de 560 px e de `lg` em diante, o nome começa sempre na segunda linha (`Bem-vindo ao` / `pk.log`): a quebra não pode depender da fonte, senão a troca da fonte reserva pela fonte de display desloca a página (T-44, CLS).
-- Abaixo, o texto de apresentação em Plex Sans 18 px, entrelinha 1,55, cor grafite, máximo ~46 caracteres por linha, para a saudação ficar sozinha no topo (T-63, T-64).
-- Links do autor, logo abaixo do texto: `RSS`, `GitHub` e `LinkedIn`, em texto e sem ícone, em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, em grafite, indo para prússia no hover e no foco, com 44 px de altura para o toque e na mesma aba (T-69).
+Decisão da T-126 (Q23); entra na T-125. Até lá, no ar, a forma da T-69: a mão sozinha numa linha acima do h1 `Bem-vindo ao pk.log`, com o nome na marcação da assinatura, e a fileira `RSS`, `GitHub` e `LinkedIn`.
+
+- **Foto:** `site.author.avatar` (`public/avatar.jpg`), redonda, acima do h1: 88 px de `lg` em diante e 72 px abaixo, com contorno de 1 px em `line` e alt `Foto de Pedro Knoll`. Largura e altura no HTML: a foto pode virar o elemento de LCP da home, e a T-125 mede no Lighthouse.
+- **h1:** `Olá, eu sou o Pedro.`, em IBM Plex Sans 400, com só "Pedro" em IBM Plex Sans Condensed 600 (§5). O tamanho é o da T-44 e da T-69: `clamp(2.4rem, 4.4vw, 3.5rem)` abaixo de `lg` (no máximo 56 px) e 36 px de `lg` em diante. A mão (`aceno.svg`) fica no fim do h1, depois do ponto, decorativa (`aria-hidden`), em 16, 32 ou 48 px (§7). A quebra de linha não pode depender da fonte: a troca da fonte reserva pela da marca não pode mover o h1 (T-44, CLS).
+- **Texto:** `Aqui documento meus aprendizados e experimentos sobre Inteligência Artificial.`, em Plex Sans 18 px, entrelinha 1,55, cor grafite, máximo ~46 caracteres por linha (T-63, T-64).
+- **Links do autor,** logo abaixo do texto: `GitHub` e `LinkedIn`, em texto e sem ícone, em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, em grafite, indo para prússia no hover e no foco, com 44 px de altura para o toque e na mesma aba (T-69).
+- **RSS:** sai da fileira e vira `Assinar via RSS`, um link para `/rss.xml` com aparência de botão, com contorno (§9.11), na mesma aba.
 - Lateral, de `lg` em diante, só na home: a saudação vira uma coluna de 15rem à esquerda, sticky no topo da tela, com 6rem de vão até a coluna das listas. O conteúdo do site fica em 72rem (token `--container-site`, utilidade `max-w-site`), e o header e o footer alinham a essa largura, na mesma margem das laterais da home e do post. Abaixo de `lg`, a saudação e os links ficam em cima das listas e rolam com a página (T-69). De `lg` em diante, o contêiner da lateral e das listas ganha 56 px de respiro em cima, somados aos 40 px da saudação (T-70).
 - A newsletter não entra na saudação. Na home, fica depois das listas, na coluna da direita (§9.2). No post, fica no fim (§9.14). Entra na T-116. Até lá, a home não tem esse bloco.
 
 ### 9.2 Item e páginas de lista
-Decisão da T-119. O card sem fólio e sem nível, e a home sem destaque, estão no ar (T-120). A home com as três listas e as quatro rotas estão no ar (T-123).
+Decisão da T-126 (Q23), que substitui a da T-119. A home entra na T-125; as listas inteiras e a Comece aqui, na T-131. Até lá, no ar, o item da T-123: data, título e uma linha de baixo com o tempo (`8 min de leitura`), o triângulo, `curtidas` e a contagem em acento; e o hover em que os outros itens caem para 0,35 de opacidade.
 
-- Um `article` em grade. De `sm` em diante, duas colunas, com 2rem de vão, centradas na vertical: a da data, com 6,5rem, e a do texto. Abaixo de `sm`, uma coluna só.
-- **Data:** mono 12 px, lápis, no formato `17.nov.2026`. Na coluna de 6,5rem de `sm` em diante; acima do título, abaixo de `sm`.
-- **Título:** fonte de display 600, entrelinha 1,2, com `text-wrap: balance`. 22 px abaixo de `sm` e 26 px de `sm` em diante. A linha de baixo fica 0,5rem abaixo do título no celular e 0,75rem de `sm` em diante.
-- **Linha de baixo,** em mono 12 px, lápis: tempo de leitura (relógio parado de 12 px + `8 min de leitura`), `|` na cor da linha, o triângulo de upvote (`icone-voto.svg`, 10×8, o mesmo do botão Curtir), a palavra `curtidas` (`curtida` quando o número é 1) e a contagem em acento. A contagem no HTML é `–`, num vão de 3 caracteres, para o número da API não empurrar o tempo de leitura. Sem resumo, capa, tipo, tema, nível, tag nem hachura.
-- **Onde as colunas mudam (T-123).** Em `/artigos/` e em `/tags/[tag]/`, o item é o de cima: de `sm` em diante, data numa coluna de 6,5rem e o texto na outra, centrados na vertical; abaixo de `sm`, a data fica acima do título e a linha de baixo, à direita, 0,5rem abaixo do título (0,75rem de `sm` em diante). Em `/blog/`, `/prototipos/` e `/mais-votados/`, de `sm` em diante são três colunas centradas na vertical: data (6,5rem), título e a linha de baixo; abaixo de `sm`, a data fica acima do título e a linha de baixo continua embaixo. Na home, `/ RECENTES` usa as três colunas só de `lg` em diante; abaixo de `lg`, o título fica em cima e a data, a leitura e os votos ficam na mesma linha. `/ PROTÓTIPOS` na home mostra só o título, sem data, sem leitura, sem votos e sem filete. `/ MAIS VOTADOS` na home mostra o título e a contagem, sem data, sem leitura e sem filete.
-- Título sem sublinhado e sem troca de cor, em repouso, no hover e no foco. O item inteiro é tocável: o link do título se estica sobre o item (`after:absolute after:inset-0`, com o `article` em `relative`) e dá retorno em acento no toque (`active:text-accent`). A linha de baixo não intercepta o toque (`pointer-events-none`).
-- Hover, no modelo do claude.dev: com o ponteiro sobre um item da listagem, os outros caem para opacidade 0,35, com transição curta. Só com mouse (`hover: hover` e `pointer: fine`); o foco do teclado faz o mesmo. Sem transição com `prefers-reduced-motion`. Exceção à seção 9.10 (T-63).
-- A lista separa os itens com divisória `divide-line`, com filete também em cima do primeiro e embaixo do último. O respiro é só vertical: 1,25rem em cima e embaixo abaixo de `sm`, e 2rem de `sm` em diante. Sem borda, sem sombra e sem capa. Exceções da home (T-123): `/ RECENTES` não tem o filete de cima; `/ PROTÓTIPOS` não tem filete e o respiro do item é 0,75rem abaixo de `sm` e 1rem de `sm` em diante; `/ MAIS VOTADOS` não tem filete.
+**Item** (`/ RECENTES` da home, `/blog/`, `/artigos/`, `/prototipos/`, `/tags/<tag>/` e Comece aqui, §9.15):
 
-**Home (T-123).**
+- Um `article` em grade. De `sm` em diante, três colunas centradas na vertical: a data (6,5rem), o título e, à direita, uma coluna só com o tempo de leitura. Abaixo de `sm`, os três empilhados: data, título e tempo.
+- **Data:** mono 12 px, lápis, no formato `21.out.2026`.
+- **NOVO:** nos posts publicados nos últimos 7 dias. Mono 12 px, maiúsculas, grafite; abaixo da data de `sm` em diante e ao lado dela abaixo de `sm`. É calculado no navegador a partir do `datetime` do item, com o lugar reservado no HTML, para o rótulo não deslocar a página. Sem JavaScript, sem rótulo.
+- **Título:** fonte de display 600, entrelinha 1,2, com `text-wrap: balance`. 20 px abaixo de `sm` e 26 px de `sm` em diante.
+- **Tempo:** o relógio parado de 12 px e `11 minutos` (`1 minuto` no singular), em mono 12 px, lápis. "de leitura" vai só no texto para leitor de tela e no `title`. Sem votos, resumo, capa, tipo, tema, nível, tag nem hachura.
+- **Toque:** o item inteiro é tocável: o link do título se estica sobre o item (`after:absolute after:inset-0`, com o `article` em `relative`). O tempo não intercepta o toque (`pointer-events-none`).
+- **Hover:** com o ponteiro sobre o item, fundo `sheet` na linha e título em `accent`, com sublinhado (§9.10). No foco do teclado, o mesmo, com o contorno da §9.10. Sem transição com `prefers-reduced-motion`. Saem a queda dos outros itens para 0,35 de opacidade e a exceção à §9.10.
+- A lista separa os itens com divisória `divide-line`. O respiro é só vertical: 1,25rem em cima e embaixo abaixo de `sm`, e 2rem de `sm` em diante. Sem borda, sem sombra e sem capa.
 
-- A saudação (§9.1) à esquerda, de `lg` em diante. Na coluna da direita, duas faixas. Sem destaque, sem paginação, sem barra de tipos e sem busca.
-- **`/ RECENTES`**, na largura da coluna: 5 posts, os dois tipos, por data, no HTML. O rótulo é mono 12 px, maiúsculas, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete. `Todos`, à direita do rótulo, no estilo dos links do header (§9.13), vai para `/blog/`.
+**Item de Mais votados** (`/ MAIS VOTADOS` da home e `/mais-votados/`): a posição (`01`, `02`…) em mono, o título e `▲ N votos` (`icone-voto.svg`, o número e `votos`, ou `voto` com 1), em tinta, não lápis: o voto é o dado principal. Sem data e sem tempo de leitura. Os itens saem do script do ranking.
+
+**Item de Protótipos** (`/ PROTÓTIPOS` da home): miniatura de 72×54 à esquerda, o título e a `description` do post em até 2 linhas (`line-clamp`), sem tags. A miniatura é o `cover` do post, recortado, decorativa. Sem `cover`, um bloco `sheet` decorativo com a mesma medida. Sem campo novo no schema.
+
+**Home.**
+
+- A saudação (§9.1) à esquerda, de `lg` em diante. Na coluna da direita, as faixas. Sem destaque, sem paginação, sem barra de tipos e sem busca.
+- **Cabeçalho de seção:** o rótulo (`/ RECENTES`, `/ MAIS VOTADOS`, `/ PROTÓTIPOS`) em mono 12 px, maiúsculas, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete. Abaixo de `sm`, o rótulo fica em 15 px, ainda em Plex Mono 400, e o filete em 2 px. O link fica à direita, na mesma linha de base do rótulo, sempre em `accent`, com seta: `Todos os N posts →` em `/ RECENTES` (para `/blog/`), `Todos os N protótipos →` em `/ PROTÓTIPOS` (para `/prototipos/`) e `Ver ranking →` em `/ MAIS VOTADOS` (para `/mais-votados/`), este sem número. Os dois números saem no HTML. O nome acessível é o texto visível sem a seta (`Todos os 12 posts`, `Todos os 3 protótipos`, `Ver ranking`); com 1 item, o texto visível e o nome vão para o singular (`O único post →`, `O único protótipo →`). Isso substitui o `Todos · N` e os nomes da T-124; o script do ranking deixa de escrever o total.
+- **`/ RECENTES`**, na largura da coluna: 5 posts, os dois tipos, por data, no HTML, com o item acima.
 - Abaixo, duas colunas lado a lado de `lg` em diante, empilhadas abaixo de `lg`.
-- **`/ MAIS VOTADOS`:** no HTML, só a frase `O ranking precisa de JavaScript.` Com JavaScript, o script monta o top 10: posts com pelo menos 1 voto, empate pela data mais recente. Sem voto nenhum, a frase `Nenhum voto ainda.` e nenhum item; o bloco continua, para o link não sumir. `Todos` vai para `/mais-votados/`.
-- **`/ PROTÓTIPOS`:** 5 protótipos mais recentes, no HTML. O bloco não é renderizado sem protótipo publicado; nesse caso, `/ MAIS VOTADOS` ocupa a largura toda. `Todos` vai para `/prototipos/`.
-- **Total no `Todos` (no ar, T-124).** O link visível é `Todos · 12`, no mesmo estilo. Em `/ RECENTES`, o 12 é o número de posts publicados; em `/ PROTÓTIPOS`, o de protótipos publicados. Os dois saem no HTML. Em `/ MAIS VOTADOS`, o script do ranking escreve o número de posts com pelo menos 1 voto, inclusive 0; sem JavaScript, o link fica `Todos`, sem número. O nome acessível inclui o número: `Todos os 12 posts recentes`, `Todos os 12 protótipos`, `Todos os 12 mais votados`. Com 1 item, o nome vai para o singular: `O único post recente`, `O único protótipo`, `O único mais votado`. O texto visível continua `Todos · 1`. Com 0 em `/ MAIS VOTADOS`, o nome é `Todos os 0 mais votados`.
+- **`/ MAIS VOTADOS`:** no HTML, só a frase `O ranking precisa de JavaScript.` Com JavaScript, o script monta o top 10, com o item de Mais votados: posts com pelo menos 1 voto, empate pela data mais recente. Sem voto nenhum, a frase `Nenhum voto ainda.` e nenhum item; o bloco continua, para o link não sumir.
+- **`/ PROTÓTIPOS`:** 5 protótipos mais recentes, no HTML, com o item de Protótipos. O bloco não é renderizado sem protótipo publicado; nesse caso, `/ MAIS VOTADOS` ocupa a largura toda.
+- **Abaixo de `sm`:** o título do item em 20 px nas três faixas, e mais espaço entre as faixas.
 - A newsletter (§9.14) fica depois das faixas, na largura da coluna da direita.
 
-**Páginas de lista (T-123).** Sem paginação e sem saudação. O item de `/tags/<tag>/` é o de `/artigos/`.
+**Páginas de lista (T-123).** Sem paginação e sem saudação. Da T-131 em diante, o item é o de cima; em `/mais-votados/`, o de Mais votados.
 
 - **`/blog/`:** h1 `Blog`, sem ícone. A lista inteira, os dois tipos, por data.
 - **`/artigos/` e `/prototipos/`:** h1 `Artigos` ou `Protótipos`, na escala do h1 de página (§5), com folha ou frasco em 24 px, em tinta, antes do nome. A lista inteira do tipo, por data. Um tipo sem post publicado não tem página.
@@ -296,13 +310,23 @@ Decisão da T-119. O card sem fólio e sem nível, e a home sem destaque, estão
 - Abaixo do h1 das quatro listas, o filtro (§9.12) e a linha de contagem.
 
 ### 9.3 Cabeçalho do post (página do post)
-Decisão da T-63, no modelo do Stripe (stripe.dev); entra nas T-65, T-66 e T-67. O topo com o tipo, e o filete sem texto na coluna do texto, entram na T-120.
+Decisão da T-126 (Q23), que substitui a da T-63 à T-120. O cabeçalho entra na T-128; o índice, na T-129; o bloco de voto e compartilhar, na T-130 (§9.14). Até a T-128, no ar: o título na largura toda; de `lg` em diante, a lateral com `/ ARTIGO` ou `/ PROTÓTIPO`, a tabela de chave e valor (data, leitura, autor e tags) e o voto, e o título que aparece acima da lateral ao rolar; abaixo de `lg`, a mesma tabela, com o tipo na primeira linha.
 
-- **Título em cima, sozinho:** h1 na escala do post (seção 5), na largura toda, com `text-wrap: balance`. Abaixo, a linha fina de introdução em grafite, até ~52 caracteres.
-- **Lateral, de `lg` em diante:** à esquerda, com 15rem, vão de 4rem até o texto, sticky a 7,5rem do topo. No topo, `/ ARTIGO` ou `/ PROTÓTIPO`, sem ícone, em mono 12 px, maiúsculas, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete; o rótulo é decorativo (`aria-hidden`). A coluna do texto abre só com o filete, sem texto, alinhado ao da lateral. Abaixo do filete, os metadados numa tabela de chave e valor: o rótulo à esquerda, em mono 12 px maiúsculo e grafite, numa coluna de 7rem, e o valor à direita; linhas com 9 px de respiro e pontilhado em `line` entre elas, e filete sólido em `line` no fim. A linha Tipo existe para o leitor de tela e não aparece na tela. Data, leitura, autor e tags; nas tags, o rótulo fica em cima, na largura toda. Sem fólio, sem "atualizado em", sem nível e sem tema. O campo `updatedDate` continua no schema; a lateral não o mostra. No fim da coluna, o voto (§9.14).
-- **Título ao rolar:** quando o h1 e a linha fina saem da tela, o título aparece acima da lateral, em 28 px, a 0,75rem dela. Fica em posição absoluta: não reserva espaço, não desloca nada, e o rótulo `/ ARTIGO` ou `/ PROTÓTIPO` continua visível. Um título de três linhas cabe acima da lateral sticky a 7,5rem. O título é texto com `aria-hidden`, não heading. A troca usa só opacidade, sem transição com `prefers-reduced-motion`. Sem JavaScript, o título não aparece.
-- **Abaixo de `lg`:** sem lateral. O título; a linha fina; e a mesma tabela, com filete em cima e 32 px de respiro, tudo rolando com o texto. O tipo é a primeira linha da tabela, com o ícone de 12 px e `ARTIGO` ou `PROTÓTIPO`, porque não há lateral. O voto fica no fim do texto (§9.14).
-- **Sem sumário** (SPEC: o RF-05 saiu na T-63).
+- **Título e linha fina, na coluna do texto:** deixam de ocupar a largura toda. h1 na escala do post (§5), com `text-wrap: balance`; abaixo, a linha fina em grafite, até ~52 caracteres. Se a escala de 80 px não couber na coluna, a T-128 para e pergunta.
+- **Metadados,** logo abaixo da linha fina, numa linha: a foto do autor (28 px, redonda, contorno de 1 px em `line`) e `Pedro Knoll` · a data (`21.out.2026`) · o relógio e `6 minutos` · o tipo, `Artigo` ou `Protótipo`. Abaixo, as tags em etiquetas com contorno `line`, cada uma com link para `/tags/<tag>/`. Um filete em `line` fecha o cabeçalho; ele é a sentinela do bloco de voto (§9.14).
+- **Saem:** a tabela de chave e valor da lateral, o rótulo `/ ARTIGO` ou `/ PROTÓTIPO`, a linha Tipo só para leitor de tela (o tipo passa a estar na tela) e o título que aparecia acima da lateral ao rolar. O `updatedDate` continua no schema; o cabeçalho não o mostra.
+- **Abaixo de `lg`:** sem lateral. O mesmo cabeçalho, rolando com o texto; o voto e o compartilhar ficam no fim do texto (§9.14). Sem índice.
+- **Lateral, de `lg` em diante:** à esquerda, com 15rem e vão de 4rem até o texto. Na altura do cabeçalho, vazia. Abaixo, o índice e o bloco de voto e compartilhar (§9.14).
+
+**Índice** (SPEC RF-26; entra na T-129). De `lg` em diante, na lateral, um `nav` com nome acessível `Neste artigo`.
+
+- **Topo:** o rótulo `/ NESTE ARTIGO` em mono 12 px, maiúsculas, tinta, e, à direita, a porcentagem lida (`42%`), com `aria-hidden`. O filete embaixo do rótulo é a barra de progresso: 2 px em `line`, preenchida em tinta conforme a leitura.
+- **Itens:** um por h2, numerados `01`, `02`… em mono, com o título do h2 como link para a âncora, separados por divisórias `line`. A seção atual fica com o fundo `sheet` (o do hover, §9.2), o título em 600 e `aria-current="location"`.
+- **Fim:** o relógio e `N minutos de leitura`.
+- **Posição:** o topo do índice fica na altura do primeiro h2 do texto, e o índice fica sticky no topo ao rolar. As duas coisas saem do layout em CSS (grid e sticky), sem JavaScript que meça e desloque a página (CLS, SPEC RNF-01).
+- **Movimento:** a barra e a seção ativa mudam sem animar o layout. Com `prefers-reduced-motion`, sem rolagem suave.
+- **Sem JavaScript:** os links de âncora funcionam, sem progresso e sem seção ativa.
+- **Sem índice:** abaixo de `lg` e em post com menos de 2 h2.
 
 **Apêndice, no modelo do Distill (T-66).** No fim do post, numa faixa própria depois do artigo, na largura toda, com filete de 1 px em `line` em cima e fundo `sheet`: os apêndices do autor e as referências numeradas (SPEC RF-04). Os títulos (`Apêndice A · <título>`, `Referências`) são rótulos em mono 12 px maiúsculo e grafite, nunca lápis (seção 4: lápis sobre folha clara dá 4,2). De `lg` em diante, o rótulo fica na coluna da lateral (15rem, vão de 4rem) e o texto, em Plex Sans 15 px com entrelinha 1,6, na coluna do texto; abaixo de `lg`, o rótulo fica em cima do texto. Cada referência traz o número da lista em grafite, o título com link numa linha e, abaixo, autores, ano e veículo em grafite; só o título é link. A ficha de bancada saiu na T-62. A revisão visual desta faixa é a T-117.
 
@@ -368,6 +392,8 @@ Foco visível: contorno 2 px prússia com afastamento 3 px. Links em prússia, s
 ### 9.11 Link com cara de botão (página 404)
 O "Voltar ao início" da página 404 parece um botão, mas continua um link (`<a>`) para `/`. Fundo tinta, texto papel, IBM Plex Mono 400 em 14 px, 44 px de altura, 20 px de respiro nas laterais. Cantos retos e sem sombra, como os botões da seção 9.6. Sem sublinhado em repouso; no hover e no foco, sublinhado com afastamento de 3 px, sem troca de cor. O foco é o da seção 9.10. No tema escuro, os mesmos tokens invertem o par: fundo claro, texto escuro.
 
+**Variante com contorno (T-126, Q23; entra na T-125).** O `Assinar via RSS` da saudação (§9.1) é a mesma forma sem fundo: borda de 1 px em tinta, texto em tinta, IBM Plex Mono 400, 44 px de altura e cantos retos. Continua um link (`<a>`), com o mesmo hover e o mesmo foco.
+
 ### 9.12 Busca e filtro
 Decisão da T-119. O filtro está no ar (T-124). A busca está no ar (T-22). A barra "Filtrar por tipo" (T-63, T-64) saiu na T-123.
 
@@ -396,21 +422,25 @@ Decisão da T-119. O header e o footer estão no ar (T-113). O link "Comece aqui
 - **Footer:** filete `line` em cima, na largura do site, com 1,5rem de respiro. Numa linha, `Pedro Knoll · 2026`, em mono 12 px, maiúsculas, grafite, à esquerda, e `RSS`, `GitHub` e `LinkedIn` à direita, no estilo dos links do header. Abaixo de `sm`, as duas partes se empilham.
 
 ### 9.14 Fim do post
-Decisão da T-119. O voto entra na T-122, o compartilhar na T-115, os relacionados na T-26 e a newsletter na T-116. O estilo da faixa do apêndice é revisto na T-117.
+Decisão da T-126 (Q23), que substitui a da T-119 no voto e no compartilhar. O bloco de voto e compartilhar entra na T-130, que absorve a T-115; os relacionados entram na T-26 e a newsletter na T-116. O estilo da faixa do apêndice é revisto na T-117. Até a T-130, no ar, o voto da T-122: de `lg` em diante, no fim da coluna de metadados; abaixo de `lg`, no fim da coluna do texto; o texto `Curtir` até a T-127.
 
-- **Ordem na coluna do texto:** compartilhar, faixa do apêndice (§9.3, só quando o post tem referências ou apêndices), posts relacionados, newsletter e footer.
-- **Voto:** de `lg` em diante, no fim da coluna de metadados (§9.3), depois da tabela. Abaixo de `lg`, no fim da coluna do texto, antes do compartilhar. O bloco entra no HTML. Sem JavaScript, mostra `O voto precisa de JavaScript.` no lugar do botão, na mesma altura, e não há botão. Com JavaScript, uma pílula de 36 px: borda `line`, fundo `surface`, cantos de 0,5rem, triângulo para cima, o texto `Curtir` e a contagem em `accent`. A contagem fica no vão de 3 caracteres, dentro do botão, e troca de `–` para o número sem mudar a posição. Depois do clique, o texto vira `Curtido`, desabilitado, sem desfazer. "Ao lado", na T-115, é esta zona, não a mesma linha: em 360 px os alvos não cabem juntos.
-- **Compartilhar:** no fim da coluna do texto, 2,5rem abaixo do último parágrafo, ou abaixo do voto quando o voto está nessa coluna. O rótulo `/ COMPARTILHAR`, em mono 12 px maiúsculo, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete; abaixo, `X`, `LinkedIn`, `E-mail` e `Copiar link`, no estilo dos links do header (§9.13). Os três primeiros são links com o título e a URL do post (o e-mail por `mailto:`), sem script de terceiro. `Copiar link` é um botão do próprio site, criado pelo script: sem JavaScript, ele não aparece. Ao copiar, vira `Link copiado` por 1,5 s, com o `aria-label` junto, como o botão do código (§9.5).
-- **Posts relacionados:** na coluna do texto, o rótulo `/ POSTS RELACIONADOS`, no estilo do compartilhar, e até 3 itens da lista (§9.2).
+- **Ordem na coluna do texto:** abaixo de `lg`, o bloco de voto e compartilhar, a faixa do apêndice (§9.3, só quando o post tem referências ou apêndices), os posts relacionados, a newsletter e o footer. De `lg` em diante, o bloco sai do fim do texto e vai para a lateral.
+- **Bloco de voto e compartilhar, de `lg` em diante:** mínimo, na lateral, abaixo do índice (§9.3), sticky na borda de baixo da tela. Aparece, com opacidade e um leve deslize (só `opacity` e `transform`), quando o filete que fecha o cabeçalho do post sai da tela (`IntersectionObserver`). Com `prefers-reduced-motion`, aparece sem animação. Ao chegar ao rodapé, o índice e o bloco sobem juntos, sem se sobrepor, só pelo layout em CSS (grid e sticky), sem JavaScript que meça.
+- **Forma do bloco:** um fio em `line` em cima, sem os rótulos `/ GOSTOU?` e `/ COMPARTILHAR`. Na primeira linha, o botão de voto. Abaixo, `Compartilhar` numa linha e, na linha de baixo, `X`, `LinkedIn`, `E-mail` e `Copiar link`, no estilo dos links do header (§9.13). Sem "copiar markdown".
+- **Voto:** a pílula de 36 px da T-122: borda `line`, fundo `surface`, cantos de 0,5rem, o triângulo para cima (`icone-voto.svg`), o texto `Votar` e a contagem em tinta (`▲ Votar 12`). A contagem fica no vão de 3 caracteres, dentro do botão, e troca de `–` para o número sem mudar a posição. Depois do clique, `Votado 12`, desabilitado, sem desfazer (SPEC RF-25). Sem JavaScript, `O voto precisa de JavaScript.` no lugar do botão, na mesma altura.
+- **Compartilhar:** `X`, `LinkedIn` e `E-mail` são links com o título e a URL do post (o e-mail por `mailto:`), sem script de terceiro. `Copiar link` é um botão do próprio site, criado pelo script: sem JavaScript, ele não aparece. Ao copiar, vira `Link copiado` por 1,5 s, com o `aria-label` junto, como o botão do código (§9.5).
+- **Abaixo de `lg`:** o mesmo bloco no fim da coluna do texto, 2,5rem abaixo do último parágrafo, sem sticky e sem animação.
+- **Sem JavaScript:** o bloco aparece parado, sem animação, com o aviso do voto e os três links.
+- **Posts relacionados:** na coluna do texto, o rótulo `/ POSTS RELACIONADOS`, em mono 12 px maiúsculo, tinta, sobre um filete de 1 px em tinta, com 8 px entre o texto e o filete, e até 3 itens da lista (§9.2).
 - **Newsletter:** na coluna do texto, depois dos relacionados, e na home, depois das faixas (§9.2). Um bloco com fundo `sheet` e cantos de 0,375rem; o título `Receba os próximos posts por e-mail.` na fonte de display 600; o campo de e-mail no tamanho do campo da busca (§9.12); o botão `Receber`, com fundo tinta, texto papel, IBM Plex Mono e cantos de 0,375rem. A forma final do campo depende do formulário do Kit (T-116).
 
 ### 9.15 Comece aqui
-Decisão da T-114. Está no ar.
+Decisão da T-114. Está no ar. O item de post muda na T-131 (T-126, Q23).
 
 - **h1** `Comece aqui`, fixo, na escala do h1 das listas (§9.2), sem ícone. É o rótulo do header.
 - **Prosa** na coluna de texto do post (§5): parágrafos, seções `##` e links. O texto mora em `src/content/comece-aqui.mdx`. Editar a página é mudar esse arquivo: dá para acrescentar, tirar e reordenar seções, e pôr uma lista em qualquer uma.
-- **Item de post:** o item alinhado (§9.2), com data, título, minutos e curtidas. O título é h3.
-- **Item externo:** a mesma grade. No lugar da data, o nome da fonte, em mono 12 px, lápis; sem fonte informada, o domínio sem `www.`. O título no mesmo estilo do item. No lugar dos minutos e das curtidas, `↗` em lápis, decorativo (`aria-hidden`). O nome acessível do link é o título mais "(site externo)". O link abre na mesma aba.
+- **Item de post:** o item de `/ RECENTES` (§9.2), com data, título e tempo de leitura, sem votos. O título é h3. Até a T-131, no ar, data, título, minutos e curtidas.
+- **Item externo:** a mesma grade. No lugar da data, o nome da fonte, em mono 12 px, lápis; sem fonte informada, o domínio sem `www.`. O título no mesmo estilo do item. No lugar do tempo de leitura, `↗` em lápis, decorativo (`aria-hidden`). O nome acessível do link é o título mais "(site externo)". O link abre na mesma aba.
 - A lista some se nenhum item sobrar. Um slug que não está nos posts publicados sai da lista, sem quebrar o build. Link externo que não é `https:` quebra o build.
 - Sem foto e sem link para o GitHub.
 
@@ -436,7 +466,7 @@ Um colega experiente puxando a cadeira ao lado, com uma pitada de inventor curio
 
 | Lugar | Texto |
 |---|---|
-| Saudação | Bem-vindo ao pk.log |
+| Saudação | Olá, eu sou o Pedro. · foto: Foto de Pedro Knoll · RSS: Assinar via RSS |
 | Newsletter | Receba os próximos posts por e-mail. · botão: Receber |
 | Página 404 | Esta página foi arrancada do caderno. · texto: O endereço pode ter mudado, ou esta página ainda não foi escrita. O resto do caderno continua aqui. · link: Voltar ao início · notas da ilustração: estava aqui · nó não encontrado |
 | Botão de código | Copiar → Copiado |
@@ -447,8 +477,12 @@ Um colega experiente puxando a cadeira ao lado, com uma pitada de inventor curio
 | Lista sem resultado | Nenhum post com essa tag. |
 | Ranking sem JavaScript | O ranking precisa de JavaScript. |
 | Ranking vazio | Nenhum voto ainda. |
-| Voto | Curtir → Curtido · O voto precisa de JavaScript. |
-| Fim do post | / Compartilhar · Copiar link → Link copiado · / Posts relacionados |
+| Voto | Votar → Votado · ▲ 12 votos · 1 voto · O voto precisa de JavaScript. |
+| Fim do post | Compartilhar · Copiar link → Link copiado · / Posts relacionados |
+| Índice do post | / Neste artigo · 42% · 6 minutos de leitura |
+| Tempo no item | 11 minutos · 1 minuto (para leitor de tela e no `title`: 11 minutos de leitura) |
+| Post recente | NOVO |
+| Links da home | Todos os 12 posts → · Todos os 3 protótipos → · Ver ranking → · com 1: O único post → · O único protótipo → |
 | Botão do caderno | Abrir no marimo · Abrir com GPU |
 
 ---
