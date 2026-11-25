@@ -135,7 +135,8 @@ test("home, listas e tags só com o script do item [RNF-02]", async ({
         return;
       }
       const pres = await page.getByRole("article").locator("pre").count();
-      const modules = pres === 0 ? 3 : 4;
+      // O post não tem mais o script do título na lateral (T-128).
+      const modules = pres === 0 ? 2 : 3;
       await expect(page.locator('script[type="module"]')).toHaveCount(modules);
 
       const plain = page.locator("script:not([type])");

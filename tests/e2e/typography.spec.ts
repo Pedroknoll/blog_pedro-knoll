@@ -89,58 +89,6 @@ function expectHeading(
   expect(sample.textWrapStyle, where).toBe("balance");
 }
 
-type LabelSample = {
-  fontSize: string;
-  fontFamily: string;
-  fontWeight: string;
-  textTransform: string;
-  fontVariantCaps: string;
-  letterSpacing: string;
-};
-
-async function exactParagraph(
-  page: Page,
-  root: string,
-  text: string,
-): Promise<LabelSample | null> {
-  return page.locator(root).evaluate((scope, expected) => {
-    const found = [...scope.querySelectorAll("p")].find((paragraph) => {
-      return (
-        (paragraph.textContent ?? "").replace(/\s+/g, " ").trim() === expected
-      );
-    });
-    if (!found) return null;
-    const style = getComputedStyle(found);
-    return {
-      fontSize: style.fontSize,
-      fontFamily: style.fontFamily,
-      fontWeight: style.fontWeight,
-      textTransform: style.textTransform,
-      fontVariantCaps: style.fontVariantCaps,
-      letterSpacing: style.letterSpacing,
-    };
-  }, text);
-}
-
-function expectLabel(
-  sample: LabelSample | null,
-  where: string,
-  family: string,
-) {
-  expect(sample, where).not.toBeNull();
-  if (!sample) return;
-  expect(sample.fontSize, where).toBe("12px");
-  expect(firstFamily(sample.fontFamily), where).toBe(family);
-  expect(sample.fontWeight, where).toBe("400");
-  expect(sample.textTransform, where).toBe("uppercase");
-  expect(sample.fontVariantCaps, where).toBe("normal");
-  const spacing = Number.parseFloat(sample.letterSpacing);
-  const size = Number.parseFloat(sample.fontSize);
-  const ratio = spacing / size;
-  expect(ratio, where).toBeGreaterThanOrEqual(0.08);
-  expect(ratio, where).toBeLessThanOrEqual(0.14);
-}
-
 test.describe("escala tipográfica [RNF-01]", () => {
   test("T1 h1", async ({ page }) => {
     const posts = await publishedPosts(page);
@@ -162,9 +110,9 @@ test.describe("escala tipográfica [RNF-01]", () => {
       const response = await page.goto(post.href);
       expect(response?.status(), post.href).toBe(200);
       const sample = await headingSample(page);
-      expectHeading(sample, post.href, "80px", display);
+      expectHeading(sample, post.href, "56px", display);
       const lineHeight = Number.parseFloat(sample?.lineHeight ?? "");
-      expect(Math.abs(lineHeight - 81.6), post.href).toBeLessThanOrEqual(0.5);
+      expect(Math.abs(lineHeight - 57.12), post.href).toBeLessThanOrEqual(0.5);
     }
 
     const tagResponse = await page.goto(tag);
@@ -194,25 +142,6 @@ test.describe("escala tipográfica [RNF-01]", () => {
     const missingNarrow = await page.goto("/blog/nao-existe/");
     expect(missingNarrow?.status()).toBe(404);
     expectHeading(await headingSample(page), "404", "36px", display, 28);
-  });
-
-  test("T2 rótulos", async ({ page }) => {
-    const posts = await publishedPosts(page);
-    await page.setViewportSize({ width: 1280, height: 800 });
-    const mono = await variableFamily(page, "--font-plex-mono");
-    const names = ["Autor", "Leitura", "Tags"] as const;
-
-    for (const post of posts) {
-      const response = await page.goto(post.href);
-      expect(response?.status(), post.href).toBe(200);
-      for (const name of names) {
-        expectLabel(
-          await exactParagraph(page, "article header", name),
-          `${post.href} ${name}`,
-          mono,
-        );
-      }
-    }
   });
 
   test("T3 prosa", async ({ page }) => {

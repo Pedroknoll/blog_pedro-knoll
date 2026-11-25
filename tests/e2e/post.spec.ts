@@ -31,7 +31,11 @@ test.describe("página do post [RF-04]", () => {
           header.getByText("Atualizado em", { exact: true }),
         ).toHaveCount(0);
 
-        await expect(header.getByText(/^\d+ min de leitura$/)).toHaveCount(1);
+        const reading = header.locator("[data-post-meta] [data-reading]");
+        await expect(reading).toHaveCount(1);
+        await expect(reading).toHaveText(
+          /^\s*(1 minuto|\d+ minutos) de leitura\s*$/,
+        );
 
         await expect(
           page.getByRole("navigation", { name: "Sumário", exact: true }),

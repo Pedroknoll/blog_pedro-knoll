@@ -1,14 +1,6 @@
-import { expect, test, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
 
 import { fixtureMd, fixtureMdx, fixtureSemTitulos } from "./fixtures";
-
-function row(page: Page, rail: Locator, label: string) {
-  return rail
-    .locator("> div")
-    .nth(1)
-    .locator("> div")
-    .filter({ has: page.getByText(label, { exact: true }) });
-}
 
 async function openFixture(page: Page, href: string, title: string) {
   const response = await page.goto(href);
@@ -16,21 +8,21 @@ async function openFixture(page: Page, href: string, title: string) {
   const heading = page.locator("article h1");
   await expect(heading).toBeVisible();
   await expect(heading).toHaveText(title);
-  const rail = page.locator("[data-post-rail]");
-  await expect(rail).toBeVisible();
-  return rail;
+  const meta = page.locator("article header [data-post-meta]");
+  await expect(meta).toBeVisible();
+  return meta;
 }
 
 test.describe("fixtures [RF-04]", () => {
   test("fixture-md tem atualização, as duas datas e h2 antes de h3 antes de h4", async ({
     page,
   }) => {
-    const rail = await openFixture(page, fixtureMd.href, fixtureMd.title);
-    const published = row(page, rail, "Data");
-    await expect(published).toBeVisible();
-    await expect(row(page, rail, "Atualizado em")).toHaveCount(0);
-    await expect(rail.locator("time")).toHaveCount(1);
-    await expect(published.locator("time")).toHaveText(fixtureMd.published);
+    const meta = await openFixture(page, fixtureMd.href, fixtureMd.title);
+    await expect(page.getByText("Atualizado em", { exact: true })).toHaveCount(
+      0,
+    );
+    await expect(page.locator("article header time")).toHaveCount(1);
+    await expect(meta.locator("time")).toHaveText(fixtureMd.published);
     await expect(
       page.locator('meta[property="article:published_time"]'),
     ).toHaveAttribute("content", /^2000-01-02/);
@@ -53,31 +45,29 @@ test.describe("fixtures [RF-04]", () => {
   });
 
   test("fixture-mdx não tem atualização e tem uma data", async ({ page }) => {
-    const rail = await openFixture(page, fixtureMdx.href, fixtureMdx.title);
-    await expect(row(page, rail, "Data")).toBeVisible();
-    await expect(rail.locator("time").first()).toBeVisible();
-    await expect(rail.locator("time")).toHaveCount(1);
-    await expect(row(page, rail, "Data").locator("time")).toHaveText(
-      fixtureMdx.published,
+    const meta = await openFixture(page, fixtureMdx.href, fixtureMdx.title);
+    await expect(meta.locator("time")).toBeVisible();
+    await expect(page.locator("article header time")).toHaveCount(1);
+    await expect(meta.locator("time")).toHaveText(fixtureMdx.published);
+    await expect(page.getByText("Atualizado em", { exact: true })).toHaveCount(
+      0,
     );
-    await expect(row(page, rail, "Atualizado em")).toHaveCount(0);
   });
 
   test("fixture-sem-titulos não tem atualização, tem uma data e não tem h2 nem h3", async ({
     page,
   }) => {
-    const rail = await openFixture(
+    const meta = await openFixture(
       page,
       fixtureSemTitulos.href,
       fixtureSemTitulos.title,
     );
-    await expect(row(page, rail, "Data")).toBeVisible();
-    await expect(rail.locator("time").first()).toBeVisible();
-    await expect(rail.locator("time")).toHaveCount(1);
-    await expect(row(page, rail, "Data").locator("time")).toHaveText(
-      fixtureSemTitulos.published,
+    await expect(meta.locator("time")).toBeVisible();
+    await expect(page.locator("article header time")).toHaveCount(1);
+    await expect(meta.locator("time")).toHaveText(fixtureSemTitulos.published);
+    await expect(page.getByText("Atualizado em", { exact: true })).toHaveCount(
+      0,
     );
-    await expect(row(page, rail, "Atualizado em")).toHaveCount(0);
 
     const prose = page.locator("article .prose");
     await expect(prose).toBeVisible();

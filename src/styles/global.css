@@ -67,27 +67,6 @@
   line-height: 1.65;
 }
 
-@media (width < 64rem) {
-  .prose-site > [data-prose-mark] + * {
-    margin-top: 0;
-  }
-}
-
-/* De lg em diante a linha Tipo fica só para leitor de tela: caixa zerada, ícone fora. */
-@media (width >= 64rem) {
-  [data-tipo-row] {
-    height: 0;
-    min-height: 0;
-    padding: 0;
-    border-width: 0;
-    overflow: hidden;
-  }
-
-  [data-tipo-row] svg {
-    display: none;
-  }
-}
-
 /* O :not tira o .not-prose: estas regras ficam fora de @layer e, sem isso, o h3 do card dentro da prosa pede a Plex Sans 600. */
 .prose-site :where(h2):not(:where(.not-prose, .not-prose *)) {
   font-family: var(--font-display);

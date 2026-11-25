@@ -41,19 +41,16 @@ function slugFrom(href: string) {
   return match[1];
 }
 
-// O chip é um span até a implementação e um link da lista "Tags" depois.
-// O texto é o mesmo, então E3, E4 e E6 abrem /tags/<tag>/ já neste commit.
 async function chipNames(page: Page) {
   const header = page.getByRole("article").locator("header");
   await expect(header).toHaveCount(1);
-  const label = header.getByText("Tags", { exact: true });
-  if ((await label.count()) === 0) return [];
-
-  const chips = label.locator("..").locator("span, li a");
+  const links = header
+    .getByRole("list", { name: "Tags", exact: true })
+    .getByRole("link");
   const names: string[] = [];
-  const count = await chips.count();
+  const count = await links.count();
   for (let index = 0; index < count; index += 1) {
-    const text = normalize(await chips.nth(index).textContent());
+    const text = normalize(await links.nth(index).textContent());
     if (text) names.push(text);
   }
   return names;

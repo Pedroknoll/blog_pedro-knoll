@@ -5,6 +5,7 @@ import { Image } from "astro:assets";
 import Clock from "~/assets/brand/icones/icone-relogio.svg";
 import Vote from "~/assets/brand/icones/icone-voto.svg";
 import { formatPubDate } from "~/lib/format-date";
+import { formatMinutes } from "~/lib/format-minutes";
 import { thumbnailOf } from "~/lib/home-lists";
 
 interface Item {
@@ -62,7 +63,7 @@ const homeItemClass =
   "group relative -mx-3 px-3 hover:bg-sheet focus-within:bg-sheet motion-safe:transition-colors";
 const homeMetaClass =
   "font-mono text-xs text-pencil group-hover:text-muted group-focus-within:text-muted";
-const minutesText = `${item.minutes} ${item.minutes === 1 ? "minuto" : "minutos"}`;
+const minutesText = formatMinutes(item.minutes);
 const thumbnail = thumbnailOf(item.cover);
 
 // Item das listas inteiras (T-131, Q24). Abaixo de `sm`, empilhado: a data

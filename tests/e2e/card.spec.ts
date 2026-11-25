@@ -234,47 +234,16 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           header.getByText("Atualizado em", { exact: true }),
         ).toHaveCount(0);
 
-        const rail = header.locator("[data-post-rail]");
-        await expect(rail).toHaveCount(1);
+        const meta = header.locator("[data-post-meta]");
+        await expect(meta).toHaveCount(1);
         const times = header.locator("time");
         await expect(times).toHaveCount(1);
         const datetime = (await times.getAttribute("datetime")) ?? "";
         expect(datetime).toMatch(/^\d{4}-\d{2}-\d{2}$/);
         await expect(times).toHaveText(dateFromDatetime(datetime));
 
-        const items = rail.locator("> div").nth(1).locator("> div");
-        const item = (label: string) =>
-          items.filter({ has: page.getByText(label, { exact: true }) });
-        await expect(item("Data")).toHaveCount(1);
-        await expect(item("Data").locator("time")).toHaveCount(1);
-        await expect(item("Tipo").getByText(KIND)).toHaveText(KIND);
-      });
-    }
-  });
-
-  test("C5 ícone do tipo só abaixo de lg", async ({ page }) => {
-    for (const href of await publishedHrefs(page)) {
-      await test.step(href, async () => {
-        await open(page, href);
-        const header = page.getByRole("article").locator("header");
-        const tipo = header
-          .locator("[data-post-rail] > div")
-          .nth(1)
-          .locator("> div")
-          .filter({ has: page.getByText("Tipo", { exact: true }) });
-        const svg = tipo.locator("svg");
-        await page.setViewportSize({ width: 1280, height: 800 });
-        await expect(svg).toHaveCount(1);
-        await expect(svg).toBeHidden();
-
-        await page.setViewportSize({ width: 360, height: 800 });
-        await expect(svg).toHaveCount(1);
-        await expect(svg).toBeVisible();
-        await expect(svg).toHaveAttribute("aria-hidden", "true");
-        await expect(svg).toHaveCSS("width", "12px");
-        await expect(svg).toHaveCSS("height", "12px");
-        const names = await animationNames(svg);
-        expect(names.every((name) => name === "none")).toBe(true);
+        await expect(meta.locator("time")).toHaveCount(1);
+        await expect(meta.locator("[data-post-kind]")).toHaveText(KIND);
       });
     }
   });
@@ -321,7 +290,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           if (await article.evaluate(inHomeBand)) continue;
           const reading = article.locator("[data-reading]");
           await expect(reading).toHaveCount(1);
-          // O item diz `N minutos` e o post `N min de leitura` (T-131).
+          // O item e o post dizem `N minutos` (T-128).
           const cardText = textOf(await reading.textContent()).replace(
             /\s*de leitura$/,
             "",
@@ -339,7 +308,9 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
             continue;
           }
           await open(page, href);
-          const postReading = page.getByText(/^\d+ min de leitura$/);
+          const postReading = page.locator(
+            "article header [data-post-meta] [data-reading]",
+          );
           await expect(postReading).toHaveCount(1);
           const postText = textOf(await postReading.textContent());
           expect(Number.parseInt(cardText, 10)).toBe(
