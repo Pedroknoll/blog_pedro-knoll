@@ -15,9 +15,8 @@ interface Props {
   icon?: "article" | "prototype" | "fire";
   headingLevel?: 2 | 3;
   frame?: boolean;
-  layout?: "paired" | "aligned" | "recent" | "prototype";
+  layout?: "stacked" | "recent" | "prototype";
   topBorder?: boolean;
-  dim?: boolean;
 }
 
 const {
@@ -28,9 +27,8 @@ const {
   icon,
   headingLevel = 2,
   frame = true,
-  layout = "paired",
+  layout = "stacked",
   topBorder = true,
-  dim = true,
 } = Astro.props;
 
 const icons = {
@@ -53,7 +51,6 @@ const items = await Promise.all(
 const headingClass =
   "font-display text-4xl font-semibold leading-tight text-balance text-ink sm:text-[2.75rem]";
 const titles = layout === "prototype";
-const home = layout === "recent" || layout === "prototype";
 ---
 
 <div
@@ -84,13 +81,9 @@ const home = layout === "recent" || layout === "prototype";
     ]}
     aria-label={listLabel}
     data-listing
-    data-dim={dim ? "" : undefined}
   >
     {items.map((item) => (
-      <li
-        class={home ? undefined : "py-5 sm:py-8"}
-        data-tags={item.tags.join(" ")}
-      >
+      <li data-tags={item.tags.join(" ")}>
         <Card item={item} headingLevel={headingLevel} layout={layout} />
       </li>
     ))}

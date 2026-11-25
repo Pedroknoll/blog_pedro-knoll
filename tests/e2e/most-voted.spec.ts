@@ -67,7 +67,7 @@ test.describe("mais votados [RF-01, RF-02]", () => {
     await expect(items.nth(0).locator("[data-vote-value]")).toHaveText("4");
     await expect(items.nth(0).locator("[data-vote-word]")).toHaveText("votos");
     await expect(items.nth(0).locator("[data-reading]")).toContainText(
-      "min de leitura",
+      /\d+ minutos?/,
     );
     const words = await items
       .filter({

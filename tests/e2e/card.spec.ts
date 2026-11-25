@@ -116,7 +116,10 @@ async function expectDateLine(container: Locator) {
   const datetime = (await time.getAttribute("datetime")) ?? "";
   expect(datetime).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   await expect(time).toHaveText(dateFromDatetime(datetime));
-  await expect(time.locator("xpath=..")).toHaveText(dateFromDatetime(datetime));
+  // O NOVO divide a linha com a data (BRAND §9.2, T-131).
+  await expect(time.locator("xpath=..")).toHaveText(
+    new RegExp(`^${dateFromDatetime(datetime).replaceAll(".", "\\.")}(NOVO)?$`),
+  );
 
   await expect(container.getByText(KIND)).toHaveCount(0);
   await expect(container.getByText(/Fól\./)).toHaveCount(0);
@@ -182,7 +185,7 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           expect(measured.weight).toBe("600");
           // Os tamanhos dos itens da home estão no home.spec.ts (T-125).
           if (measured.home) continue;
-          expect(fontSizePx(measured.fontSize)).toBeGreaterThanOrEqual(22);
+          expect(fontSizePx(measured.fontSize)).toBeGreaterThanOrEqual(20);
         }
       });
     }
@@ -311,8 +314,12 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           if (await article.evaluate(inHomeBand)) continue;
           const reading = article.locator("[data-reading]");
           await expect(reading).toHaveCount(1);
-          const cardText = textOf(await reading.textContent());
-          expect(cardText).toMatch(/^\d+ min de leitura$/);
+          // O item diz `N minutos` e o post `N min de leitura` (T-131).
+          const cardText = textOf(await reading.textContent()).replace(
+            /\s*de leitura$/,
+            "",
+          );
+          expect(cardText).toMatch(/^(1 minuto|\d+ minutos)$/);
           const href =
             (await article
               .locator(titleHeading)
@@ -328,7 +335,9 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
           const postReading = page.getByText(/^\d+ min de leitura$/);
           await expect(postReading).toHaveCount(1);
           const postText = textOf(await postReading.textContent());
-          expect(cardText).toBe(postText);
+          expect(Number.parseInt(cardText, 10)).toBe(
+            Number.parseInt(postText, 10),
+          );
           seen.set(href, cardText);
           await open(page, path);
         }
@@ -347,289 +356,8 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     }
   });
 
-  test("C11 faixa da data e a ordem a 360", async ({ page }) => {
-    const paths = await listingSurfaces(page);
-
-    await page.setViewportSize({ width: 1280, height: 800 });
-    for (const path of paths) {
-      await test.step(`${path} 1280`, async () => {
-        await open(page, path);
-        for (const article of await listArticles(page)) {
-          if (await article.evaluate(inHomeBand)) continue;
-          const placed = await article.evaluate((root) => {
-            const date = root.querySelector("time")?.parentElement;
-            const heading = root.querySelector(":is(h2, h3)");
-            if (!date || !heading) return null;
-            const dateBox = date.getBoundingClientRect();
-            const headingBox = heading.getBoundingClientRect();
-            const track = Number.parseFloat(
-              getComputedStyle(root)
-                .gridTemplateColumns.trim()
-                .split(/\s+/)[0] ?? "",
-            );
-            const fontSize = Number.parseFloat(
-              getComputedStyle(document.documentElement).fontSize,
-            );
-            const footer = root.querySelector("p.footer");
-            const footerBox = footer?.getBoundingClientRect();
-            return {
-              dateRight: dateBox.right,
-              headingLeft: headingBox.left,
-              headingRight: headingBox.right,
-              track,
-              expectedTrack: 6.5 * fontSize,
-              dateCenter: (dateBox.top + dateBox.bottom) / 2,
-              textCenter: heading.parentElement
-                ? (heading.parentElement.getBoundingClientRect().top +
-                    heading.parentElement.getBoundingClientRect().bottom) /
-                  2
-                : Number.NaN,
-              footerLeft: footerBox?.left ?? Number.NaN,
-              footerCenter: footerBox
-                ? (footerBox.top + footerBox.bottom) / 2
-                : Number.NaN,
-            };
-          });
-          expect(placed).not.toBeNull();
-          if (!placed) continue;
-          expect(placed.dateRight).toBeLessThanOrEqual(placed.headingLeft);
-          expect(
-            Math.abs(placed.track - placed.expectedTrack),
-          ).toBeLessThanOrEqual(1);
-          expect(
-            Math.abs(placed.dateCenter - placed.textCenter),
-            "data centrada no texto",
-          ).toBeLessThanOrEqual(1);
-        }
-      });
-    }
-
-    await page.setViewportSize({ width: 360, height: 800 });
-    for (const path of paths) {
-      await test.step(`${path} 360`, async () => {
-        await open(page, path);
-        for (const article of await listArticles(page)) {
-          if (await article.evaluate(inHomeBand)) continue;
-          const above = await article.evaluate((root) => {
-            const date = root.querySelector("time")?.parentElement;
-            const heading = root.querySelector(":is(h2, h3)");
-            if (!date || !heading) return null;
-            const dateBox = date.getBoundingClientRect();
-            const headingBox = heading.getBoundingClientRect();
-            const footer = root
-              .querySelector("p.footer")
-              ?.getBoundingClientRect();
-            return {
-              dateTop: dateBox.top,
-              dateBottom: dateBox.bottom,
-              headingTop: headingBox.top,
-              footerTop: footer?.top ?? Number.NaN,
-              footerBottom: footer?.bottom ?? Number.NaN,
-            };
-          });
-          expect(above).not.toBeNull();
-          if (!above) continue;
-          expect(above.dateTop).toBeLessThan(above.headingTop);
-          expect(above.dateBottom).toBeLessThanOrEqual(above.headingTop + 1);
-        }
-      });
-    }
-  });
-
-  test("C12 rodapé não abre nem fecha linha com pipe", async ({ page }) => {
-    await page.setViewportSize({ width: 360, height: 800 });
-    await open(page, "/blog/");
-    const widths = await page.evaluate(() => ({
-      scrollWidth: document.documentElement.scrollWidth,
-      clientWidth: document.documentElement.clientWidth,
-    }));
-    expect(widths.scrollWidth).toBeLessThanOrEqual(widths.clientWidth);
-
-    const footer = page.locator("article p.footer");
-    await expect(footer.first()).toBeVisible();
-    const edges = await footer.first().evaluate((source) => {
-      const clone = source.cloneNode(true) as HTMLElement;
-      const width = source.getBoundingClientRect().width;
-      const kind = [...clone.querySelectorAll("span")].find((span) =>
-        /^(Artigo|Protótipo)$/.test((span.textContent ?? "").trim()),
-      );
-      if (kind) kind.textContent = "Protótipo";
-      const minutes = [...clone.querySelectorAll("[data-reading]")].find(
-        (span) =>
-          /^\d+\s+min de leitura$/.test(
-            (span.textContent ?? "").replace(/\s+/g, " ").trim(),
-          ),
-      );
-      if (minutes) minutes.textContent = "20 min de leitura";
-      clone.style.position = "absolute";
-      clone.style.left = "0";
-      clone.style.top = "0";
-      clone.style.width = `${width}px`;
-      clone.style.boxSizing = "border-box";
-      document.body.appendChild(clone);
-      const clip = clone.getBoundingClientRect();
-      const glyphs: { ch: string; left: number; top: number }[] = [];
-      const texts = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT);
-      while (texts.nextNode()) {
-        const node = texts.currentNode;
-        const parent = node.parentElement;
-        if (!parent || parent.closest(".sr-only")) continue;
-        const raw = node.textContent ?? "";
-        for (let index = 0; index < raw.length; index += 1) {
-          const ch = raw[index] ?? "";
-          if (ch.trim() === "") continue;
-          const range = document.createRange();
-          range.setStart(node, index);
-          range.setEnd(node, index + 1);
-          const rect = range.getBoundingClientRect();
-          const visible =
-            Math.min(rect.right, clip.right) - Math.max(rect.left, clip.left);
-          if (rect.width <= 0 || rect.height <= 0 || visible <= 1) continue;
-          if (rect.bottom <= clip.top || rect.top >= clip.bottom) continue;
-          glyphs.push({ ch, left: rect.left, top: rect.top });
-        }
-      }
-      clone.remove();
-      glyphs.sort(
-        (left, right) => left.top - right.top || left.left - right.left,
-      );
-      const lines: { ch: string; left: number; top: number }[][] = [];
-      for (const glyph of glyphs) {
-        const line = lines.find(
-          (items) => Math.abs((items[0]?.top ?? 0) - glyph.top) < 4,
-        );
-        if (line) line.push(glyph);
-        else lines.push([glyph]);
-      }
-      return lines
-        .map((line) => {
-          line.sort((left, right) => left.left - right.left);
-          return {
-            first: line[0]?.ch ?? "",
-            last: line[line.length - 1]?.ch ?? "",
-            text: line.map((glyph) => glyph.ch).join(""),
-          };
-        })
-        .filter((line) => line.first === "|" || line.last === "|");
-    });
-    expect(edges).toEqual([]);
-  });
-
-  test("C14 relógio parado e título sem sublinhado", async ({ page }) => {
-    for (const path of await listingSurfaces(page)) {
-      await test.step(path, async () => {
-        await open(page, path);
-        for (const article of await listArticles(page)) {
-          if (await article.evaluate(inHomeBand)) continue;
-          const clock = await article.evaluate((root) => {
-            const span = root.querySelector("[data-reading]");
-            const svg = span?.querySelector(":scope > svg");
-            if (!svg) return { ok: false, reason: "sem svg" };
-            let after = "";
-            for (let node = svg.nextSibling; node; node = node.nextSibling) {
-              if (node.nodeType === Node.ELEMENT_NODE) {
-                return { ok: false, reason: "elemento depois do svg" };
-              }
-              after += node.textContent ?? "";
-            }
-            return {
-              ok: /^\d+\s+min de leitura$/.test(
-                after.replace(/\s+/g, " ").trim(),
-              ),
-              hidden: svg.getAttribute("aria-hidden"),
-              after: after.replace(/\s+/g, " ").trim(),
-            };
-          });
-          expect(clock.ok, JSON.stringify(clock)).toBe(true);
-          expect(clock.hidden).toBe("true");
-
-          const link = article.locator(titleHeading).getByRole("link");
-          const rest = await link.evaluate((element) => {
-            const style = getComputedStyle(element);
-            return {
-              color: style.color,
-              decoration: style.textDecorationLine,
-            };
-          });
-          expect(rest.decoration).toBe("none");
-          await link.hover();
-          await expect(link).toHaveCSS("color", rest.color);
-          await expect(link).toHaveCSS("text-decoration-line", "none");
-          await page.mouse.move(0, 0);
-        }
-      });
-    }
-  });
-
-  test("C18 título em 22px abaixo de sm e 26px de sm em diante", async ({
-    page,
-  }) => {
-    await open(page, "/blog/");
-    const cases = [
-      { width: 360, size: 22, line: 26.4 },
-      { width: 1280, size: 26, line: 31.2 },
-    ];
-    for (const item of cases) {
-      await page.setViewportSize({ width: item.width, height: 800 });
-      const articles = await listArticles(page);
-      expect(articles.length, String(item.width)).toBeGreaterThan(0);
-      for (const article of articles) {
-        const measured = await article
-          .locator(titleHeading)
-          .evaluate((element) => {
-            const style = getComputedStyle(element);
-            return { fontSize: style.fontSize, lineHeight: style.lineHeight };
-          });
-        expect(fontSizePx(measured.fontSize), String(item.width)).toBe(
-          item.size,
-        );
-        const lineHeight = fontSizePx(measured.lineHeight);
-        expect(
-          Math.abs(lineHeight - item.line),
-          String(item.width),
-        ).toBeLessThanOrEqual(0.5);
-      }
-    }
-  });
-
-  test("linha de baixo com relógio, voto e vão de 3ch", async ({ page }) => {
-    await open(page, "/blog/");
-    const articles = await listArticles(page);
-    expect(articles.length).toBeGreaterThan(0);
-    for (const article of articles) {
-      const footer = article.locator("p.footer");
-      await expect(footer).toHaveCount(1);
-      await expect(footer).toContainText("|");
-      const clock = footer.locator("svg").first();
-      await expect(clock).toHaveAttribute("aria-hidden", "true");
-      await expect(clock).toHaveCSS("width", "12px");
-      await expect(clock).toHaveCSS("height", "12px");
-      await expect(footer).toContainText(/\d+\s+min de leitura/);
-      const vote = footer.locator("svg").nth(1);
-      await expect(vote).toHaveAttribute("aria-hidden", "true");
-      await expect(vote).toHaveCSS("width", "10px");
-      await expect(vote).toHaveCSS("height", "8px");
-      await expect(footer.locator("[data-vote-word]")).toHaveText("votos");
-      const value = footer.locator("[data-vote-value]");
-      await expect(value).toHaveText("–");
-      const count = value.locator("xpath=..");
-      await expect(count).toHaveClass(/text-accent/);
-      await expect(count).toHaveAccessibleName("–");
-      const gap = await count.evaluate((element) => {
-        const probe = document.createElement("span");
-        const style = getComputedStyle(element);
-        probe.style.font = style.font;
-        probe.textContent = "000";
-        probe.style.position = "absolute";
-        probe.style.visibility = "hidden";
-        document.body.append(probe);
-        const expected = probe.getBoundingClientRect().width;
-        probe.remove();
-        return Math.abs(element.getBoundingClientRect().width - expected);
-      });
-      expect(gap).toBeLessThanOrEqual(1);
-    }
-  });
+  // O C11, o C12, o C14, o C18, o C20 e a linha de baixo eram do item da
+  // T-123; o item empilhado está no list-item.spec.ts (T-131, Q24).
 
   test("GET com 0 mostra 0 e GET 500 mantém –", async ({ page }) => {
     const slugs = [
@@ -677,68 +405,6 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
     expect(dashCount).toBeGreaterThan(0);
     for (let index = 0; index < dashCount; index += 1) {
       await expect(dashes.nth(index)).toHaveText("–");
-    }
-  });
-
-  test("C20 vão vertical quando o rodapé quebra", async ({ page }) => {
-    await page.setViewportSize({ width: 360, height: 800 });
-    await open(page, "/blog/");
-    const footer = page.locator("article p.footer").first();
-    await expect(footer).toBeVisible();
-    const measured = await footer.evaluate((node) => {
-      const block = node as HTMLElement;
-      const kind = [...block.querySelectorAll("span")].find((span) =>
-        /^(Artigo|Protótipo)$/.test((span.textContent ?? "").trim()),
-      );
-      if (kind) kind.textContent = "Protótipo";
-      const wraps = () => {
-        const tops = [...block.children].map(
-          (child) => child.getBoundingClientRect().top,
-        );
-        return Math.max(...tops) - Math.min(...tops) > 8;
-      };
-      if (!wraps()) {
-        let width = Math.floor(block.getBoundingClientRect().width);
-        while (width > 8 && !wraps()) {
-          width -= 16;
-          block.style.width = `${width}px`;
-        }
-      }
-      const boxes = [...block.children]
-        .map((child) => {
-          const rect = child.getBoundingClientRect();
-          return { top: rect.top, bottom: rect.bottom };
-        })
-        .sort((left, right) => left.top - right.top);
-      const lines: { top: number; bottom: number }[] = [];
-      for (const box of boxes) {
-        const line = lines.find((item) => box.top < item.bottom - 2);
-        if (line) {
-          line.top = Math.min(line.top, box.top);
-          line.bottom = Math.max(line.bottom, box.bottom);
-        } else {
-          lines.push({ top: box.top, bottom: box.bottom });
-        }
-      }
-      const gaps: number[] = [];
-      for (let index = 1; index < lines.length; index += 1) {
-        const previous = lines[index - 1];
-        const current = lines[index];
-        if (!previous || !current) continue;
-        gaps.push(current.top - previous.bottom);
-      }
-      return {
-        lines: lines.length,
-        gaps,
-        rowGap: getComputedStyle(block).rowGap,
-      };
-    });
-    expect(measured.lines, JSON.stringify(measured)).toBeGreaterThan(1);
-    expect(Number.parseFloat(measured.rowGap)).toBeCloseTo(6, 0);
-    expect(measured.gaps.length).toBeGreaterThan(0);
-    for (const gap of measured.gaps) {
-      expect(gap).toBeGreaterThanOrEqual(5);
-      expect(gap).toBeLessThanOrEqual(8);
     }
   });
 });

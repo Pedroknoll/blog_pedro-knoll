@@ -38,12 +38,7 @@ const noun =
   ogTitle={heading}
   ogType="website"
 >
-  <Listing
-    heading={heading}
-    posts={posts}
-    icon={kind}
-    layout={kind === "prototype" ? "aligned" : "paired"}
-  >
+  <Listing heading={heading} posts={posts} icon={kind}>
     <TagFilter
       slot="filter"
       tags={collectTags(posts)}

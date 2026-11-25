@@ -20,14 +20,14 @@ interface Props {
   item: Item;
   headingLevel?: 2 | 3;
   href?: string;
-  layout?: "paired" | "aligned" | "recent" | "ranked" | "prototype";
+  layout?: "stacked" | "recent" | "ranked" | "prototype";
 }
 
 const {
   item,
   headingLevel = 2,
   href: hrefProp,
-  layout = "paired",
+  layout = "stacked",
 } = Astro.props;
 
 function asDate(value: Date | string): Date {
@@ -38,19 +38,13 @@ function asDate(value: Date | string): Date {
   return new Date(value);
 }
 
-const showMeta =
-  layout === "paired" || layout === "recent" || layout === "aligned";
+const showMeta = layout === "stacked" || layout === "recent";
 const formatted = showMeta ? formatPubDate(asDate(item.date)) : null;
 const text = formatted?.text ?? "";
 const datetime = formatted?.datetime ?? "";
 const href = hrefProp ?? `/blog/${item.slug}/`;
 const Heading = headingLevel === 3 ? "h3" : "h2";
-const linkClass =
-  "text-ink no-underline active:text-accent after:absolute after:inset-0";
-const titleClass =
-  "font-display text-[1.375rem] leading-[1.2] font-semibold text-balance text-ink not-italic sm:text-[1.625rem]";
-
-// Itens da home (BRAND §9.2, T-125): o hover pinta a linha de `sheet` e o
+// Itens da home (BRAND §9.2, T-125) e das listas inteiras (T-131, Q24): o hover pinta a linha de `sheet` e o
 // título vai para `accent` sublinhado; a data e o tempo passam de lápis a
 // grafite sobre o `sheet` (BRAND §4: lápis não é texto pequeno sobre folha).
 const homeTitleClass =
@@ -171,82 +165,55 @@ const thumbnail = thumbnailOf(item.cover);
       <span class="sr-only">{" de leitura"}</span>
     </p>
   </article>
-) : layout === "aligned" ? (
-  <article class="relative grid gap-y-0 sm:grid-cols-[6.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-8">
-    <p class="font-mono text-xs text-pencil sm:col-start-1 sm:row-start-1">
+) : (
+  <article class:list={[homeItemClass, "flex flex-col py-5 sm:py-8"]}>
+    <p class={homeMetaClass}>
       <time datetime={datetime}>{text}</time>
+      <span data-novo class="ml-3 text-muted uppercase" />
     </p>
-    <Heading class:list={[titleClass, "sm:col-start-2 sm:row-start-1"]}>
-      <a class={linkClass} href={href}>
+    <Heading class:list={[homeTitleClass, "mt-2"]}>
+      <a class={homeLinkClass} href={href}>
         {item.title}
       </a>
     </Heading>
-    <p class="footer pointer-events-none mt-2 flex flex-wrap items-baseline justify-end gap-x-2 gap-y-1.5 font-mono text-xs text-pencil sm:col-start-3 sm:row-start-1 sm:mt-0 sm:justify-start">
-      <span data-reading class="whitespace-nowrap">
-        <Clock aria-hidden="true" width={12} height={12} class="inline-block" />{" "}
-        {item.minutes} min de leitura
-      </span>
-      <span class="text-line" aria-hidden="true">
-        |
-      </span>
-      <span class="inline-flex items-baseline gap-1 whitespace-nowrap">
-        <Vote
-          aria-hidden="true"
-          width={10}
-          height={8}
-          class="inline-block h-2 w-2.5"
-        />
-        <span data-vote-word>votos</span>
-        <span
-          class="inline-block w-[3ch] text-right text-accent"
-          role="tooltip"
-        >
-          <span data-vote-value>–</span>
-        </span>
-      </span>
+    <p
+      data-description
+      class="mt-2 font-sans text-base leading-[1.5] text-muted"
+    >
+      {item.description}
     </p>
-  </article>
-) : (
-  <article class="relative grid gap-y-0 sm:grid-cols-[6.5rem_minmax(0,1fr)] sm:items-center sm:gap-x-8">
-    <p class="font-mono text-xs text-pencil sm:col-start-1 sm:row-start-1">
-      <time datetime={datetime}>{text}</time>
+    <p
+      data-reading
+      title={`${minutesText} de leitura`}
+      class:list={[
+        homeMetaClass,
+        "pointer-events-none mt-3 flex items-center gap-1.5 whitespace-nowrap",
+      ]}
+    >
+      <Clock
+        aria-hidden="true"
+        width={12}
+        height={12}
+        class="inline-block shrink-0"
+      />
+      <span>{minutesText}</span>
+      <span class="sr-only">{" de leitura"}</span>
     </p>
-    <div class="min-w-0 sm:col-start-2 sm:row-start-1">
-      <Heading class={titleClass}>
-        <a class={linkClass} href={href}>
-          {item.title}
-        </a>
-      </Heading>
-      <p class="footer pointer-events-none mt-2 flex flex-wrap items-baseline justify-end gap-x-2 gap-y-1.5 font-mono text-xs text-pencil sm:mt-3">
-        <span data-reading class="whitespace-nowrap">
-          <Clock
-            aria-hidden="true"
-            width={12}
-            height={12}
-            class="inline-block"
-          />{" "}
-          {item.minutes} min de leitura
-        </span>
-        <span class="text-line" aria-hidden="true">
-          |
-        </span>
-        <span class="inline-flex items-baseline gap-1 whitespace-nowrap">
-          <Vote
-            aria-hidden="true"
-            width={10}
-            height={8}
-            class="inline-block h-2 w-2.5"
-          />
-          <span data-vote-word>votos</span>
-          <span
-            class="inline-block w-[3ch] text-right text-accent"
-            role="tooltip"
-          >
-            <span data-vote-value>–</span>
-          </span>
-        </span>
-      </p>
-    </div>
+    <p
+      data-votes
+      class="pointer-events-none mt-1.5 flex items-center gap-1 font-mono text-xs text-ink"
+    >
+      <Vote
+        aria-hidden="true"
+        width={10}
+        height={8}
+        class="inline-block h-2 w-2.5"
+      />
+      <span data-vote-value class="inline-block w-[3ch] text-right">
+        –
+      </span>{" "}
+      <span data-vote-word>votos</span>
+    </p>
   </article>
 )}
 

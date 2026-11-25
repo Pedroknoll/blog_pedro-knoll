@@ -5,13 +5,14 @@ interface Props {
   catalogJson: string;
   headingLevel: 2 | 3;
   limit?: number;
-  layout?: "full" | "ranked" | "aligned";
+  layout?: "ranked" | "stacked";
 }
 
-const { catalogJson, headingLevel, limit, layout = "full" } = Astro.props;
+const { catalogJson, headingLevel, limit, layout = "stacked" } = Astro.props;
 const placeholder = {
   slug: "post",
   title: "Post",
+  description: "",
   date: "2000-01-01",
   minutes: 1,
 };
@@ -23,18 +24,12 @@ const placeholder = {
   </p>
   <script is:inline type="application/json" set:html={catalogJson} />
   <template>
-    <li class={layout === "ranked" ? "list-none" : "py-5 sm:py-8"}>
+    <li class="list-none">
       <Card
         item={placeholder}
         headingLevel={headingLevel}
         href="/blog/"
-        layout={
-          layout === "ranked"
-            ? "ranked"
-            : layout === "aligned"
-              ? "aligned"
-              : "paired"
-        }
+        layout={layout}
       />
     </li>
   </template>
@@ -47,13 +42,15 @@ const placeholder = {
   import { tagsOf } from "~/lib/tag-filter";
   import { loadVotes } from "~/lib/votes-client";
 
+  // O tempo do item empilhado: `11 minutos` visível, "de leitura" só no
+  // texto para leitor de tela e no `title` (BRAND §9.2, T-131).
   function setReading(root: ParentNode, minutes: number) {
-    const line = root.querySelector("[data-reading]");
+    const line = root.querySelector<HTMLElement>("[data-reading]");
     if (!line) return;
-    const icon = line.querySelector("svg");
-    line.textContent = "";
-    if (icon) line.append(icon);
-    line.append(` ${minutes} min de leitura`);
+    const text = `${minutes} ${minutes === 1 ? "minuto" : "minutos"}`;
+    const shown = line.querySelector("span:not(.sr-only)");
+    if (shown) shown.textContent = text;
+    line.title = `${text} de leitura`;
   }
 
   function fill(root: HTMLElement) {
@@ -104,6 +101,8 @@ const placeholder = {
         const link = fragment.querySelector("a");
         const time = fragment.querySelector("time");
         const value = fragment.querySelector("[data-vote-value]");
+        const description = fragment.querySelector("[data-description]");
+        if (description) description.textContent = post.description;
         if (link) {
           link.setAttribute("href", `/blog/${post.slug}/`);
           link.textContent = post.title;

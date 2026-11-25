@@ -8,16 +8,21 @@ interface Props {
 
 const { href, title, source, headingLevel = 3 } = Astro.props;
 const Heading = headingLevel === 3 ? "h3" : "h2";
-const linkClass =
-  "text-ink no-underline active:text-accent after:absolute after:inset-0";
+
+// A mesma grade e o mesmo hover do item de Recentes (`Card`, layout
+// `recent`): a fonte no lugar da data e `↗` no lugar do tempo (BRAND §9.15).
+const itemClass =
+  "group relative -mx-3 grid gap-y-2 px-3 py-5 hover:bg-sheet focus-within:bg-sheet motion-safe:transition-colors sm:grid-cols-[6.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-8 sm:gap-y-0 sm:py-8";
+const metaClass =
+  "font-mono text-xs text-pencil group-hover:text-muted group-focus-within:text-muted";
 const titleClass =
-  "font-display text-[1.375rem] leading-[1.2] font-semibold text-balance text-ink not-italic sm:text-[1.625rem]";
+  "font-display text-[1.25rem] leading-[1.2] font-semibold text-balance text-ink not-italic sm:text-[1.625rem]";
+const linkClass =
+  "text-ink no-underline group-hover:text-accent group-focus-within:text-accent active:text-accent after:absolute after:inset-0";
 ---
 
-<article class="relative grid gap-y-0 sm:grid-cols-[6.5rem_minmax(0,1fr)_auto] sm:items-center sm:gap-x-8">
-  <p class="font-mono text-xs text-pencil sm:col-start-1 sm:row-start-1">
-    {source}
-  </p>
+<article class={itemClass}>
+  <p class:list={[metaClass, "sm:col-start-1 sm:row-start-1"]}>{source}</p>
   <Heading class:list={[titleClass, "sm:col-start-2 sm:row-start-1"]}>
     <a class={linkClass} href={href}>
       {title}
@@ -25,7 +30,10 @@ const titleClass =
     </a>
   </Heading>
   <p
-    class="pointer-events-none mt-2 text-right font-mono text-xs text-pencil sm:col-start-3 sm:row-start-1 sm:mt-0 sm:text-left"
+    class:list={[
+      metaClass,
+      "pointer-events-none sm:col-start-3 sm:row-start-1",
+    ]}
     aria-hidden="true"
   >
     ↗

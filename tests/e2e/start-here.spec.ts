@@ -20,6 +20,23 @@ test("página Comece aqui [RF-14]", async ({ page }) => {
     expect(href).toMatch(/^\/blog\/[a-z0-9-]+\/$|^https:\/\//);
   }
 
+  // Item de post: o de Recentes da home (BRAND §9.15, T-131), sem votos e
+  // sem descrição.
+  const posts = items.filter({ has: page.locator('a[href^="/blog/"]') });
+  const postCount = await posts.count();
+  expect(postCount).toBeGreaterThan(0);
+  for (let index = 0; index < postCount; index += 1) {
+    const post = posts.nth(index);
+    await expect(post.locator("article time")).toHaveCount(1);
+    await expect(post.locator("article h3 a")).toHaveCount(1);
+    await expect(post.locator("[data-novo]")).toHaveCount(1);
+    await expect(post.locator("[data-reading]")).toContainText(
+      /^\s*\d+ minutos?/,
+    );
+    await expect(post.locator("[data-vote-value]")).toHaveCount(0);
+    await expect(post.locator("[data-description]")).toHaveCount(0);
+  }
+
   const mainLinks = page.locator("main a");
   const mainCount = await mainLinks.count();
   for (let index = 0; index < mainCount; index += 1) {

@@ -1,6 +1,7 @@
 export type CatalogPost = {
   slug: string;
   title: string;
+  description: string;
   date: string;
   kind: "article" | "prototype";
   minutes: number;
