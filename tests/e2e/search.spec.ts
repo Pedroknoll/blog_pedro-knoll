@@ -136,6 +136,24 @@ test.describe("busca [RF-15]", () => {
     await expect(input).toBeFocused();
   });
 
+  test("o atalho logo depois do Esc reabre a busca", async ({ page }) => {
+    // O `isOpen` do pagefind-modal só vira false no evento `close`, que chega
+    // alguns ms depois de o <dialog> fechar (T-132).
+    await page.setViewportSize({ width: 1280, height: 800 });
+    await page.goto("/");
+    const dialog = page.getByRole("dialog");
+    for (let round = 0; round < 5; round += 1) {
+      await page.keyboard.press("ControlOrMeta+K");
+      await expect(dialog, `abre ${round}`).toBeVisible({ timeout: 15_000 });
+      await page.keyboard.press("Escape");
+      await page.keyboard.press("ControlOrMeta+K");
+      await expect(dialog, `reabre ${round}`).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(dialog).toBeHidden();
+      await page.waitForTimeout(100);
+    }
+  });
+
   test("o corpo da fixture entra no índice e o que está fora fica de fora", async ({
     page,
   }) => {
