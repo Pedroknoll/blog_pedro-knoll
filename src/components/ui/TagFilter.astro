@@ -92,12 +92,6 @@ const linkClass =
         if (match) shown += 1;
       }
       output.textContent = countLabel(shown, rows.length, noun);
-      // O ano sem item visível some junto (T-131).
-      for (const group of document.querySelectorAll<HTMLElement>(
-        "[data-year-group]",
-      )) {
-        group.hidden = !group.querySelector("li:not([hidden])");
-      }
     }
 
     function allowed() {

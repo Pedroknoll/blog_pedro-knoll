@@ -4,7 +4,7 @@ import { Image } from "astro:assets";
 
 import Clock from "~/assets/brand/icones/icone-relogio.svg";
 import Vote from "~/assets/brand/icones/icone-voto.svg";
-import { formatPubDate, formatShortDate } from "~/lib/format-date";
+import { formatPubDate } from "~/lib/format-date";
 import { thumbnailOf } from "~/lib/home-lists";
 
 interface Item {
@@ -42,10 +42,7 @@ function asDate(value: Date | string): Date {
 
 const showMeta = layout === "list" || layout === "recent";
 const formatted = showMeta ? formatPubDate(asDate(item.date)) : null;
-const text =
-  layout === "list"
-    ? formatShortDate(asDate(item.date))
-    : (formatted?.text ?? "");
+const text = formatted?.text ?? "";
 const datetime = formatted?.datetime ?? "";
 const href = hrefProp ?? `/blog/${item.slug}/`;
 const Heading = headingLevel === 3 ? "h3" : "h2";
@@ -75,8 +72,8 @@ const thumbnail = thumbnailOf(item.cover);
 // votos, um embaixo do outro. A coluna da direita tem largura fixa, para os
 // votos não mudarem a largura do título quando aparecem.
 const listGrid = thumb
-  ? "grid-cols-[72px_minmax(0,1fr)] gap-x-4 [grid-template-areas:'date_date'_'thumb_title'_'thumb_desc'_'thumb_meta'] sm:grid-cols-[4.5rem_6rem_minmax(0,1fr)_7.5rem] sm:grid-rows-[auto_1fr] sm:gap-x-6 sm:[grid-template-areas:'date_thumb_title_meta'_'date_thumb_desc_meta']"
-  : "[grid-template-areas:'date'_'title'_'desc'_'meta'] sm:grid-cols-[4.5rem_minmax(0,1fr)_7.5rem] sm:grid-rows-[auto_1fr] sm:gap-x-6 sm:[grid-template-areas:'date_title_meta'_'date_desc_meta']";
+  ? "grid-cols-[72px_minmax(0,1fr)] gap-x-4 [grid-template-areas:'date_date'_'thumb_title'_'thumb_desc'_'thumb_meta'] sm:grid-cols-[6.5rem_6rem_minmax(0,1fr)_7.5rem] sm:grid-rows-[auto_1fr] sm:gap-x-6 sm:[grid-template-areas:'date_thumb_title_meta'_'date_thumb_desc_meta']"
+  : "[grid-template-areas:'date'_'title'_'desc'_'meta'] sm:grid-cols-[6.5rem_minmax(0,1fr)_7.5rem] sm:grid-rows-[auto_1fr] sm:gap-x-6 sm:[grid-template-areas:'date_title_meta'_'date_desc_meta']";
 ---
 
 {layout === "prototype" ? (

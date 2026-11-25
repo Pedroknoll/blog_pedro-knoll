@@ -55,7 +55,7 @@ test.describe("mais votados [RF-01, RF-02]", () => {
     await page.goto("/mais-votados/");
     const items = page.locator("[data-ranking] article");
     await expect(items).toHaveCount(6);
-    await expect(items.locator("h2 a").first()).toHaveAttribute(
+    await expect(items.locator("h3 a").first()).toHaveAttribute(
       "href",
       "/blog/fixture-md/",
     );

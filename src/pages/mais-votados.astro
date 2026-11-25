@@ -1,5 +1,6 @@
 ---
 import ListPage from "~/components/ui/ListPage.astro";
+import ListSection from "~/components/ui/ListSection.astro";
 import TagFilter from "~/components/ui/TagFilter.astro";
 import TopVoted from "~/components/ui/TopVoted.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
@@ -29,6 +30,8 @@ const heading = "Mais votados";
       noun={{ one: "post", many: "posts" }}
       pending
     />
-    <TopVoted catalogJson={catalogJson} headingLevel={2} layout="list" />
+    <ListSection>
+      <TopVoted catalogJson={catalogJson} headingLevel={3} layout="list" />
+    </ListSection>
   </ListPage>
 </BaseLayout>

@@ -43,11 +43,9 @@ async function expectListPage(
   await expect(
     page.getByRole("navigation", { name: "Paginação", exact: true }),
   ).toHaveCount(0);
-  // O h2 é o ano do grupo e o h3, o título do post (T-131, Q24).
+  // O h2 é o rótulo `/ LISTAGEM` e o h3, o título do post (T-131, Q24).
   await expect(page.locator("[data-listing] article h2")).toHaveCount(0);
-  await expect(
-    page.locator("[data-listing] > [data-year-group] > h2"),
-  ).toHaveCount(await page.locator("[data-year-group]").count());
+  await expect(page.locator("[data-list-section] h2")).toHaveText("/ LISTAGEM");
   const headings = page.locator("[data-listing] article h3");
   await expect(headings).toHaveCount(slugs.length);
   expect(await listedHrefs(page)).toEqual(slugs.map(hrefOf));

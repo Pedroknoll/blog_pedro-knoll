@@ -25,9 +25,3 @@ export function formatPubDate(date: Date): { text: string; datetime: string } {
     datetime: `${year}-${month}-${day}`,
   };
 }
-
-// Nas listas inteiras o ano fica no rótulo do grupo: `21 out` (T-131, Q24).
-export function formatShortDate(date: Date): string {
-  const day = String(date.getUTCDate()).padStart(2, "0");
-  return `${day} ${MONTHS[date.getUTCMonth()]}`;
-}

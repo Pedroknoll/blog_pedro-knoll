@@ -37,7 +37,7 @@ const placeholder = {
 </div>
 
 <script>
-  import { formatPubDate, formatShortDate } from "~/lib/format-date";
+  import { formatPubDate } from "~/lib/format-date";
   import { isNew } from "~/lib/novo";
   import { rankPosts, type CatalogPost } from "~/lib/ranking";
   import { tagsOf } from "~/lib/tag-filter";
@@ -112,11 +112,7 @@ const placeholder = {
           const date = new Date(`${post.date}T00:00:00.000Z`);
           const formatted = formatPubDate(date);
           time.setAttribute("datetime", formatted.datetime);
-          // O item das listas inteiras leva a data sem o ano (T-131).
-          time.textContent =
-            root.dataset.layout === "list"
-              ? formatShortDate(date)
-              : formatted.text;
+          time.textContent = formatted.text;
         }
         const novo = fragment.querySelector("[data-novo]");
         if (novo && isNew(post.date, new Date())) novo.textContent = "NOVO";

@@ -1,12 +1,12 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
 
 import { diskPosts } from "./disk-posts";
-import { fixtureMd, fixtureTag, fixtureTagMath } from "./fixtures";
+import { fixtureMd, fixtureTag } from "./fixtures";
 
 // Listas inteiras (Q24, T-131, BRAND §9.2): lateral com o h1, a contagem e o
-// filtro; posts agrupados por ano; o item com a data sem ano, o título, a
+// filtro; a lista sob o rótulo `/ LISTAGEM`; o item com a data, o título, a
 // descrição em até 2 linhas, o tempo e os votos (só com 1 ou mais). Em
-// /prototipos/, a miniatura. Em /mais-votados/, o mesmo item, sem anos.
+// /prototipos/, a miniatura. Em /mais-votados/, o mesmo item, sem posição.
 
 const MONTHS = [
   "jan",
@@ -26,9 +26,9 @@ const LISTS = ["/blog/", "/artigos/", "/prototipos/", `/tags/${fixtureTag}/`];
 const WIDTHS = [360, 1280] as const;
 const PIXELS_TO_SIGNIFICANCE = 3;
 
-function shortDate(datetime: string): string {
-  const [, month, day] = datetime.split("-");
-  return `${day} ${MONTHS[Number(month) - 1]}`;
+function fullDate(datetime: string): string {
+  const [year, month, day] = datetime.split("-");
+  return `${day}.${MONTHS[Number(month) - 1]}.${year}`;
 }
 
 function votesBody(votes: Record<string, number>, status = 200) {
@@ -87,30 +87,39 @@ async function partsOf(article: Locator) {
 }
 
 test.describe("listas inteiras [RF-02]", () => {
-  test("agrupadas por ano, com a data sem ano e o título em h3", async ({
+  test("um rótulo / LISTAGEM, a data completa e o título em h3", async ({
     page,
   }) => {
     const posts = diskPosts();
-    await open(page, "/blog/");
-    const years = [...new Set(posts.map((post) => post.date.slice(0, 4)))];
-    const groups = page.locator("[data-listing] [data-year-group]");
-    await expect(groups).toHaveCount(years.length);
-    for (const [index, year] of years.entries()) {
-      const group = groups.nth(index);
-      await expect(group.locator("h2")).toHaveText(`/ ${year}`);
-      await expect(group.getByRole("list")).toHaveAccessibleName(
-        `Posts de ${year}`,
+    for (const width of WIDTHS) {
+      await page.setViewportSize({ width, height: 800 });
+      await open(page, "/blog/");
+      const section = page.locator("[data-list-section]");
+      await expect(section).toHaveCount(1);
+      const label = section.locator("h2");
+      await expect(label).toHaveCount(1);
+      await expect(label).toHaveText("/ LISTAGEM");
+      const rule = await label.evaluate(
+        (node) =>
+          getComputedStyle(node.parentElement ?? node).borderBottomWidth,
       );
-      const expected = posts.filter((post) => post.date.startsWith(year));
-      const times = group.locator("article time");
-      await expect(times).toHaveCount(expected.length);
-      for (const [row, post] of expected.entries()) {
+      expect(rule).toBe(width === 360 ? "2px" : "1px");
+      await expect(page.locator("[data-year-group]")).toHaveCount(0);
+      const times = page.locator("[data-listing] article time");
+      await expect(times).toHaveCount(posts.length);
+      for (const [row, post] of posts.entries()) {
         await expect(times.nth(row)).toHaveAttribute("datetime", post.date);
-        await expect(times.nth(row)).toHaveText(shortDate(post.date));
+        await expect(times.nth(row)).toHaveText(fullDate(post.date));
       }
-      await expect(group.locator("article h3")).toHaveCount(expected.length);
+      await expect(page.locator("[data-listing] article h3")).toHaveCount(
+        posts.length,
+      );
+      await expect(page.locator("[data-listing] article h2")).toHaveCount(0);
+      const listBox = await page.locator("[data-listing]").boundingBox();
+      const labelBox = await label.boundingBox();
+      if (!listBox || !labelBox) throw new Error("sem caixa");
+      expect(listBox.y).toBeGreaterThanOrEqual(labelBox.y + labelBox.height);
     }
-    await expect(page.locator("[data-listing] article h2")).toHaveCount(0);
   });
 
   test("lateral com h1, contagem e filtro de lg em diante", async ({
@@ -123,7 +132,7 @@ test.describe("listas inteiras [RF-02]", () => {
         const h1 = await page.locator("h1").boundingBox();
         const count = await page.locator("[data-count]").boundingBox();
         const select = await page.locator("#filtro-tag").boundingBox();
-        const list = await page.locator("[data-listing]").boundingBox();
+        const list = await page.locator("[data-list-section]").boundingBox();
         if (!h1 || !count || !select || !list) throw new Error("sem caixa");
         expect(count.y).toBeGreaterThan(h1.y);
         expect(select.y).toBeGreaterThan(count.y);
@@ -147,29 +156,6 @@ test.describe("listas inteiras [RF-02]", () => {
     await expect(page.locator("[data-count]")).toHaveText(
       `${tagged.length} posts`,
     );
-  });
-
-  test("o filtro esconde o ano que fica vazio", async ({ page }) => {
-    const posts = diskPosts();
-    const years = new Set(
-      posts
-        .filter((post) => post.tags.includes(fixtureTagMath))
-        .map((post) => post.date.slice(0, 4)),
-    );
-    await open(page, `/blog/?tag=${fixtureTagMath}`);
-    await expect(page.getByLabel("Filtrar por")).toHaveValue(fixtureTagMath);
-    const groups = page.locator("[data-year-group]");
-    const count = await groups.count();
-    for (let index = 0; index < count; index += 1) {
-      const group = groups.nth(index);
-      const year = ((await group.locator("h2").textContent()) ?? "").slice(2);
-      if (years.has(year)) await expect(group).toBeVisible();
-      else await expect(group).toBeHidden();
-    }
-    await page.getByLabel("Filtrar por").selectOption("");
-    for (let index = 0; index < count; index += 1) {
-      await expect(groups.nth(index)).toBeVisible();
-    }
   });
 
   test("item em colunas de sm em diante e empilhado abaixo", async ({
@@ -466,7 +452,7 @@ test.describe("listas inteiras [RF-02]", () => {
 });
 
 test.describe("/mais-votados/ [RF-02]", () => {
-  test("lateral e o item das listas, sem anos e sem posição", async ({
+  test("lateral, / LISTAGEM e o item das listas, sem posição", async ({
     page,
   }) => {
     await page.route("**/api/votes", (route) =>
@@ -477,15 +463,17 @@ test.describe("/mais-votados/ [RF-02]", () => {
       await open(page, "/mais-votados/");
       const items = page.locator("[data-ranking] article");
       await expect(items).toHaveCount(2);
-      await expect(page.locator("[data-year-group]")).toHaveCount(0);
+      await expect(page.locator("[data-list-section] h2")).toHaveText(
+        "/ LISTAGEM",
+      );
       await expect(items.locator("[data-rank-position]")).toHaveCount(0);
       await expect(items.locator("[data-thumb]")).toHaveCount(0);
       const first = items.first();
-      await expect(first.locator("h2 a")).toHaveAttribute(
+      await expect(first.locator("h3 a")).toHaveAttribute(
         "href",
         fixtureMd.href,
       );
-      await expect(first.locator("time")).toHaveText("02 jan");
+      await expect(first.locator("time")).toHaveText("02.jan.2000");
       await expect(first.locator("[data-description]")).toHaveText(
         fixtureMd.description,
       );

@@ -110,26 +110,13 @@ async function publishedHrefs(page: Page): Promise<string[]> {
   return posts.map((post) => post.href);
 }
 
-// Nas listas inteiras, a data vai sem o ano, que está no rótulo do grupo
-// (`21 out`); o NOVO divide a linha com ela (BRAND §9.2, T-131, Q24).
-function shortDateFromDatetime(datetime: string): string {
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(datetime);
-  const month = match ? MONTHS[Number(match[2]) - 1] : undefined;
-  if (!match?.[3] || !month) return datetime;
-  return `${match[3]} ${month}`;
-}
-
+// O NOVO divide a linha com a data (BRAND §9.2, T-131).
 async function expectDateLine(container: Locator) {
   const time = container.locator("time");
   await expect(time).toHaveCount(1);
   const datetime = (await time.getAttribute("datetime")) ?? "";
   expect(datetime).toMatch(/^\d{4}-\d{2}-\d{2}$/);
-  const short = await container.evaluate((root) =>
-    Boolean(root.closest("[data-year-group]")),
-  );
-  const date = short
-    ? shortDateFromDatetime(datetime)
-    : dateFromDatetime(datetime);
+  const date = dateFromDatetime(datetime);
   await expect(time).toHaveText(date);
   await expect(time.locator("xpath=..")).toHaveText(
     new RegExp(`^${date.replaceAll(".", "\\.")}(NOVO)?$`),
@@ -151,8 +138,11 @@ async function animationNames(svg: Locator): Promise<string[]> {
 }
 
 // A home tem itens próprios desde a T-125 (BRAND §9.2, home.spec.ts).
+// O `/ LISTAGEM` das listas inteiras não é faixa da home (T-131).
 function inHomeBand(root: Element) {
-  const label = root.closest("section")?.querySelector("h2");
+  const section = root.closest("section");
+  if (section?.hasAttribute("data-list-section")) return false;
+  const label = section?.querySelector("h2");
   return /^\/ [A-ZÁÉÍÓÚÂÊÔÃÕÇ ]+$/.test(
     (label?.textContent ?? "").replace(/\s+/g, " ").trim(),
   );
@@ -184,13 +174,16 @@ test.describe("card e cabeçalho [RF-01, RF-04]", () => {
             const variable = getComputedStyle(document.documentElement)
               .getPropertyValue("--font-plex-condensed")
               .trim();
-            const label = element.closest("section")?.querySelector("h2");
+            const section = element.closest("section");
+            const label = section?.querySelector("h2");
             return {
               family: style.fontFamily,
               variable,
               weight: style.fontWeight,
               fontSize: style.fontSize,
-              home: /^\/ /.test((label?.textContent ?? "").trim()),
+              home:
+                !section?.hasAttribute("data-list-section") &&
+                /^\/ /.test((label?.textContent ?? "").trim()),
             };
           });
           expect(familyPrefix(measured.family, measured.variable)).toBe(

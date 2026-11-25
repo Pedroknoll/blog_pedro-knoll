@@ -289,8 +289,8 @@ Decisão da T-126 (Q23), que substitui a da T-119, e da T-131 (Q24) nas listas i
 
 **Item das listas inteiras** (`/blog/`, `/artigos/`, `/prototipos/`, `/tags/<tag>/` e `/mais-votados/`; T-131, Q24):
 
-- Um `article` em grade. De `sm` em diante, colunas: a data (4,5rem), em `/prototipos/` a miniatura (6rem), o título com a descrição embaixo e, à direita, uma coluna de 7,5rem com o tempo e, embaixo, os votos. A coluna da direita tem largura fixa, para os votos não mudarem a largura do título quando aparecem. Vão de 1,5rem entre as colunas. Abaixo de `sm`: a data com o `NOVO` ao lado, o título, a descrição e uma linha com o tempo, `·` e os votos; em `/prototipos/`, a miniatura fica à esquerda do título, da descrição e dessa linha.
-- **Data:** sem o ano, que está no rótulo do grupo: `20 nov`, `05 nov` (dia com dois dígitos e o mês da lista fixa). Mono 12 px, lápis. O `datetime` continua ISO.
+- Um `article` em grade. De `sm` em diante, colunas: a data (6,5rem, como no item de Recentes), em `/prototipos/` a miniatura (6rem), o título com a descrição embaixo e, à direita, uma coluna de 7,5rem com o tempo e, embaixo, os votos. A coluna da direita tem largura fixa, para os votos não mudarem a largura do título quando aparecem. Vão de 1,5rem entre as colunas. Abaixo de `sm`: a data com o `NOVO` ao lado, o título, a descrição e uma linha com o tempo, `·` e os votos; em `/prototipos/`, a miniatura fica à esquerda do título, da descrição e dessa linha.
+- **Data:** como no item de Recentes: `21.out.2026`, mono 12 px, lápis.
 - **NOVO:** como no item de Recentes: abaixo da data de `sm` em diante e ao lado dela abaixo de `sm`.
 - **Título:** como no item de Recentes (20 px abaixo de `sm`, 26 px de `sm` em diante).
 - **Descrição:** a `description` do post, em até 2 linhas (`line-clamp`), em Plex Sans 16 px, entrelinha 1,5, grafite.
@@ -298,8 +298,8 @@ Decisão da T-126 (Q23), que substitui a da T-119, e da T-131 (Q24) nas listas i
 - **Votos:** `▲ N votos` (`icone-voto.svg`, o número e `votos`, ou `voto` com 1), mono 12 px, na cor do tempo. Só aparecem com 1 voto ou mais: com 0, sem JavaScript ou com a API falhando, não há linha de votos. Não interceptam o toque.
 - **Miniatura** (só em `/prototipos/`): o `cover` do post, recortado, decorativo, 96×72 de `sm` em diante e 72×54 abaixo. Sem `cover`, o bloco `sheet` da faixa de Protótipos da home, na mesma medida. Sem hachura.
 - **Toque, hover e foco:** como no item de Recentes. Sem tags, tipo nem hachura.
-- **Grupos por ano:** a lista se divide por ano de publicação (UTC), do mais recente ao mais antigo. Cada grupo abre com o rótulo `/ 2026`, no estilo do cabeçalho das faixas da home (mono 12 px em maiúsculas sobre um filete de 1 px em tinta; abaixo de `sm`, 15 px e filete de 2 px), e o título do post é h3. Os itens se separam por `divide-line`, com um filete em `line` no fim do grupo. Com o filtro, o grupo sem item visível some.
-- Em `/mais-votados/`, o mesmo item, montado pelo script do ranking, sem grupos por ano, sem miniatura e sem a posição: a ordem é o ranking, e o título é h2.
+- **Rótulo:** a lista abre com `/ LISTAGEM`, no estilo do cabeçalho das faixas da home (mono 12 px em maiúsculas sobre um filete de 1 px em tinta; abaixo de `sm`, 15 px e filete de 2 px), e o título do post é h3. O lado direito da linha do rótulo fica vazio, para a ordenação (T-133). Os itens se separam por `divide-line`, com um filete em `line` no fim da lista.
+- Em `/mais-votados/`, o mesmo rótulo e o mesmo item, montado pelo script do ranking, sem miniatura e sem a posição: a ordem é o ranking.
 
 **Item de Mais votados** (`/ MAIS VOTADOS` da home): a posição (`01`, `02`…) em mono, o título e `▲ N votos` (`icone-voto.svg`, o número e `votos`, ou `voto` com 1), em tinta, não lápis: o voto é o dado principal. Sem data e sem tempo de leitura. Os itens saem do script do ranking.
 
