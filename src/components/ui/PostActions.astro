@@ -1,0 +1,52 @@
+---
+// Bloco de voto e compartilhar (RF-23, T-130, BRAND §9.14). Sai duas vezes no
+// post: `rail`, na lateral de `lg` em diante, sticky na borda de baixo e
+// aparecendo quando o filete do cabeçalho sai da tela; `end`, no fim do texto
+// abaixo de `lg`, parado. Sem JavaScript, o aviso do voto e os três links.
+import PostVote from "~/components/ui/PostVote.astro";
+import { shareLinks } from "~/lib/share";
+
+interface Props {
+  slug: string;
+  title: string;
+  url: string;
+  variant: "rail" | "end";
+  class?: string;
+}
+
+const { slug, title, url, variant, class: className } = Astro.props;
+const links = shareLinks(title, url);
+// Os quatro numa linha, em caixa normal (decisão do autor na T-130). O botão
+// Copiar link, criado pelo script, lê a mesma classe de `data-item-class`.
+const itemClass =
+  "inline-flex min-h-6 items-center font-sans text-sm whitespace-nowrap text-ink hover:text-accent focus-visible:text-accent";
+---
+
+<div
+  data-post-actions={variant}
+  data-share-url={url}
+  data-share-title={title}
+  class:list={["border-t border-line bg-surface pt-4", className]}
+>
+  <PostVote slug={slug} />
+  <p data-share-label class="mt-5 font-mono text-xs text-muted">
+    Compartilhar
+  </p>
+  <div
+    data-share-links
+    data-item-class={itemClass}
+    class="mt-1.5 flex flex-wrap gap-x-3 gap-y-1"
+  >
+    {links.map((link) => (
+      <a class={itemClass} href={link.href}>
+        {link.label}
+      </a>
+    ))}
+  </div>
+</div>
+
+<script>
+  import { initPostActions } from "~/lib/post-actions";
+
+  initPostActions();
+</script>

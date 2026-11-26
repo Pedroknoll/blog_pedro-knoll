@@ -211,6 +211,42 @@
   }
 }
 
+/*
+ * Bloco de voto e compartilhar da lateral (RF-23, T-130, BRAND §9.14). Com
+ * JavaScript, nasce escondido e aparece quando o script marca `data-shown`
+ * (o filete do cabeçalho saiu da tela): fade e deslize de 8 px, só opacity e
+ * transform. Escondido, `visibility: hidden` o tira do foco e do clique sem
+ * mudar o layout. Sem JavaScript (`scripting: none`), fica parado e visível.
+ */
+@media (scripting: enabled) {
+  [data-post-actions="rail"] {
+    opacity: 0;
+    transform: translateY(8px);
+    visibility: hidden;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease,
+      visibility 0s linear 0.25s;
+  }
+
+  [data-post-actions="rail"][data-shown] {
+    opacity: 1;
+    transform: none;
+    visibility: visible;
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease,
+      visibility 0s linear 0s;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-post-actions="rail"],
+  [data-post-actions="rail"][data-shown] {
+    transition: none;
+  }
+}
+
 /* Índice do post (RF-26, T-129): rolagem suave só no post com índice e sem prefers-reduced-motion. */
 @media (prefers-reduced-motion: no-preference) {
   :root:has([data-post-toc]) {

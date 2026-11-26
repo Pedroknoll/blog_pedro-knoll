@@ -1,23 +1,46 @@
 ---
+import PostActions from "~/components/ui/PostActions.astro";
 import PostToc, { type TocHeading } from "~/components/ui/PostToc.astro";
-import PostVote from "~/components/ui/PostVote.astro";
 
 interface Props {
   slug: string;
+  title: string;
+  url: string;
   headings: TocHeading[];
   minutesRead?: number;
 }
 
-const { slug, headings, minutesRead } = Astro.props;
-// Post com menos de 2 h2 não tem índice (RF-26). Até a T-130, o voto fica
-// abaixo do índice, sticky junto com ele.
+const { slug, title, url, headings, minutesRead } = Astro.props;
+// Post com menos de 2 h2 não tem índice (RF-26).
 const hasToc = headings.length >= 2;
 ---
 
+{/*
+  A lateral ocupa a altura da prosa (linha 2 do grid). Com JavaScript, o
+  índice fica sticky no topo dentro de um invólucro que acaba 40 px acima do
+  bloco de voto e compartilhar, e o bloco fica no fim da coluna, sticky na
+  borda de baixo: no fim do texto, os dois sobem juntos, só pelo CSS (RF-23,
+  RF-26). Sem JavaScript (`noscript:`), o bloco fica logo abaixo do índice e a
+  lateral inteira fica sticky no topo, parada.
+*/}
 <div
-  class="max-lg:hidden lg:sticky lg:top-30 lg:col-start-1 lg:row-start-2 lg:mt-10 lg:block lg:min-w-0 lg:self-start"
+  class="max-lg:hidden lg:col-start-1 lg:row-start-2 lg:mt-10 lg:flex lg:min-w-0 lg:flex-col noscript:lg:sticky noscript:lg:top-30 noscript:lg:self-start"
   data-post-rail
 >
-  {hasToc && <PostToc headings={headings} minutesRead={minutesRead} />}
-  <PostVote slug={slug} class={hasToc ? "mt-8" : undefined} />
+  {hasToc && (
+    <div data-rail-toc class="flex-1 pb-10 noscript:flex-none noscript:pb-0">
+      <div class="sticky top-30 noscript:static">
+        <PostToc headings={headings} minutesRead={minutesRead} />
+      </div>
+    </div>
+  )}
+  <PostActions
+    slug={slug}
+    title={title}
+    url={url}
+    variant="rail"
+    class="sticky bottom-0 z-10 mt-auto pb-12 noscript:static noscript:mt-8"
+  />
+  {/* O fim da coluna, na altura do fim do texto: com ele na tela, o bloco aparece. */}
+  <div data-rail-end aria-hidden="true" class="h-0"></div>
 </div>

@@ -26,8 +26,13 @@ const { slug, class: className } = Astro.props;
         height={8}
         class="inline-block h-2 w-2.5 shrink-0"
       />
-      <span data-vote-label>Votar</span>
-      <span data-vote-count class="inline-block w-[3ch] text-right text-ink">
+      <span data-vote-label class="font-semibold">
+        Votar
+      </span>
+      <span
+        data-vote-count
+        class="inline-block w-[3ch] text-left font-mono text-ink"
+      >
         <span data-vote-value>–</span>
         <span data-vote-unit class="sr-only">
           {" "}
