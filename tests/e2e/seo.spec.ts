@@ -1,5 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 
+import { fixtureMd, fixtureMdx } from "./fixtures";
 import { isPostPath, publishedPosts } from "./published-posts";
 import { authorName, homeTitle, titled } from "./site-literals";
 
@@ -174,7 +175,6 @@ test("E2 canonical [RF-12]", async ({ page }) => {
 test("E3 Open Graph [RF-12]", async ({ page }) => {
   const { paths } = await discover(page);
   let withImage = 0;
-  let withoutImage = 0;
 
   for (const path of paths) {
     await visit(page, path);
@@ -207,14 +207,9 @@ test("E3 Open Graph [RF-12]", async ({ page }) => {
       page.locator('meta[property="article:published_time"]'),
     ).toHaveAttribute("content", data.datePublished ?? "");
 
-    if (data.image === undefined) {
-      await expect(ogImage).toHaveCount(0);
-      withoutImage += 1;
-      continue;
-    }
-
+    // Todo post tem imagem: a capa ou a ficha gerada (RF-16, T-23).
     expect(data.image).toHaveLength(1);
-    const imageUrl = data.image[0] ?? "";
+    const imageUrl = data.image?.[0] ?? "";
     await expect(ogImage).toHaveCount(1);
     await expect(ogImage).toHaveAttribute("content", imageUrl);
     expect((await metaContent(page, "og:image:alt")).length).toBeGreaterThan(0);
@@ -230,7 +225,44 @@ test("E3 Open Graph [RF-12]", async ({ page }) => {
   }
 
   expect(withImage).toBeGreaterThan(0);
-  expect(withoutImage).toBeGreaterThan(0);
+});
+
+// Largura e altura do PNG, lidas do IHDR (bytes 16 a 23).
+function pngSize(body: Buffer) {
+  const signature = [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a];
+  expect([...body.subarray(0, 8)]).toEqual(signature);
+  return { width: body.readUInt32BE(16), height: body.readUInt32BE(20) };
+}
+
+test("E9 imagem OG gerada sem capa [RF-16]", async ({ page }) => {
+  await visit(page, fixtureMdx.href);
+  const ogUrl = await metaContent(page, "og:image");
+  const url = sharedOrigin(ogUrl, new URL(await canonicalHref(page)).origin);
+  expect(url.pathname).toBe(`${fixtureMdx.href}og.png`);
+  expect(await metaContent(page, "og:image:width")).toBe("1200");
+  expect(await metaContent(page, "og:image:height")).toBe("630");
+  expect(await metaContent(page, "og:image:alt")).toBe(fixtureMdx.title);
+
+  const script = page.locator('script[type="application/ld+json"]');
+  const data = JSON.parse((await script.textContent()) ?? "") as {
+    image?: string[];
+  };
+  expect(data.image).toEqual([ogUrl]);
+
+  const response = await page.request.get(url.pathname);
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"] ?? "").toContain("image/png");
+  expect(pngSize(await response.body())).toEqual({ width: 1200, height: 630 });
+});
+
+test("E10 com capa, a capa ganha [RF-16]", async ({ page }) => {
+  await visit(page, fixtureMd.href);
+  const ogUrl = await metaContent(page, "og:image");
+  expect(new URL(ogUrl).pathname).not.toBe(`${fixtureMd.href}og.png`);
+  expect(new URL(ogUrl).pathname).toMatch(/^\/_astro\/.+\.jpe?g$/);
+
+  const response = await page.request.get(`${fixtureMd.href}og.png`);
+  expect(response.status()).toBe(404);
 });
 
 test("E4 JSON-LD [RF-12]", async ({ page }) => {
