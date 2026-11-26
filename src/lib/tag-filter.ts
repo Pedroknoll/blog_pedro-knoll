@@ -1,3 +1,5 @@
+import { withParam } from "./list-order";
+
 export type Noun = { one: string; many: string };
 
 export function selectedTag(
@@ -16,11 +18,10 @@ export function countLabel(shown: number, total: number, noun: Noun): string {
   return `${shown} de ${total} ${word}`;
 }
 
-export function searchWith(tag: string | null): string {
-  if (tag === null) return "";
-  const params = new URLSearchParams();
-  params.set("tag", tag);
-  return `?${params.toString()}`;
+// Grava a tag em `?tag=` e mantém os outros parâmetros, como `?ordem=`
+// (T-133).
+export function searchWith(tag: string | null, current = ""): string {
+  return withParam(current, "tag", tag);
 }
 
 export function allLinkName(total: number, noun: Noun): string {

@@ -101,7 +101,7 @@ const linkClass =
     }
 
     function writeUrl(tag: string | null) {
-      const next = `${location.pathname}${searchWith(tag)}`;
+      const next = `${location.pathname}${searchWith(tag, location.search)}`;
       if (`${location.pathname}${location.search}` !== next) {
         history.replaceState(null, "", next);
       }

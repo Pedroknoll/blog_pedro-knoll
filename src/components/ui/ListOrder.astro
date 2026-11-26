@@ -1,0 +1,142 @@
+---
+import { ORDERS } from "~/lib/list-order";
+
+// Ordenação das listas inteiras (T-133, RF-02, BRAND §9.2): um select nativo
+// à direita do rótulo `/ LISTAGEM`, sem caixa: o rótulo em mono 12 px, como o
+// link das faixas da home, e o valor em `accent` com uma seta fina. Abaixo de
+// `sm`, o valor fica em 16 px, para o Safari do iPhone não dar zoom no toque. No HTML do build sai desabilitado, já com
+// as opções e na ordem padrão (a do HTML, por data), e o script o habilita sem
+// mudar a altura. `Mais votados` espera os votos; com a API falhando, fica
+// desabilitado.
+---
+
+<div class="flex items-baseline gap-x-2" data-list-order>
+  <label
+    class="font-mono text-xs whitespace-nowrap text-ink max-sm:sr-only"
+    for="ordem-lista"
+  >
+    Ordenar por
+  </label>
+  <span class="relative inline-flex items-baseline">
+    <select
+      id="ordem-lista"
+      class="box-border h-11 cursor-pointer appearance-none rounded-none border-0 bg-transparent py-0 pr-4 pl-0 font-mono text-base text-accent underline-offset-3 hover:underline disabled:cursor-default disabled:no-underline sm:text-xs"
+      disabled
+    >
+      {ORDERS.map((order) => (
+        <option value={order.value} selected={order.value === ""}>
+          {order.label}
+        </option>
+      ))}
+    </select>
+    <span
+      aria-hidden="true"
+      class="pointer-events-none absolute top-1/2 right-0.5 size-1.5 -translate-y-3/4 rotate-45 border-r border-b border-accent"
+    ></span>
+  </span>
+</div>
+
+<script>
+  import {
+    ORDER_PARAM,
+    orderFromSearch,
+    sortRows,
+    withParam,
+    type Order,
+    type OrderRow,
+  } from "~/lib/list-order";
+  import { loadVotes, type VoteMap } from "~/lib/votes-client";
+
+  type Row = OrderRow & { node: HTMLElement };
+
+  function setup(root: HTMLElement) {
+    const field = root.querySelector("select");
+    const list = root
+      .closest("[data-list-section]")
+      ?.querySelector<HTMLElement>("[data-listing]");
+    if (!field || !list) return;
+    const select = field;
+    const listing = list;
+    const voted = select.querySelector<HTMLOptionElement>(
+      'option[value="votados"]',
+    );
+    let votes: VoteMap | null = null;
+    let touched = false;
+
+    const rows: Row[] = [...listing.children].flatMap((child, index) => {
+      if (!(child instanceof HTMLElement)) return [];
+      return [
+        {
+          node: child,
+          index,
+          slug: child.dataset.slug ?? "",
+          date: child.dataset.date ?? "",
+        },
+      ];
+    });
+
+    function available() {
+      return [...select.options]
+        .filter((option) => option.value !== "" && !option.disabled)
+        .map((option) => option.value);
+    }
+
+    function writeUrl(order: Order | null) {
+      const next = `${location.pathname}${withParam(location.search, ORDER_PARAM, order)}`;
+      if (`${location.pathname}${location.search}` !== next) {
+        history.replaceState(null, "", next);
+      }
+    }
+
+    function apply(order: Order | null) {
+      const sorted = sortRows(rows, order, votes ?? {});
+      const current = [...listing.children];
+      if (sorted.every((row, index) => current[index] === row.node)) return;
+      listing.append(...sorted.map((row) => row.node));
+    }
+
+    function fromUrl() {
+      const order = orderFromSearch(location.search, available());
+      if (
+        order === null &&
+        new URLSearchParams(location.search).has(ORDER_PARAM)
+      ) {
+        writeUrl(null);
+      }
+      return order;
+    }
+
+    select.addEventListener("change", () => {
+      touched = true;
+      const order = select.value === "" ? null : (select.value as Order);
+      writeUrl(order);
+      apply(order);
+    });
+
+    // A ordem pedida pela URL espera os votos só quando é `votados`.
+    const wanted = new URLSearchParams(location.search).get(ORDER_PARAM);
+    if (voted) voted.disabled = true;
+    if (wanted !== "votados") {
+      const order = fromUrl();
+      select.value = order ?? "";
+      apply(order);
+    }
+    select.disabled = false;
+
+    void loadVotes().then((map) => {
+      votes = map;
+      if (map && voted) voted.disabled = false;
+      if (wanted === "votados" && !touched) {
+        const order = fromUrl();
+        select.value = order ?? "";
+        apply(order);
+      }
+    });
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>(
+    "[data-list-order]",
+  )) {
+    setup(root);
+  }
+</script>

@@ -125,9 +125,16 @@ test("home, listas e tags só com o script do item [RNF-02]", async ({
           'script:not([type="application/ld+json"]):not([type="application/json"])',
         );
         // Comece aqui repete o script do card: o script da busca no layout
-        // impede o Astro de juntar os scripts que vêm do MDX.
+        // impede o Astro de juntar os scripts que vêm do MDX. As listas
+        // inteiras somam o módulo da ordenação (T-133): 3 na página de tag,
+        // 4 em /blog/, com o do filtro.
+        const scripts: Record<string, number> = {
+          "/": 3,
+          "/comece-aqui/": 3,
+          "/blog/": 4,
+        };
         await expect(executable).toHaveCount(
-          path === "/" || path === "/blog/" || path === "/comece-aqui/" ? 3 : 2,
+          scripts[path] ?? (path.startsWith("/tags/") ? 3 : 2),
         );
         await expect(
           page.locator('script[type="application/json"]'),
