@@ -86,6 +86,12 @@ describe("searchWith", () => {
     expect(searchWith(null)).toBe("");
   });
 
+  it("mantém a ordem e os outros parâmetros da URL [T-133]", () => {
+    expect(searchWith("md", "?ordem=antigos")).toBe("?ordem=antigos&tag=md");
+    expect(searchWith(null, "?tag=md&ordem=antigos")).toBe("?ordem=antigos");
+    expect(searchWith(null, "?tag=md")).toBe("");
+  });
+
   it("codifica a tag", () => {
     expect(searchWith("fine-tuning")).toBe("?tag=fine-tuning");
     expect(selectedTag(searchWith("fine-tuning"), ["fine-tuning"])).toBe(

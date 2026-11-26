@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.41 · novembro de 2026 · pedroknoll.com
+Versão 1.42 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -299,7 +299,7 @@ Decisão da T-126 (Q23), que substitui a da T-119, e da T-131 (Q24) nas listas i
 - **Votos:** `▲ N votos` (`icone-voto.svg`, o número e `votos`, ou `voto` com 1), mono 12 px, na cor do tempo. Só aparecem com 1 voto ou mais: com 0, sem JavaScript ou com a API falhando, não há linha de votos. Não interceptam o toque.
 - **Miniatura** (só em `/prototipos/`): o `cover` do post, recortado, decorativo, 96×72 de `sm` em diante e 72×54 abaixo. Sem `cover`, o bloco `sheet` da faixa de Protótipos da home, na mesma medida. Sem hachura.
 - **Toque, hover e foco:** como no item de Recentes. Sem tags, tipo nem hachura.
-- **Rótulo:** a lista abre com `/ LISTAGEM`, no estilo do cabeçalho das faixas da home (mono 12 px em maiúsculas sobre um filete de 1 px em tinta; abaixo de `sm`, 15 px e filete de 2 px), e o título do post é h3. O lado direito da linha do rótulo fica vazio, para a ordenação (T-133). Os itens se separam por `divide-line`, com um filete em `line` no fim da lista.
+- **Rótulo:** a lista abre com `/ LISTAGEM`, no estilo do cabeçalho das faixas da home (mono 12 px em maiúsculas sobre um filete de 1 px em tinta; abaixo de `sm`, 15 px e filete de 2 px), e o título do post é h3. O lado direito da linha do rótulo tem a ordenação (T-133, BRAND 1.42): rótulo visível `Ordenar por` em Plex Mono 12 px, tinta, a fonte e o tamanho do link das faixas da home (abaixo de `sm`, só para leitor de tela, para caber em 360 px), e um `select` nativo sem caixa: sem borda, sem fundo e sem a seta do sistema, o valor em Plex Mono `accent`, 12 px de `sm` em diante e 16 px abaixo (o Safari do iPhone dá zoom no toque abaixo de 16 px), com uma seta fina em `accent` desenhada no CSS e sublinhado no hover; alvo de 44 px de altura, na linha de base de `/ LISTAGEM`. Opções: `Mais recentes` (padrão), `Mais antigos` e `Mais votados`; sem ordem por tempo de leitura (decisão do autor). No HTML do build sai `disabled`, e o script o habilita sem mudar a altura; `Mais votados` espera os votos. Em `/mais-votados/`, sem ordenação: o lado direito fica vazio. Os itens se separam por `divide-line`, com um filete em `line` no fim da lista.
 - Em `/mais-votados/`, o mesmo rótulo e o mesmo item, montado pelo script do ranking, sem miniatura e sem a posição: a ordem é o ranking.
 
 **Item de Mais votados** (`/ MAIS VOTADOS` da home): a posição (`01`, `02`…) em mono, o título e `▲ N votos` (`icone-voto.svg`, o número e `votos`, ou `voto` com 1), em tinta, não lápis: o voto é o dado principal. Sem data e sem tempo de leitura. Os itens saem do script do ranking.
@@ -417,7 +417,7 @@ Decisão da T-119. O filtro está no ar (T-124). A busca está no ar (T-22). A b
 **Filtro.** Nas quatro listas (`/blog/`, `/artigos/`, `/prototipos/`, `/mais-votados/`), abaixo do h1 e acima da contagem. Não entra na home nem em `/tags/`.
 
 - `select` nativo, uma tag por vez, com a seta do sistema. Rótulo visível `Filtrar por`. 44 px de altura, IBM Plex Mono 16 px (abaixo de 16 px, o Safari do iPhone dá zoom no toque), fundo `surface`, borda `line`, cantos de 0,375rem. Sem ícone.
-- A primeira opção é `Todas as tags` e tira `?tag=` da URL. As outras são as tags dos posts daquela lista. A escolha vai para `?tag=<slug>`.
+- A primeira opção é `Todas as tags` e tira `?tag=` da URL. As outras são as tags dos posts daquela lista. A escolha vai para `?tag=<slug>`, sem tirar o `?ordem=` da ordenação (§9.2, T-133).
 - Em `/mais-votados/`, o HTML traz as tags de todos os posts publicados, com o select desabilitado. Quando o ranking chega, saem as opções cujas tags não têm post votado, e só então o select habilita. Sem voto nenhum ou com a API falhando, o select continua desabilitado.
 - No HTML do build, o select sai `disabled`, já com as opções, e o script o habilita sem mudar a altura (sem CLS).
 - **Contagem:** mono 12 px, maiúsculas, lápis, com `aria-live="polite"`. `5 artigos` e `2 de 5 artigos` em `/artigos/`; `protótipo` e `protótipos` em `/prototipos/`; `post` e `posts` em `/blog/` e em `/mais-votados/`.

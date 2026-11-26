@@ -3,10 +3,12 @@ import type { CollectionEntry } from "astro:content";
 
 import Card from "~/components/ui/Card.astro";
 import ListSection from "~/components/ui/ListSection.astro";
+import { formatPubDate } from "~/lib/format-date";
 import { minutesReadOf } from "~/lib/reading-minutes";
 
 // Lista inteira sob o rótulo `/ LISTAGEM` (T-131, Q24, BRAND §9.2), por data;
-// o título do post é h3.
+// o título do post é h3. O slug e a data no `li` servem à
+// ordenação (T-133).
 
 interface Props {
   posts: CollectionEntry<"posts">[];
@@ -27,14 +29,18 @@ const items = await Promise.all(
 );
 ---
 
-<ListSection>
+<ListSection order>
   <ul
     class="divide-y divide-line border-b border-line"
     aria-label="Posts"
     data-listing
   >
     {items.map((item) => (
-      <li data-tags={item.tags.join(" ")}>
+      <li
+        data-tags={item.tags.join(" ")}
+        data-slug={item.slug}
+        data-date={formatPubDate(item.date).datetime}
+      >
         <Card item={item} headingLevel={3} layout="list" thumb={thumb} />
       </li>
     ))}

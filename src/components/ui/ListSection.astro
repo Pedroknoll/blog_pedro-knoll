@@ -1,8 +1,16 @@
 ---
+import ListOrder from "~/components/ui/ListOrder.astro";
+
 // Rótulo das listas inteiras (T-131, Q24, BRAND §9.2): `/ LISTAGEM` no estilo
 // do cabeçalho das faixas da home, sobre um filete em tinta (2 px abaixo de
-// `sm`, 1 px de `sm` em diante). O lado direito da linha fica para a
-// ordenação (T-133).
+// `sm`, 1 px de `sm` em diante). Com `order`, a ordenação fica no lado direito
+// da linha (T-133); em /mais-votados/, sem ela, a ordem é o ranking.
+
+interface Props {
+  order?: boolean;
+}
+
+const { order = false } = Astro.props;
 ---
 
 <section data-list-section>
@@ -10,6 +18,7 @@
     <h2 class="font-mono text-[15px] tracking-widest text-ink uppercase sm:text-xs">
       / LISTAGEM
     </h2>
+    {order && <ListOrder />}
   </div>
   <slot />
 </section>
