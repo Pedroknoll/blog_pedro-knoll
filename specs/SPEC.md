@@ -388,13 +388,15 @@ Notas de Zod 4: `z.url()` substitui `z.string().url()`, e o parâmetro `error` s
 ### Autor (`src/site.config.ts`)
 
 ```ts
+import avatar from '~/assets/avatar.jpg';
+
 export const site = {
   title: 'pk.log',
   // SITE_URL é a variável do repositório; em produção, https://pedroknoll.com.
   url: import.meta.env.SITE_URL ?? 'https://blog.exemplo.com',
   author: {
     name: 'Pedro Knoll',
-    avatar: '/avatar.jpg',
+    avatar, // ImageMetadata: cada uso pede ao getImage a variante no dobro do tamanho mostrado (T-134)
     bio: 'Aprendizados e experimentos em IA',
     github: 'https://github.com/Pedroknoll',
     linkedin: 'https://www.linkedin.com/in/pedro-henrique-knoll-giacometo/',
@@ -637,6 +639,7 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 │   ├── content.config.ts
 │   ├── content/comece-aqui.mdx   # página Comece aqui; editar é mudar só este MDX
 │   ├── content/posts/
+│   ├── assets/avatar.jpg     # foto do autor; o astro:assets gera 176 px para a home e 56 px para o post (T-134)
 │   ├── assets/brand/         # símbolo e ícones; ver a árvore da marca abaixo
 │   ├── components/
 │   │   ├── ui/               # .astro: Card, ReadingList, TagList, PostRail, KindFilter
@@ -665,7 +668,6 @@ Um único repositório com dois ambientes (Node e Python) que se encontram no `p
 ├── scripts/
 │   └── build-data.py         # acha e roda o data/build.py de cada post; o CI só confere o lock (T-73, T-79)
 ├── public/
-│   ├── avatar.jpg            # foto do autor, na saudação da home (T-125)
 │   ├── favicon.svg
 │   ├── favicon.ico
 │   ├── favicon-16.png

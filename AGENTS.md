@@ -63,6 +63,7 @@ src/content.config.ts   collection `posts` com schema Zod 4
 src/content/posts/<slug>/index.mdx   cada post é uma pasta: texto, capa, figs/, data/, notebooks/
 src/content/comece-aqui.mdx          a página Comece aqui; editar é mudar só este MDX
 src/content/posts/fixture-*/         fixtures de teste, só no build com SHOW_FIXTURES=true (T-39)
+src/assets/avatar.jpg   foto do autor (T-125); variantes de 176 e 56 px pelo getImage (T-134)
 src/assets/brand/       pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel,-404}.svg
 src/assets/brand/icones/  aceno.svg; icone-{artigo,prototipo,relogio,fogo,voto,busca,rss}.svg
 src/components/ui/      .astro estáticos
@@ -77,7 +78,7 @@ worker/                 Worker só para /api/* (T-121)
 migrations/             SQL do D1, 0001_votes.sql
 src/styles/shiki/       pk-claro.json, pk-escuro.json
 scripts/build-data.py   acha e roda o data/build.py de cada post e grava o data.lock; o pnpm check:data confere o lock (T-73, T-79)
-public/                 avatar.jpg (foto do autor, T-125), favicon.svg, favicon.ico, favicon-16.png, favicon-32.png, apple-touch-icon.png
+public/                 favicon.svg, favicon.ico, favicon-16.png, favicon-32.png, apple-touch-icon.png
 tests/                  vitest (unit) e playwright (e2e); literais das fixtures em tests/e2e/fixtures.ts
 .cursor/skills/         novo-post e as skills de bloco do post: post-prosa, post-figura, post-dados, post-caderno (T-80)
 ```

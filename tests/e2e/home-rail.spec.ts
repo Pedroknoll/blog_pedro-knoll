@@ -77,7 +77,7 @@ async function readRail(page: Page): Promise<Rail> {
     const greeting = document.querySelector("h1")?.parentElement ?? null;
     const column = greeting?.parentElement ?? null;
     const grid = column?.parentElement ?? null;
-    const hand = document.querySelector('img[src="/avatar.jpg"]');
+    const hand = document.querySelector('img[alt="Foto de Pedro Knoll"]');
     const right = column?.nextElementSibling ?? null;
     const band = right?.querySelector("section") ?? null;
     const list = band?.querySelector("h2") ?? null;
@@ -111,7 +111,7 @@ async function readRail(page: Page): Promise<Rail> {
 async function handBelowHeader(page: Page): Promise<number> {
   return page.evaluate(() => {
     const header = document.querySelector("header");
-    const hand = document.querySelector('img[src="/avatar.jpg"]');
+    const hand = document.querySelector('img[alt="Foto de Pedro Knoll"]');
     if (!header || !hand) throw new Error("sem header ou foto");
     return (
       hand.getBoundingClientRect().top - header.getBoundingClientRect().bottom
