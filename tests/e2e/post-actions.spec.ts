@@ -291,9 +291,15 @@ test.describe("bloco de voto e compartilhar [RF-23]", () => {
     expect(viewport - lastLink).toBeGreaterThanOrEqual(47);
     const tocMiddle = await rect(page, "[data-post-toc]");
     expect(tocMiddle.bottom).toBeLessThanOrEqual(middle.top);
+    // O índice preso fica a mesma distância do topo que o último link do
+    // bloco fica da borda de baixo.
+    expect(Math.abs(tocMiddle.top - (viewport - lastLink))).toBeLessThanOrEqual(
+      1.5,
+    );
 
     // No fim, o bloco para no fim da prosa e o índice fica 40 px acima dele.
-    await scrollPage(page, prose.bottom - viewport + 300);
+    // Com o índice preso a 3rem do topo, o bloco só o alcança mais adiante.
+    await scrollPage(page, prose.bottom - viewport + 500);
     const block = await rect(page, '[data-post-actions="rail"]');
     const proseBottom = await page
       .locator("article [data-pagefind-body]")
