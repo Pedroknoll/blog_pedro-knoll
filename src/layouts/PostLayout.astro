@@ -14,6 +14,7 @@ import PostRelated from "~/components/ui/PostRelated.astro";
 import type { TocHeading } from "~/components/ui/PostToc.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import type { PostAppendixModel } from "~/lib/citations";
+import { needsGeneratedOg, OG_HEIGHT, OG_WIDTH, ogImagePath } from "~/lib/og";
 import { absoluteUrl, blogPostingJsonLd, pageTitle, postPath } from "~/lib/seo";
 import { site } from "~/site.config";
 
@@ -60,6 +61,14 @@ if (cover && coverAlt) {
     width: optimized.attributes.width,
     height: optimized.attributes.height,
     alt: coverAlt,
+  };
+} else if (needsGeneratedOg(post.data)) {
+  // Sem capa, a ficha gerada no build (RF-16, T-23).
+  image = {
+    url: absoluteUrl(ogImagePath(post.id), Astro.site),
+    width: OG_WIDTH,
+    height: OG_HEIGHT,
+    alt: title,
   };
 }
 
