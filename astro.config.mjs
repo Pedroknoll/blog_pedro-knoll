@@ -73,6 +73,30 @@ export default defineConfig({
       formats: ["woff2"],
       fallbacks: ["Metric Mono", "monospace"],
     },
+    // Só a imagem OG (T-23): o sharp não lê woff2, só TTF. Nenhuma página
+    // renderiza <Font> destas variáveis, e o leitor não baixa os TTF.
+    {
+      name: "IBM Plex Sans Condensed",
+      cssVariable: "--font-og-display",
+      provider: fontProviders.fontsource(),
+      weights: [600],
+      styles: ["normal"],
+      subsets: ["latin"],
+      formats: ["ttf"],
+      fallbacks: ["sans-serif"],
+      optimizedFallbacks: false,
+    },
+    {
+      name: "IBM Plex Mono",
+      cssVariable: "--font-og-mono",
+      provider: fontProviders.fontsource(),
+      weights: [400],
+      styles: ["normal"],
+      subsets: ["latin"],
+      formats: ["ttf"],
+      fallbacks: ["monospace"],
+      optimizedFallbacks: false,
+    },
   ],
   markdown: {
     shikiConfig: {
