@@ -20,11 +20,28 @@ function visibleVote(page: Page) {
   return page.locator("[data-post-vote]:visible");
 }
 
-async function openFixture(page: Page, width: number) {
+async function openFixture(page: Page, width: number, reveal = true) {
   await page.setViewportSize({ width, height: 800 });
   const response = await page.goto(fixtureMdx.href);
   expect(response?.status()).toBe(200);
   expect(fixtureMdx.href).toBe(`/blog/${SLUG}/`);
+  if (reveal) await revealRail(page);
+}
+
+// De lg em diante, com JavaScript, o bloco da lateral nasce escondido e só
+// aparece quando o filete do cabeçalho sai da tela (RF-23, T-130).
+async function revealRail(page: Page) {
+  if ((page.viewportSize()?.width ?? 0) < 1024) return;
+  await page.locator("[data-post-header]").evaluate((element) => {
+    scrollTo({
+      top: element.getBoundingClientRect().bottom + scrollY + 200,
+      behavior: "instant",
+    });
+  });
+  await expect(page.locator('[data-post-actions="rail"]')).toHaveAttribute(
+    "data-shown",
+    "",
+  );
 }
 
 async function lineHeight(page: Page) {
@@ -106,7 +123,7 @@ test.describe("voto sem JavaScript [RF-25]", () => {
   test("um bloco visível, com o aviso e sem botão", async ({ page }) => {
     for (const width of WIDTHS) {
       await test.step(`${width}px`, async () => {
-        await openFixture(page, width);
+        await openFixture(page, width, false);
         const vote = visibleVote(page);
         await expect(page.locator("[data-post-vote]")).toHaveCount(2);
         await expect(vote).toHaveCount(1);
@@ -257,6 +274,7 @@ test.describe("voto com JavaScript [RF-25]", () => {
     ).toBe("1");
 
     await page.reload();
+    await revealRail(page);
     const again = visibleVote(page);
     await expect(again.getByRole("button", { name: "Votado" })).toBeDisabled();
     await expect(again.locator("[data-vote-count]")).toContainText("7");

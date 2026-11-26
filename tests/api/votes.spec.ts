@@ -142,6 +142,19 @@ test.describe("votos na API [RF-25]", () => {
     const response = await page.goto(fixtureMdx.href);
     expect(response?.status()).toBe(200);
 
+    // De lg em diante, o bloco da lateral nasce escondido e aparece quando o
+    // filete do cabeçalho sai da tela (RF-23, T-130).
+    await page.locator("[data-post-header]").evaluate((element) => {
+      scrollTo({
+        top: element.getBoundingClientRect().bottom + scrollY + 200,
+        behavior: "instant",
+      });
+    });
+    await expect(page.locator('[data-post-actions="rail"]')).toHaveAttribute(
+      "data-shown",
+      "",
+    );
+
     const vote = page.locator("[data-post-vote]:visible");
     const posted = page.waitForResponse(
       (answer) =>
