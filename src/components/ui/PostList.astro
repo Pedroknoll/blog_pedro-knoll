@@ -4,7 +4,7 @@ import type { CollectionEntry } from "astro:content";
 import Card from "~/components/ui/Card.astro";
 import ListSection from "~/components/ui/ListSection.astro";
 import { formatPubDate } from "~/lib/format-date";
-import { minutesReadOf } from "~/lib/reading-minutes";
+import { listItemOf } from "~/lib/reading-minutes";
 
 // Lista inteira sob o rótulo `/ LISTAGEM` (T-131, Q24, BRAND §9.2), por data;
 // o título do post é h3. O slug e a data no `li` servem à
@@ -16,17 +16,7 @@ interface Props {
 }
 
 const { posts, thumb = false } = Astro.props;
-const items = await Promise.all(
-  posts.map(async (post) => ({
-    slug: post.id,
-    title: post.data.title,
-    date: post.data.pubDate,
-    minutes: await minutesReadOf(post),
-    tags: post.data.tags,
-    description: post.data.description,
-    cover: post.data.cover,
-  })),
-);
+const items = await Promise.all(posts.map(listItemOf));
 ---
 
 <ListSection order>

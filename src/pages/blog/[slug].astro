@@ -4,20 +4,22 @@ import { render, type CollectionEntry } from "astro:content";
 import PostLayout from "~/layouts/PostLayout.astro";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
 import { postAppendix } from "~/lib/citations";
+import { relatedPosts } from "~/lib/related";
 
 export async function getStaticPaths() {
   const posts = await getPublishedPosts();
   return posts.map((post) => ({
     params: { slug: post.id },
-    props: { post },
+    props: { post, related: relatedPosts(post, posts) },
   }));
 }
 
 interface Props {
   post: CollectionEntry<"posts">;
+  related: CollectionEntry<"posts">[];
 }
 
-const { post } = Astro.props;
+const { post, related } = Astro.props;
 const { Content, headings, remarkPluginFrontmatter } = await render(post);
 const { minutesRead, hasCode } = remarkPluginFrontmatter;
 // O índice (RF-26) lista só os h2 do texto; o apêndice fica fora do Content.
@@ -33,6 +35,7 @@ const appendix = postAppendix(post.data.citations, post.data.appendices);
   hasCode={hasCode === true}
   appendix={appendix}
   tocHeadings={tocHeadings}
+  related={related}
 >
   <Content />
 </PostLayout>

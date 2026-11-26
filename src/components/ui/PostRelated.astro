@@ -1,0 +1,40 @@
+---
+import type { CollectionEntry } from "astro:content";
+
+import Card from "~/components/ui/Card.astro";
+import { listItemOf } from "~/lib/reading-minutes";
+
+// Posts relacionados pelas tags (RF-18, T-26, BRAND §9.14): na coluna do
+// texto, depois do apêndice, com o rótulo `/ POSTS RELACIONADOS` (mono 12 px
+// maiúsculo, tinta, sobre um filete de 1 px em tinta) e até 2 itens das
+// listas inteiras (§9.2). Quem chama não renderiza a seção sem post.
+
+interface Props {
+  posts: CollectionEntry<"posts">[];
+}
+
+const { posts } = Astro.props;
+const items = await Promise.all(posts.map(listItemOf));
+---
+
+<section
+  data-post-related
+  aria-labelledby="posts-relacionados"
+  class="mx-auto w-full max-w-site px-4 pb-12 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-16"
+>
+  <div class="min-w-0 max-w-[65ch] text-lg lg:col-start-2">
+    <h2
+      id="posts-relacionados"
+      class="border-b border-ink pb-2 font-mono text-xs font-normal tracking-widest text-ink uppercase"
+    >
+      / POSTS RELACIONADOS
+    </h2>
+    <ul class="divide-y divide-line border-b border-line">
+      {items.map((item) => (
+        <li>
+          <Card item={item} headingLevel={3} layout="list" />
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

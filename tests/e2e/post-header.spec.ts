@@ -190,7 +190,10 @@ test.describe("cabeçalho do post [RF-04]", () => {
         expect(response?.status()).toBe(200);
         const p = await expectHeaderContent(page);
 
-        const articleBox = await box(page.getByRole("article"));
+        // O artigo do post: os relacionados (T-26) também são <article>.
+        const articleBox = await box(
+          page.locator("article:has([data-post-header])"),
+        );
         const railBox = await box(p.rail);
         const proseBox = await box(page.locator("article > .prose"));
         expect(railBox.width).toBeCloseTo(240, 0);
@@ -306,7 +309,10 @@ test.describe("cabeçalho do post [RF-04]", () => {
         const p = await expectHeaderContent(page);
         await expect(p.rail).toBeHidden();
 
-        const articleBox = await box(page.getByRole("article"));
+        // O artigo do post: os relacionados (T-26) também são <article>.
+        const articleBox = await box(
+          page.locator("article:has([data-post-header])"),
+        );
         const h1Box = await box(p.h1);
         expect(h1Box.y - articleBox.y).toBeCloseTo(56, 0);
         await expect(p.h1).toHaveCSS("font-size", "36px");

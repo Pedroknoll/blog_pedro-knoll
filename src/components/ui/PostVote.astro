@@ -42,6 +42,8 @@ const { slug, class: className } = Astro.props;
     </button>
   </div>
   <script>
+    import { loadVotes } from "~/lib/votes-client";
+
     type Block = {
       notice: HTMLElement;
       button: HTMLButtonElement;
@@ -95,13 +97,6 @@ const { slug, class: className } = Astro.props;
       return typeof value === "number" && Number.isFinite(value) ? value : null;
     }
 
-    function catalogCount(body: unknown, slug: string) {
-      if (!body || typeof body !== "object") return null;
-      const votes = (body as { votes?: unknown }).votes;
-      if (!votes || typeof votes !== "object") return null;
-      return finiteNumber((votes as Record<string, unknown>)[slug]);
-    }
-
     function voteCount(body: unknown) {
       if (!body || typeof body !== "object") return null;
       return finiteNumber((body as { votes?: unknown }).votes);
@@ -136,16 +131,13 @@ const { slug, class: className } = Astro.props;
           if (voted) showVoted(block);
         }
 
-        void fetch("/api/votes")
-          .then(async (response) => {
-            if (!response.ok || locked) return;
-            const value = catalogCount(await response.json(), slug);
-            if (value === null || locked) return;
-            for (const block of blocks) setCount(block.count, String(value));
-          })
-          .catch(() => {
-            // Sem API, a contagem fica em –.
-          });
+        // O mesmo GET dos itens da página (posts relacionados, T-26).
+        void loadVotes().then((votes) => {
+          if (!votes || locked) return;
+          const value = votes[slug];
+          if (value === undefined) return;
+          for (const block of blocks) setCount(block.count, String(value));
+        });
 
         if (voted) continue;
 

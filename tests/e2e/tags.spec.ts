@@ -253,7 +253,10 @@ test("E7 páginas de tag sem barra [RF-02]", async ({ page }) => {
   for (const post of tagged) {
     const response = await page.goto(post.href);
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole("article")).toHaveCount(1);
+    // Um só artigo de post; os relacionados (T-26) são <article> à parte.
+    await expect(page.locator("article:has([data-post-header])")).toHaveCount(
+      1,
+    );
     await expect(
       page.getByRole("navigation", { name: "Filtrar por tag", exact: true }),
     ).toHaveCount(0);
