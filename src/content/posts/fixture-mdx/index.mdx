@@ -9,8 +9,17 @@ kind: article
 
 tags: [fixture, mdx]
 
-references:
+citations:
+  - key: gpt2
+    type: model
+    authors:
+      - OpenAI
+    title: openai-community/gpt2
+    year: 2019
+    venue: Hugging Face
+    url: https://huggingface.co/openai-community/gpt2
   - key: distill-multimodal
+    type: paper
     authors:
       - Gabriel Goh
       - Nick Cammarata
@@ -25,6 +34,7 @@ references:
     venue: Distill
     url: https://distill.pub/2021/multimodal-neurons/
   - key: astro-unified
+    type: article
     authors:
       - Astro
     title: Unified API Reference
@@ -33,9 +43,9 @@ references:
     url: https://docs.astro.build/en/reference/markdown-processors/unified/
 
 appendices:
-  - title: Como as referências funcionam
+  - title: Como as citações funcionam
     paragraphs:
-      - A citação no texto é um número entre colchetes. O número é a posição da obra na lista de referências, e o link leva ao item correspondente no fim do post.
+      - A citação no texto é um número entre colchetes. O número segue a lista de citações no fim do post, agrupada por tipo, e o link leva ao item. Uma citação pode não ter número no texto, como o modelo desta lista.
 ---
 
 import Notebook from "~/components/marimo/Notebook.astro";

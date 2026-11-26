@@ -1,7 +1,7 @@
 ---
 title: "Fixture de Markdown"
 
-description: "Post de prova em Markdown, com títulos aninhados, código, fórmula, referências e apêndice."
+description: "Post de prova em Markdown, com títulos aninhados, código, fórmula, citações e apêndice."
 
 pubDate: 2000-01-02
 
@@ -15,8 +15,9 @@ cover: ./cover.png
 
 coverAlt: "Fundo preto com texto"
 
-references:
+citations:
   - key: chave-a
+    type: video
     authors:
       - Ada Lovelace
       - Grace Hopper
@@ -25,6 +26,7 @@ references:
     venue: Caderno de prova
     url: https://example.com/chave-a
   - key: chave-b
+    type: paper
     authors:
       - Alan Turing
     title: Segunda nota da fixture
@@ -35,18 +37,18 @@ references:
 appendices:
   - title: Notas da fixture
     paragraphs:
-      - A citação no texto é um número entre colchetes. O número é a posição da obra na lista, e o link leva ao item no fim do post.
+      - A citação no texto é um número entre colchetes. O número segue a ordem da lista no fim do post, agrupada por tipo, e o link leva ao item.
 ---
 
 Este post exercita o Markdown publicado: títulos, código, fórmula e citação.
 
 ## Camada de seção
 
-A primeira referência entra nesta camada [@chave-a].
+A primeira citação entra nesta camada [@chave-a].
 
 ### Camada intermediária
 
-A segunda referência entra nesta camada [@chave-b].
+A segunda citação entra nesta camada [@chave-b].
 
 #### Camada de detalhe
 

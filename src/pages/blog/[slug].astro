@@ -3,7 +3,7 @@ import { render, type CollectionEntry } from "astro:content";
 
 import PostLayout from "~/layouts/PostLayout.astro";
 import { getPublishedPosts } from "~/lib/getPublishedPosts";
-import { postAppendix } from "~/lib/references";
+import { postAppendix } from "~/lib/citations";
 
 export async function getStaticPaths() {
   const posts = await getPublishedPosts();
@@ -24,7 +24,7 @@ const { minutesRead, hasCode } = remarkPluginFrontmatter;
 const tocHeadings = headings
   .filter((heading) => heading.depth === 2)
   .map(({ slug, text }) => ({ slug, text }));
-const appendix = postAppendix(post.data.references, post.data.appendices);
+const appendix = postAppendix(post.data.citations, post.data.appendices);
 ---
 
 <PostLayout

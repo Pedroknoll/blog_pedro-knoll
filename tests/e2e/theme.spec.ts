@@ -228,28 +228,37 @@ for (const theme of ["light", "dark"] as const) {
           }
         }
 
-        const band = await region.evaluate((node) => {
-          const style = getComputedStyle(node);
-          return {
-            background: style.backgroundColor,
-            border: style.borderTopColor,
-          };
-        });
-        const bandSheetWhere = `${path} fundo da faixa`;
-        const bandLineWhere = `${path} filete da faixa`;
-        if (requireToken(colors.sheet, "sheet", bandSheetWhere)) {
-          softRole(band.background, colors.sheet, bandSheetWhere);
-        }
-        if (requireToken(colors.line, "line", bandLineWhere)) {
-          softRole(band.border, colors.line, bandLineWhere);
+        // T-117: sem faixa sheet; o rótulo de cada seção tem filete em
+        // tinta e os itens das citações são separados por tracejado em line.
+        const labels = region.locator("[data-appendix-label]");
+        const labelCount = await labels.count();
+        expect(labelCount, `${path} rótulos`).toBeGreaterThan(0);
+        for (let index = 0; index < labelCount; index += 1) {
+          const paint = await labels.nth(index).evaluate((node) => {
+            const style = getComputedStyle(node);
+            return { color: style.color, border: style.borderBottomColor };
+          });
+          const labelWhere = `${path} rótulo[${index}]`;
+          if (requireToken(colors.muted, "muted", labelWhere)) {
+            softRole(paint.color, colors.muted, labelWhere);
+          }
+          const ruleWhere = `${path} filete do rótulo[${index}]`;
+          if (requireToken(colors.ink, "ink", ruleWhere)) {
+            softRole(paint.border, colors.ink, ruleWhere);
+          }
         }
 
-        const labelWhere = `${path} h2#referencias`;
-        const label = await page
-          .locator("h2#referencias")
-          .evaluate((node) => getComputedStyle(node).color);
-        if (requireToken(colors.muted, "muted", labelWhere)) {
-          softRole(label, colors.muted, labelWhere);
+        const groupLabels = region.locator("h3");
+        const groupCount = await groupLabels.count();
+        expect(groupCount, `${path} h3`).toBeGreaterThan(0);
+        for (let index = 0; index < groupCount; index += 1) {
+          const color = await groupLabels
+            .nth(index)
+            .evaluate((node) => getComputedStyle(node).color);
+          const where = `${path} h3[${index}]`;
+          if (requireToken(colors.muted, "muted", where)) {
+            softRole(color, colors.muted, where);
+          }
         }
 
         const metas = region.locator("ol > li > p");
@@ -269,12 +278,20 @@ for (const theme of ["light", "dark"] as const) {
         const bandItemCount = await bandItems.count();
         expect(bandItemCount, `${path} li`).toBeGreaterThan(0);
         for (let index = 0; index < bandItemCount; index += 1) {
-          const marker = await bandItems
-            .nth(index)
-            .evaluate((node) => getComputedStyle(node, "::marker").color);
-          const where = `${path} li ::marker[${index}]`;
+          const paint = await bandItems.nth(index).evaluate((node) => {
+            const number = node.querySelector("[data-citation-n]");
+            return {
+              number: number ? getComputedStyle(number).color : "",
+              dash: getComputedStyle(node).borderBottomColor,
+            };
+          });
+          const where = `${path} [n][${index}]`;
           if (requireToken(colors.muted, "muted", where)) {
-            softRole(marker, colors.muted, where);
+            softRole(paint.number, colors.muted, where);
+          }
+          const dashWhere = `${path} tracejado[${index}]`;
+          if (requireToken(colors.line, "line", dashWhere)) {
+            softRole(paint.dash, colors.line, dashWhere);
           }
         }
 

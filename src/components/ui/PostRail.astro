@@ -24,12 +24,12 @@ const hasToc = headings.length >= 2;
   lateral inteira fica sticky no topo, parada.
 */}
 <div
-  class="max-lg:hidden lg:col-start-1 lg:row-start-2 lg:mt-10 lg:flex lg:min-w-0 lg:flex-col noscript:lg:sticky noscript:lg:top-30 noscript:lg:self-start"
+  class="max-lg:hidden lg:col-start-1 lg:row-start-2 lg:mt-10 lg:flex lg:min-w-0 lg:flex-col noscript:lg:sticky noscript:lg:top-12 noscript:lg:self-start"
   data-post-rail
 >
   {hasToc && (
     <div data-rail-toc class="flex-1 pb-10 noscript:flex-none noscript:pb-0">
-      <div class="sticky top-30 noscript:static">
+      <div class="sticky top-12 noscript:static">
         <PostToc headings={headings} minutesRead={minutesRead} />
       </div>
     </div>

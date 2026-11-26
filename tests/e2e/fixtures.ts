@@ -2,14 +2,17 @@ export const fixtureMd = {
   href: "/blog/fixture-md/",
   title: "Fixture de Markdown",
   description:
-    "Post de prova em Markdown, com títulos aninhados, código, fórmula, referências e apêndice.",
+    "Post de prova em Markdown, com títulos aninhados, código, fórmula, citações e apêndice.",
   published: "02.jan.2000",
   updated: "09.jan.2000",
-  keys: ["chave-a", "chave-b"],
-  referenceTitles: ["Notas sobre a fixture", "Segunda nota da fixture"],
+  // chave-a é video e chave-b é paper: o grupo Papers vem antes, e a ordem
+  // dos números inverte a do frontmatter (T-117).
+  keys: ["chave-b", "chave-a"],
+  groups: ["Papers · 1", "Vídeos · 1"],
+  citationTitles: ["Segunda nota da fixture", "Notas sobre a fixture"],
   authorLines: [
-    "Ada Lovelace e Grace Hopper, 2000. Caderno de prova.",
     "Alan Turing, 2000. Caderno de prova.",
+    "Ada Lovelace e Grace Hopper, 2000. Caderno de prova.",
   ],
   appendixHeading: "Apêndice A · Notas da fixture",
   bodyTerm: "exercita",
@@ -20,7 +23,11 @@ export const fixtureMdx = {
   href: "/blog/fixture-mdx/",
   title: "Fixture de MDX",
   published: "03.jan.2000",
-  keys: ["distill-multimodal", "astro-unified"],
+  // Na ordem dos grupos: Modelos, Papers, Textos. O gpt2 não tem marcador no
+  // texto (citação indireta, T-117).
+  keys: ["gpt2", "distill-multimodal", "astro-unified"],
+  groups: ["Modelos · 1", "Papers · 1", "Textos · 1"],
+  appendixHeading: "Apêndice A · Como as citações funcionam",
   notebook:
     "https://molab.marimo.io/github/Pedroknoll/blog_pedro-knoll/blob/main/src/content/posts/fixture-mdx/notebooks/prova.py",
 } as const;
