@@ -49,7 +49,7 @@
       height={cell.size}
       class={`${
         marked(cell.row, cell.col)
-          ? "fill-accent stroke-ink"
+          ? "fill-highlight stroke-ink"
           : "fill-sheet stroke-ink"
       } transition-colors motion-reduce:transition-none`}
       data-highlight={marked(cell.row, cell.col) ? "" : undefined}

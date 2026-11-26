@@ -57,7 +57,7 @@
           width={cell.size}
           height={cell.size}
           class={marked(cell.row, cell.col)
-            ? "fill-accent stroke-ink"
+            ? "fill-highlight stroke-ink"
             : "fill-sheet stroke-ink"}
           stroke-width="1"
         />
