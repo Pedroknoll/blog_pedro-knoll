@@ -288,8 +288,10 @@ const listGrid = thumb
     }
     void loadVotes().then((votes) => {
       if (!votes) return;
+      // Só os votos dos itens: o botão do post (PostVote) também tem um
+      // `data-vote-value`, dentro do <article> do post (T-26).
       for (const node of document.querySelectorAll<HTMLElement>(
-        "[data-vote-value]",
+        "[data-votes] [data-vote-value]",
       )) {
         const article = node.closest("article");
         const link = article?.querySelector("a")?.getAttribute("href") ?? "";
