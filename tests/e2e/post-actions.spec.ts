@@ -217,6 +217,8 @@ test.describe("bloco de voto e compartilhar [RF-23]", () => {
     const block = rail(page);
     await expect(block).toHaveCSS("opacity", "0");
     await expect(block).toHaveCSS("transform", "matrix(1, 0, 0, 1, 0, 8)");
+    // O estado do carregamento entra sem animação; a transição volta depois.
+    await expect(block).not.toHaveAttribute("data-instant");
     const durations = await block.evaluate(
       (element) => getComputedStyle(element).transitionDuration,
     );
@@ -322,6 +324,37 @@ test.describe("bloco de voto e compartilhar [RF-23]", () => {
       .locator("article [data-pagefind-body]")
       .evaluate((element) => element.getBoundingClientRect().bottom);
     expect(Math.abs(block.bottom - proseBottom)).toBeLessThanOrEqual(1.5);
+  });
+
+  test("o estado do carregamento entra sem animação", async ({ page }) => {
+    // Post curto: o bloco já aparece no carregamento. Sem o fade, nenhuma
+    // leitura (axe, leitor) o pega com opacidade parcial.
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    await open(page, fixtureSemTitulos.href);
+    const opacity = await page.evaluate(
+      () =>
+        new Promise<string>((resolve) => {
+          const block = document.querySelector<HTMLElement>(
+            '[data-post-actions="rail"]',
+          );
+          if (!block) throw new Error("sem bloco");
+          const read = () => resolve(getComputedStyle(block).opacity);
+          if (block.hasAttribute("data-shown")) {
+            read();
+            return;
+          }
+          new MutationObserver((_, observer) => {
+            if (!block.hasAttribute("data-shown")) return;
+            observer.disconnect();
+            read();
+          }).observe(block, { attributes: true });
+        }),
+    );
+    expect(opacity).toBe("1");
+
+    // Depois do carregamento, a rolagem volta a animar.
+    await expect(rail(page)).not.toHaveAttribute("data-instant");
+    await expect(rail(page)).toHaveCSS("transition-duration", /^0\.25s/);
   });
 
   test("aparecer e sumir não move nenhum elemento fora do bloco", async ({

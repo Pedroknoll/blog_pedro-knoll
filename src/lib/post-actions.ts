@@ -72,6 +72,7 @@ export function initPostActions(): void {
   // tela: num post curto, o filete pode nunca sair.
   let pastHeader = false;
   let endInView = false;
+  let first = true;
   const observer = new IntersectionObserver((entries) => {
     for (const entry of entries) {
       if (entry.target === header) {
@@ -82,6 +83,15 @@ export function initPostActions(): void {
       } else {
         endInView = entry.isIntersecting;
       }
+    }
+    // No primeiro aviso (post curto, ou página aberta no meio), o estado
+    // inicial entra sem animação: o fade só acompanha a rolagem.
+    if (first) {
+      first = false;
+      rail.setAttribute("data-instant", "");
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => rail.removeAttribute("data-instant"));
+      });
     }
     rail.toggleAttribute("data-shown", pastHeader || endInView);
   });

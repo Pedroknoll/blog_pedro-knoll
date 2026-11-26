@@ -238,6 +238,11 @@
       transform 0.25s ease,
       visibility 0s linear 0s;
   }
+
+  /* O estado do carregamento entra sem animação (o script tira em 2 quadros). */
+  [data-post-actions="rail"][data-instant] {
+    transition: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
