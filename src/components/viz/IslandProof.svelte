@@ -58,7 +58,7 @@
         y={cell.y}
         width={cell.size}
         height={cell.size}
-        class={index === active ? "fill-accent" : "fill-sheet stroke-ink"}
+        class={index === active ? "fill-highlight" : "fill-sheet stroke-ink"}
         data-active={index === active ? "" : undefined}
       />
     {/each}

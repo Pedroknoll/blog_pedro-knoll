@@ -1,6 +1,6 @@
 # pk.log · Especificação da marca
 
-Versão 1.43 · novembro de 2026 · pedroknoll.com
+Versão 1.44 · novembro de 2026 · pedroknoll.com
 
 Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele foi escrito para pessoas e para agentes de código. O manual visual interativo existe como artefato à parte; quando os dois divergirem, vale este arquivo. Quando o comportamento discordar da SPEC, vale a SPEC.
 
@@ -10,7 +10,7 @@ Este arquivo é a fonte da verdade da identidade visual e verbal do pk.log. Ele 
 - **Sugestão** é um ponto de partida. Ajuste ao código, ao schema e à SPEC.
 - Este arquivo é a identidade. Em conflito de comportamento com a SPEC, vale a SPEC; avise no PR.
 - A seção 14 é sugestão. A ordem das tarefas está na Fase 1b do ROADMAP. Onde a seção 14 discordar da SPEC ou do ROADMAP, valem a SPEC e o ROADMAP.
-- Não crie nomes paralelos `--papel` / `--prussia` no CSS de componente, página ou layout. A lista fechada é `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `grid` e `grid-strong` (T-41, T-72, T-120). Sem `@custom-variant dark` e sem `dark:` nos componentes.
+- Não crie nomes paralelos `--papel` / `--prussia` no CSS de componente, página ou layout. A lista fechada é `surface`, `sheet`, `ink`, `muted`, `pencil`, `line`, `accent`, `highlight`, `grid` e `grid-strong` (T-41, T-72, T-120, T-76). Sem `@custom-variant dark` e sem `dark:` nos componentes.
 - A stack é Astro 7 + Tailwind v4. A seção 13 é sugestão de tokens; confirme a SPEC §9 antes de aplicá-la.
 - SVGs, favicons e temas do Shiki estão na árvore abaixo, com os nomes originais. O apêndice repete o código dos SVGs principais e usa esses caminhos.
 
@@ -148,16 +148,16 @@ Fundo **sempre liso**, sem textura, sem vinheta.
 | `--linha` | `rgba(60,40,20,.16)` | `rgba(232,238,243,.18)` | Bordas e divisórias. |
 | `--prussia` | `#1F4B7A` | `#8DB8E8` | **Cor principal.** Links, título do item no hover, foco, nó do símbolo, ponto do nome. |
 | `--latao` | `#84601A` | `#D9B85C` | Número no código (§9.5). |
-| `--sanguinea` | `#A3392A` | `#EE8A74` | Função no código (Shiki, §9.5). |
+| `--sanguinea` | `#A3392A` | `#EE8A74` | Função no código (Shiki, §9.5) e destaque e intensidade das figuras (§9.8). No CSS, `highlight` (T-76). |
 | `--verdete` | `#2E6B5A` | `#7CC7AE` | Texto (string) no código (§9.5). |
 | `--ouro` | `#F5B82E` | `#F5B82E` | **Exceção:** só a mão da saudação. |
 | `--contorno-px` | `#2A2118` | `#2A2118` | Contorno da mão em pixel, nos dois modos. |
-| `--grade` / `--grade-forte` | `rgba(31,75,122,.03)` / `.065` | `rgba(200,225,255,.025)` / `.055` | Grade milimetrada. No CSS, `grid` e `grid-strong` (T-72). |
+| `--grade` / `--grade-forte` | `rgba(42,33,24,.03)` / `.065` | `rgba(232,238,243,.025)` / `.055` | Grade milimetrada, em tinta (T-76). No CSS, `grid` e `grid-strong` (T-72). |
 | `--grade-px` | `rgba(42,33,24,.07)` | `rgba(232,238,243,.07)` | Grade de exibição dos ícones em pixel (só em documentação). |
 
 ### Regras de cor (decisões)
 - **Proporção em qualquer peça:** papel ~68%, tinta ~20%, prússia ~7%, latão + sanguínea + verdete ≤ 5% somados.
-- **Latão e verdete ficam só no código (§9.5); a sanguínea fica só na função.** Nunca marcam tipo, avisos, erros, sucesso ou resultados, e nunca são fundo de página. Os tipos ficam em tinta (§8).
+- **Latão e verdete ficam só no código (§9.5); a sanguínea fica na função do código e nas figuras (§9.8, T-76).** Nunca marcam tipo, avisos, erros, sucesso ou resultados, e nunca são fundo de página. Os tipos ficam em tinta (§8).
 - **Prússia só no que é interativo** (decisão da T-126, Q23): links, título no hover (sem sublinhado nos itens da lista, T-125) e foco. Na interface, nenhuma outra cor de destaque além da mão; a contagem do voto e os metadados ficam em tinta, grafite ou lápis. O ponto da assinatura e o nó do símbolo continuam prússia: são a marca, e o header não muda.
 - **Ouro-pigmento** aparece só na mão da saudação, sempre com contorno em tinta (amarelo puro some sobre o fundo claro).
 - **Pergaminho** (`#EADFC8`, com `--folha #DFD2B6`, `--grafite #5A4D3C`, `--lapis #8E7E64`, `--latao #765514`, `--sanguinea #9E3526`, `--verdete #2B6454`) é um tom mais fundo **só para peças gráficas**: slides, posts de rede social, capas, certificado. Nunca no blog.
@@ -175,6 +175,16 @@ Fundo **sempre liso**, sem textura, sem vinheta.
 | latão | 5,4 | 4,9 | 8,4 | 6,8 |
 | sanguínea | 6,3 | 5,7 | 6,6 | 5,3 |
 | verdete | 5,9 | 5,4 | 8,2 | 6,6 |
+
+Nas figuras (T-76), com a sanguínea como `highlight`:
+
+| Par | Claro | Escuro |
+|---|---|---|
+| destaque × célula (folha) | 5,7 | 5,3 |
+| destaque × papel | 6,3 | 6,6 |
+| traço e contorno do mapa (tinta) × papel | 15,0 | 13,8 |
+| mapa, degrau 1 → 5 × papel | 1,4 → 6,3 | 1,4 → 6,6 |
+| mapa, degraus vizinhos entre si | 1,4 a 1,5 | 1,4 a 1,5 |
 
 Lápis sobre folha clara (4,2) fica abaixo de 4,5. Lápis não é texto menor que 24 px sobre folha clara; nesse tamanho, use grafite. Comentário de código não usa lápis. No tema claro do Shiki o comentário é `#5E5345`. O tema escuro não muda o comentário nesta revisão (`#869EB6`).
 
@@ -375,7 +385,22 @@ No MDX, `Callout` com `variant` `note`, `caution` ou `result` (SPEC RF-22), impo
 Primeira célula de todo caderno: cabeçalho renderizado com a assinatura e o título, sem fólio (T-120). Parâmetros como controles do marimo (`mo.ui.slider` etc.), não como constantes soltas. Sem `pk.css`: o molab não aplica o `css_file` do caderno (T-97), e o caderno fica com o estilo do molab; a marca entra pelo cabeçalho da primeira célula. Os dados ficam na pasta do caderno e se leem com `mo.notebook_dir()` (SPEC §7).
 
 ### 9.8 Diagramas
-- Tinta para elementos; prússia para **um** destaque por diagrama; tracejado fino para guias.
+
+**Papéis de cor (decisão, 26/11/2026, T-76).** Valem para toda figura do blog, das primitivas de `src/components/viz/` às figuras de post em `figs/`, e não só para as figuras de prova.
+
+| Papel | Cor | Token |
+|---|---|---|
+| Elementos: traço, seta, cota, rótulo, guia tracejada | tinta | `ink` |
+| Superfície de célula e forma | folha | `sheet` |
+| Destaque único (no máximo um por figura) | sanguínea | `highlight` |
+| Intensidade (mapa de calor, qualquer escala sequencial) | sanguínea com transparência, cinco degraus: 0,2, 0,4, 0,6, 0,8 e 1 | `highlight` |
+| Seleção numa figura de intensidade (a sanguínea já é o dado) | contorno em tinta, traço de 2 | `ink` |
+| Grade milimetrada | tinta com transparência | `grid`, `grid-strong` |
+| Controle interativo (controle deslizante, foco) | prússia, fora do `svg` da figura | `accent` |
+
+A prússia nunca entra no `svg` de uma figura: ela é do que se clica (§4).
+
+- Tinta para elementos; sanguínea para **um** destaque por diagrama; tracejado fino para guias.
 - Rótulos em mono; no máximo duas notas em IBM Plex Sans itálico (T-52, LCP).
 - Sempre uma cota com medida real.
 - Fundo com grade milimetrada; sem sombra, sem gradiente, sem 3D.
@@ -383,7 +408,7 @@ Primeira célula de todo caderno: cabeçalho renderizado com a assinatura e o t�
 
 **Vocabulário (decisão, 10/11/2026, T-72).** Medidas em unidades do `viewBox`; a figura sai no tamanho natural e só encolhe.
 
-- Célula: quadrado de 24 com vão de 4, em folha (`sheet`), com traço de 1 em tinta. O destaque único é a célula em prússia (`accent`), com o mesmo traço.
+- Célula: quadrado de 24 com vão de 4, em folha (`sheet`), com traço de 1 em tinta. O destaque único é a célula em sanguínea (`highlight`), com o mesmo traço.
 - Tensor: só a camada da frente tem células; as de trás são placas lisas, deslocadas (8, −8) a cada camada.
 - Seta: haste de 1 em tinta e ponta aberta de dois traços de 8, a ±30°.
 - Cota: linha de 1 em tinta, afastada 12 da forma, com marcas perpendiculares de 6 nas pontas; o valor em Plex Mono 12, a 8 além da linha.
@@ -395,7 +420,7 @@ Primeira célula de todo caderno: cabeçalho renderizado com a assinatura e o t�
 
 **Exploráveis (decisão, 10/11/2026, T-20).**
 
-- Mapa de calor: células como no vocabulário acima, mas em tinta com transparência por degrau (0,15, 0,3, 0,45, 0,6 e 0,75, do menor ao maior valor da matriz), com o traço de 1 em tinta. O destaque único é o contorno da linha escolhida, em prússia, com traço de 2, por fora das células, sobre o papel (8,5 de contraste no claro e 7,8 no escuro). Sem número dentro das células: os degraus entre si não chegam a 3:1, por isso os valores vão também em texto, no "Ver dados" e no texto ao vivo.
+- Mapa de calor: células como no vocabulário acima, mas em sanguínea com transparência por degrau (0,2, 0,4, 0,6, 0,8 e 1, do menor ao maior valor da matriz; 1,4 a 6,3 de contraste sobre o papel no claro e 1,4 a 6,6 no escuro), com o traço de 1 em tinta. O destaque único é o contorno da linha escolhida, em tinta, com traço de 2, por fora das células, sobre o papel (15,0 no claro e 13,8 no escuro; T-76). Sem número dentro das células: os degraus entre si não chegam a 3:1, por isso os valores vão também em texto, no "Ver dados" e no texto ao vivo.
 - Rótulos do mapa: os nomes em Plex Mono 12, tinta, à esquerda das linhas e acima das colunas, estes girados −90°; a cota `[linhas, colunas]` embaixo.
 - Controles: abaixo do desenho. Botão em Plex Mono 12, tinta, com borda de 1 em tinta, cantos retos e pelo menos 32 px de altura; desabilitado, com 60% de opacidade. Controle deslizante na cor prússia, com pelo menos 24 px de altura e o rótulo visível. Texto ao vivo em Plex Mono 12, grafite.
 - Movimento: a troca de cor da célula tem transição curta, desligada com `prefers-reduced-motion`; o contorno do mapa muda de linha sem transição.
@@ -561,8 +586,8 @@ Sugestão anterior à T-41. No site valem os nomes da seção 0, não `--papel` 
   --verdete: #2E6B5A;
   --ouro: #F5B82E;
   --contorno-px: #2A2118;
-  --grade: rgba(31, 75, 122, .03);
-  --grade-forte: rgba(31, 75, 122, .065);
+  --grade: rgba(42, 33, 24, .03);
+  --grade-forte: rgba(42, 33, 24, .065);
 
   --f-display: "IBM Plex Sans Condensed", "Arial Narrow", Arial, sans-serif;
   --f-texto: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
@@ -580,8 +605,8 @@ Sugestão anterior à T-41. No site valem os nomes da seção 0, não `--papel` 
   --latao: #D9B85C;
   --sanguinea: #EE8A74;
   --verdete: #7CC7AE;
-  --grade: rgba(200, 225, 255, .025);
-  --grade-forte: rgba(200, 225, 255, .055);
+  --grade: rgba(232, 238, 243, .025);
+  --grade-forte: rgba(232, 238, 243, .055);
   color-scheme: dark;
 }
 
@@ -625,6 +650,7 @@ Com os tokens acima no CSS global, exponha-os como utilitários:
 
   /* se o projeto já usa estes nomes, aponte-os para a marca */
   --color-accent: var(--prussia);
+  --color-highlight: var(--sanguinea);
 
   --font-display: var(--f-display);
   --font-sans: var(--f-texto);

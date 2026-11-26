@@ -12,6 +12,7 @@ const tokens = [
   "pencil",
   "line",
   "accent",
+  "highlight",
   "grid",
   "grid-strong",
 ] as const;
@@ -27,8 +28,9 @@ const light: Record<Token, Channels> = {
   pencil: { r: 123, g: 111, b: 90, a: 1 },
   line: { r: 60, g: 40, b: 20, a: 0.16 },
   accent: { r: 31, g: 75, b: 122, a: 1 },
-  grid: { r: 31, g: 75, b: 122, a: 0.03 },
-  "grid-strong": { r: 31, g: 75, b: 122, a: 0.065 },
+  highlight: { r: 163, g: 57, b: 42, a: 1 },
+  grid: { r: 42, g: 33, b: 24, a: 0.03 },
+  "grid-strong": { r: 42, g: 33, b: 24, a: 0.065 },
 };
 
 const dark: Record<Token, Channels> = {
@@ -39,8 +41,9 @@ const dark: Record<Token, Channels> = {
   pencil: { r: 134, g: 158, b: 182, a: 1 },
   line: { r: 232, g: 238, b: 243, a: 0.18 },
   accent: { r: 141, g: 184, b: 232, a: 1 },
-  grid: { r: 200, g: 225, b: 255, a: 0.025 },
-  "grid-strong": { r: 200, g: 225, b: 255, a: 0.055 },
+  highlight: { r: 238, g: 138, b: 116, a: 1 },
+  grid: { r: 232, g: 238, b: 243, a: 0.025 },
+  "grid-strong": { r: 232, g: 238, b: 243, a: 0.055 },
 };
 
 function channels(color: string): Channels {

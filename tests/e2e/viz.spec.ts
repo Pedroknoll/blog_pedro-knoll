@@ -101,6 +101,34 @@ test("teto de 1.000 nós por figura [RF-09]", async ({ page }) => {
   expect(found).toBeGreaterThan(0);
 });
 
+test("figura sem accent dentro do svg [RF-09, BRAND §9.8]", async ({
+  page,
+}) => {
+  // T-76: accent (prússia) só nos controles; o destaque da figura é highlight.
+  const posts = await publishedPosts(page);
+  let found = 0;
+  for (const post of posts) {
+    await open(page, post.href);
+    const figures = page.locator("svg[data-viz]");
+    const count = await figures.count();
+    for (let index = 0; index < count; index += 1) {
+      found += 1;
+      const accents = await figures
+        .nth(index)
+        .evaluate(
+          (svg) =>
+            [...svg.querySelectorAll("[class]")].filter((node) =>
+              /(?:^|\s)(?:fill|stroke)-accent(?:\s|$)/.test(
+                node.getAttribute("class") ?? "",
+              ),
+            ).length,
+        );
+      expect.soft(accents, `${post.href} figura ${index}`).toBe(0);
+    }
+  }
+  expect(found).toBeGreaterThan(0);
+});
+
 test("explorável hidrata ao ficar visível [RF-09, RNF-02]", async ({
   page,
 }) => {

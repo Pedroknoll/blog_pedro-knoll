@@ -1,7 +1,7 @@
 import { cellRects, gridSize } from "./cells";
 import { dimension as dimensionOf, type Dimension } from "./geometry";
 
-const HEAT_OPACITY: readonly number[] = [0.15, 0.3, 0.45, 0.6, 0.75];
+const HEAT_OPACITY: readonly number[] = [0.2, 0.4, 0.6, 0.8, 1];
 
 const cellSize = 24;
 const cellGap = 4;

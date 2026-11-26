@@ -11,8 +11,9 @@
   --color-pencil: #7b6f5a;
   --color-line: rgba(60, 40, 20, 0.16);
   --color-accent: #1f4b7a;
-  --color-grid: rgba(31, 75, 122, 0.03);
-  --color-grid-strong: rgba(31, 75, 122, 0.065);
+  --color-highlight: #a3392a;
+  --color-grid: rgba(42, 33, 24, 0.03);
+  --color-grid-strong: rgba(42, 33, 24, 0.065);
   --container-site: 72rem;
 }
 
@@ -31,8 +32,9 @@
     --color-pencil: #869eb6;
     --color-line: rgba(232, 238, 243, 0.18);
     --color-accent: #8db8e8;
-    --color-grid: rgba(200, 225, 255, 0.025);
-    --color-grid-strong: rgba(200, 225, 255, 0.055);
+    --color-highlight: #ee8a74;
+    --color-grid: rgba(232, 238, 243, 0.025);
+    --color-grid-strong: rgba(232, 238, 243, 0.055);
     color-scheme: dark;
   }
 

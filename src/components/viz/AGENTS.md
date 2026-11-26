@@ -24,12 +24,12 @@ Complementa o `AGENTS.md` da raiz e prevalece no que for mais específico. Fonte
 
 ## Cor e tipo
 
-- Só os tokens da lista fechada, pelas classes do Tailwind (`fill-ink`, `stroke-ink`, `fill-sheet`, `fill-accent`, `stroke-line`…). Sem hex, sem variável `--viz-*` e sem `dark:`.
-- Tinta para os elementos; `accent` para um único destaque por figura; tracejado fino para guias.
+- Só os tokens da lista fechada, pelas classes do Tailwind (`fill-ink`, `stroke-ink`, `fill-sheet`, `fill-highlight`, `stroke-line`…). Sem hex, sem variável `--viz-*` e sem `dark:`.
+- Papéis de cor na BRAND §9.8 (T-76), para toda figura, primitiva ou de post: tinta para os elementos; `highlight` (sanguínea) para um único destaque por figura e para a intensidade; tracejado fino em tinta para guias. `accent` (prússia) nunca dentro do `svg`: só no controle interativo, como o `accent-accent` do controle deslizante do `Explorable`. O `tests/e2e/viz.spec.ts` reprova preenchimento ou traço em `accent` dentro de `svg[data-viz]` em qualquer post (o nome da classe fica fora deste texto: o Tailwind lê `src/` e a geraria).
 - Rótulos em IBM Plex Mono 400; no máximo duas notas em IBM Plex Sans itálico; nenhuma face nova.
 - Sem sombra, gradiente ou 3D. Prefira classes do Tailwind a `<style>` no componente.
 - A grade usa `stroke-grid` e `stroke-grid-strong`; a cota vem de `dimension()` em `src/lib/viz/geometry.ts`. Medidas e vocabulário na BRAND §9.8.
-- `Heatmap`: células `fill-ink` com `fill-opacity` pelos cinco degraus de `HEAT_OPACITY` (`src/lib/viz/heatmap.ts`); o destaque é o contorno da linha em `stroke-accent`. Sem `d3-scale-chromatic`, que devolve hex. Medidas e contraste na BRAND §9.8.
+- `Heatmap`: células `fill-highlight stroke-ink` com `fill-opacity` pelos cinco degraus de `HEAT_OPACITY` (`src/lib/viz/heatmap.ts`, 0,2 a 1); o destaque é o contorno da linha em `stroke-ink`, porque a sanguínea já é o dado. Qualquer figura nova de intensidade usa a mesma escala. Sem `d3-scale-chromatic`, que devolve hex. Medidas e contraste na BRAND §9.8.
 - A troca de cor usa `transition-colors motion-reduce:transition-none`.
 - A guarda de cores (`tests/unit/color-tokens.test.ts`) varre os `.astro` e `.svelte` desta pasta.
 

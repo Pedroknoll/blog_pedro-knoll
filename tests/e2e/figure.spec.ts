@@ -54,9 +54,8 @@ test.describe("figuras com moldura sem JavaScript", () => {
       expect(
         await img.locator("[data-dimension]").count(),
       ).toBeGreaterThanOrEqual(1);
-      await expect(
-        img.locator('[class~="fill-accent"], [class~="stroke-accent"]'),
-      ).toHaveCount(1);
+      await expect(img.locator('[class*="-accent"]')).toHaveCount(0);
+      await expect(img.locator('[class~="fill-highlight"]')).toHaveCount(1);
     }
 
     const captions = page.locator("figure:has(svg[data-viz]) > figcaption");

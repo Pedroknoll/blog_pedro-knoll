@@ -50,6 +50,7 @@ async function expectIslandFigure(
   page: Page,
   spec: Framed,
   numberLabel: string,
+  kind: "cells" | "intensity",
 ) {
   const img = imgNamed(page, spec.summary);
   await expect(img).toHaveCount(1);
@@ -86,10 +87,20 @@ async function expectIslandFigure(
   await expect(details.locator("table th")).toHaveText([...spec.columns]);
   await expect(details.locator("table td")).toHaveText(spec.rows.flat());
 
+  // BRAND §9.8 (T-76): accent só no controle, nunca dentro do svg da figura.
+  await expect(img.locator('[class*="-accent"]')).toHaveCount(0);
   await expect(img.locator("[data-highlight]")).toHaveCount(1);
-  await expect(
-    img.locator('[class~="fill-accent"], [class~="stroke-accent"]'),
-  ).toHaveCount(1);
+  if (kind === "cells") {
+    await expect(img.locator('[class~="fill-highlight"]')).toHaveCount(1);
+  } else {
+    // A intensidade já é a sanguínea: a seleção é o contorno em tinta.
+    await expect(img.locator("[data-highlight]")).toHaveClass(/\bstroke-ink\b/);
+    const cells = img.locator("[data-cell]");
+    expect(await cells.count()).toBe(25);
+    await expect(
+      img.locator('[data-cell][class~="fill-highlight"]'),
+    ).toHaveCount(25);
+  }
 }
 
 async function expectDistinctPatterns(page: Page) {
@@ -141,8 +152,8 @@ test.describe("exploráveis sem JavaScript", () => {
     page,
   }) => {
     await open(page, fixtureMdx.href);
-    await expectIslandFigure(page, stepFigure, "Figura 3");
-    await expectIslandFigure(page, heatFigure, "Figura 4");
+    await expectIslandFigure(page, stepFigure, "Figura 3", "cells");
+    await expectIslandFigure(page, heatFigure, "Figura 4", "intensity");
 
     const islands = page.locator("astro-island");
     await expect(islands).toHaveCount(3);

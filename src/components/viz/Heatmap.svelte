@@ -33,7 +33,7 @@
       y={cell.y}
       width={cell.size}
       height={cell.size}
-      class="fill-ink stroke-ink"
+      class="fill-highlight stroke-ink"
       stroke-width="1"
       fill-opacity={opacityAt(cell.row, cell.col)}
     />
@@ -95,7 +95,7 @@
     y={outline.y}
     width={outline.width}
     height={outline.height}
-    class="stroke-accent"
+    class="stroke-ink"
     fill="none"
     stroke-width="2"
   />
