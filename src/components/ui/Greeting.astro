@@ -1,15 +1,19 @@
 ---
+import { getImage } from "astro:assets";
 import Aceno from "~/assets/brand/icones/aceno.svg";
 import Rss from "~/assets/brand/icones/icone-rss.svg";
 import { site } from "~/site.config";
 
 const linkClass =
   "inline-flex min-h-11 items-center gap-1.5 font-mono text-sm whitespace-nowrap text-ink hover:text-accent focus-visible:text-accent";
+// Uma variante, no dobro do maior tamanho mostrado; o <img> guarda a
+// largura e a altura de exibição e fica sem lazy (T-134).
+const photo = await getImage({ src: site.author.avatar, width: 176 });
 ---
 
 <div class="mx-auto w-full max-w-[52rem] px-4 pt-10">
   <img
-    src={site.author.avatar}
+    src={photo.src}
     alt="Foto de Pedro Knoll"
     width="88"
     height="88"

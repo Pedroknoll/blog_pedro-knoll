@@ -137,6 +137,16 @@ async function expectHeaderContent(page: Page) {
   await expect(p.avatar).toHaveAttribute("alt", "");
   await expect(p.avatar).toHaveAttribute("width", "28");
   await expect(p.avatar).toHaveAttribute("height", "28");
+  // T-134: a variante de 56 px (2× de 28), gerada pelo astro:assets.
+  await expect(p.avatar).toHaveAttribute("src", /^\/_astro\/avatar\..+\.webp$/);
+  await expect
+    .poll(() =>
+      p.avatar.evaluate((element) => {
+        const image = element as HTMLImageElement;
+        return [image.naturalWidth, image.naturalHeight];
+      }),
+    )
+    .toEqual([56, 56]);
   await expect(p.name).toHaveCount(1);
   await expect(p.time).toHaveCount(1);
   await expect(p.time).toHaveText(DATE);
@@ -326,7 +336,7 @@ test.describe("cabeçalho do post [RF-04]", () => {
       const held = new Promise<void>((resolve) => {
         release = resolve;
       });
-      await page.route("**/avatar.jpg", async (route) => {
+      await page.route("**/_astro/avatar.*", async (route) => {
         await held;
         try {
           await route.continue();

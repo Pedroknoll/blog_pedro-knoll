@@ -197,7 +197,16 @@ test.describe("saudação [RF-01, RNF-04]", () => {
     await open(page, "/", 1280);
     const photo = page.getByRole("img", { name: avatarAlt, exact: true });
     await expect(photo).toHaveCount(1);
-    await expect(photo).toHaveAttribute("src", "/avatar.jpg");
+    // T-134: a variante de 176 px (2× de 88), gerada pelo astro:assets.
+    await expect(photo).toHaveAttribute("src", /^\/_astro\/avatar\..+\.webp$/);
+    await expect
+      .poll(() =>
+        photo.evaluate((element) => {
+          const image = element as HTMLImageElement;
+          return [image.naturalWidth, image.naturalHeight];
+        }),
+      )
+      .toEqual([176, 176]);
     await expect(photo).toHaveAttribute("width", /^\d+$/);
     await expect(photo).toHaveAttribute("height", /^\d+$/);
 
