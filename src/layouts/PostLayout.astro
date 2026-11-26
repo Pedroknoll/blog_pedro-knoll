@@ -9,6 +9,7 @@ import CodeCopy from "~/components/ui/CodeCopy.astro";
 import PostAppendix from "~/components/ui/PostAppendix.astro";
 import PostHeader from "~/components/ui/PostHeader.astro";
 import PostRail from "~/components/ui/PostRail.astro";
+import type { TocHeading } from "~/components/ui/PostToc.astro";
 import PostVote from "~/components/ui/PostVote.astro";
 import BaseLayout from "~/layouts/BaseLayout.astro";
 import type { PostAppendixModel } from "~/lib/references";
@@ -20,9 +21,10 @@ interface Props {
   minutesRead?: number;
   hasCode?: boolean;
   appendix?: PostAppendixModel;
+  tocHeadings?: TocHeading[];
 }
 
-const { post, minutesRead, hasCode, appendix } = Astro.props;
+const { post, minutesRead, hasCode, appendix, tocHeadings = [] } = Astro.props;
 const {
   title,
   description,
@@ -84,7 +86,7 @@ const jsonLd = blogPostingJsonLd({
       kind={kind}
       tags={tags}
     />
-    <PostRail slug={post.id} />
+    <PostRail slug={post.id} headings={tocHeadings} minutesRead={minutesRead} />
     <div
       class="prose prose-site mt-10 min-w-0 lg:col-start-2 lg:row-start-2"
       data-pagefind-body

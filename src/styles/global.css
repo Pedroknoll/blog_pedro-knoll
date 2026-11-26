@@ -211,6 +211,13 @@
   }
 }
 
+/* Índice do post (RF-26, T-129): rolagem suave só no post com índice e sem prefers-reduced-motion. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:has([data-post-toc]) {
+    scroll-behavior: smooth;
+  }
+}
+
 @font-face {
   font-family: "Metric Sans";
   src:
