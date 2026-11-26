@@ -265,6 +265,49 @@ test("E10 com capa, a capa ganha [RF-16]", async ({ page }) => {
   expect(response.status()).toBe(404);
 });
 
+async function twitterContent(page: Page, name: string) {
+  const meta = page.locator(`meta[name="${name}"]`);
+  await expect(meta).toHaveCount(1);
+  const content = await meta.getAttribute("content");
+  expect(content).toBeTruthy();
+  return content as string;
+}
+
+// O X lê título, descrição e imagem do og:; o tipo de cartão não tem
+// equivalente no Open Graph (T-135).
+const repeatedTwitter = [
+  "twitter:title",
+  "twitter:description",
+  "twitter:image",
+];
+
+test("E11 cartão do X [RF-12]", async ({ page }) => {
+  const { paths } = await discover(page);
+  const checked = [...paths, fixtureMdx.href, fixtureMd.href];
+
+  for (const path of checked) {
+    await visit(page, path);
+    const card = await twitterContent(page, "twitter:card");
+    const imageAlt = page.locator('meta[name="twitter:image:alt"]');
+    if (isPostPath(path)) {
+      expect(card, path).toBe("summary_large_image");
+      await expect(imageAlt).toHaveAttribute(
+        "content",
+        await metaContent(page, "og:image:alt"),
+      );
+    } else {
+      expect(card, path).toBe("summary");
+      await expect(imageAlt).toHaveCount(0);
+    }
+    for (const name of repeatedTwitter) {
+      await expect(
+        page.locator(`meta[name="${name}"], meta[property="${name}"]`),
+        `${path} ${name}`,
+      ).toHaveCount(0);
+    }
+  }
+});
+
 test("E4 JSON-LD [RF-12]", async ({ page }) => {
   const { paths } = await discover(page);
   let withModified = 0;
