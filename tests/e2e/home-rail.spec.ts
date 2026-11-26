@@ -388,12 +388,16 @@ test.describe("lateral da home [RF-01]", () => {
     expect(edges.paragraph).toBeCloseTo(16, 0);
   });
 
-  test("H10 largura do apêndice a 1440", async ({ page }) => {
+  test("H10 apêndice na coluna do texto a 1440", async ({ page }) => {
     await open(page, fixtureMdx.href, 1440);
-    const inner = page
-      .getByRole("region", { name: "Apêndice", exact: true })
-      .locator(":scope > div");
-    await expect(inner).toHaveCount(1);
-    await expect(inner).toHaveCSS("max-width", "1152px");
+    const region = page.getByRole("region", { name: "Apêndice", exact: true });
+    await expect(region).toHaveCount(1);
+    const prose = await page.locator("article > .prose").boundingBox();
+    const content = await region.locator("[data-appendix-body]").boundingBox();
+    expect(prose).not.toBeNull();
+    expect(content).not.toBeNull();
+    if (!prose || !content) return;
+    expect(content.x).toBeCloseTo(prose.x, 0);
+    expect(content.width).toBeLessThanOrEqual(prose.width + 1);
   });
 });

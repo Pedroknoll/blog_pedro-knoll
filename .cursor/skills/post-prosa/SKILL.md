@@ -1,6 +1,6 @@
 ---
 name: post-prosa
-description: Blocos de texto de um post do blog (degrau 0). Callout (note, caution, result), bloco de código com title=, fórmula KaTeX dentro do teto de fontes, imagem com alt, referências com a citação [@chave] e apêndices. Use ao escrever ou revisar o index.mdx de um post em src/content/posts/.
+description: Blocos de texto de um post do blog (degrau 0). Callout (note, caution, result), bloco de código com title=, fórmula KaTeX dentro do teto de fontes, imagem com alt, citações com tipo e o marcador [@chave], e apêndices. Use ao escrever ou revisar o index.mdx de um post em src/content/posts/.
 paths:
   - "src/content/posts/**"
 ---
@@ -42,11 +42,13 @@ Cerca com a linguagem. Se o autor quiser o nome do arquivo na barra, `title=<arq
 
 Arquivo em `figs/`, sempre com alt. O alt é do autor.
 
-## Referências e apêndices
+## Citações e apêndices
 
-`references` e `appendices` ficam no frontmatter (SPEC §6). No texto, `[@chave]`. Duas seguidas: `[@a] [@b]`.
+`citations` e `appendices` ficam no frontmatter (SPEC §6). `citations` lista tudo o que o post cita, direta ou indiretamente; cada item tem `key`, `type`, `authors`, `title`, `year`, `venue` e `url`. O `type` é um de `model`, `dataset`, `paper`, `article`, `course` e `video` (no fim do post: Modelos, Datasets, Papers, Textos, Cursos, Vídeos). Ex.: um modelo do Hugging Face leva `authors: [<org>]` e `venue: Hugging Face`; um vídeo, `venue: YouTube`.
 
-Quebram o build: citação sem referência, referência não citada, citação dentro de link, chave repetida. Os nomes das falhas estão na SPEC §6, "Regras derivadas".
+No texto, `[@chave]` é opcional. Duas seguidas: `[@a] [@b]`. O número segue a lista agrupada por tipo, e não a ordem do frontmatter.
+
+Quebram o build: chave citada sem citação, citação dentro de link, chave repetida, `type` ausente ou fora da lista. Os nomes das falhas estão na SPEC §6, "Regras derivadas".
 
 ## Antes de gravar
 

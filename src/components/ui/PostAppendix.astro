@@ -1,51 +1,88 @@
 ---
-import type { PostAppendixModel } from "~/lib/references";
+import type { PostAppendixModel } from "~/lib/citations";
 
 interface Props {
   appendix: PostAppendixModel;
 }
 
 const { appendix } = Astro.props;
+
+// Rótulo de seção: mono 12 px maiúsculo, com barra e filete em tinta, como o
+// `/ LISTAGEM` (BRAND §9.3, T-117).
+const label =
+  "block border-b border-ink pb-2 font-mono text-xs font-normal uppercase tracking-widest text-muted";
+const copy = "text-[0.9375rem] leading-[1.6]";
 ---
 
-<section aria-label="Apêndice" class="mt-12 border-t border-line bg-sheet">
-  <div class="mx-auto w-full max-w-site px-4 pt-8 pb-12 grid gap-7 lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-16 lg:gap-y-8">
+{/*
+  Abaixo do corpo, na coluna do texto: o mesmo grid do post, com a lateral
+  vazia. O `text-lg` do invólucro faz o 65ch valer o mesmo que o da prosa.
+*/}
+<section
+  aria-label="Apêndice"
+  class="mx-auto w-full max-w-site px-4 pb-12 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-16"
+>
+  <div
+    data-appendix-body
+    class="min-w-0 max-w-[65ch] space-y-14 text-lg lg:col-start-2"
+  >
     {appendix.appendices.map((section) => (
-      <section class="grid gap-y-2 lg:col-span-2 lg:grid-cols-subgrid">
-        <h2
-          id={section.id}
-          class="font-mono text-xs uppercase tracking-widest text-muted lg:pt-[0.15rem]"
-        >
-          {section.text}
+      <section>
+        <h2 id={section.id} class="text-ink">
+          <span data-appendix-label class={label}>
+            <span aria-hidden="true">/ </span>
+            {section.label}
+          </span>
+          <span class="sr-only">{" · "}</span>
+          <span class="mt-4 block font-sans text-xl font-semibold leading-snug text-balance">
+            {section.title}
+          </span>
         </h2>
-        <div class="max-w-[68ch] space-y-3 text-[0.9375rem] leading-[1.6] text-ink">
+        <div class={`mt-2 space-y-3 text-ink ${copy}`}>
           {section.paragraphs.map((paragraph) => (
             <p>{paragraph}</p>
           ))}
         </div>
       </section>
     ))}
-    {appendix.references && (
-      <section class="grid gap-y-2 lg:col-span-2 lg:grid-cols-subgrid">
-        <h2
-          id={appendix.references.id}
-          class="font-mono text-xs uppercase tracking-widest text-muted lg:pt-[0.15rem]"
-        >
-          {appendix.references.text}
+    {appendix.citations && (
+      <section>
+        <h2 id={appendix.citations.id}>
+          <span data-appendix-label class={label}>
+            <span aria-hidden="true">/ </span>
+            {appendix.citations.text}
+          </span>
         </h2>
-        <ol class="max-w-[68ch] list-decimal space-y-3 pl-8 text-[0.9375rem] leading-[1.6] text-ink marker:text-muted">
-          {appendix.references.items.map((item) => (
-            <li id={item.id}>
-              <a
-                href={item.url}
-                class="text-accent underline decoration-1 underline-offset-3"
-              >
-                {item.title}
-              </a>
-              <p class="text-muted">{`${item.authors}, ${item.year}. ${item.venue}.`}</p>
-            </li>
-          ))}
-        </ol>
+        {appendix.citations.groups.map((group) => (
+          <section class="mt-5">
+            <h3 class="font-mono text-xs font-normal uppercase tracking-widest text-muted">
+              {`${group.label} · ${group.count}`}
+            </h3>
+            <ol start={group.start} class={`mt-1 list-none text-ink ${copy}`}>
+              {group.items.map((item) => (
+                <li
+                  id={item.id}
+                  class="relative grid grid-cols-[2.25rem_minmax(0,1fr)] border-b border-dashed border-line py-3 lg:block"
+                >
+                  <span
+                    data-citation-n
+                    aria-hidden="true"
+                    class="font-mono text-xs leading-[2] text-muted lg:absolute lg:top-3 lg:right-full lg:mr-3"
+                  >
+                    {`[${item.n}]`}
+                  </span>
+                  <a
+                    href={item.url}
+                    class="col-start-2 text-accent underline decoration-1 underline-offset-3"
+                  >
+                    {item.title}
+                  </a>
+                  <p class="col-start-2 text-muted">{`${item.authors}, ${item.year}. ${item.venue}.`}</p>
+                </li>
+              ))}
+            </ol>
+          </section>
+        ))}
       </section>
     )}
   </div>
