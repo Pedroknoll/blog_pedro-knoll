@@ -255,9 +255,10 @@ test.describe("citações e apêndices [RF-04]", () => {
       const item = items.nth(index);
       await expect(item).toHaveCSS("border-bottom-style", "dashed");
       const numberBox = await box(item.locator("[data-citation-n]"));
-      expect(numberBox.x + numberBox.width).toBeLessThanOrEqual(proseBox.x + 1);
+      // O [n] começa na borda do texto do post, e o título vem depois dele.
+      expect(numberBox.x).toBeCloseTo(proseBox.x, 0);
       const linkBox = await box(item.locator("a"));
-      expect(linkBox.x).toBeCloseTo(proseBox.x, 0);
+      expect(linkBox.x).toBeGreaterThanOrEqual(numberBox.x + numberBox.width);
     }
 
     await expectCopy(page.locator("section:has(> h2#apendice-a) > div > p"));

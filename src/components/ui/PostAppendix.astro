@@ -62,12 +62,12 @@ const copy = "text-[0.9375rem] leading-[1.6]";
               {group.items.map((item) => (
                 <li
                   id={item.id}
-                  class="relative grid grid-cols-[2.25rem_minmax(0,1fr)] border-b border-dashed border-line py-3 lg:block"
+                  class="grid grid-cols-[2.25rem_minmax(0,1fr)] border-b border-dashed border-line py-3"
                 >
                   <span
                     data-citation-n
                     aria-hidden="true"
-                    class="font-mono text-xs leading-[2] text-muted lg:absolute lg:top-3 lg:right-full lg:mr-3"
+                    class="font-mono text-xs leading-[2] text-muted"
                   >
                     {`[${item.n}]`}
                   </span>
