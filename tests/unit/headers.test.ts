@@ -181,16 +181,19 @@ describe("cacheHeaders", () => {
     return buildHeaders({ scripts: [], styles: [] }) + cacheHeaders();
   }
 
-  it("cache de um ano no primeiro nível de /_astro/", () => {
+  it("cache de um ano no primeiro nível de /_astro/ e em /_astro/fonts/", () => {
     const text = headersText();
     const lines = text.split("\n").filter((line) => line !== "");
     expect(lines.filter((line) => !line.startsWith(" "))).toEqual([
       "/*",
       "/_astro/:file",
+      "/_astro/fonts/:file",
     ]);
     for (const pathname of [
       "/_astro/BaseLayout.DLRftG8w.css",
       "/_astro/KaTeX_Main-Regular.B22Nviop.woff2",
+      "/_astro/fonts/0123456789abcdef.woff2",
+      "/_astro/fonts/0123456789abcdef.ttf",
     ]) {
       expect(effectiveHeaders(text, pathname).get("cache-control")).toEqual(
         immutable,
@@ -201,7 +204,7 @@ describe("cacheHeaders", () => {
   it("sem Cache-Control fora dele", () => {
     const text = headersText();
     for (const pathname of [
-      "/_astro/fonts/0123456789abcdef.woff2",
+      "/_astro/fonts/x/0123456789abcdef.woff2",
       "/",
       "/blog/a/",
       "/favicon.svg",
@@ -230,6 +233,7 @@ describe("robotsHeaders", () => {
     expect(lines.filter((line) => !line.startsWith(" "))).toEqual([
       "/*",
       "/_astro/:file",
+      "/_astro/fonts/:file",
       "https://:version.:subdomain.workers.dev/*",
     ]);
     expect(lines.filter((line) => line.includes("X-Robots-Tag"))).toEqual([

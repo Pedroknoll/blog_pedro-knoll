@@ -44,6 +44,12 @@ describe("isBinaryPath", () => {
     expect(isBinaryPath("a.PNG")).toBe(true);
   });
 
+  it("as fontes locais, .woff2 e .ttf, são binárias (T-95)", () => {
+    expect(isBinaryPath("src/assets/fonts/a.woff2")).toBe(true);
+    expect(isBinaryPath("src/assets/fonts/a.ttf")).toBe(true);
+    expect(isBinaryPath("src/assets/fonts/OFL.txt")).toBe(false);
+  });
+
   it(".svg, .astro e .ts não são binários", () => {
     expect(isBinaryPath("a.svg")).toBe(false);
     expect(isBinaryPath("a.astro")).toBe(false);

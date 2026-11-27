@@ -6,6 +6,8 @@ const binaryExtensions: readonly string[] = [
   ".avif",
   ".gif",
   ".ico",
+  ".woff2",
+  ".ttf",
 ];
 
 export function isBinaryPath(filePath: string): boolean {

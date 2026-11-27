@@ -27,50 +27,78 @@ const remarkPlugins = [
 ];
 const rehypePlugins = [rehypeKatex];
 
+// O subset latin do Fontsource, o unicode-range que a API dava (T-95).
+const LATIN = [
+  "U+0000-00FF",
+  "U+0131",
+  "U+0152-0153",
+  "U+02BB-02BC",
+  "U+02C6",
+  "U+02DA",
+  "U+02DC",
+  "U+0304",
+  "U+0308",
+  "U+0329",
+  "U+2000-206F",
+  "U+20AC",
+  "U+2122",
+  "U+2191",
+  "U+2193",
+  "U+2212",
+  "U+2215",
+  "U+FEFF",
+  "U+FFFD",
+];
+
+function face(weight, style, file) {
+  return {
+    weight,
+    style,
+    src: [`./src/assets/fonts/${file}`],
+    unicodeRange: LATIN,
+  };
+}
+
 export default defineConfig({
   site: process.env.SITE_URL ?? "https://blog.exemplo.com",
   output: "static",
+  // Arquivos locais (T-95): o Astro nomeia a fonte local pelo hash do
+  // conteúdo, e a fonte remota pelo hash da URL. Os bytes são os do
+  // Fontsource 5.3.0 (OFL, src/assets/fonts/OFL.txt). Trocar o arquivo muda
+  // o nome, e /_astro/fonts/ pode ter cache longo.
   fonts: [
     {
       name: "IBM Plex Sans Condensed",
       cssVariable: "--font-plex-condensed",
-      provider: fontProviders.fontsource(),
-      weights: [600],
-      styles: ["normal"],
-      subsets: ["latin"],
-      formats: ["woff2"],
+      provider: fontProviders.local(),
+      options: {
+        variants: [
+          face(600, "normal", "ibm-plex-sans-condensed-latin-600-normal.woff2"),
+        ],
+      },
       fallbacks: ["Metric Sans", "sans-serif"],
     },
     {
       name: "IBM Plex Sans",
       cssVariable: "--font-plex-sans",
-      provider: fontProviders.fontsource(),
-      weights: [400, 600],
-      styles: ["normal"],
-      subsets: ["latin"],
-      formats: ["woff2"],
-      fallbacks: ["Metric Plex Sans", "sans-serif"],
-      optimizedFallbacks: false,
-    },
-    {
-      name: "IBM Plex Sans",
-      cssVariable: "--font-plex-sans",
-      provider: fontProviders.fontsource(),
-      weights: [400],
-      styles: ["italic"],
-      subsets: ["latin"],
-      formats: ["woff2"],
+      provider: fontProviders.local(),
+      options: {
+        variants: [
+          face(400, "normal", "ibm-plex-sans-latin-400-normal.woff2"),
+          face(600, "normal", "ibm-plex-sans-latin-600-normal.woff2"),
+          face(400, "italic", "ibm-plex-sans-latin-400-italic.woff2"),
+        ],
+      },
       fallbacks: ["Metric Plex Sans", "sans-serif"],
       optimizedFallbacks: false,
     },
     {
       name: "IBM Plex Mono",
       cssVariable: "--font-plex-mono",
-      provider: fontProviders.fontsource(),
-      weights: [400],
-      styles: ["normal"],
-      subsets: ["latin"],
-      formats: ["woff2"],
+      provider: fontProviders.local(),
+      options: {
+        variants: [face(400, "normal", "ibm-plex-mono-latin-400-normal.woff2")],
+      },
       fallbacks: ["Metric Mono", "monospace"],
     },
     // Só a imagem OG (T-23): o sharp não lê woff2, só TTF. Nenhuma página
@@ -78,22 +106,22 @@ export default defineConfig({
     {
       name: "IBM Plex Sans Condensed",
       cssVariable: "--font-og-display",
-      provider: fontProviders.fontsource(),
-      weights: [600],
-      styles: ["normal"],
-      subsets: ["latin"],
-      formats: ["ttf"],
+      provider: fontProviders.local(),
+      options: {
+        variants: [
+          face(600, "normal", "ibm-plex-sans-condensed-latin-600-normal.ttf"),
+        ],
+      },
       fallbacks: ["sans-serif"],
       optimizedFallbacks: false,
     },
     {
       name: "IBM Plex Mono",
       cssVariable: "--font-og-mono",
-      provider: fontProviders.fontsource(),
-      weights: [400],
-      styles: ["normal"],
-      subsets: ["latin"],
-      formats: ["ttf"],
+      provider: fontProviders.local(),
+      options: {
+        variants: [face(400, "normal", "ibm-plex-mono-latin-400-normal.ttf")],
+      },
       fallbacks: ["monospace"],
       optimizedFallbacks: false,
     },
