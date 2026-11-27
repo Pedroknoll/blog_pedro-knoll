@@ -50,6 +50,7 @@ Uma tarefa = um PR, num branch `t-XX-descricao-curta`. Trabalho descoberto no ca
 | Dados pré-calculados   | `uv run scripts/build-data.py <pasta do post>` (na máquina do autor; roda o `data/build.py` do post e grava o lock; sem argumento, todos) |
 | Frescor dos dados      | `pnpm check:data` (também no `pnpm lint`; confere o `data.lock` sem Python)    |
 | Figuras no `dist/`     | `pnpm check:svg` (depois do build; no de teste, `node scripts/check-svg.mjs dist-fixtures`; reprova tag que fecha o `svg`, T-104) |
+| Tempo até a math      | `node scripts/measure-katex-fonts.mjs dist-fixtures /blog/fixture-formulas/` (depois do build; Slow 4G aplicado, mediana de 5; fora do CI, para a tarefa que medir um arquivo do KaTeX a mais, T-89) |
 
 
 Sempre `pnpm`, nunca `npm` ou `yarn`. Sempre `uv run`, nunca `python` ou `pip` direto.
