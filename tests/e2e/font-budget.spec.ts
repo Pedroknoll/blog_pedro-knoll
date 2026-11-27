@@ -119,8 +119,8 @@ function distWoff2Bytes(): Map<string, number> {
 }
 
 function ceilingFor(path: string): FontCeiling {
-  const katexFiles = 3;
-  const katexBytes = 48_000;
+  const katexFiles = 6;
+  const katexBytes = 107_000;
   if (isPostPath(path)) {
     return { files: 5, bytes: 110_000, katexFiles, katexBytes };
   }

@@ -97,3 +97,7 @@ A primeira conta é $x_i$, a segunda é $\alpha_i + \beta_j = \gamma$ e a tercei
 $$
 \lim_{n \to \infty} \frac{1}{n} \sum_{k=1}^{n} \sin(k \theta) = 0, \qquad \sqrt{x^2 + y^2} \le \lVert v \rVert
 $$
+
+## Seção 11
+
+Um somatório inline é $\sum_{i=1}^{n} x_i$, um vetor em negrito é $\mathbf{x}$ e um conjunto é $\mathbb{R}^n$.
