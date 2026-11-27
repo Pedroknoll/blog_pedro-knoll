@@ -219,12 +219,13 @@ test("E6 página de tag com o script do item e um h1 fora do banner [RF-02]", as
       const banner = page.getByRole("banner");
       await expect(banner).toHaveCount(1);
       await expect(banner.locator("h1")).toHaveCount(0);
-      // A busca do layout, o item e a ordenação (T-133).
+      // A busca do layout, o item e a ordenação (T-133), mais o script inline
+      // e o controle do tema (T-24).
       await expect(
         page.locator(
           'script:not([type="application/ld+json"]):not([type="application/json"])',
         ),
-      ).toHaveCount(3);
+      ).toHaveCount(5);
 
       const results = await new AxeBuilder({ page }).analyze();
       const blocking = results.violations.filter(

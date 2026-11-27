@@ -65,7 +65,7 @@ src/content/comece-aqui.mdx          a página Comece aqui; editar é mudar só 
 src/content/posts/fixture-*/         fixtures de teste, só no build com SHOW_FIXTURES=true (T-39)
 src/assets/avatar.jpg   foto do autor (T-125); variantes de 176 e 56 px pelo getImage (T-134)
 src/assets/brand/       pklog-simbolo{,-escuro,-currentcolor,-construcao,-pixel,-404}.svg
-src/assets/brand/icones/  aceno.svg; icone-{artigo,prototipo,relogio,fogo,voto,busca,rss}.svg
+src/assets/brand/icones/  aceno.svg; icone-{artigo,prototipo,relogio,fogo,voto,busca,rss,sol,lua}.svg
 src/assets/brand/og-ficha.ts  cores da imagem OG (T-23)
 src/pages/blog/[slug]/og.png.ts  ficha OG do post sem capa, desenhada com o sharp (RF-16, T-23)
 src/components/ui/      .astro estáticos

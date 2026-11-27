@@ -24,6 +24,11 @@
 }
 
 @layer base {
+  /*
+   * Tema (RF-17, T-24). Com JavaScript, o script do <head> sempre grava
+   * data-theme. A cópia no @media é só para quem está sem JavaScript, e o T9
+   * do theme.spec.ts confere que as duas são iguais.
+   */
   :root[data-theme="dark"] {
     --color-surface: #0e2236;
     --color-sheet: #163250;
@@ -36,6 +41,22 @@
     --color-grid: rgba(232, 238, 243, 0.025);
     --color-grid-strong: rgba(232, 238, 243, 0.055);
     color-scheme: dark;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --color-surface: #0e2236;
+      --color-sheet: #163250;
+      --color-ink: #e8eef3;
+      --color-muted: #a9bacb;
+      --color-pencil: #869eb6;
+      --color-line: rgba(232, 238, 243, 0.18);
+      --color-accent: #8db8e8;
+      --color-highlight: #ee8a74;
+      --color-grid: rgba(232, 238, 243, 0.025);
+      --color-grid-strong: rgba(232, 238, 243, 0.055);
+      color-scheme: dark;
+    }
   }
 
   :focus-visible {
@@ -95,6 +116,23 @@
   font-style: var(--shiki-light-font-style, normal);
   font-weight: var(--shiki-light-font-weight, inherit);
   text-decoration: var(--shiki-light-text-decoration, none);
+}
+
+/* Sintaxe escura (T-24), com a mesma cópia no @media para quem está sem JavaScript. */
+:root[data-theme="dark"] .prose-site :where(pre.astro-code span) {
+  color: var(--shiki-dark);
+  font-style: var(--shiki-dark-font-style, normal);
+  font-weight: var(--shiki-dark-font-weight, inherit);
+  text-decoration: var(--shiki-dark-text-decoration, none);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .prose-site :where(pre.astro-code span) {
+    color: var(--shiki-dark);
+    font-style: var(--shiki-dark-font-style, normal);
+    font-weight: var(--shiki-dark-font-weight, inherit);
+    text-decoration: var(--shiki-dark-text-decoration, none);
+  }
 }
 
 .prose-site :where(:not(pre) > code)::before,

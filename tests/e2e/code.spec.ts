@@ -1,5 +1,6 @@
 import { expect, test, type Request } from "@playwright/test";
 
+import { fixtureMd } from "./fixtures";
 import { publishedPosts } from "./published-posts";
 
 // Igual a `copyResetMs` no script de src/components/ui/CodeCopy.astro.
@@ -36,6 +37,36 @@ test.describe("código e fórmulas [RF-06, RF-07, RNF-01]", () => {
     }
 
     expect(pres).toBeGreaterThan(0);
+  });
+
+  test("no tema escuro, o código lê --shiki-dark [RF-06, RF-17]", async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    const response = await page.goto(fixtureMd.href);
+    expect(response?.status()).toBe(200);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+    const tokens = page
+      .getByRole("article")
+      .locator("pre.astro-code span[style*='--shiki-dark']");
+    const count = await tokens.count();
+    expect(count).toBeGreaterThan(0);
+    const pairs = await tokens.evaluateAll((nodes) =>
+      nodes.map((node) => {
+        const want = (node as HTMLElement).style
+          .getPropertyValue("--shiki-dark")
+          .trim();
+        const probe = document.createElement("span");
+        probe.style.color = want;
+        document.body.append(probe);
+        const expected = getComputedStyle(probe).color;
+        probe.remove();
+        return { got: getComputedStyle(node).color, expected };
+      }),
+    );
+    for (const [index, pair] of pairs.entries()) {
+      expect.soft(pair.got, `span[${index}]`).toBe(pair.expected);
+    }
   });
 
   test("botão copiar grava o texto do code [RF-06]", async ({

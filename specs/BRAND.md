@@ -30,7 +30,7 @@ public/favicon.svg · favicon.ico · favicon-16.png · favicon-32.png · apple-t
 
 `icon-192.png` e `icon-512.png` não entram no repositório. Sem manifesto PWA.
 
-Sol, lua, fogo e voto estão só no apêndice, até a tarefa que cria o arquivo. A lupa está na árvore (T-22).
+Todos os ícones do apêndice estão na árvore: a lupa desde a T-22, o fogo e o voto desde a T-123, e o sol e a lua desde a T-24.
 
 ---
 
@@ -426,7 +426,7 @@ A prússia nunca entra no `svg` de uma figura: ela é do que se clica (§4).
 - Movimento: a troca de cor da célula tem transição curta, desligada com `prefers-reduced-motion`; o contorno do mapa muda de linha sem transição.
 
 ### 9.9 Botão de tema
-Decisão da T-109; entra na T-24. Um controle segmentado com dois botões de ícone, em 12 px: o sol (`icone-sol.svg`), tema claro, e a lua (`icone-lua.svg`), tema escuro. Cada botão tem 36 × 32 px; o grupo tem borda `line`, filete `line` entre os dois e cantos de 0,375rem. O botão ativo tem fundo tinta e ícone papel, com `aria-pressed="true"`; o outro, ícone grafite. Os nomes para o leitor de tela são **Claro** e **Escuro** (`aria-label`), e o grupo se chama Tema. Fica no header, à direita (§9.13). Grava a escolha (localStorage) e aplica `data-theme` na raiz.
+Decisão da T-109; no ar desde a T-24. Um controle segmentado com dois botões de ícone, em 12 px: o sol (`icone-sol.svg`), tema claro, e a lua (`icone-lua.svg`), tema escuro. Cada botão tem 36 × 32 px; o grupo tem borda `line`, filete `line` entre os dois e cantos de 0,375rem. O botão ativo tem fundo tinta e ícone papel, com `aria-pressed="true"`; o outro, ícone grafite. Os nomes para o leitor de tela são **Claro** e **Escuro** (`aria-label`), e o grupo se chama Tema. Fica no header, à direita (§9.13). Grava a escolha (localStorage) e aplica `data-theme` na raiz. Sem JavaScript, o grupo fica invisível, como o botão de busca, e o site segue o sistema.
 
 ### 9.10 Foco e interação
 Foco visível: contorno 2 px prússia com afastamento 3 px. Links em prússia, sublinhado de 1 px com afastamento 3 px.
@@ -456,7 +456,7 @@ Decisão da T-119. O filtro está no ar (T-124). A busca está no ar (T-22). A b
 - O Pagefind 1.6.0 não pediu `unsafe-inline` em `style-src-elem`. O modelo do resultado é `text/pagefind-template` e só entra no DOM ao abrir. Esta seção não desenha um modal paralelo ao do Pagefind.
 
 ### 9.13 Header e footer
-Decisão da T-119. O header e o footer estão no ar (T-113). O link "Comece aqui" está no ar (T-114). O botão de busca está no ar (T-22) e o controle de tema entra na T-24.
+Decisão da T-119. O header e o footer estão no ar (T-113). O link "Comece aqui" está no ar (T-114). O botão de busca está no ar (T-22), e o controle de tema também (T-24).
 
 - **Header:** fundo `surface`, filete `line` embaixo, na largura do site (72rem), com 0,75rem de respiro em cima e embaixo. A assinatura (§3) fica à esquerda. Depois, nesta ordem: `Comece aqui` (`/comece-aqui/`), `Artigos`, `Protótipos`, o botão de busca (§9.12) e o controle de tema (§9.9). `Artigos` e `Protótipos` não levam ícone. Cada link em IBM Plex Mono 12 px, maiúsculas, letter-spacing .12em, grafite, indo para prússia no hover e no foco, com 44 px de toque e 1,25rem entre eles; o da página atual vai para tinta, com sublinhado de 2 px e `aria-current="page"`. `Protótipos` só aparece quando há protótipo publicado: sem ele, a página não existe.
 - **De `md` em diante:** uma linha só, com a assinatura à esquerda e o resto à direita.
@@ -568,7 +568,7 @@ O `sizes="32x32"` no ICO evita que o Chrome escolha o ICO no lugar do SVG. `favi
 
 ## 13. Tokens
 
-Sugestão anterior à T-41. No site valem os nomes da seção 0, não `--papel` / `--prussia` como segundo conjunto. Sem `@custom-variant dark`. A paleta escura fica em `:root[data-theme="dark"]`. Até a T-24, nada no site aplica `data-theme` nem `prefers-color-scheme`; a T-41 só declara as paletas.
+Sugestão anterior à T-41. No site valem os nomes da seção 0, não `--papel` / `--prussia` como segundo conjunto. Sem `@custom-variant dark`. A paleta escura fica em `:root[data-theme="dark"]` e, para quem está sem JavaScript, repetida no `@media (prefers-color-scheme: dark)`. Desde a T-24, um script inline no `<head>` grava o `data-theme` antes da primeira pintura.
 
 ### CSS puro
 
@@ -741,7 +741,7 @@ Desde a T-44 o arquivo não tem `<style>`, `role` nem `aria-label`: as classes `
 
 ### Ícones (T-119) · `src/assets/brand/icones/`
 
-Só parados, sem versão animada (§7). A folha, o frasco, a lupa e o RSS estão em `src/assets/brand/icones/` (T-120, T-22, T-125). O sol e a lua entram na T-24, o fogo e o voto na T-123. O filtro não entra.
+Só parados, sem versão animada (§7). Todos estão em `src/assets/brand/icones/`: a folha e o frasco (T-120), a lupa (T-22), o fogo e o voto (T-123), o RSS (T-125), e o sol e a lua (T-24). O filtro não entra.
 
 `icone-artigo.svg`
 

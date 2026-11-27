@@ -1,0 +1,92 @@
+---
+import MoonIcon from "~/assets/brand/icones/icone-lua.svg";
+import SunIcon from "~/assets/brand/icones/icone-sol.svg";
+
+// BRAND §9.9 (T-24). O grupo nasce invisível, como o botão de busca: o script
+// marca o aria-pressed pelo data-theme da raiz e só então o mostra. Sem
+// JavaScript, o lugar fica reservado e o CSS segue o sistema. O grupo não tem
+// overflow-hidden, que cortaria o contorno de foco (T3 do focus.spec.ts): os
+// cantos ficam no próprio botão, 1 px menores que os do grupo, por causa da borda.
+const buttonClass =
+  "inline-flex h-8 w-9 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-muted first:rounded-l-[5px] last:rounded-r-[5px] hover:text-accent focus-visible:text-accent aria-pressed:bg-ink aria-pressed:text-surface";
+---
+
+<div
+  role="group"
+  aria-label="Tema"
+  class="invisible inline-flex shrink-0 divide-x divide-line rounded-md border border-line"
+  data-theme-control
+>
+  <button
+    type="button"
+    class={buttonClass}
+    aria-label="Claro"
+    aria-pressed="false"
+    data-theme-option="light"
+  >
+    <SunIcon aria-hidden="true" width={12} height={12} class="size-3" />
+  </button>
+  <button
+    type="button"
+    class={buttonClass}
+    aria-label="Escuro"
+    aria-pressed="false"
+    data-theme-option="dark"
+  >
+    <MoonIcon aria-hidden="true" width={12} height={12} class="size-3" />
+  </button>
+</div>
+<script>
+  import { DARK_QUERY, THEME_KEY, isTheme, resolveTheme } from "~/lib/theme";
+  import type { Theme } from "~/lib/theme";
+
+  const control = document.querySelector("[data-theme-control]");
+  if (control instanceof HTMLElement) {
+    const root = document.documentElement;
+    const buttons = [
+      ...control.querySelectorAll<HTMLButtonElement>("[data-theme-option]"),
+    ];
+    const system = matchMedia(DARK_QUERY);
+
+    function stored(): string | null {
+      try {
+        return localStorage.getItem(THEME_KEY);
+      } catch {
+        return null;
+      }
+    }
+
+    function apply(theme: Theme): void {
+      root.dataset.theme = theme;
+      for (const button of buttons) {
+        button.setAttribute(
+          "aria-pressed",
+          String(button.dataset.themeOption === theme),
+        );
+      }
+    }
+
+    apply(resolveTheme(root.dataset.theme ?? stored(), system.matches));
+
+    for (const button of buttons) {
+      button.addEventListener("click", () => {
+        const theme = button.dataset.themeOption;
+        if (!isTheme(theme)) return;
+        try {
+          localStorage.setItem(THEME_KEY, theme);
+        } catch {
+          // Sem armazenamento, a escolha vale só nesta página.
+        }
+        apply(theme);
+      });
+    }
+
+    // Sem escolha gravada, a página acompanha a troca do sistema.
+    system.addEventListener("change", (event) => {
+      if (isTheme(stored())) return;
+      apply(event.matches ? "dark" : "light");
+    });
+
+    control.classList.remove("invisible");
+  }
+</script>

@@ -372,17 +372,265 @@ test("T4 contraste na paleta escura", async ({ page }) => {
     await test.step(path, async () => {
       await open(page, path);
       await applyTheme(page, "dark");
-      // O CSS só lê --shiki-light até a T-24. Com data-theme="dark",
-      // a sintaxe clara fica sobre a folha escura e o contraste cairia
-      // por um motivo que esta tarefa não corrige.
-      const results = await new AxeBuilder({ page })
-        .exclude("pre.astro-code")
-        .analyze();
+      // Desde a T-24, o código lê --shiki-dark no tema escuro e entra no axe.
+      const results = await new AxeBuilder({ page }).analyze();
       const blocking = results.violations.filter(
         (violation) =>
           violation.impact === "serious" || violation.impact === "critical",
       );
       expect(blocking.map((violation) => violation.id)).toEqual([]);
+    });
+  }
+});
+
+// ---------------------------------------------------------------------------
+// RF-17, T-24: o controle de tema, a escolha gravada, o sistema e o flash.
+
+const themeKey = "pk-theme";
+
+function themeGroup(page: Page) {
+  return page.getByRole("banner").getByRole("group", {
+    name: "Tema",
+    exact: true,
+  });
+}
+
+function themeButton(page: Page, name: "Claro" | "Escuro") {
+  return themeGroup(page).getByRole("button", { name, exact: true });
+}
+
+async function rootTheme(page: Page) {
+  return page.evaluate(() => document.documentElement.dataset.theme);
+}
+
+async function storedTheme(page: Page) {
+  return page.evaluate((key) => localStorage.getItem(key), themeKey);
+}
+
+async function bodyBackground(page: Page) {
+  return page
+    .locator("body")
+    .evaluate((node) => getComputedStyle(node).backgroundColor);
+}
+
+function rgbOf(value: Channels) {
+  return `rgb(${value.r}, ${value.g}, ${value.b})`;
+}
+
+async function expectPressed(page: Page, theme: "light" | "dark") {
+  await expect(themeButton(page, "Claro")).toHaveAttribute(
+    "aria-pressed",
+    theme === "light" ? "true" : "false",
+  );
+  await expect(themeButton(page, "Escuro")).toHaveAttribute(
+    "aria-pressed",
+    theme === "dark" ? "true" : "false",
+  );
+}
+
+test.describe("tema [RF-17]", () => {
+  test("T5 controle segmentado no header [BRAND §9.9]", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await open(page, "/");
+    const group = themeGroup(page);
+    await expect(group).toBeVisible();
+    await expect(group.getByRole("button")).toHaveCount(2);
+    await expectPressed(page, "light");
+
+    for (const name of ["Claro", "Escuro"] as const) {
+      const box = await themeButton(page, name).boundingBox();
+      expect(box, name).not.toBeNull();
+      if (!box) return;
+      expect(Math.round(box.width), name).toBe(36);
+      expect(Math.round(box.height), name).toBe(32);
+      await expect(themeButton(page, name).locator("svg")).toHaveCount(1);
+    }
+
+    const colors = await probeColors(page);
+    const active = await themeButton(page, "Claro").evaluate((node) => {
+      const style = getComputedStyle(node);
+      return { background: style.backgroundColor, color: style.color };
+    });
+    expect(colorsMatch(active.background, colors.ink)).toBe(true);
+    expect(colorsMatch(active.color, colors.surface)).toBe(true);
+    const idle = await themeButton(page, "Escuro").evaluate(
+      (node) => getComputedStyle(node).color,
+    );
+    expect(colorsMatch(idle, colors.muted)).toBe(true);
+    await expect(group).toHaveCSS("border-top-left-radius", "6px");
+  });
+
+  test("T6 a escolha grava e aplica data-theme", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "light" });
+    await open(page, fixtureMd.href);
+    await themeButton(page, "Escuro").click();
+    expect(await rootTheme(page)).toBe("dark");
+    expect(await storedTheme(page)).toBe("dark");
+    await expectPressed(page, "dark");
+    expect(colorsMatch(await bodyBackground(page), rgbOf(dark.surface))).toBe(
+      true,
+    );
+
+    await page.reload();
+    expect(await rootTheme(page)).toBe("dark");
+    await expectPressed(page, "dark");
+
+    await page.emulateMedia({ colorScheme: "dark" });
+    await themeButton(page, "Claro").click();
+    expect(await storedTheme(page)).toBe("light");
+    await page.reload();
+    expect(await rootTheme(page)).toBe("light");
+    await expectPressed(page, "light");
+    expect(colorsMatch(await bodyBackground(page), rgbOf(light.surface))).toBe(
+      true,
+    );
+  });
+
+  test("T7 sem escolha, segue o sistema", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await open(page, "/");
+    expect(await rootTheme(page)).toBe("dark");
+    await expectPressed(page, "dark");
+    expect(await storedTheme(page)).toBeNull();
+
+    await page.emulateMedia({ colorScheme: "light" });
+    await expect.poll(() => rootTheme(page)).toBe("light");
+    await expectPressed(page, "light");
+
+    await page.reload();
+    expect(await rootTheme(page)).toBe("light");
+
+    // Com escolha gravada, a troca do sistema não muda a página.
+    await themeButton(page, "Claro").click();
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.waitForTimeout(100);
+    expect(await rootTheme(page)).toBe("light");
+  });
+
+  for (const source of ["escolha", "sistema"] as const) {
+    test(`T8 sem flash (${source})`, async ({ page }) => {
+      await page.emulateMedia({
+        colorScheme: source === "sistema" ? "dark" : "light",
+      });
+      await page.addInitScript(
+        ({ key, store }) => {
+          if (store) localStorage.setItem(key, "dark");
+          const record = window as unknown as { __themeAtBody?: string };
+          new MutationObserver((records, observer) => {
+            for (const item of records) {
+              for (const node of item.addedNodes) {
+                if (node.nodeName !== "BODY") continue;
+                record.__themeAtBody =
+                  document.documentElement.dataset.theme ?? "(nenhum)";
+                observer.disconnect();
+                return;
+              }
+            }
+          }).observe(document, { childList: true, subtree: true });
+        },
+        { key: themeKey, store: source === "escolha" },
+      );
+      await open(page, fixtureMd.href);
+      const atBody = await page.evaluate(
+        () => (window as unknown as { __themeAtBody?: string }).__themeAtBody,
+      );
+      expect(atBody).toBe("dark");
+
+      const head = await page.evaluate(() =>
+        [...document.head.querySelectorAll("script")]
+          .filter((script) => (script.textContent ?? "").includes("pk-theme"))
+          .map((script) => ({
+            type: script.getAttribute("type"),
+            src: script.hasAttribute("src"),
+            async: script.hasAttribute("async"),
+            defer: script.hasAttribute("defer"),
+          })),
+      );
+      expect(head).toEqual([
+        { type: null, src: false, async: false, defer: false },
+      ]);
+    });
+  }
+
+  test("T10 figuras no escuro [RF-09, BRAND §9.8]", async ({ page }) => {
+    await page.emulateMedia({ colorScheme: "dark" });
+    await open(page, fixtureMdx.href);
+    expect(await rootTheme(page)).toBe("dark");
+    const figures = page.locator("svg[data-viz]");
+    const count = await figures.count();
+    expect(count).toBeGreaterThan(0);
+    const darkRgb = new Set(Object.values(dark).map(rgbOf));
+    const lightOnly = new Set(
+      Object.values(light)
+        .map(rgbOf)
+        .filter((color) => !darkRgb.has(color)),
+    );
+
+    let painted = 0;
+    for (let index = 0; index < count; index += 1) {
+      const paints = await figures.nth(index).evaluate((svg) => {
+        // Só os elementos que pintam: svg, g, title e pattern herdam o fill
+        // preto padrão do SVG sem desenhar nada.
+        const out: string[] = [];
+        const shapes =
+          "rect, circle, ellipse, line, path, polygon, polyline, text, tspan";
+        for (const node of svg.querySelectorAll(shapes)) {
+          const style = getComputedStyle(node);
+          for (const value of [style.fill, style.stroke]) {
+            if (!value || value === "none" || value.startsWith("url(")) {
+              continue;
+            }
+            out.push(value);
+          }
+        }
+        return out;
+      });
+      for (const value of paints) {
+        let parsed: Channels;
+        try {
+          parsed = channels(value);
+        } catch {
+          expect.soft(false, `figura ${index}: cor ${value}`).toBe(true);
+          continue;
+        }
+        if (parsed.a === 0) continue;
+        painted += 1;
+        const rgb = rgbOf(parsed);
+        expect
+          .soft(lightOnly.has(rgb), `figura ${index}: ${rgb} é clara`)
+          .toBe(false);
+        expect
+          .soft(darkRgb.has(rgb), `figura ${index}: ${rgb} fora da paleta`)
+          .toBe(true);
+      }
+    }
+    expect(painted).toBeGreaterThan(0);
+  });
+});
+
+test.describe("tema sem JavaScript [RF-17]", () => {
+  test.use({ javaScriptEnabled: false });
+
+  for (const scheme of ["light", "dark"] as const) {
+    test(`T9 segue o sistema ${scheme === "light" ? "claro" : "escuro"}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await open(page, fixtureMd.href);
+      await expect(themeGroup(page)).toBeHidden();
+      const colors = await probeColors(page);
+      const table = scheme === "light" ? light : dark;
+      for (const token of tokens) {
+        const got = channels(colors[token]);
+        const want = table[token];
+        expect
+          .soft(
+            rgbOf(got) === rgbOf(want) &&
+              Math.round(got.a * 255) === Math.round(want.a * 255),
+            `${scheme} ${token}: ${colors[token]}`,
+          )
+          .toBe(true);
+      }
     });
   }
 });
