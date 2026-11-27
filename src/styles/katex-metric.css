@@ -12,6 +12,19 @@
 }
 
 @font-face {
+  font-family: "KaTeX Metric Main";
+  src:
+    local("Liberation Serif Bold"), local("LiberationSerif-Bold"),
+    local("Times New Roman Bold"), local("TimesNewRomanPS-BoldMT"),
+    local("Noto Serif Bold"), local("NotoSerif-Bold"), local("Droid Serif Bold");
+  font-weight: bold;
+  font-style: normal;
+  ascent-override: 95%;
+  descent-override: 27%;
+  line-gap-override: 0%;
+}
+
+@font-face {
   font-family: "KaTeX Metric Math";
   src:
     local("Liberation Serif"), local("LiberationSerif"),
@@ -25,6 +38,19 @@
 }
 
 @font-face {
+  font-family: "KaTeX Metric Size1";
+  src:
+    local("Liberation Serif"), local("LiberationSerif"),
+    local("Times New Roman"), local("TimesNewRomanPSMT"), local("Noto Serif"),
+    local("NotoSerif"), local("Droid Serif");
+  font-weight: normal;
+  font-style: normal;
+  ascent-override: 85%;
+  descent-override: 35%;
+  line-gap-override: 0%;
+}
+
+@font-face {
   font-family: "KaTeX Metric Size2";
   src:
     local("Liberation Serif"), local("LiberationSerif"),
@@ -34,6 +60,19 @@
   font-style: normal;
   ascent-override: 136%;
   descent-override: 86%;
+  line-gap-override: 0%;
+}
+
+@font-face {
+  font-family: "KaTeX Metric AMS";
+  src:
+    local("Liberation Serif"), local("LiberationSerif"),
+    local("Times New Roman"), local("TimesNewRomanPSMT"), local("Noto Serif"),
+    local("NotoSerif"), local("Droid Serif");
+  font-weight: normal;
+  font-style: normal;
+  ascent-override: 100%;
+  descent-override: 46%;
   line-gap-override: 0%;
 }
 
@@ -56,4 +95,15 @@
 .katex .op-symbol.large-op {
   font-family:
     KaTeX_Size2, "KaTeX Metric Size2", math, "Times New Roman", serif;
+}
+.katex .delimsizing.size1,
+.katex .delimsizing.mult .delim-size1 > span,
+.katex .op-symbol.small-op {
+  font-family:
+    KaTeX_Size1, "KaTeX Metric Size1", math, "Times New Roman", serif;
+}
+.katex .amsrm,
+.katex .mathbb,
+.katex .textbb {
+  font-family: KaTeX_AMS, "KaTeX Metric AMS", math, "Times New Roman", serif;
 }
