@@ -321,6 +321,13 @@ function watchFonts(page: Page) {
   };
 }
 
+// FontFace.weight devolve o descritor como foi escrito ("bold", "700").
+function cssWeight(weight: string): number {
+  if (weight === "normal") return 400;
+  if (weight === "bold") return 700;
+  return Number(weight);
+}
+
 async function liveFaces(page: Page): Promise<LiveFace[]> {
   return page.evaluate(async () => {
     await document.fonts.ready;
@@ -853,9 +860,11 @@ test.describe("fontes da marca [RNF-01]", () => {
     await page.evaluate(
       async (entries) => {
         for (const entry of entries) {
-          await document.fonts
-            .load(`${entry.style} 100px "${entry.family}"`)
-            .catch(() => []);
+          for (const name of [entry.family, entry.katex]) {
+            await document.fonts
+              .load(`${entry.style} ${entry.weight} 100px "${name}"`)
+              .catch(() => []);
+          }
         }
       },
       [...katexMetricFaces],
@@ -864,21 +873,24 @@ test.describe("fontes da marca [RNF-01]", () => {
     const faces = await liveFaces(page);
 
     for (const entry of katexMetricFaces) {
+      const label = `${entry.family} ${entry.weight}`;
       const loaded = faces.some(
         (face) =>
-          unquote(face.family) === entry.family && face.status === "loaded",
+          unquote(face.family) === entry.family &&
+          cssWeight(face.weight) === entry.weight &&
+          face.status === "loaded",
       );
-      expect.soft(loaded, `${entry.family} face ausente`).toBe(true);
+      expect.soft(loaded, `${label} face ausente`).toBe(true);
       if (!loaded) continue;
 
       const boxes = await page.evaluate(
-        async ({ family, katex, style }) => {
+        async ({ family, katex, style, weight }) => {
           await document.fonts.ready;
           const canvas = document.createElement("canvas");
           const context = canvas.getContext("2d");
           if (!context) return null;
           const measure = (name: string) => {
-            context.font = `${style} 100px "${name}"`;
+            context.font = `${style} ${weight} 100px "${name}"`;
             const metrics = context.measureText("x");
             return {
               ascent: metrics.fontBoundingBoxAscent,
@@ -887,21 +899,26 @@ test.describe("fontes da marca [RNF-01]", () => {
           };
           return { metric: measure(family), katex: measure(katex) };
         },
-        { family: entry.family, katex: entry.katex, style: entry.style },
+        {
+          family: entry.family,
+          katex: entry.katex,
+          style: entry.style,
+          weight: entry.weight,
+        },
       );
-      expect(boxes, entry.family).not.toBeNull();
+      expect(boxes, label).not.toBeNull();
       if (!boxes) continue;
 
       expect
         .soft(
           Math.abs(boxes.metric.ascent - boxes.katex.ascent),
-          `${entry.family}: ascent`,
+          `${label}: ascent`,
         )
         .toBeLessThanOrEqual(1);
       expect
         .soft(
           Math.abs(boxes.metric.descent - boxes.katex.descent),
-          `${entry.family}: descent`,
+          `${label}: descent`,
         )
         .toBeLessThanOrEqual(1);
     }
