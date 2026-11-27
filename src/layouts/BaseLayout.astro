@@ -39,12 +39,28 @@ const {
   jsonLd,
 } = Astro.props;
 const rssHref = absoluteUrl("/rss.xml", Astro.site);
+// O script inline do <head> aplica o tema antes da primeira pintura (RF-17,
+// T-24). Repete o resolveTheme de src/lib/theme.ts, porque não importa nada.
 ---
 
 <html lang="pt-BR">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
+    <script is:inline>
+      (() => {
+        let theme = null;
+        try {
+          theme = localStorage.getItem("pk-theme");
+        } catch {}
+        if (theme !== "light" && theme !== "dark") {
+          theme = matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+        }
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />

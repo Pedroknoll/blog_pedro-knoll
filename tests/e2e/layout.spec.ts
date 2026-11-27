@@ -127,14 +127,15 @@ test("home, listas e tags só com o script do item [RNF-02]", async ({
         // Comece aqui repete o script do card: o script da busca no layout
         // impede o Astro de juntar os scripts que vêm do MDX. As listas
         // inteiras somam o módulo da ordenação (T-133): 3 na página de tag,
-        // 4 em /blog/, com o do filtro.
+        // 4 em /blog/, com o do filtro. O tema (T-24) soma 2 em toda página:
+        // o script inline do <head> e o módulo do controle.
         const scripts: Record<string, number> = {
-          "/": 3,
-          "/comece-aqui/": 3,
-          "/blog/": 4,
+          "/": 5,
+          "/comece-aqui/": 5,
+          "/blog/": 6,
         };
         await expect(executable).toHaveCount(
-          scripts[path] ?? (path.startsWith("/tags/") ? 3 : 2),
+          scripts[path] ?? (path.startsWith("/tags/") ? 5 : 4),
         );
         await expect(
           page.locator('script[type="application/json"]'),
@@ -145,16 +146,17 @@ test("home, listas e tags só com o script do item [RNF-02]", async ({
       // O post não tem mais o script do título na lateral (T-128). O índice
       // (T-129) soma um módulo no post com 2 h2 ou mais, e o bloco de voto e
       // compartilhar (T-130) soma um em todo post. Os posts relacionados
-      // (T-26) somam o script do item da lista.
+      // (T-26) somam o script do item da lista. O controle de tema (T-24)
+      // soma um módulo, e o script inline do tema, um script sem type.
       const toc = (await page.locator("[data-post-toc]").count()) === 0 ? 0 : 1;
       const related =
         (await page.locator("[data-post-related]").count()) === 0 ? 0 : 1;
-      const modules = (pres === 0 ? 3 : 4) + toc + related;
+      const modules = (pres === 0 ? 4 : 5) + toc + related;
       await expect(page.locator('script[type="module"]')).toHaveCount(modules);
 
       const plain = page.locator("script:not([type])");
       const plainCount =
-        (await page.locator("astro-island").count()) === 0 ? 0 : 2;
+        1 + ((await page.locator("astro-island").count()) === 0 ? 0 : 2);
       await expect(plain).toHaveCount(plainCount);
       await expect(extra).toHaveCount(modules + plainCount);
       for (let index = 0; index < plainCount; index += 1) {

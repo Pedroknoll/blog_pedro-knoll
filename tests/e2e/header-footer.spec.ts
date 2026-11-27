@@ -74,6 +74,12 @@ function principal(page: Page) {
     .getByRole("navigation", { name: "Principal", exact: true });
 }
 
+function themeGroup(page: Page) {
+  return page
+    .getByRole("banner")
+    .getByRole("group", { name: "Tema", exact: true });
+}
+
 function signature(page: Page) {
   return page.getByRole("banner").getByRole("link", {
     name: siteTitle,
@@ -202,9 +208,17 @@ test.describe("header e footer", () => {
         .getByRole("banner")
         .getByRole("button", { name: /^Buscar/ })
         .boundingBox();
+      // T-24: o controle de tema fecha a linha, depois da busca (BRAND §9.13).
+      const theme = await themeGroup(page).boundingBox();
       expect(search, String(width)).not.toBeNull();
-      if (!search) return;
-      expect(search.x + search.width, String(width)).toBeCloseTo(right, 0);
+      expect(theme, String(width)).not.toBeNull();
+      if (!search || !theme) return;
+      expect(theme.x + theme.width, String(width)).toBeCloseTo(right, 0);
+      expect(search.x + search.width, String(width)).toBeLessThanOrEqual(
+        theme.x,
+      );
+      const themeCenter = theme.y + theme.height / 2;
+      expect(Math.abs(themeCenter - markCenter), String(width)).toBeLessThan(1);
     }
   });
 
@@ -219,6 +233,13 @@ test.describe("header e footer", () => {
       if (!mark || !navBox) return;
       expect(navBox.y, String(width)).toBeGreaterThanOrEqual(
         mark.y + mark.height - 1,
+      );
+      // T-24: a busca e o tema ficam na linha de cima, com a assinatura.
+      const theme = await themeGroup(page).boundingBox();
+      expect(theme, String(width)).not.toBeNull();
+      if (!theme) return;
+      expect(theme.y + theme.height, String(width)).toBeLessThanOrEqual(
+        navBox.y + 1,
       );
       await expect(nav).toHaveCSS("overflow-x", "auto");
       await expect(nav).toHaveCSS("border-top-width", "1px");
