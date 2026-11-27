@@ -43,9 +43,16 @@ export const fixtureFormulas = {
   href: "/blog/fixture-formulas/",
   title: "Fixture de fórmulas",
   published: "04.jan.2000",
-  inline: 30,
+  inline: 33,
   display: 10,
-  katex: ["KaTeX_Main-Regular", "KaTeX_Math-Italic", "KaTeX_Size2-Regular"],
+  katex: [
+    "KaTeX_AMS-Regular",
+    "KaTeX_Main-Bold",
+    "KaTeX_Main-Regular",
+    "KaTeX_Math-Italic",
+    "KaTeX_Size1-Regular",
+    "KaTeX_Size2-Regular",
+  ],
   brandFiles: 5,
 } as const;
 
