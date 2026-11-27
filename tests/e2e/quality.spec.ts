@@ -28,6 +28,36 @@ function loadLighthouseConfig() {
   return loadConfig(lighthouseConfig) as LighthouseConfig;
 }
 
+const lighthouseEnvNames = [
+  "LIGHTHOUSE_SCOPE",
+  "LIGHTHOUSE_DIST",
+  "LIGHTHOUSE_MODE",
+  "LIGHTHOUSE_POSTS",
+] as const;
+
+type LighthouseEnv = Partial<
+  Record<(typeof lighthouseEnvNames)[number], string>
+>;
+
+function withLighthouseEnv<T>(env: LighthouseEnv, run: () => T): T {
+  const previous = lighthouseEnvNames.map(
+    (name) => [name, process.env[name]] as const,
+  );
+  try {
+    for (const name of lighthouseEnvNames) {
+      const value = env[name];
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+    return run();
+  } finally {
+    for (const [name, value] of previous) {
+      if (value === undefined) delete process.env[name];
+      else process.env[name] = value;
+    }
+  }
+}
+
 function pathnameOf(url: string) {
   return new URL(url).pathname;
 }
@@ -105,7 +135,7 @@ test.describe("qualidade por post [RNF-01, RNF-04, RNF-14]", () => {
   test("a lista do Lighthouse é a home e cada post publicado", async ({
     page,
   }) => {
-    const config = loadLighthouseConfig();
+    const config = withLighthouseEnv({}, loadLighthouseConfig);
     const posts = await publishedPosts(page);
     const fromConfig = config.ci.collect.url.map(pathnameOf);
     const fromSite = ["/", ...posts.map((post) => post.href)];
@@ -115,6 +145,47 @@ test.describe("qualidade por post [RNF-01, RNF-04, RNF-14]", () => {
     expect(fromConfig.slice(1)).toEqual([...fromConfig.slice(1)].sort());
     expect(config.ci.collect.numberOfRuns).toBe(5);
     expect(config.ci.collect.staticDistDir).toBe("./dist");
+
+    const full = withLighthouseEnv(
+      { LIGHTHOUSE_MODE: "full", LIGHTHOUSE_POSTS: "fixture-mdx" },
+      loadLighthouseConfig,
+    );
+    expect(full.ci.collect.url).toEqual(config.ci.collect.url);
+  });
+
+  test("no modo posts, a lista do Lighthouse é a home e os posts tocados", async ({
+    page,
+  }) => {
+    const posts = await publishedPosts(page);
+    const href = fixtureMdx.href;
+    const slug = href.slice("/blog/".length, -1);
+    expect(posts.map((post) => post.href)).toContain(href);
+    const plain = withLighthouseEnv({}, loadLighthouseConfig);
+
+    const one = withLighthouseEnv(
+      { LIGHTHOUSE_MODE: "posts", LIGHTHOUSE_POSTS: slug },
+      loadLighthouseConfig,
+    );
+    expect(one.ci.collect.url.map(pathnameOf)).toEqual(["/", href]);
+    expect(one.ci.collect.numberOfRuns).toBe(5);
+    expect(one.ci.collect.staticDistDir).toBe("./dist");
+    expect(one.ci.assert.assertions).toEqual(plain.ci.assert.assertions);
+
+    const missing = withLighthouseEnv(
+      { LIGHTHOUSE_MODE: "posts", LIGHTHOUSE_POSTS: "post-que-nao-existe" },
+      loadLighthouseConfig,
+    );
+    expect(missing.ci.collect.url.map(pathnameOf)).toEqual(["/"]);
+
+    const empty = withLighthouseEnv(
+      { LIGHTHOUSE_MODE: "posts", LIGHTHOUSE_POSTS: "" },
+      loadLighthouseConfig,
+    );
+    expect(empty.ci.collect.url.map(pathnameOf)).toEqual(["/"]);
+
+    expect(() =>
+      withLighthouseEnv({ LIGHTHOUSE_MODE: "xyz" }, loadLighthouseConfig),
+    ).toThrow(/LIGHTHOUSE_MODE/);
   });
 
   test("a lista do Lighthouse no escopo fixtures é cada post fixture", async ({

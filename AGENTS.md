@@ -75,12 +75,13 @@ src/lib/viz/            geometria pura
 src/components/marimo/  Notebook.astro, o botão do caderno (AGENTS.md próprio, criado antes da T-18; seções 9.6–9.7)
 src/integrations/headers.ts   gera dist/_headers no build (CSP por rota)
 src/integrations/pagefind.ts  indexa dist/blog/*/index.html no fim do build (T-22)
-src/lib/                getPublishedPosts, readingTime, seo, votes-catalog, votes-client, ranking, home-lists, novo, tag-filter, reading-list, search, post-toc, share, post-actions, list-order, related, og, og-image
+src/lib/                getPublishedPosts, readingTime, seo, votes-catalog, votes-client, ranking, home-lists, novo, tag-filter, reading-list, search, post-toc, share, post-actions, list-order, related, og, og-image, lighthouse-scope
 src/pages/api/catalogo.json.ts   catálogo dos posts publicados; o público recebe 404 (T-121)
 worker/                 Worker só para /api/* (T-121)
 migrations/             SQL do D1, 0001_votes.sql
 src/styles/shiki/       pk-claro.json, pk-escuro.json
 scripts/build-data.py   acha e roda o data/build.py de cada post e grava o data.lock; o pnpm check:data confere o lock (T-73, T-79)
+scripts/lighthouse-scope.mjs  o que o job lighthouse mede, pelo diff do PR ou do push (T-86)
 public/                 favicon.svg, favicon.ico, favicon-16.png, favicon-32.png, apple-touch-icon.png
 tests/                  vitest (unit) e playwright (e2e); literais das fixtures em tests/e2e/fixtures.ts
 .cursor/skills/         novo-post e as skills de bloco do post: post-prosa, post-figura, post-dados, post-caderno (T-80)
