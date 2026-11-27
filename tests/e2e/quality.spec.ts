@@ -317,6 +317,36 @@ test.describe("qualidade por post [RNF-01, RNF-04, RNF-14]", () => {
       expect.soft(counts.display, "katex-display").toBeGreaterThan(0);
     });
 
+    test("a fixture-mdx mostra \\sum inline, \\mathbf e \\mathbb no primeiro viewport", async ({
+      page,
+    }) => {
+      const response = await page.goto(fixtureMdx.href);
+      expect(response?.status()).toBe(200);
+      await page.evaluate(() => document.fonts.ready);
+
+      const counts = await page.evaluate(() => {
+        const count = (selector: string) =>
+          [...document.querySelectorAll(`.katex ${selector}`)].filter(
+            (element) =>
+              element.closest(".katex-display") === null &&
+              element.getBoundingClientRect().top < 823,
+          ).length;
+        return {
+          size1: count(".op-symbol.small-op"),
+          mathbf: count(".mathbf"),
+          mathbb: count(".mathbb"),
+        };
+      });
+
+      expect
+        .soft(counts.size1, "KaTeX_Size1 (\\sum inline)")
+        .toBeGreaterThan(0);
+      expect
+        .soft(counts.mathbf, "KaTeX_Main-Bold (\\mathbf)")
+        .toBeGreaterThan(0);
+      expect.soft(counts.mathbb, "KaTeX_AMS (\\mathbb)").toBeGreaterThan(0);
+    });
+
     test("a fixture-formulas mostra ênfase, negrito e código no primeiro viewport", async ({
       page,
     }) => {
