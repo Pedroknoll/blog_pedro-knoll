@@ -80,11 +80,28 @@ if (scope === undefined) {
     );
   }
 
+  // T-86: no modo posts, só a home e os posts tocados que estão no dist/;
+  // sem a variável, vazia ou com full, a lista inteira.
+  const mode = process.env.LIGHTHOUSE_MODE || "full";
+  let measured;
+  if (mode === "full") {
+    measured = slugs;
+  } else if (mode === "posts") {
+    const touched = new Set(
+      (process.env.LIGHTHOUSE_POSTS ?? "").split(/\s+/).filter(Boolean),
+    );
+    measured = slugs.filter((slug) => touched.has(slug));
+  } else {
+    throw new Error(
+      `LIGHTHOUSE_MODE=${mode} não é um modo do Lighthouse. Os modos são full e posts.`,
+    );
+  }
+
   module.exports = configFor(
     "./dist",
     [
       "http://localhost/",
-      ...slugs.map((slug) => `http://localhost/blog/${slug}/`),
+      ...measured.map((slug) => `http://localhost/blog/${slug}/`),
     ],
     "./lhci-report",
   );

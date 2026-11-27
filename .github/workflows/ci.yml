@@ -64,14 +64,27 @@ jobs:
     name: build
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    outputs:
+      lighthouse-mode: ${{ steps.lighthouse-scope.outputs.mode }}
+      lighthouse-posts: ${{ steps.lighthouse-scope.outputs.posts }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          # O diff do Lighthouse scope precisa da base do PR ou do push (T-86).
+          fetch-depth: 0
 
       - name: Setup
         uses: ./.github/actions/setup
+
+      # Só pastas de post publicado: o Lighthouse mede a home e esses posts.
+      # Qualquer outra mudança, ou base não achada: mede tudo (T-86).
+      - name: Lighthouse scope
+        id: lighthouse-scope
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: node scripts/lighthouse-scope.mjs
 
       - name: Production build
         run: pnpm build
@@ -178,27 +191,61 @@ jobs:
           name: dist
           path: dist
 
-      - name: Download dist-fixtures
-        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
-        with:
-          name: dist-fixtures
-          path: dist-fixtures
-
       - name: Lighthouse
         run: pnpm exec lhci autorun
-
-      - name: Lighthouse fixtures
-        if: ${{ !cancelled() }}
-        run: pnpm exec lhci autorun
         env:
-          LIGHTHOUSE_SCOPE: fixtures
-          LIGHTHOUSE_DIST: dist-fixtures
+          LIGHTHOUSE_MODE: ${{ needs.build.outputs.lighthouse-mode }}
+          LIGHTHOUSE_POSTS: ${{ needs.build.outputs.lighthouse-posts }}
 
       - name: Upload Lighthouse report
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: lighthouse-report
+          path: lhci-report/
+          retention-days: 14
+
+  # O job sempre roda, para o deploy não ficar skipped; no modo posts, o
+  # passo do Lighthouse é que fica de fora (T-86).
+  lighthouse-fixtures:
+    name: lighthouse-fixtures
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        if: ${{ needs.build.outputs.lighthouse-mode != 'posts' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup
+        if: ${{ needs.build.outputs.lighthouse-mode != 'posts' }}
+        uses: ./.github/actions/setup
+
+      - name: Download dist-fixtures
+        if: ${{ needs.build.outputs.lighthouse-mode != 'posts' }}
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: dist-fixtures
+          path: dist-fixtures
+
+      - name: Lighthouse fixtures
+        if: ${{ needs.build.outputs.lighthouse-mode != 'posts' }}
+        run: pnpm exec lhci autorun
+        env:
+          LIGHTHOUSE_SCOPE: fixtures
+          LIGHTHOUSE_DIST: dist-fixtures
+
+      - name: Skipped in posts mode
+        if: ${{ needs.build.outputs.lighthouse-mode == 'posts' }}
+        run: echo "Só pastas de post publicado no diff; as fixtures não mudaram."
+
+      - name: Upload Lighthouse report
+        if: ${{ !cancelled() && needs.build.outputs.lighthouse-mode != 'posts' }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-report-fixtures
           path: lhci-report/
           retention-days: 14
 
@@ -320,7 +367,17 @@ jobs:
 
   deploy:
     name: deploy
-    needs: [lint, test, build, e2e, lighthouse, artifact-checks, api]
+    needs:
+      [
+        lint,
+        test,
+        build,
+        e2e,
+        lighthouse,
+        lighthouse-fixtures,
+        artifact-checks,
+        api,
+      ]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 15
