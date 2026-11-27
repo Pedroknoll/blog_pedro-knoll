@@ -162,6 +162,9 @@ export function cacheHeaders(): string {
   return `${[
     "/_astro/:file",
     "  Cache-Control: public, max-age=31536000, immutable",
+    // Fontes locais, com o nome pelo hash do conteúdo (T-95).
+    "/_astro/fonts/:file",
+    "  Cache-Control: public, max-age=31536000, immutable",
   ].join("\n")}\n`;
 }
 

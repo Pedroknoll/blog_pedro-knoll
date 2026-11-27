@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -14,6 +15,10 @@ function fileNames(directory: string): string[] {
     .readdirSync(directory, { withFileTypes: true })
     .filter((entry) => entry.isFile())
     .map((entry) => entry.name);
+}
+
+function sha256(file: string): string {
+  return createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 }
 
 function cacheOf(text: string, pathname: string): string[] | undefined {
@@ -40,14 +45,27 @@ test("regras de cache do dist/_headers [RNF-01, RNF-07]", async ({ page }) => {
   }
   expect(astro).toEqual({});
 
+  // O nome em /_astro/fonts/ é o hash do conteúdo só para arquivo local
+  // (T-95): toda fonte servida tem os bytes de uma de src/assets/fonts/.
+  const localDir = path.resolve("src/assets/fonts");
+  const local = new Set(
+    fs.existsSync(localDir)
+      ? fileNames(localDir).map((name) => sha256(path.join(localDir, name)))
+      : [],
+  );
   const fontNames = fileNames(path.resolve("dist/_astro/fonts"));
   expect(fontNames.length).toBeGreaterThanOrEqual(1);
-  const fonts: Record<string, string[]> = {};
+  const fonts: Record<string, string[] | null> = {};
+  const remote: string[] = [];
   for (const name of fontNames) {
     const pathname = `/_astro/fonts/${name}`;
+    if (!local.has(sha256(path.resolve("dist/_astro/fonts", name)))) {
+      remote.push(pathname);
+    }
     const value = cacheOf(headersText, pathname);
-    if (value !== undefined) fonts[pathname] = value;
+    if (!isImmutable(value)) fonts[pathname] = value ?? null;
   }
+  expect(remote).toEqual([]);
   expect(fonts).toEqual({});
 
   const posts = await publishedPosts(page);
