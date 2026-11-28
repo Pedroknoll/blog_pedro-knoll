@@ -121,6 +121,9 @@ test.describe("CSP por rota [RNF-06, RNF-07]", () => {
     for (const pathname of browserPaths) {
       await page.unrouteAll();
       await serveDocument(page, pathname, policyOf(headersText, pathname));
+      // O unrouteAll tira também o blockGiscus do beforeEach: sem ele, o
+      // widget de verdade carrega no post curto (T-28).
+      await blockGiscus(page);
       await watchCsp(page);
       const response = await page.goto(pathname);
       expect(response?.status(), pathname).toBe(

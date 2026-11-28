@@ -2,7 +2,7 @@
   "origins": ["https://pedroknoll.com"],
   "originsRegex": [
     "^https://([a-z0-9-]+-)?blog\\.p-giacometo\\.workers\\.dev$",
-    "^http://localhost:(4321|8787)$"
+    "^http://(localhost|127\\.0\\.0\\.1)(:[0-9]+)?$"
   ],
   "defaultCommentOrder": "oldest"
 }
