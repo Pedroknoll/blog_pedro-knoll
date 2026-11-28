@@ -1,6 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { pagesForTheme } from "./published-posts";
+import { blockGiscus } from "./giscus";
+
+// O widget de giscus.app não entra nestes testes (RF-19, T-28).
+test.beforeEach(async ({ page }) => {
+  await blockGiscus(page);
+});
 
 type Channels = { r: number; g: number; b: number; a: number };
 

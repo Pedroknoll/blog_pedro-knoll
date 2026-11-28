@@ -7,6 +7,12 @@ import {
   fixtureMdx,
   fixtureSemTitulos,
 } from "./fixtures";
+import { blockGiscus } from "./giscus";
+
+// O widget de giscus.app não entra nestes testes (RF-19, T-28).
+test.beforeEach(async ({ page }) => {
+  await blockGiscus(page);
+});
 
 // Posts relacionados pelas tags (RF-18, T-26, BRAND §9.14). As fixtures têm
 // só a tag `fixture` em comum: a ordem é a da data, a mais recente primeiro.

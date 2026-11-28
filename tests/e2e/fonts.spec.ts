@@ -3,6 +3,12 @@ import { expect, test, type Page, type Response } from "@playwright/test";
 import { fixtureMdx } from "./fixtures";
 import { katexMetricFaces } from "./katex-metric";
 import { pagesForTheme, publishedPosts } from "./published-posts";
+import { blockGiscus } from "./giscus";
+
+// O widget de giscus.app não entra nestes testes (RF-19, T-28).
+test.beforeEach(async ({ page }) => {
+  await blockGiscus(page);
+});
 
 // Família, peso e estilo da T-42. Uma linha por combinação.
 const declared = [

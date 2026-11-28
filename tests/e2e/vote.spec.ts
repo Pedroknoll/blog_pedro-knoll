@@ -1,6 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { fixtureMdx } from "./fixtures";
+import { blockGiscus } from "./giscus";
+
+// O widget de giscus.app não entra nestes testes (RF-19, T-28).
+test.beforeEach(async ({ page }) => {
+  await blockGiscus(page);
+});
 
 const SLUG = "fixture-mdx";
 const STORAGE_KEY = `pk-vote:${SLUG}`;

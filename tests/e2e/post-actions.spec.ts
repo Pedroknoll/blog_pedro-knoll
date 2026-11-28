@@ -1,6 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
 import { fixtureMdx, fixtureSemTitulos } from "./fixtures";
+import { blockGiscus } from "./giscus";
+
+// O widget de giscus.app não entra nestes testes (RF-19, T-28).
+test.beforeEach(async ({ page }) => {
+  await blockGiscus(page);
+});
 
 // Bloco de voto e compartilhar (RF-23, T-130, BRAND §9.14) na `fixture-mdx`
 // (4 h2, com índice) e na `fixture-sem-titulos` (sem índice).
