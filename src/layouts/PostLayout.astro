@@ -8,6 +8,7 @@ import "~/styles/katex-metric.css";
 import CodeCopy from "~/components/ui/CodeCopy.astro";
 import PostActions from "~/components/ui/PostActions.astro";
 import PostAppendix from "~/components/ui/PostAppendix.astro";
+import PostComments from "~/components/ui/PostComments.astro";
 import PostHeader from "~/components/ui/PostHeader.astro";
 import PostRail from "~/components/ui/PostRail.astro";
 import PostRelated from "~/components/ui/PostRelated.astro";
@@ -128,4 +129,5 @@ const jsonLd = blogPostingJsonLd({
   </article>
   {appendix && <PostAppendix appendix={appendix} />}
   {related.length > 0 && <PostRelated posts={related} />}
+  <PostComments slug={post.id} description={description} url={postUrl} />
 </BaseLayout>

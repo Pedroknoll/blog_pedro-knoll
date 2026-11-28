@@ -103,6 +103,7 @@ describe("buildHeaders", () => {
       "img-src": "'self'",
       "font-src": "'self' data:",
       "connect-src": "'self'",
+      "frame-src": "https://giscus.app",
       "base-uri": "'none'",
       "form-action": "'none'",
       "frame-ancestors": "'self'",

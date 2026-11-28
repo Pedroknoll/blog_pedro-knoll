@@ -5,6 +5,12 @@ import { expect, test, type Page } from "@playwright/test";
 
 import { fixtureFormulas, fixtureMdx } from "./fixtures";
 import { pagesForTheme, publishedPosts } from "./published-posts";
+import { blockGiscus } from "./giscus";
+
+// O widget de giscus.app não entra nestes testes (RF-19, T-28).
+test.beforeEach(async ({ page }) => {
+  await blockGiscus(page);
+});
 
 const loadConfig = createRequire(import.meta.url);
 const lighthouseConfig = "../../lighthouserc.cjs";

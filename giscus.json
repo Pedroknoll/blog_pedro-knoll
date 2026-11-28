@@ -1,0 +1,8 @@
+{
+  "origins": ["https://pedroknoll.com"],
+  "originsRegex": [
+    "^https://([a-z0-9-]+-)?blog\\.p-giacometo\\.workers\\.dev$",
+    "^http://localhost:(4321|8787)$"
+  ],
+  "defaultCommentOrder": "oldest"
+}

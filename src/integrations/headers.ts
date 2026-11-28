@@ -144,6 +144,8 @@ export function buildHeaders(hashes: Hashes): string {
     "img-src 'self'",
     "font-src 'self' data:",
     "connect-src 'self'",
+    // Só o iframe dos comentários (RF-19, T-28); o script é do próprio site.
+    "frame-src https://giscus.app",
     "base-uri 'none'",
     "form-action 'none'",
     "frame-ancestors 'self'",

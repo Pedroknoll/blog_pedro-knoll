@@ -147,11 +147,12 @@ test("home, listas e tags só com o script do item [RNF-02]", async ({
       // (T-129) soma um módulo no post com 2 h2 ou mais, e o bloco de voto e
       // compartilhar (T-130) soma um em todo post. Os posts relacionados
       // (T-26) somam o script do item da lista. O controle de tema (T-24)
-      // soma um módulo, e o script inline do tema, um script sem type.
+      // soma um módulo, e o script inline do tema, um script sem type. Os
+      // comentários (T-28) somam um módulo em todo post.
       const toc = (await page.locator("[data-post-toc]").count()) === 0 ? 0 : 1;
       const related =
         (await page.locator("[data-post-related]").count()) === 0 ? 0 : 1;
-      const modules = (pres === 0 ? 4 : 5) + toc + related;
+      const modules = (pres === 0 ? 5 : 6) + toc + related;
       await expect(page.locator('script[type="module"]')).toHaveCount(modules);
 
       const plain = page.locator("script:not([type])");

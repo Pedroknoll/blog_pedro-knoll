@@ -23,6 +23,12 @@ import {
   fixtureSemTitulos,
 } from "./fixtures";
 import { pagesForTheme, publishedPosts } from "./published-posts";
+import { blockGiscus } from "./giscus";
+
+// O widget de giscus.app não entra nestes testes (RF-19, T-28).
+test.beforeEach(async ({ page }) => {
+  await blockGiscus(page);
+});
 
 test.describe("Caderno no molab [RF-08, RNF-03]", () => {
   test("post sem caderno não carrega runtime", async ({ page }) => {
@@ -147,6 +153,10 @@ function assertArtifact(text: string, pathname: string): void {
     "'wasm-unsafe-eval'",
   );
   expect(policy, pathname).toContain("frame-ancestors 'self'");
+  // O iframe dos comentários (RF-19, T-28) é a única origem de frame.
+  expect(directiveValue(policy, "frame-src"), pathname).toBe(
+    "https://giscus.app",
+  );
   expect(applied.get("strict-transport-security"), pathname).toEqual([
     "max-age=63072000; includeSubDomains",
   ]);

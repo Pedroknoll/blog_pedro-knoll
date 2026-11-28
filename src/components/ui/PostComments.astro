@@ -1,0 +1,56 @@
+---
+import { site } from "~/site.config";
+
+// Comentários pelo Giscus (RF-19, T-28, BRAND §9.14): na coluna do
+// texto, depois dos relacionados, com o rótulo `/ COMENTÁRIOS` dos
+// relacionados. O iframe de giscus.app nasce pelo script, quando a seção se
+// aproxima da tela; a discussão é a do slug (`specific`, com `strict`). Sem
+// JavaScript (`noscript:`), um aviso com o link da categoria nas Discussions.
+
+interface Props {
+  slug: string;
+  description: string;
+  url: string;
+}
+
+const { slug, description, url } = Astro.props;
+const { repo, repoId, category, categoryId, lang, discussions } = site.comments;
+---
+
+<section
+  data-post-comments
+  data-repo={repo}
+  data-repo-id={repoId}
+  data-category={category}
+  data-category-id={categoryId}
+  data-lang={lang}
+  data-term={slug}
+  data-description={description}
+  data-back-link={url}
+  aria-labelledby="comentarios"
+  class="mx-auto w-full max-w-site px-4 pb-12 lg:grid lg:grid-cols-[15rem_minmax(0,1fr)] lg:gap-x-16"
+>
+  <div class="min-w-0 max-w-[65ch] text-lg lg:col-start-2">
+    <h2
+      id="comentarios"
+      class="border-b border-ink pb-2 font-mono text-xs font-normal tracking-widest text-ink uppercase"
+    >
+      / COMENTÁRIOS
+    </h2>
+    <div data-comments-frame class="mt-6 min-h-48 noscript:min-h-0">
+      <p class="hidden text-base text-muted noscript:block">
+        Os comentários precisam de JavaScript. Você também pode comentar no{" "}
+        <a class="text-accent underline" href={discussions}>
+          GitHub Discussions
+        </a>
+        .
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { initPostComments } from "~/lib/post-comments";
+
+  initPostComments();
+</script>
