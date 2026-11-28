@@ -290,6 +290,7 @@ test.describe("voto com JavaScript [RF-25]", () => {
     for (const status of [403, 429]) {
       await test.step(String(status), async () => {
         await page.unrouteAll({ behavior: "ignoreErrors" });
+        await blockGiscus(page);
         await page.route("**/api/votes", async (route) => {
           if (route.request().method() === "GET") {
             await route.fulfill(fulfillVotes({ votes: { [SLUG]: 7 } }));
@@ -317,6 +318,7 @@ test.describe("voto com JavaScript [RF-25]", () => {
     for (const width of WIDTHS) {
       await test.step(`${width}px`, async () => {
         await page.unrouteAll({ behavior: "ignoreErrors" });
+        await blockGiscus(page);
         let release = () => {};
         const gate = new Promise<void>((resolve) => {
           release = resolve;
